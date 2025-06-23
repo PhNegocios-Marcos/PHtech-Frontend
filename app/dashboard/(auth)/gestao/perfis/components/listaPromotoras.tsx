@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -13,7 +13,6 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -33,49 +32,40 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-import { PromotoraDrawer } from "./PromotoraModal";
 
-type Promotora = {
-  id: string;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type Usuario = {
+  id_relacionamento: string;
+  status_relacionamento: number;
   nome: string;
-  razao_social: string;
-  cnpj: number;
-  representante: string | null;
-  master: string;
-  master_id: string;
-  rateio_master: string;
-  rateio_sub: string;
-  status: number;
 };
 
-const promotoraColumns: ColumnDef<Promotora>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "razao_social", header: "Razão Social" },
-  { accessorKey: "cnpj", header: "CNPJ" },
-  { accessorKey: "representante", header: "Representante" },
-  { accessorKey: "master", header: "É Master?" },
-  { accessorKey: "rateio_master", header: "Rateio Master" },
-  { accessorKey: "rateio_sub", header: "Rateio Sub" },
-  { accessorKey: "status", header: "Status" }
+type UsuariosTableProps = {
+  equipeNome: string;
+};
+
+const usuarioColumns: ColumnDef<Usuario>[] = [
+  { accessorKey: "nome", header: "Nome do Usuário" },
+  { accessorKey: "status_relacionamento", header: "Status" }
 ];
 
-export function PromotorasTable() {
-  const [promotoras, setPromotoras] = React.useState<Promotora[]>([]);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedPromotora, setSelectedPromotora] = React.useState<Promotora | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
+export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [equipeLabel, setEquipeLabel] = useState<string>("");
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
   const { token } = useAuth();
 
-  React.useEffect(() => {
-    async function fetchPromotoras() {
+  useEffect(() => {
+    async function fetchUsuariosDaEquipe() {
+      if (!token || !equipeNome) return;
+
       try {
-        const response = await fetch(`${API_BASE_URL}/promotora/listar`, {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/${equipeNome}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -85,35 +75,32 @@ export function PromotorasTable() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar promotoras");
+          throw new Error(errorData?.detail || "Erro ao buscar usuários da equipe");
         }
 
         const data = await response.json();
-        const promotorasArray = data.map((item: any) => ({
-          id: item.id,
-          nome: item.nome,
-          razao_social: item.razao_social,
-          cnpj: item.cnpj,
-          representante: item.representante,
-          master: item.master,
-          master_id: item.master_id,
-          rateio_master: item.rateio_master,
-          rateio_sub: item.rateio_sub,
-          status: item.status
+
+        const equipeNomeApi = data.equipe?.nome ?? equipeNome;
+        setEquipeLabel(equipeNomeApi);
+
+        const usuariosFormatados = (data.usuarios || []).map((item: any) => ({
+          id_relacionamento: item.id_relacionamento,
+          status_relacionamento: item.status_relacionamento,
+          nome: item.usuario?.nome ?? "(Sem nome)"
         }));
 
-        setPromotoras(promotorasArray);
+        setUsuarios(usuariosFormatados);
       } catch (error: any) {
-        console.error("Erro ao buscar promotoras:", error.message || error);
+        console.error("Erro ao buscar usuários:", error.message || error);
       }
     }
 
-    fetchPromotoras();
-  }, [token]);
+    fetchUsuariosDaEquipe();
+  }, [token, equipeNome]);
 
   const table = useReactTable({
-    data: promotoras,
-    columns: promotoraColumns,
+    data: usuarios,
+    columns: usuarioColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -130,22 +117,10 @@ export function PromotorasTable() {
     }
   });
 
-  const handleRowClick = (promotora: Promotora) => {
-  setSelectedPromotora(null); // reseta o estado primeiro
-  setIsModalOpen(false);
-
-  // pequena espera para forçar re-render
-  setTimeout(() => {
-    setSelectedPromotora(promotora);
-    setIsModalOpen(true);
-  }, 50); // 50ms geralmente é o suficiente
-};
-
-
   return (
     <Card className="col-span-2">
-      <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Promotoras</CardTitle>
+      <CardHeader>
+        <CardTitle>Usuários da Equipe: {equipeLabel}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
@@ -194,10 +169,7 @@ export function PromotorasTable() {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onDoubleClick={() => handleRowClick(row.original)}
-                    className="hover:bg-muted cursor-pointer">
+                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -211,12 +183,6 @@ export function PromotorasTable() {
             </TableBody>
           </Table>
         </div>
-
-        <PromotoraDrawer
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          promotora={selectedPromotora as any} // ajuste conforme sua tipagem no Drawer
-        />
       </CardContent>
     </Card>
   );

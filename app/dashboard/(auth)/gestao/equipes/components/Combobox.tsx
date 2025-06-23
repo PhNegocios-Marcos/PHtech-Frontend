@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 type ComboboxProps<T> = {
-  data?: T[];  // Tornou opcional, mas com valor padrão
+  data: T[];
   displayField: keyof T;
   value: T | null;
   onChange: (item: T) => void;
@@ -19,7 +19,7 @@ type ComboboxProps<T> = {
 };
 
 export function Combobox<T extends Record<string, any>>({
-  data = [],  // valor padrão vazio
+  data,
   displayField,
   value,
   onChange,
@@ -66,11 +66,10 @@ export function Combobox<T extends Record<string, any>>({
             <CommandGroup>
               {filteredData.map(item => (
                 <CommandItem
-                  key={String(item[displayField])}
+                  key={item[displayField]}
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);
-                    setSearch('');  // limpa busca após seleção
                   }}
                   className="cursor-pointer"
                 >

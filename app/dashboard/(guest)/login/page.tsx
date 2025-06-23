@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import FA from "./components/2FA";
 import { useAuth } from "@/contexts/AuthContext";
+import Promotoras from "./components/promotoras";
 
-type ModalType = "none" | "2FA" | "modal2";
+type ModalType = "none" | "2FA" | "modal2" | "promotoras";
 
 type OTPFormProps = {
   onNext?: () => void; // ← permite o uso opcional de um callback externo
@@ -19,18 +20,19 @@ type OTPFormProps = {
 // Schema Zod
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres")
 });
 
 export default function Page() {
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
+  const [promotorasModal, setpromotorasModal] = useState<ModalType>("none");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const [loginError, setLoginError] = useState<string | null>(null); // novo estado
-  const { setToken, setMail, setUserData, userData, token } = useAuth(); // pega o setToken do contexto
+  const { setToken, setMail, setUserData, userData, token, setPromotoras, setSenha } = useAuth(); // pega o setToken do contexto
 
   const handleLogin = async () => {
     const result = loginSchema.safeParse({ email, password });
@@ -48,7 +50,7 @@ export default function Page() {
       setErrors({});
       setLoginError(null); // limpa erro anterior
 
-      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+      const response = await fetch("http://127.0.0.1:8000/auth/pre_login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -68,13 +70,16 @@ export default function Page() {
         return;
       }
 
-      const tipoAcesso = userData?.usuarios && Object.values(userData.usuarios)[0]?.tipo_acesso;
-
-      setToken(data.token);
-      setUserData(data.dadosRetorno);
+      // setToken(data?.token);
       setMail(email);
-
-      if (tipoAcesso === "externo") {
+      setSenha(password)
+      // console.log("dados do user: ", data);
+      // console.log("promotoas: ", data?.promotoras)
+      // console.log("tipoUsuario: ", data?.tipo_usuario);
+      // console.log("senha: ", password)
+      setPromotoras(data?.promotoras)
+      if (data?.tipo_usuario === "Promotora") {
+        setpromotorasModal("promotoras");
       } else {
         setCurrentModal("2FA");
       }
@@ -85,16 +90,19 @@ export default function Page() {
   };
 
   const closeModal = () => setCurrentModal("none");
+  const closeModalPromotoras = () => setpromotorasModal("none");
 
   // console.log(token)
 
   return (
     <div className="flex items-center justify-center py-4 lg:h-screen">
-      {currentModal === "none" && (
+      {currentModal === "none" && promotorasModal === "none" && (
         <Card className="mx-auto w-96">
           <CardHeader>
             <CardTitle className="text-2xl">Login</CardTitle>
-            <CardDescription className="text-[13px]">Digite seu e-mail e senha abaixo para acessar sua conta</CardDescription>
+            <CardDescription className="text-[13px]">
+              Digite seu e-mail e senha abaixo para acessar sua conta
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
@@ -137,9 +145,11 @@ export default function Page() {
         </Card>
       )}
 
-      {currentModal === "2FA" && (
+      {currentModal === "2FA" ? (
         <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-      )}
+      ) : promotorasModal === "promotoras" ? (
+        <Promotoras onNext={() => setCurrentModal("modal2")} onClose={closeModalPromotoras} />
+      ) : null}
     </div>
   );
 }

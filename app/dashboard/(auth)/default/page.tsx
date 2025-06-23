@@ -6,11 +6,8 @@ import {
   SummaryCards,
   AchievementByYear,
   ChartProjectOverview,
-  ChartProjectEfficiency,
-  TableRecentProjects,
-  Reminders,
-  SuccessMetrics,
-  Reports
+  ChartProjectEfficiency, 
+  Reminders
 } from "./components";
 import CampoBoasVindas from "@/components/boasvindas";
 
@@ -35,23 +32,23 @@ export default function Page() {
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <SummaryCards />
-          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="mt-4 grid gap-4">
             <div className="lg:col-span-2">
               <ChartProjectOverview />
             </div>
-            <SuccessMetrics />
+            {/* <SuccessMetrics /> */}
           </div>
           <div className="mt-4 grid gap-4 xl:grid-cols-2 2xl:grid-cols-4">
             <Reminders />
             <AchievementByYear />
             <ChartProjectEfficiency />
           </div>
-          <TableRecentProjects />
+          {/* <TableRecentProjects /> */}
         </TabsContent>
-        <TabsContent value="reports">
+        {/* <TabsContent value="reports">
           <Reports />
-        </TabsContent>
-        <TabsContent value="activities">...</TabsContent>
+        </TabsContent> */}
+        {/* <TabsContent value="activities">...</TabsContent> */}
       </Tabs>
     </>
   );

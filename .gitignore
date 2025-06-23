@@ -39,3 +39,18 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+example-app/storage/logs/laravel.log
+example-app/storage/framework/views/81070f4a8a2c312e1095ad3e0f7c69ae.php
+example-app/storage/framework/views/965bc2e398371ddb7171a153de7fcde7.php
+example-app/storage/framework/views/f3392e9a0e7dfa8b9fb4eeb21e767413.php
+example-app/storage/oauth-private.key
+example-app/storage/oauth-public.key
+example-app/bootstrap/cache/services.php
+example-app/bootstrap/cache/packages.php
+example-app/bootstrap/cache/pac247D.tmp
+example-app/bootstrap/cache/pac247B.tmp
+example-app/.vscode/launch.json
+example-app/.env
+.vscode/launch.json
+package-lock.json
+package-lock.json

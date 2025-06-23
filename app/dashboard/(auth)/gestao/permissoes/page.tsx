@@ -2,7 +2,7 @@
 
 import CustomDateRangePicker from "@/components/custom-date-range-picker";
 import { Button } from "@/components/ui/button";
-import { UsuariosTable } from "./components/leads";
+import { PermissoesTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
 import { useRouter } from "next/navigation";
 
@@ -15,9 +15,9 @@ export default function Page() {
         <CampoBoasVindas />
         <div className="mb-4 flex items-center justify-end space-x-2">
           <CustomDateRangePicker />
-          <Button onClick={() => router.push('/dashboard/cadastro/usuario')}>Novo Usuario</Button>
+          <Button  onClick={() => router.push('/dashboard/cadastro/promotora')}>Nova Promotora</Button>
         </div>
-        <UsuariosTable />
+        <PermissoesTable />
       </div>
     </div>
   );

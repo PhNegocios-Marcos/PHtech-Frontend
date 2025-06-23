@@ -32,99 +32,74 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Componentes
+import { useAuth } from "@/contexts/AuthContext";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
+import { PerfilDrawer } from "./PerfilModal";
 
-// Tipagem
-type Usuario = {
+type Equipe = {
   id: string;
   nome: string;
-  status: number; // 1 = ativo, 0 = inativo
+  promotora: string;
+  descricao: string;
+  status: number;
 };
 
-// Dados fictícios (mock) que simulam a resposta do endpoint
-const mockApiResponse = {
-  usuarios: {
-    "1": { nome: "Goku", status: 1 },
-    "2": { nome: "Vegeta", status: 1 },
-    "3": { nome: "Gohan", status: 0 },
-    "4": { nome: "Trunks", status: 1 },
-    "5": { nome: "Freeza", status: 0 }
-  }
-};
+const equipeColumns: ColumnDef<Equipe>[] = [
+  { accessorKey: "nome", header: "Nome da Equipe" },
+  { accessorKey: "promotora", header: "Promotora" },
+  { accessorKey: "descricao", header: "Descrição" },
+  { accessorKey: "status", header: "Status" }
+];
 
-export function UsuariosTable() {
-  const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
+export function EquipesTable() {
+  const [equipes, setEquipes] = React.useState<Equipe[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<Equipe | null>(null);
+
+  const { token } = useAuth();
 
   React.useEffect(() => {
-    async function fetchUsuarios() {
+    async function fetchEquipes() {
       try {
-        // Simulação de requisição com delay
-        // const response = await fetch("/sua-api/usuario/listar", {
-        //   headers: { Authorization: "Bearer SEU_TOKEN" }
-        // });
-        // const data = await response.json();
+        const response = await fetch(`${API_BASE_URL}/equipe/listar`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-        const data = mockApiResponse; // usa dados falsos
-        const usuariosObject = data.usuarios;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.detail || "Erro ao buscar equipes");
+        }
 
-        const usuariosArray = Object.entries(usuariosObject).map(
-          ([id, usuario]: [string, any]) => ({
-            id,
-            nome: usuario.nome,
-            status: usuario.status
-          })
-        );
+        const data = await response.json();
+        const equipesArray = data.map((equipe: any) => ({
+          id: equipe.id,
+          nome: equipe.nome,
+          promotora: equipe.promotora,
+          descricao: equipe.descricao,
+          status: equipe.status
+        }));
 
-        setUsuarios(usuariosArray);
-      } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
+        setEquipes(equipesArray);
+      } catch (error: any) {
+        console.error("Erro ao buscar equipes:", error.message || error);
       }
     }
 
-    fetchUsuarios();
-  }, []);
-
-  // Alterna status ativo/inativo
-  const toggleStatus = (id: string) => {
-    setUsuarios((prev) =>
-      prev.map((user) => (user.id === id ? { ...user, status: user.status === 1 ? 0 : 1 } : user))
-    );
-  };
-
-  // Colunas da tabela
-  const usuarioColumns: ColumnDef<Usuario>[] = [
-    { accessorKey: "nome", header: "Nome" },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const usuario = row.original;
-        const isAtivo = usuario.status === 1;
-        return (
-          <Button
-            onClick={() => toggleStatus(usuario.id)}
-            className={
-              isAtivo
-                ? "bg-primary hover:bg-primary/50 px-3 py-1 text-xs text-white hover:text-white"
-                : "border-primary text-primary hover:text-primary hover:bg-primary/30 border bg-transparent px-3 py-1 text-xs"
-            }
-            variant="ghost">
-            {isAtivo ? "Ativo" : "Inativo"}
-          </Button>
-        );
-      }
-    }
-  ];
+    fetchEquipes();
+  }, [token]);
 
   const table = useReactTable({
-    data: usuarios,
-    columns: usuarioColumns,
+    data: equipes,
+    columns: equipeColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -144,7 +119,7 @@ export function UsuariosTable() {
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Permissões</CardTitle>
+        <CardTitle>Equipes</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
@@ -193,7 +168,14 @@ export function UsuariosTable() {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
+                  <TableRow
+                    key={row.id}
+                    className="hover:bg-muted cursor-pointer"
+                    onDoubleClick={() => {
+                      setSelectedUser(row.original);
+                      setIsModalOpen(true);
+                    }}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -207,6 +189,14 @@ export function UsuariosTable() {
             </TableBody>
           </Table>
         </div>
+
+        {selectedUser && (
+          <PerfilDrawer
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            usuario={selectedUser}
+          />
+        )}
       </CardContent>
     </Card>
   );

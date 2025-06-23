@@ -19,17 +19,17 @@ export default function OTPForm({ onNext }: OTPFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const { token, email } = useAuth();
+  const { token, email, selectedPromotoraId, senha, setToken } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [secretCode, setSecretCode] = useState("");
   const router = useRouter();
 
   async function handleVerify(pin: string) {
-    if (!token) {
-      alert("Token de autenticação não encontrado.");
-      return;
-    }
+    // if (!token) {
+    //   alert("Token de autenticação não encontrado.");
+    //   return;
+    // }
 
     setLoading(true);
     setError("");
@@ -50,9 +50,11 @@ export default function OTPForm({ onNext }: OTPFormProps) {
 
       setSuccess(true);
 
-      setTimeout(() => {
-        router.push("/dashboard/default"); // ← fallback
-      }, 2000);
+      console.log("funcionou");
+
+      // setTimeout(() => {
+      //   router.push("/dashboard/default"); // ← fallback
+      // }, 2000);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -105,8 +107,7 @@ export default function OTPForm({ onNext }: OTPFormProps) {
             if (val.length === 6) {
               handleVerify(val);
             }
-          }}
-        >
+          }}>
           <InputOTPGroup className="space-x-4 *:rounded-lg! *:border!">
             {[...Array(6)].map((_, i) => (
               <InputOTPSlot key={i} index={i} />
@@ -118,8 +119,7 @@ export default function OTPForm({ onNext }: OTPFormProps) {
           <button
             type="button"
             className="ml-auto inline-block cursor-pointer text-sm underline"
-            onClick={gerarNovoQRCode}
-          >
+            onClick={gerarNovoQRCode}>
             Gerar novo QR CODE
           </button>
         </div>
@@ -144,11 +144,13 @@ export default function OTPForm({ onNext }: OTPFormProps) {
             <div className="mb-4">
               <p className="text-sm font-medium">QR Code:</p>
               <div
-                className="w-full rounded flex justify-center"
+                className="flex w-full justify-center rounded"
                 dangerouslySetInnerHTML={{ __html: qrCode }}
               />
             </div>
-            <Button onClick={() => setShowModal(false)} className="mt-4 rounded px-4 py-2 text-white">
+            <Button
+              onClick={() => setShowModal(false)}
+              className="mt-4 rounded px-4 py-2 text-white">
               Fechar
             </Button>
           </div>

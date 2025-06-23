@@ -1,4 +1,3 @@
-// src/hooks/useFilteredPageRoutes.ts
 import { useAuth } from "@/contexts/AuthContext";
 import { page_routes } from "@/lib/routes-config";
 
@@ -22,41 +21,47 @@ type PageRoutesType = {
   items: PageRoutesItemType;
 }[];
 
-function filterItems(items: PageRoutesItemType, rotasNegadas: string[]): PageRoutesItemType {
+type PermissaoLinha = {
+  id: string;
+  nome: string;
+  categoria: string;
+  status: number;
+};
+
+// Função para filtrar recursivamente apenas os itens permitidos
+function filterItems(items: PageRoutesItemType, allowedRoutes: string[]): PageRoutesItemType {
   return items
     .map((item) => {
-      const subItems = item.items ? filterItems(item.items, rotasNegadas) : [];
+      const subItems = item.items ? filterItems(item.items, allowedRoutes) : [];
 
-      const isItemPermitido = !rotasNegadas.includes(item.id) && (subItems.length > 0 || !item.items);
+      const isItemPermitido = allowedRoutes.includes(item.id);
 
-      if (!isItemPermitido) return null;
+      if (!isItemPermitido && subItems.length === 0) return null;
 
       return {
         ...item,
-        items: subItems.length > 0 ? subItems : undefined,
+        items: subItems.length > 0 ? subItems : undefined
       };
     })
     .filter(Boolean) as PageRoutesItemType;
 }
 
-export function useFilteredPageRoutes() {
-  const { userData } = useAuth();
+export function useFilteredPageRoutes(): PageRoutesType {
+  const { userPermissoes } = useAuth();
 
-  const tipoAcesso =
-    userData?.usuarios && Object.values(userData.usuarios)[0]?.tipo_acesso;
+  let allowedRoutes: string[] = [];
 
-  const acesso = tipoAcesso || "interno";
+  if (userPermissoes === "acesso_total" ) {
+    allowedRoutes = ["Equipes_ver", "Promotoras_ver", "Usuarios_ver", "Perfis_ver", "Gestão_Permissões", "Gestão_Modulos", "Credito_Excluidos", "Credito_Operações", "Credito_Simular" ];
+  } else if (Array.isArray(userPermissoes)) {
+    allowedRoutes = userPermissoes;
+  }
 
-  const hiddenRoutesByAccessType: Record<string, string[]> = {
-    externo: ["Gestão_Permissões", "Gestão_Modulos", "Gestão_Alçadas", "Gestão_Promotoras"],
-    interno: ["Authentication", "login", "Cadastro", "Gestão_Cadastro_Promotora", "Gestão_Cadastro_Usuario"]
-  };
-
-  const rotasNegadas = hiddenRoutesByAccessType[acesso] || [];
+  allowedRoutes.push("Default"); // ✅ sempre adiciona Default
 
   const filteredRoutes = page_routes
     .map((route) => {
-      const filteredItems = filterItems(route.items, rotasNegadas);
+      const filteredItems = filterItems(route.items, allowedRoutes);
       return {
         ...route,
         items: filteredItems

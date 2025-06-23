@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -13,7 +13,6 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -33,49 +32,41 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-import { PromotoraDrawer } from "./PromotoraModal";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Promotora = {
   id: string;
   nome: string;
-  razao_social: string;
   cnpj: number;
-  representante: string | null;
-  master: string;
-  master_id: string;
-  rateio_master: string;
-  rateio_sub: string;
   status: number;
 };
 
+type UsuariosTableProps = {
+  email: string; // Agora usamos email no lugar do CNPJ
+};
+
 const promotoraColumns: ColumnDef<Promotora>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "razao_social", header: "Razão Social" },
+  { accessorKey: "nome", header: "Nome da Promotora" },
   { accessorKey: "cnpj", header: "CNPJ" },
-  { accessorKey: "representante", header: "Representante" },
-  { accessorKey: "master", header: "É Master?" },
-  { accessorKey: "rateio_master", header: "Rateio Master" },
-  { accessorKey: "rateio_sub", header: "Rateio Sub" },
   { accessorKey: "status", header: "Status" }
 ];
 
-export function PromotorasTable() {
-  const [promotoras, setPromotoras] = React.useState<Promotora[]>([]);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedPromotora, setSelectedPromotora] = React.useState<Promotora | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
+export function UsuariosTable({ email }: UsuariosTableProps) {
+  const [promotoras, setPromotoras] = useState<Promotora[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
   const { token } = useAuth();
 
-  React.useEffect(() => {
-    async function fetchPromotoras() {
+  useEffect(() => {
+    async function fetchPromotorasRelacionadas() {
+      if (!token || !email) return;
+
       try {
-        const response = await fetch(`${API_BASE_URL}/promotora/listar`, {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_promotora/${email}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -89,27 +80,14 @@ export function PromotorasTable() {
         }
 
         const data = await response.json();
-        const promotorasArray = data.map((item: any) => ({
-          id: item.id,
-          nome: item.nome,
-          razao_social: item.razao_social,
-          cnpj: item.cnpj,
-          representante: item.representante,
-          master: item.master,
-          master_id: item.master_id,
-          rateio_master: item.rateio_master,
-          rateio_sub: item.rateio_sub,
-          status: item.status
-        }));
-
-        setPromotoras(promotorasArray);
+        setPromotoras(data.promotoras || []);
       } catch (error: any) {
-        console.error("Erro ao buscar promotoras:", error.message || error);
+        console.error("Erro na requisição:", error.message || error);
       }
     }
 
-    fetchPromotoras();
-  }, [token]);
+    fetchPromotorasRelacionadas();
+  }, [token, email]);
 
   const table = useReactTable({
     data: promotoras,
@@ -130,22 +108,10 @@ export function PromotorasTable() {
     }
   });
 
-  const handleRowClick = (promotora: Promotora) => {
-  setSelectedPromotora(null); // reseta o estado primeiro
-  setIsModalOpen(false);
-
-  // pequena espera para forçar re-render
-  setTimeout(() => {
-    setSelectedPromotora(promotora);
-    setIsModalOpen(true);
-  }, 50); // 50ms geralmente é o suficiente
-};
-
-
   return (
     <Card className="col-span-2">
-      <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Promotoras</CardTitle>
+      <CardHeader>
+        <CardTitle>Promotoras Vinculadas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
@@ -170,7 +136,8 @@ export function PromotorasTable() {
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  >
                     {column.id}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -194,10 +161,7 @@ export function PromotorasTable() {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onDoubleClick={() => handleRowClick(row.original)}
-                    className="hover:bg-muted cursor-pointer">
+                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -211,12 +175,6 @@ export function PromotorasTable() {
             </TableBody>
           </Table>
         </div>
-
-        <PromotoraDrawer
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          promotora={selectedPromotora as any} // ajuste conforme sua tipagem no Drawer
-        />
       </CardContent>
     </Card>
   );

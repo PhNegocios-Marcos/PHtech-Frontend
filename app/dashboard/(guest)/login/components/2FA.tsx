@@ -23,11 +23,39 @@ export default function FA({ onNext, onClose }: FAProps) {
   const [emailModal, setEmailModal] = useState<ModalType>("none");
   const [smsModal, setSmsModal] = useState<ModalType>("none");
   const [googleModal, setGoogleModal] = useState<ModalType>("none");
-  const { token, email } = useAuth();
+  const { token, email, selectedPromotoraId, senha, setToken, setUserData, userData, setUserPermissoes } = useAuth();
   const router = useRouter();
 
   const handleSms = async () => {
     // console.log("Token:", token);
+
+    try {
+      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          senha: senha,
+          promotora: selectedPromotoraId
+        })
+      });
+
+      const dataLogin = await login.json();
+
+      setUserData(dataLogin?.dados_usuario?.[0]); // ← objeto direto
+      setToken(dataLogin?.token);
+
+      console.log(dataLogin?.dados_usuario);
+
+      sessionStorage.removeItem("auth_senha");
+      // console.log("email: ", email);
+      // console.log("senha: ", senha);
+      // console.log("promotora: ", selectedPromotoraId);
+    } catch (err: any) {
+    } finally {
+    }
 
     if (!token) {
       alert("Token de autenticação não encontrado.");
@@ -62,6 +90,42 @@ export default function FA({ onNext, onClose }: FAProps) {
   };
 
   const handleEmail = async () => {
+    try {
+      var request = selectedPromotoraId
+        ? {
+            email,
+            senha: senha,
+            promotora: selectedPromotoraId
+          }
+        : {
+            email,
+            senha: senha
+          };
+
+      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(request)
+      });
+
+      const dataLogin = await login.json();
+
+      // console.log("permissoes: ", dataLogin?.permissoes);
+
+      setUserData(dataLogin?.dados_usuario); // ← objeto direto
+      setToken(dataLogin?.token);
+      setUserPermissoes(dataLogin?.permissoes);
+      // console.log("dados do user: ", userData);
+      sessionStorage.removeItem("auth_senha");
+      // console.log("email: ", email);
+      // console.log("senha: ", senha);
+      // console.log("promotora: ", selectedPromotoraId);
+    } catch (err: any) {
+      console.error("Erro ao fazer Login: ", err);
+    } finally {
+    }
     // setTimeout(() => {
     //   router.push("/dashboard/default"); // ← fallback
     // }, 2000);
@@ -99,7 +163,34 @@ export default function FA({ onNext, onClose }: FAProps) {
     router.push("/dashboard/default"); // ← fallback ativado temporariamente
   };
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
+    try {
+      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          senha: senha,
+          promotora: selectedPromotoraId
+        })
+      });
+
+      const dataLogin = await login.json();
+
+      setUserData(dataLogin?.dados_usuario?.[0]); // ← objeto direto
+      setToken(dataLogin?.token);
+
+      console.log(dataLogin?.dados_usuario);
+      sessionStorage.removeItem("auth_senha");
+      // console.log("email: ", email);
+      // console.log("senha: ", senha);
+      // console.log("promotora: ", selectedPromotoraId);
+    } catch (err: any) {
+    } finally {
+    }
+
     setGoogleModal("google");
   };
 

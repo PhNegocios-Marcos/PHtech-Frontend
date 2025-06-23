@@ -1,37 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { UsuariosTable } from "./userPromotora";
-import { PromotorEdit } from "./editPromotora";
+import { UsuarioEdit } from "./editUsuario";
+import { UsuariosTable } from "./listaPromotoras";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Promotora = {
+type Usuario = {
   id: string;
   nome: string;
-  razao_social: string;
-  cnpj: string;
-  representante: string | null;
-  master: string;
-  master_id: string;
-  rateio_master: string;
-  rateio_sub: string;
+  cpf: string;
+  email: string;
+  tipo_acesso: string;
+  telefone: string;
+  endereco: string;
   status: number;
+  cnpj: string; // Para buscar usuários por promotora, se aplicável
 };
 
-type PromotoraDrawerProps = {
+type UsuarioDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  promotora: Promotora | null;
+  usuario: Usuario | null;
 };
 
-export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerProps) {
-  const [formData, setFormData] = useState<Promotora | null>(null);
+export function UsuarioDrawer({ isOpen, onClose, usuario}: UsuarioDrawerProps) {
+  const [formData, setFormData] = useState<Usuario | null>(null);
 
   useEffect(() => {
-    if (isOpen && promotora) {
-      setFormData({ ...promotora });
+    if (isOpen && usuario) {
+      setFormData({ ...usuario });
     }
-  }, [promotora, isOpen]);
+  }, [usuario, isOpen]);
 
   if (!isOpen || !formData) return null;
 
@@ -44,7 +43,7 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
         role="dialog"
         aria-modal="true">
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-lg font-semibold">Usuários da Promotora</h2>
+          <h2 className="text-lg font-semibold">Detalhes do Usuário</h2>
           <button
             onClick={onClose}
             aria-label="Fechar painel"
@@ -53,25 +52,22 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
           </button>
         </div>
 
-        {/* ✅ Passando apenas o CNPJ */}
         <div className="h-full overflow-y-auto p-4">
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList className="z-10">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="overview">Informações</TabsTrigger>
+              <TabsTrigger value="reports">Relacionados</TabsTrigger>
               <TabsTrigger value="activities" disabled>
-                Activities
+                Atividades
               </TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
-              <div className="">
-                <div className="lg:col-span-2">
-                  <PromotorEdit data={formData} onClose={onClose} />
-                </div>
+              <div className="lg:col-span-2">
+                <UsuarioEdit usuario={formData} onClose={onClose} />
               </div>
             </TabsContent>
             <TabsContent value="reports">
-              <UsuariosTable cnpj={formData.cnpj} />
+              <UsuariosTable email={formData.email} />
             </TabsContent>
             <TabsContent value="activities">...</TabsContent>
           </Tabs>

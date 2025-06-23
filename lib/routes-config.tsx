@@ -33,7 +33,7 @@ export const page_routes: PageRoutesType[] = [
         icon: "ChartPie"
       },
       {
-        id: "Cadastro",
+        id: "Cadastro_ver",
         title: "Cadastro",
         href: "/dashboard/cadastro",
         items: [
@@ -94,31 +94,31 @@ export const page_routes: PageRoutesType[] = [
             icon: "ChartPie"
           },
           {
-            id: "Gestão_Alçadas",
+            id: "Alcadas_ver",
             title: "Alçadas",
             href: "/dashboard/gestao/alcadas",
             icon: "ChartPie"
           },
           {
-            id: "Gestão_Promotoras",
+            id: "Promotoras_ver",
             title: "Promotoras",
             href: "/dashboard/gestao/promotoras",
             icon: "ChartPie"
           },
           {
-            id: "Gestão_Usuarios",
+            id: "Usuarios_ver",
             title: "Usuarios",
             href: "/dashboard/gestao/usuarios",
             icon: "ChartPie"
           },
           {
-            id: "Gestão_Equipes",
+            id: "Equipes_ver",
             title: "Equipes",
             href: "/dashboard/gestao/equipes",
             icon: "ChartPie"
           },
           {
-            id: "Gestão_Perfis",
+            id: "Perfis_ver",
             title: "Perfis",
             href: "/dashboard/gestao/perfis",
             icon: "ChartPie"

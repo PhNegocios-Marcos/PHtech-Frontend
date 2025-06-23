@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext"; // Certifique-se de que este caminho está correto
+import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 
-type Usuario = {
+type Alcadas = {
   id: string;
   nome: string;
   cpf: string;
@@ -18,15 +18,15 @@ type Usuario = {
   status: number;
 };
 
-type UsuarioDrawerProps = {
+type AlcadasDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  usuario: Usuario | null;
+  usuario: Alcadas | null;
 };
 
-export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
-  const [formData, setFormData] = useState<Usuario | null>(null);
-  const { token } = useAuth(); // ✅ hook sendo chamado dentro do componente
+export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
+  const [formData, setFormData] = useState<Alcadas | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     if (usuario) {
@@ -52,18 +52,19 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
       nome: formData.nome,
       endereco: formData.endereco,
       telefone: formData.telefone,
-      status: Number(formData.status)
+      status: Number(formData.status),
     };
 
     try {
       const response = await axios.put("http://127.0.0.1:8000/usuario/atualizar", payload, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       console.log("Usuário atualizado:", response.data);
       alert("Usuário atualizado com sucesso!");
-      onClose(); // fecha o drawer após sucesso
+      onClose();
+      window.location.reload();
     } catch (error: any) {
       console.error(
         "Erro ao atualizar usuário:",
@@ -75,98 +76,95 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
         }`
       );
     }
-    window.location.reload();
   };
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
-    { id: 0, name: "Inativo" }
+    { id: 0, name: "Inativo" },
   ];
 
   return (
     <>
-      {/* Overlay */}
       <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
 
-      {/* Drawer lateral */}
       <aside
-        className="fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col bg-white shadow-lg md:w-1/2"
+        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[600px] flex-col bg-white shadow-lg"
         role="dialog"
-        aria-modal="true">
-        {/* Cabeçalho */}
-        <div className="flex items-center justify-between border-b p-4">
+        aria-modal="true"
+      >
+        <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-lg font-semibold">Editar Usuário</h2>
           <button
             onClick={onClose}
             aria-label="Fechar painel"
-            className="text-2xl leading-none text-gray-600 hover:text-gray-900">
+            className="text-2xl leading-none text-gray-600 hover:text-gray-900"
+          >
             ×
           </button>
         </div>
 
-        {/* Formulário */}
-        <div className="grid grid-cols-2 gap-3 overflow-y-auto p-6">
-          <div className="h-[100px]">
+        <div className="grid grid-cols-2 gap-4 overflow-y-auto p-6">
+          <div>
             <label className="block text-sm font-medium">Nome</label>
             <Input
               name="nome"
               value={formData.nome}
               onChange={handleChange}
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">CPF</label>
             <Input
               name="cpf"
               value={formData.cpf}
               readOnly
-              className="mt-1 w-full cursor-not-allowed rounded border bg-gray-100 p-2 text-gray-500"
+              className="mt-1 w-full bg-gray-100 text-gray-500 cursor-not-allowed"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">Email</label>
             <Input
               name="email"
               value={formData.email}
               readOnly
-              className="mt-1 w-full cursor-not-allowed rounded border bg-gray-100 p-2 text-gray-500"
+              className="mt-1 w-full bg-gray-100 text-gray-500 cursor-not-allowed"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">Telefone</label>
             <Input
               name="telefone"
               value={formData.telefone}
               onChange={handleChange}
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">Endereço</label>
             <Input
               name="endereco"
               value={formData.endereco}
               onChange={handleChange}
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">Tipo de Acesso</label>
             <Input
               name="tipo_acesso"
               value={formData.tipo_acesso}
               onChange={handleChange}
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full"
             />
           </div>
 
-          <div className="h-[100px]">
+          <div>
             <label className="block text-sm font-medium">Status</label>
             <Combobox
               data={statusOptions}
@@ -181,9 +179,10 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
           </div>
         </div>
 
-        {/* Botão de salvar */}
-        <div className="p-4">
-          <Button onClick={handleSubmit}>Salvar Alterações</Button>
+        <div className="border-t p-4">
+          <Button onClick={handleSubmit} className="w-full">
+            Salvar Alterações
+          </Button>
         </div>
       </aside>
     </>

@@ -1,19 +1,9 @@
 "use client";
 
 import React from "react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState
-} from "@tanstack/react-table";
-
+import { useAuth } from "@/contexts/AuthContext";
+import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
+import { CarregandoTable } from "./leads_carregando";
 import {
   Table,
   TableBody,
@@ -23,191 +13,138 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge"; // substituto visual para Switch
 
-// Componentes
-import { CarregandoTable } from "./leads_carregando";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Tipagem
-type Usuario = {
+type ModuloLinha = {
   id: string;
   nome: string;
-  status: number; // 1 = ativo, 0 = inativo
+  status: number;
 };
 
-// Dados fictícios (mock) que simulam a resposta do endpoint
-const mockApiResponse = {
-  usuarios: {
-    "1": { nome: "Goku", status: 1 },
-    "2": { nome: "Vegeta", status: 1 },
-    "3": { nome: "Gohan", status: 0 },
-    "4": { nome: "Trunks", status: 1 },
-    "5": { nome: "Freeza", status: 0 }
-  }
-};
-
-export function UsuariosTable() {
-  const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+export function ModulosTable() {
+  const { token } = useAuth();
+  const [modulos, setModulos] = React.useState<ModuloLinha[]>([]);
+  const [filtro, setFiltro] = React.useState("");
 
   React.useEffect(() => {
-    async function fetchUsuarios() {
+    async function fetchModulos() {
+      if (!token) return;
+
       try {
-        // Simulação de requisição com delay
-        // const response = await fetch("/sua-api/usuario/listar", {
-        //   headers: { Authorization: "Bearer SEU_TOKEN" }
-        // });
-        // const data = await response.json();
+        const res = await fetch(`${API_BASE_URL}/modulo/listar`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error("Erro ao buscar módulos");
 
-        const data = mockApiResponse; // usa dados falsos
-        const usuariosObject = data.usuarios;
+        const data = await res.json();
 
-        const usuariosArray = Object.entries(usuariosObject).map(
-          ([id, usuario]: [string, any]) => ({
-            id,
-            nome: usuario.nome,
-            status: usuario.status
-          })
-        );
+        console.log("Resposta da API:", data);
 
-        setUsuarios(usuariosArray);
+        const arr: ModuloLinha[] = data.map((m: any) => ({
+          id: m.id,
+          nome: m.nome,
+          status: m.status
+        }));
+
+        setModulos(arr);
       } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
+        console.error("Erro ao carregar módulos:", error);
       }
     }
 
-    fetchUsuarios();
-  }, []);
+    fetchModulos();
+  }, [token]);
 
-  // Alterna status ativo/inativo
-  const toggleStatus = (id: string) => {
-    setUsuarios((prev) =>
-      prev.map((user) => (user.id === id ? { ...user, status: user.status === 1 ? 0 : 1 } : user))
-    );
-  };
+  const filteredModulos = React.useMemo(() => {
+    const filtroLower = filtro.toLowerCase();
+    return modulos.filter((m) => m.nome.toLowerCase().includes(filtroLower));
+  }, [filtro, modulos]);
 
-  // Colunas da tabela
-  const usuarioColumns: ColumnDef<Usuario>[] = [
-    { accessorKey: "nome", header: "Nome" },
+  const columns: ColumnDef<ModuloLinha>[] = [
     {
-      accessorKey: "status",
+      accessorKey: "nome",
+      header: "Módulo"
+    },
+    {
+      id: "status",
       header: "Status",
       cell: ({ row }) => {
-        const usuario = row.original;
-        const isAtivo = usuario.status === 1;
+        const ativo = row.original.status === 1;
         return (
-          <Button
-            onClick={() => toggleStatus(usuario.id)}
-            className={
-              isAtivo
-                ? "bg-primary hover:bg-primary/50 px-3 py-1 text-xs text-white hover:text-white"
-                : "border-primary text-primary hover:text-primary hover:bg-primary/30 border bg-transparent px-3 py-1 text-xs"
-            }
-            variant="ghost">
-            {isAtivo ? "Ativo" : "Inativo"}
-          </Button>
+          <Badge
+            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
         );
       }
     }
   ];
 
   const table = useReactTable({
-    data: usuarios,
-    columns: usuarioColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection
-    }
+    data: filteredModulos,
+    columns,
+    getCoreRowModel: getCoreRowModel()
   });
 
-  return (
-    <Card className="col-span-2">
-      <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Permissões</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 flex items-center gap-2">
-          <Input
-            placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+  function renderHeader(header: any): React.ReactNode {
+    if (typeof header.column.columnDef.header === "function") {
+      return (header.column.columnDef.header as (ctx: any) => React.ReactNode)(header.getContext());
+    }
+    return String(header.column.columnDef.header);
+  }
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
+  return (
+    <div>
+      <Input
+        placeholder="Filtrar módulos..."
+        value={filtro}
+        onChange={(e) => setFiltro(e.target.value)}
+        className="mb-4 max-w-sm"
+      />
+
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {!header.isPlaceholder &&
+                    (typeof header.column.columnDef.header === "function"
+                      ? header.column.columnDef.header(header.getContext() as any)
+                      : String(header.column.columnDef.header))}
+                </TableHead>
               ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
+            </TableRow>
+          ))}
+        </TableHeader>
+
+        <TableBody>
+          {table.getRowModel().rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={3} className="p-4 text-center">
                 <CarregandoTable />
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+              </TableCell>
+            </TableRow>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

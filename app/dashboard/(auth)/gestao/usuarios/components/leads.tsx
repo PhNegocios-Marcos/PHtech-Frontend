@@ -33,9 +33,8 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL; // se for Next.js
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-
 
 import { UsuarioDrawer } from "./UsuarioModal";
 
@@ -48,6 +47,7 @@ type Usuario = {
   telefone: string;
   endereco: string;
   status: number;
+  cnpj: string; // adicione como opcional se nem todos os contextos usarem
 };
 
 const usuarioColumns: ColumnDef<Usuario>[] = [
@@ -56,7 +56,7 @@ const usuarioColumns: ColumnDef<Usuario>[] = [
   { accessorKey: "email", header: "Email" },
   { accessorKey: "telefone", header: "Telefone" },
   { accessorKey: "endereco", header: "Endereço" },
-  { accessorKey: "tipo_acesso", header: "Tipo de Acesso" },
+  { accessorKey: "tipo_usuario", header: "Tipo de Usuario" },
   { accessorKey: "status", header: "Status" }
 ];
 
@@ -70,7 +70,7 @@ export function UsuariosTable() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { token } = useAuth();
-  // console.log(token);
+
   React.useEffect(() => {
     async function fetchUsuarios() {
       try {
@@ -88,25 +88,20 @@ export function UsuariosTable() {
         }
 
         const data = await response.json();
-        const usuariosObject = data.usuarios;
-
-        const usuariosArray = Object.entries(usuariosObject).map(
-          ([id, usuario]: [string, any]) => ({
-            id,
-            nome: usuario.nome,
-            cpf: usuario.cpf,
-            email: usuario.email,
-            tipo_acesso: usuario.tipo_acesso,
-            telefone: usuario.telefone,
-            endereco: usuario["endereço"],
-            status: usuario.status
-          })
-        );
+        const usuariosArray = data.map((usuario: any) => ({
+          id: usuario.id,
+          nome: usuario.nome,
+          cpf: usuario.cpf,
+          email: usuario.email,
+          tipo_usuario: usuario.tipo_usuario,
+          telefone: usuario.telefone,
+          endereco: usuario.endereco,
+          status: usuario.status
+        }));
 
         setUsuarios(usuariosArray);
       } catch (error: any) {
-        window.location.href = "/dashboard/login"; // Corrigido: "dashboar" → "dashboard"
-        // console.error("Erro na requisição:", error.message || error);
+        // Tratamento de erro
       }
     }
 
@@ -207,7 +202,6 @@ export function UsuariosTable() {
           </Table>
         </div>
 
-        {/* Modal separado */}
         <UsuarioDrawer
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

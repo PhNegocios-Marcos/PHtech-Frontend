@@ -35,47 +35,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-import { PromotoraDrawer } from "./PromotoraModal";
 
-type Promotora = {
+// tipo adaptado
+type Equipe = {
   id: string;
+  promotora: string;
   nome: string;
-  razao_social: string;
-  cnpj: number;
-  representante: string | null;
-  master: string;
-  master_id: string;
-  rateio_master: string;
-  rateio_sub: string;
+  descricao: string;
   status: number;
 };
 
-const promotoraColumns: ColumnDef<Promotora>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "razao_social", header: "Razão Social" },
-  { accessorKey: "cnpj", header: "CNPJ" },
-  { accessorKey: "representante", header: "Representante" },
-  { accessorKey: "master", header: "É Master?" },
-  { accessorKey: "rateio_master", header: "Rateio Master" },
-  { accessorKey: "rateio_sub", header: "Rateio Sub" },
+// colunas para a equipe
+const equipeColumns: ColumnDef<Equipe>[] = [
+  { accessorKey: "promotora", header: "Promotora" },
+  { accessorKey: "nome", header: "Nome da Equipe" },
+  { accessorKey: "descricao", header: "Descrição" },
   { accessorKey: "status", header: "Status" }
 ];
 
-export function PromotorasTable() {
-  const [promotoras, setPromotoras] = React.useState<Promotora[]>([]);
+export function EquipesTable() {
+  const [equipes, setEquipes] = React.useState<Equipe[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedPromotora, setSelectedPromotora] = React.useState<Promotora | null>(null);
+  const [selectedEquipe, setSelectedEquipe] = React.useState<Equipe | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { token } = useAuth();
 
   React.useEffect(() => {
-    async function fetchPromotoras() {
+    async function fetchEquipes() {
       try {
-        const response = await fetch(`${API_BASE_URL}/promotora/listar`, {
+        const response = await fetch(`${API_BASE_URL}/equipe/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -85,35 +77,22 @@ export function PromotorasTable() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar promotoras");
+          throw new Error(errorData?.detail || "Erro ao buscar equipes");
         }
 
         const data = await response.json();
-        const promotorasArray = data.map((item: any) => ({
-          id: item.id,
-          nome: item.nome,
-          razao_social: item.razao_social,
-          cnpj: item.cnpj,
-          representante: item.representante,
-          master: item.master,
-          master_id: item.master_id,
-          rateio_master: item.rateio_master,
-          rateio_sub: item.rateio_sub,
-          status: item.status
-        }));
-
-        setPromotoras(promotorasArray);
+        setEquipes(data);
       } catch (error: any) {
-        console.error("Erro ao buscar promotoras:", error.message || error);
+        console.error("Erro ao carregar equipes:", error.message || error);
       }
     }
 
-    fetchPromotoras();
+    fetchEquipes();
   }, [token]);
 
   const table = useReactTable({
-    data: promotoras,
-    columns: promotoraColumns,
+    data: equipes,
+    columns: equipeColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -130,22 +109,15 @@ export function PromotorasTable() {
     }
   });
 
-  const handleRowClick = (promotora: Promotora) => {
-  setSelectedPromotora(null); // reseta o estado primeiro
-  setIsModalOpen(false);
-
-  // pequena espera para forçar re-render
-  setTimeout(() => {
-    setSelectedPromotora(promotora);
+  const handleRowClick = (equipe: Equipe) => {
+    setSelectedEquipe(equipe);
     setIsModalOpen(true);
-  }, 50); // 50ms geralmente é o suficiente
-};
-
+  };
 
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Promotoras</CardTitle>
+        <CardTitle>Equipes</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
@@ -212,11 +184,13 @@ export function PromotorasTable() {
           </Table>
         </div>
 
-        <PromotoraDrawer
+        {/* Modal futuro de edição de equipe */}
+        {/* <EquipeDrawer
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          promotora={selectedPromotora as any} // ajuste conforme sua tipagem no Drawer
-        />
+          equipe={selectedEquipe}
+          onRefresh={() => setRefreshKey((prev) => prev + 1)}
+        /> */}
       </CardContent>
     </Card>
   );
