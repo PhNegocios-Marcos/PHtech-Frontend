@@ -45,7 +45,7 @@ export default async function RootLayout({
             defaultTheme="light"
             enableSystem
             disableTransitionOnChange>
-            <ActiveThemeProvider initialTheme={themeSettings}>
+            <ActiveThemeProvider initialTheme={themeSettings} promotoraId="uuid-da-promotora">
               {children}
               <Toaster />
               <NextTopLoader
