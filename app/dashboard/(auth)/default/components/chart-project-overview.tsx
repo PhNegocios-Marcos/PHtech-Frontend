@@ -38,7 +38,9 @@ const generateChartData = () => {
     data.push({
       date: date.toISOString().split("T")[0],
       desktop: Math.floor(Math.random() * (400 - 50) + 50),
-      mobile: Math.floor(Math.random() * (400 - 50) + 50)
+      mobile: Math.floor(Math.random() * (400 - 50) + 50),
+      tablet: Math.floor(Math.random() * (400 - 50) + 50),
+      tv: Math.floor(Math.random() * (400 - 50) + 50)
     });
   }
 
@@ -58,6 +60,14 @@ const chartConfig = {
   mobile: {
     label: "Mobile",
     color: "var(--primary)"
+  },
+  tablet: {
+    label: "Tablet",
+    color: "#f59e0b" // Ex: cor amarela
+  },
+  tv: {
+    label: "TV",
+    color: "#10b981" // Ex: cor verde
   }
 } satisfies ChartConfig;
 
@@ -137,6 +147,14 @@ export function ChartProjectOverview() {
                 <stop offset="5%" stopColor="var(--color-mobile)" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="var(--color-mobile)" stopOpacity={0} />
               </linearGradient>
+              <linearGradient id="fillTablet" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="fillTv" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -182,6 +200,14 @@ export function ChartProjectOverview() {
               stroke="var(--color-desktop)"
               stackId="a"
             />
+            <Area
+              dataKey="tablet"
+              type="natural"
+              fill="url(#fillTablet)"
+              stroke="#f59e0b"
+              stackId="a"
+            />
+            <Area dataKey="tv" type="natural" fill="url(#fillTv)" stroke="#10b981" stackId="a" />
           </AreaChart>
         </ChartContainer>
       </CardContent>

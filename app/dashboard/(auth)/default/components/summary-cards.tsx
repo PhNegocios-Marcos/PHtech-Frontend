@@ -14,7 +14,7 @@ export function SummaryCards() {
     <div className="*:data-[slot=card]:from-primary/10 grid gap-4 *:data-[slot=card]:bg-gradient-to-t md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader>
-          <CardTitle>Total Revenue</CardTitle>
+          <CardTitle>Valor total operado</CardTitle>
           <CardDescription>
             <span className="text-green-600">+20.1% </span>from last month
           </CardDescription>
@@ -28,7 +28,7 @@ export function SummaryCards() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Active Projects</CardTitle>
+          <CardTitle>Operações concluídas</CardTitle>
           <CardDescription>
             <span className="text-green-600">+5.02%</span> from last month
           </CardDescription>
@@ -42,7 +42,7 @@ export function SummaryCards() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>New Leads</CardTitle>
+          <CardTitle>Coleta de assinaturas</CardTitle>
           <CardDescription>
             <span className="text-red-600">-3.58%</span> from last month
           </CardDescription>
@@ -56,7 +56,7 @@ export function SummaryCards() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Time Spent</CardTitle>
+          <CardTitle>Em andamento</CardTitle>
           <CardDescription>
             <span className="text-red-600">-3.58%</span> from last month
           </CardDescription>
@@ -65,7 +65,7 @@ export function SummaryCards() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <div className="font-display text-2xl lg:text-3xl">168h 40m</div>
+          <div className="font-display text-2xl lg:text-3xl">1.250</div>
         </CardContent>
       </Card>
     </div>

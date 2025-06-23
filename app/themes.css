@@ -398,6 +398,9 @@ body {
     --sidebar-border: var(--base-200);
     --sidebar-ring: var(--primary-600);
 
+    --text-family: var(--font-poppins), sans-serif;
+
+
     @variant dark {
         --background: var(--base-950);
         --foreground: var(--base-200);
