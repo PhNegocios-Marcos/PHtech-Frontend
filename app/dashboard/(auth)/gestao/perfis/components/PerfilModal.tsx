@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { PerfilEdit } from "./editUsuario";
 import { UsuariosPorEquipeTable } from "./listaPromotoras";
+import { Permissoes } from "./listaNovaPermissao";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Usuario = {
@@ -21,11 +22,9 @@ type Usuario = {
 type Equipe = {
   id: string;
   nome: string;
-  promotora: string;
   descricao: string;
   status: number;
 };
-
 
 type UsuarioDrawerProps = {
   isOpen: boolean;
@@ -33,8 +32,8 @@ type UsuarioDrawerProps = {
   usuario: Usuario | Equipe | null; // se quiser aceitar ambos
 };
 
-export function PerfilDrawer({ isOpen, onClose, usuario}: UsuarioDrawerProps) {
-const [formData, setFormData] = useState<Usuario | Equipe | null>(null);
+export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
+  const [formData, setFormData] = useState<Usuario | Equipe | null>(null);
 
   useEffect(() => {
     if (isOpen && usuario) {
@@ -66,10 +65,8 @@ const [formData, setFormData] = useState<Usuario | Equipe | null>(null);
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList className="z-10">
               <TabsTrigger value="overview">Informações</TabsTrigger>
-              <TabsTrigger value="reports">Relacionados</TabsTrigger>
-              <TabsTrigger value="activities" disabled>
-                Atividades
-              </TabsTrigger>
+              <TabsTrigger value="reports">Permissões</TabsTrigger>
+              <TabsTrigger value="activities">ADD Nova Permissão</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="lg:col-span-2">
@@ -79,7 +76,9 @@ const [formData, setFormData] = useState<Usuario | Equipe | null>(null);
             <TabsContent value="reports">
               <UsuariosPorEquipeTable equipeNome={formData.nome} />
             </TabsContent>
-            <TabsContent value="activities">...</TabsContent>
+            <TabsContent value="activities">
+              <Permissoes equipeNome={formData.nome} perfilId={formData.id} />
+            </TabsContent>
           </Tabs>
         </div>
       </aside>

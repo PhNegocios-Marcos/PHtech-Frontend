@@ -40,14 +40,12 @@ import { PerfilDrawer } from "./PerfilModal";
 type Equipe = {
   id: string;
   nome: string;
-  promotora: string;
   descricao: string;
   status: number;
 };
 
 const equipeColumns: ColumnDef<Equipe>[] = [
   { accessorKey: "nome", header: "Nome da Equipe" },
-  { accessorKey: "promotora", header: "Promotora" },
   { accessorKey: "descricao", header: "Descrição" },
   { accessorKey: "status", header: "Status" }
 ];
@@ -66,7 +64,7 @@ export function EquipesTable() {
   React.useEffect(() => {
     async function fetchEquipes() {
       try {
-        const response = await fetch(`${API_BASE_URL}/equipe/listar`, {
+        const response = await fetch(`${API_BASE_URL}/perfil/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -83,7 +81,6 @@ export function EquipesTable() {
         const equipesArray = data.map((equipe: any) => ({
           id: equipe.id,
           nome: equipe.nome,
-          promotora: equipe.promotora,
           descricao: equipe.descricao,
           status: equipe.status
         }));

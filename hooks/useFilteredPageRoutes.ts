@@ -28,7 +28,7 @@ type PermissaoLinha = {
   status: number;
 };
 
-// Função para filtrar recursivamente apenas os itens permitidos
+// 🔁 Função para filtrar itens recursivamente
 function filterItems(items: PageRoutesItemType, allowedRoutes: string[]): PageRoutesItemType {
   return items
     .map((item) => {
@@ -46,18 +46,29 @@ function filterItems(items: PageRoutesItemType, allowedRoutes: string[]): PageRo
     .filter(Boolean) as PageRoutesItemType;
 }
 
+// ✅ Hook principal que filtra rotas com base nas permissões
 export function useFilteredPageRoutes(): PageRoutesType {
   const { userPermissoes } = useAuth();
 
   let allowedRoutes: string[] = [];
 
-  if (userPermissoes === "acesso_total" ) {
-    allowedRoutes = ["Equipes_ver", "Promotoras_ver", "Usuarios_ver", "Perfis_ver", "Gestão_Permissões", "Gestão_Modulos", "Credito_Excluidos", "Credito_Operações", "Credito_Simular" ];
+  if (userPermissoes === "acesso_total") {
+    allowedRoutes = [
+      "Equipes_ver",
+      "Promotoras_ver",
+      "Usuarios_ver",
+      "Perfis_ver",
+      "Gestão_Permissões",
+      "Gestão_Modulos",
+      "Credito_Excluidos",
+      "Credito_Operações",
+      "Credito_Simular"
+    ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
   }
 
-  allowedRoutes.push("Default"); // ✅ sempre adiciona Default
+  allowedRoutes.push("Default");
 
   const filteredRoutes = page_routes
     .map((route) => {
@@ -70,4 +81,17 @@ export function useFilteredPageRoutes(): PageRoutesType {
     .filter((route) => route.items.length > 0);
 
   return filteredRoutes;
+}
+
+// ✅ Novo hook: verifica se o usuário tem uma permissão específica
+export function useHasPermission(permissionId: string): boolean {
+  const { userPermissoes } = useAuth();
+
+  if (userPermissoes === "acesso_total") return true;
+
+  if (Array.isArray(userPermissoes)) {
+    return userPermissoes.includes(permissionId);
+  }
+
+  return false;
 }

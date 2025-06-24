@@ -40,7 +40,8 @@ const generateChartData = () => {
       desktop: Math.floor(Math.random() * (400 - 50) + 50),
       mobile: Math.floor(Math.random() * (400 - 50) + 50),
       tablet: Math.floor(Math.random() * (400 - 50) + 50),
-      tv: Math.floor(Math.random() * (400 - 50) + 50)
+      tv: Math.floor(Math.random() * (400 - 50) + 50),
+      banana: 999
     });
   }
 
@@ -68,6 +69,10 @@ const chartConfig = {
   tv: {
     label: "TV",
     color: "#10b981" // Ex: cor verde
+  },
+  banana : {
+    label : 'chiclete',
+    color : 'pink'
   }
 } satisfies ChartConfig;
 
@@ -155,6 +160,10 @@ export function ChartProjectOverview() {
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
+              <linearGradient id="fillBanana" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -204,6 +213,13 @@ export function ChartProjectOverview() {
               dataKey="tablet"
               type="natural"
               fill="url(#fillTablet)"
+              stroke="#f59e0b"
+              stackId="a"
+            />
+            <Area
+              dataKey="banana"
+              type="natural"
+              fill="url(#fillBanana)"
               stroke="#f59e0b"
               stackId="a"
             />

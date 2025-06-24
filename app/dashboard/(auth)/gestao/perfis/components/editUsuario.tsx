@@ -29,13 +29,14 @@ import {
 const perfilSchema = z.object({
   id: z.string(),
   nome: z.string().min(2),
-  promotora: z.string().optional(),
   descricao: z.string().optional(),
   status: z.number()
 });
 
 
-type Perfil = z.infer<typeof perfilSchema>;
+type Perfil = z.infer<typeof perfilSchema> & {
+  nome?: string,
+};
 
 type PerfilDrawerProps = {
   onClose: () => void;
@@ -68,7 +69,7 @@ export function PerfilEdit({ perfil, onClose }: PerfilDrawerProps) {
     }
 
     try {
-      await axios.put("http://127.0.0.1:8000/equipe/atualizar", data, {
+      await axios.put("http://127.0.0.1:8000/perfil/atualizar", data, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -94,26 +95,13 @@ export function PerfilEdit({ perfil, onClose }: PerfilDrawerProps) {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
+
                 <FormField
                   control={methods.control}
                   name="nome"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="promotora"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Promotora</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
