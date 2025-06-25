@@ -43,7 +43,7 @@ export function ModulosTable() {
 
         const data = await res.json();
 
-        console.log("Resposta da API:", data);
+        // console.log("Resposta da API:", data);
 
         const arr: ModuloLinha[] = data.map((m: any) => ({
           id: m.id,

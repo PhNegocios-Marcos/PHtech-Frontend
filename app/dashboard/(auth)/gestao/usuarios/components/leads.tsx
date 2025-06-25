@@ -35,8 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-
-import { UsuarioDrawer } from "./UsuarioModal";
+import { UsuarioPerfil } from "./UsuarioModal";
 
 type Usuario = {
   id: string;
@@ -47,7 +46,7 @@ type Usuario = {
   telefone: string;
   endereco: string;
   status: number;
-  cnpj: string; // adicione como opcional se nem todos os contextos usarem
+  cnpj: string;
 };
 
 const usuarioColumns: ColumnDef<Usuario>[] = [
@@ -56,7 +55,7 @@ const usuarioColumns: ColumnDef<Usuario>[] = [
   { accessorKey: "email", header: "Email" },
   { accessorKey: "telefone", header: "Telefone" },
   { accessorKey: "endereco", header: "Endereço" },
-  { accessorKey: "tipo_usuario", header: "Tipo de Usuario" },
+  { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
   { accessorKey: "status", header: "Status" }
 ];
 
@@ -67,7 +66,6 @@ export function UsuariosTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { token } = useAuth();
 
@@ -93,15 +91,16 @@ export function UsuariosTable() {
           nome: usuario.nome,
           cpf: usuario.cpf,
           email: usuario.email,
-          tipo_usuario: usuario.tipo_usuario,
+          tipo_acesso: usuario.tipo_usuario,
           telefone: usuario.telefone,
           endereco: usuario.endereco,
-          status: usuario.status
+          status: usuario.status,
+          cnpj: usuario.cnpj || ""
         }));
 
         setUsuarios(usuariosArray);
       } catch (error: any) {
-        // Tratamento de erro
+        console.error("Erro ao buscar usuários:", error.message);
       }
     }
 
@@ -129,7 +128,6 @@ export function UsuariosTable() {
 
   const handleRowClick = (usuario: Usuario) => {
     setSelectedUser(usuario);
-    setIsModalOpen(true);
   };
 
   return (
@@ -138,75 +136,77 @@ export function UsuariosTable() {
         <CardTitle>Usuários</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex items-center gap-2">
-          <Input
-            placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onDoubleClick={() => handleRowClick(row.original)}
-                    className="hover:bg-muted cursor-pointer">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+        {selectedUser ? (
+          <UsuarioPerfil usuario={selectedUser} onClose={() => setSelectedUser(null)} />
+        ) : (
+          <>
+            <div className="mb-4 flex items-center gap-2">
+              <Input
+                placeholder="Filtrar por nome..."
+                value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
+                onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+                className="max-w-sm"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
                     ))}
-                  </TableRow>
-                ))
-              ) : (
-                <CarregandoTable />
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-        <UsuarioDrawer
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          usuario={selectedUser}
-        />
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        onDoubleClick={() => handleRowClick(row.original)}
+                        className="hover:bg-muted cursor-pointer"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <CarregandoTable />
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
