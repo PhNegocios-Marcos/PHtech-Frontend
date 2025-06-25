@@ -33,17 +33,14 @@ const perfilSchema = z.object({
   status: z.number()
 });
 
-
-type Perfil = z.infer<typeof perfilSchema> & {
-  nome?: string,
-};
+type Perfil = z.infer<typeof perfilSchema>;
 
 type PerfilDrawerProps = {
   onClose: () => void;
   perfil: Perfil | null;
 };
 
-export function PerfilEdit({ perfil, onClose }: PerfilDrawerProps) {
+export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
   const methods = useForm<Perfil>({
     resolver: zodResolver(perfilSchema),
     defaultValues: perfil || {}
@@ -95,7 +92,6 @@ export function PerfilEdit({ perfil, onClose }: PerfilDrawerProps) {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-
                 <FormField
                   control={methods.control}
                   name="nome"

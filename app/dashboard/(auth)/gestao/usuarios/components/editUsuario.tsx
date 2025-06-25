@@ -5,7 +5,6 @@ import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,13 +19,9 @@ import {
   FormMessage
 } from "@/components/ui/form";
 
-// Validação com Zod
 const usuarioSchema = z.object({
   id: z.string(),
-  nome: z.string().min(2),
-  // cpf: z.string(),
-  // email: z.string().email(),
-  //   tipo_acesso: z.string(),
+  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   telefone: z.string(),
   endereco: z.string(),
   status: z.number()
@@ -35,25 +30,26 @@ const usuarioSchema = z.object({
 type Usuario = z.infer<typeof usuarioSchema> & {
   cpf?: string;
   email?: string;
+  tipo_acesso?: string;
+  cnpj?: string;
 };
 
 type UsuarioDrawerProps = {
+  usuario: Usuario;
   onClose: () => void;
-  usuario: Usuario | null;
+  onRefresh: () => void;
 };
 
-export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
+export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
   const methods = useForm<Usuario>({
     resolver: zodResolver(usuarioSchema),
-    defaultValues: usuario || {}
+    defaultValues: usuario
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
-    if (usuario) {
-      methods.reset(usuario);
-    }
+    methods.reset(usuario);
   }, [usuario, methods]);
 
   const statusOptions = [
@@ -68,28 +64,24 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
     }
 
     try {
-      await axios.put("http://127.0.0.1:8000/usuario/atualizar", data, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/usuario/atualizar`, data, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      alert("Usuário atualizado com sucesso!");
       onClose();
-      window.location.reload();
+      onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
-      alert(`Erro: ${JSON.stringify(error.response?.data || error.message)}`);
+      alert(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
 
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form
-          onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 overflow-y-auto p-6">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Dados do Usuário</CardTitle>
+              <CardTitle>Editar Usuário</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
@@ -114,11 +106,7 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
                     <FormItem>
                       <FormLabel>CPF</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          readOnly
-                          className="cursor-not-allowed bg-gray-100 text-gray-500"
-                        />
+                        <Input {...field} readOnly className="bg-gray-100" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -132,11 +120,7 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          readOnly
-                          className="cursor-not-allowed bg-gray-100 text-gray-500"
-                        />
+                        <Input {...field} readOnly className="bg-gray-100" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -171,20 +155,6 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
                   )}
                 />
 
-                {/* <FormField
-                  control={methods.control}
-                  name="tipo_acesso"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Acesso</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
-
                 <FormField
                   control={methods.control}
                   name="status"
@@ -196,7 +166,7 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
                           data={statusOptions}
                           displayField="name"
                           value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected.id)}
+                          onChange={(selected) => field.onChange(selected?.id ?? 1)}
                           searchFields={["name"]}
                         />
                       </FormControl>
@@ -208,7 +178,10 @@ export function UsuarioEdit({ usuario, onClose }: UsuarioDrawerProps) {
             </CardContent>
           </Card>
 
-          <div className="col-span-2 p-4">
+          <div className="col-span-2 flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
             <Button type="submit">Salvar Alterações</Button>
           </div>
         </form>

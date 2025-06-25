@@ -39,21 +39,31 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 type Promotora = {
   id: string;
   nome: string;
-  cnpj: number;
-  status: number;
+  usuario: {
+    id: string;
+    nome: string;
+  };
+  status_relacionamento: number;
 };
 
 type UsuariosTableProps = {
-  email: string; // Agora usamos email no lugar do CNPJ
+  equipeNome: string; // Mantido como estava, apenas mudando o prop para receber o nome da equipe
 };
 
 const promotoraColumns: ColumnDef<Promotora>[] = [
-  { accessorKey: "nome", header: "Nome da Promotora" },
-  { accessorKey: "cnpj", header: "CNPJ" },
-  { accessorKey: "status", header: "Status" }
+  {
+    accessorKey: "usuario.nome",
+    header: "Nome do Usuário",
+    cell: ({ row }) => row.original.usuario.nome
+  },
+  {
+    accessorKey: "status_relacionamento",
+    header: "Status",
+    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+  }
 ];
 
-export function UsuariosTable({ email }: UsuariosTableProps) {
+export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
   const [promotoras, setPromotoras] = useState<Promotora[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -61,12 +71,14 @@ export function UsuariosTable({ email }: UsuariosTableProps) {
   const [rowSelection, setRowSelection] = useState({});
   const { token } = useAuth();
 
+  // console.log(equipeNome)
+
   useEffect(() => {
     async function fetchPromotorasRelacionadas() {
-      if (!token || !email) return;
+      if (!token || !equipeNome) return;
 
       try {
-        const response = await fetch(`${API_BASE_URL}/rel_usuario_promotora/${email}`, {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/${equipeNome}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -76,18 +88,31 @@ export function UsuariosTable({ email }: UsuariosTableProps) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar promotoras");
+          throw new Error(errorData?.detail || "Erro ao buscar usuários da equipe");
         }
 
         const data = await response.json();
-        setPromotoras(data.promotoras || []);
+        // Adaptação para manter a estrutura esperada
+        const usuariosFormatados = data.usuarios
+          .map((usuario: any) => ({
+            id: usuario.id_relacionamento,
+            nome: usuario.usuario.nome,
+            usuario: {
+              id: usuario.usuario.id,
+              nome: usuario.usuario.nome
+            },
+            status_relacionamento: usuario.status_relacionamento
+          }))
+          .filter((usuario: any) => usuario.status_relacionamento === 1); // <- aqui filtra
+
+        setPromotoras(usuariosFormatados);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
       }
     }
 
     fetchPromotorasRelacionadas();
-  }, [token, email]);
+  }, [token, equipeNome]);
 
   const table = useReactTable({
     data: promotoras,
@@ -111,14 +136,16 @@ export function UsuariosTable({ email }: UsuariosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Promotoras Vinculadas</CardTitle>
+        <CardTitle>Usuários da Equipe {equipeNome}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
           <Input
             placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("usuario.nome")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("usuario.nome")?.setFilterValue(event.target.value)
+            }
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -136,8 +163,7 @@ export function UsuariosTable({ email }: UsuariosTableProps) {
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
                     {column.id}
                   </DropdownMenuCheckboxItem>
                 ))}

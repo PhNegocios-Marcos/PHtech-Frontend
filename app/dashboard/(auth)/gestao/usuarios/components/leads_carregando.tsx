@@ -31,7 +31,11 @@ const usuarioColumns: ColumnDef<Usuario>[] = [
   { accessorKey: "telefone", header: "Telefone" },
   { accessorKey: "endereco", header: "Endereço" },
   { accessorKey: "tipo_acesso", header: "Tipo de Acesso" },
-  { accessorKey: "status", header: "Status" }
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+  }
 ];
 
 export function CarregandoTable() {

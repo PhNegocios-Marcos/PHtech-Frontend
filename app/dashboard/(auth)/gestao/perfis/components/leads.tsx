@@ -115,7 +115,7 @@ export function EquipesTable() {
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Equipes</CardTitle>
+        <CardTitle>Perfis</CardTitle>
       </CardHeader>
       <CardContent>
         {selectedUser ? (

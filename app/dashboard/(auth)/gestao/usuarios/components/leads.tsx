@@ -6,14 +6,11 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
   SortingState,
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -33,7 +30,6 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { UsuarioPerfil } from "./UsuarioModal";
 
@@ -56,7 +52,11 @@ const usuarioColumns: ColumnDef<Usuario>[] = [
   { accessorKey: "telefone", header: "Telefone" },
   { accessorKey: "endereco", header: "Endereço" },
   { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
-  { accessorKey: "status", header: "Status" }
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+  }
 ];
 
 export function UsuariosTable() {
@@ -66,13 +66,14 @@ export function UsuariosTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   const { token } = useAuth();
 
   React.useEffect(() => {
     async function fetchUsuarios() {
       try {
-        const response = await fetch(`${API_BASE_URL}/usuario/listar`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuario/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -86,7 +87,7 @@ export function UsuariosTable() {
         }
 
         const data = await response.json();
-        const usuariosArray = data.map((usuario: any) => ({
+        setUsuarios(data.map((usuario: any) => ({
           id: usuario.id,
           nome: usuario.nome,
           cpf: usuario.cpf,
@@ -96,23 +97,19 @@ export function UsuariosTable() {
           endereco: usuario.endereco,
           status: usuario.status,
           cnpj: usuario.cnpj || ""
-        }));
-
-        setUsuarios(usuariosArray);
+        })));
       } catch (error: any) {
         console.error("Erro ao buscar usuários:", error.message);
       }
     }
 
     fetchUsuarios();
-  }, [token]);
+  }, [token, refreshKey]);
 
   const table = useReactTable({
     data: usuarios,
     columns: usuarioColumns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -126,8 +123,8 @@ export function UsuariosTable() {
     }
   });
 
-  const handleRowClick = (usuario: Usuario) => {
-    setSelectedUser(usuario);
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -137,14 +134,18 @@ export function UsuariosTable() {
       </CardHeader>
       <CardContent>
         {selectedUser ? (
-          <UsuarioPerfil usuario={selectedUser} onClose={() => setSelectedUser(null)} />
+          <UsuarioPerfil 
+            usuario={selectedUser} 
+            onClose={() => setSelectedUser(null)}
+            onRefresh={handleRefresh}
+          />
         ) : (
           <>
             <div className="mb-4 flex items-center gap-2">
               <Input
                 placeholder="Filtrar por nome..."
                 value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+                onChange={(e) => table.getColumn("nome")?.setFilterValue(e.target.value)}
                 className="max-w-sm"
               />
               <DropdownMenu>
@@ -162,8 +163,7 @@ export function UsuariosTable() {
                         key={column.id}
                         className="capitalize"
                         checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                      >
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
                         {column.id}
                       </DropdownMenuCheckboxItem>
                     ))}
@@ -189,9 +189,8 @@ export function UsuariosTable() {
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        onDoubleClick={() => handleRowClick(row.original)}
-                        className="hover:bg-muted cursor-pointer"
-                      >
+                        onDoubleClick={() => setSelectedUser(row.original)}
+                        className="hover:bg-muted cursor-pointer">
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
