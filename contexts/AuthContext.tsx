@@ -1,18 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode
-} from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { UserData } from "@/app/dashboard/(guest)/login/components/auth";
 
 // ✅ Defina o tipo de userPermissoes corretamente
 export type userPermissoes = "acesso_total" | string[];
 
-
+type PromotoraTheme = {
+  preset: string;
+  contentLayout: string;
+  radius: string;
+  scale: string;
+};
 
 type AuthContextType = {
   token: string | null;
@@ -31,6 +30,10 @@ type AuthContextType = {
   loading: boolean;
   selectedPromotoraId: string | null;
   setSelectedPromotoraId: (id: string | null) => void;
+  selectedPromotoraTemas: PromotoraTheme | null | string;
+  setSelectedPromotoraTemas: (temas: string | null) => void;
+  selectedPromotoraLogo: PromotoraTheme | null | string;
+  setSelectedPromotoraLogo: (temas: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [promotorasState, setPromotorasState] = useState<any[] | null>(null);
   const [selectedPromotoraId, setSelectedPromotoraId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPromotoraTemas, setSelectedPromotoraTemas] = useState<string | null>(null);
+  const [selectedPromotoraLogo, setSelectedPromotoraLogo] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem("auth_token");
@@ -53,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUserPermissoes = sessionStorage.getItem("auth_userPermissoes");
     const storedPromotoras = sessionStorage.getItem("auth_promotoras");
     const storedSelectedPromotoraId = sessionStorage.getItem("auth_selectedPromotoraId");
+    const storedSelectedPromotoraTemas = sessionStorage.getItem("auth_selectedPromotoraTemas");
+    const storedSelectedPromotoraImg = sessionStorage.getItem("auth_selectedPromotoraImg");
 
     if (storedToken) setTokenState(storedToken);
     if (storedEmail) setEmail(storedEmail);
@@ -61,6 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUserPermissoes) setUserPermissoesState(JSON.parse(storedUserPermissoes));
     if (storedPromotoras) setPromotorasState(JSON.parse(storedPromotoras));
     if (storedSelectedPromotoraId) setSelectedPromotoraId(storedSelectedPromotoraId);
+    if (storedSelectedPromotoraTemas) setSelectedPromotoraTemas(storedSelectedPromotoraTemas);
+    if (storedSelectedPromotoraTemas) setSelectedPromotoraTemas(storedSelectedPromotoraImg);
 
     setLoading(false);
   }, []);
@@ -114,6 +123,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : sessionStorage.removeItem("auth_selectedPromotoraId");
   };
 
+  const setSelectedPromotoraTemasState = (temas: string | null) => {
+    setSelectedPromotoraTemas(temas);
+    temas
+      ? sessionStorage.setItem("auth_selectedPromotoraTemas", temas)
+      : sessionStorage.removeItem("auth_selectedPromotoraTemas");
+  };
+
+  const setSelectedPromotoraTemasStateLogo = (temas: string | null) => {
+    setSelectedPromotoraLogo(temas);
+    temas
+      ? sessionStorage.setItem("auth_selectedPromotoraTemas", temas)
+      : sessionStorage.removeItem("auth_selectedPromotoraTemas");
+  };
+
   const clearAuth = () => {
     setToken(null);
     setMail(null);
@@ -150,7 +173,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearAuth,
         loading,
         selectedPromotoraId,
-        setSelectedPromotoraId: setSelectedPromotoraIdState
+        setSelectedPromotoraId: setSelectedPromotoraIdState,
+        selectedPromotoraTemas,
+        setSelectedPromotoraTemas,
+        selectedPromotoraLogo,
+        setSelectedPromotoraLogo: setSelectedPromotoraTemasStateLogo,
       }}>
       {children}
     </AuthContext.Provider>

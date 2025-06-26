@@ -17,12 +17,9 @@ export default function Page() {
         <CampoBoasVindas />
         <div className="mb-4 flex items-center justify-end space-x-2">
           <CustomDateRangePicker />
-          
+
           {podeCriar && (
-            <Button
-              id="Usuarios_criar"
-              onClick={() => router.push("/dashboard/cadastro/usuario")}
-            >
+            <Button id="Usuarios_criar" onClick={() => router.push("/dashboard/cadastro/usuario")}>
               Novo Usuário
             </Button>
           )}

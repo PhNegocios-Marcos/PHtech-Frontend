@@ -15,21 +15,51 @@ type OTPFormProps = {
   onClose?: () => void;
 };
 
+type Tema = {
+  id: string;
+  promotora: string;
+  preset: string;
+  radius: string;
+  scale: string;
+  contentLayout: string;
+  image: string;
+};
+
+type Promotora = {
+  id: string;
+  nome: string;
+  temas: Tema[]; // ← é um array
+};
+
 export default function OTPForm({ onNext, onClose }: OTPFormProps) {
-  const { promotoras, setSelectedPromotoraId } = useAuth();
+  const {
+    promotoras,
+    setSelectedPromotoraId,
+    setSelectedPromotoraTemas,
+    setSelectedPromotoraLogo
+  } = useAuth(); // ← Adicione setSelectedPromotoraTemas
   const router = useRouter();
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
 
-  const [selectedPromotora, setSelectedPromotora] = useState<any | null>(null);
-
+  const [selectedPromotora, setSelectedPromotora] = useState<Promotora | null>(null);
   const handleConfirm = () => {
     if (selectedPromotora && selectedPromotora.id) {
+      const tema =
+        Array.isArray(selectedPromotora.temas) && selectedPromotora.temas.length > 0
+          ? selectedPromotora.temas[0]
+          : null;
+
       setSelectedPromotoraId(selectedPromotora.id);
+      setSelectedPromotoraTemas(tema?.preset ?? "default");
+      setSelectedPromotoraLogo(tema?.image ?? "/logo.png");
+
       setCurrentModal("2FA");
     } else {
       alert("Selecione uma promotora primeiro.");
     }
   };
+
+  // console.log("Dados completos:", selectedPromotora?.preset);
 
   const closeModal = () => setCurrentModal("none");
 

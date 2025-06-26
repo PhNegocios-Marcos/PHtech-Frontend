@@ -6,12 +6,14 @@ import {
   SummaryCards,
   AchievementByYear,
   ChartProjectOverview,
-  ChartProjectEfficiency, 
+  ChartProjectEfficiency,
   Reminders
 } from "./components";
 import CampoBoasVindas from "@/components/boasvindas";
 
 export default function Page() {
+
+
   return (
     <>
       <div className="mb-4 flex flex-row items-center justify-between space-y-2">

@@ -1,17 +1,21 @@
 "use client";
 
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
-import { DEFAULT_THEME, ThemeType } from "@/lib/themes";
+import { DEFAULT_THEME } from "@/lib/themes";
+import { useAuth } from "@/contexts/AuthContext";
 
-function setThemeCookie(key: string, value: string | null) {
-  if (typeof window === "undefined") return;
+// Tipos
+export type Preset = "default" | "sunset-glow";
+export type Radius = "default" | "md" | "lg";
+export type Scale = "none" | "sm" | "md" | "lg";
+export type Layout = "full" | "compact";
 
-  if (!value) {
-    document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax; ${window.location.protocol === "https:" ? "Secure;" : ""}`;
-  } else {
-    document.cookie = `${key}=${value}; path=/; max-age=31536000; SameSite=Lax; ${window.location.protocol === "https:" ? "Secure;" : ""}`;
-  }
-}
+export type ThemeType = {
+  preset: Preset;
+  radius: Radius;
+  scale: Scale;
+  contentLayout: Layout;
+};
 
 type ThemeContextType = {
   theme: ThemeType;
@@ -20,76 +24,65 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Utilidade para salvar cookie
+function setThemeCookie(key: string, value: string | null) {
+  if (typeof window === "undefined") return;
+
+  const secure = window.location.protocol === "https:" ? "Secure;" : "";
+
+  if (!value) {
+    document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax; ${secure}`;
+  } else {
+    document.cookie = `${key}=${value}; path=/; max-age=31536000; SameSite=Lax; ${secure}`;
+  }
+}
+
+// Provider
 export function ActiveThemeProvider({
   children,
   initialTheme,
-  promotoraId, // <- novo parâmetro opcional
+  promotoraId,
 }: {
   children: ReactNode;
   initialTheme?: ThemeType;
   promotoraId?: string;
 }) {
-  const [theme, setTheme] = useState<ThemeType>(DEFAULT_THEME);
+  const [theme, setTheme] = useState<ThemeType>(initialTheme || DEFAULT_THEME);
+  const { selectedPromotoraTemas, selectedPromotoraLogo } = useAuth();
 
+  // console.log(selectedPromotoraLogo)
+
+  // Aplica tema com base no tema da promotora
   useEffect(() => {
-    async function loadThemeFromPromotora() {
-      if (!promotoraId) return;
-
-      try {
-        // const res = await fetch(`/api/promotora/${promotoraId}/tema`);
-        // const data = await res.json();
-        // if (data?.theme) {
-        //   setTheme(data.theme);
-        // }
-
-        const mockTheme: ThemeType = {
-          preset: "sunset-glow",
-          radius: "default",
-          scale: "md",
-          contentLayout: "compact",
-        };
-        setTheme(mockTheme);
-      } catch (error) {
-        console.error("Erro ao buscar tema da promotora:", error);
-      }
+    if (selectedPromotoraTemas) {
+      const themeFromPromotora: ThemeType = {
+        preset: (selectedPromotoraTemas || "default") as Preset,
+        radius: "default",
+        scale: "md",
+        contentLayout: "compact",
+      };
+      setTheme(themeFromPromotora);
     }
+  }, [selectedPromotoraTemas]);
 
-    loadThemeFromPromotora();
-  }, [promotoraId]);
-
-  // Aplicação do tema nos atributos + cookies
+  // Define atributos e cookies com base no tema
   useEffect(() => {
     const body = document.body;
 
-    setThemeCookie("theme_radius", theme.radius);
-    body.setAttribute("data-theme-radius", theme.radius);
+    const updateAttr = (key: string, value: string | null) => {
+      setThemeCookie(key, value);
+      const attrKey = `data-${key.replace("theme_", "theme-")}`;
+      if (value) {
+        body.setAttribute(attrKey, value);
+      } else {
+        body.removeAttribute(attrKey);
+      }
+    };
 
-    if (theme.radius !== "default") {
-      setThemeCookie("theme_radius", theme.radius);
-      body.setAttribute("data-theme-radius", theme.radius);
-    } else {
-      setThemeCookie("theme_radius", null);
-      body.removeAttribute("data-theme-radius");
-    }
-
-    if (theme.preset !== "default") {
-      setThemeCookie("theme_preset", theme.preset);
-      body.setAttribute("data-theme-preset", theme.preset);
-    } else {
-      setThemeCookie("theme_preset", null);
-      body.removeAttribute("data-theme-preset");
-    }
-
-    setThemeCookie("theme_content_layout", theme.contentLayout);
-    body.setAttribute("data-theme-content-layout", theme.contentLayout);
-
-    if (theme.scale !== "none") {
-      setThemeCookie("theme_scale", theme.scale);
-      body.setAttribute("data-theme-scale", theme.scale);
-    } else {
-      setThemeCookie("theme_scale", null);
-      body.removeAttribute("data-theme-scale");
-    }
+    updateAttr("theme_radius", theme.radius !== "default" ? theme.radius : null);
+    updateAttr("theme_preset", theme.preset !== "default" ? theme.preset : null);
+    updateAttr("theme_content_layout", theme.contentLayout);
+    updateAttr("theme_scale", theme.scale !== "none" ? theme.scale : null);
   }, [theme]);
 
   return (
@@ -99,9 +92,10 @@ export function ActiveThemeProvider({
   );
 }
 
+// Hook para uso do tema
 export function useThemeConfig() {
   const context = useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useThemeConfig must be used within an ActiveThemeProvider");
   }
   return context;

@@ -32,7 +32,8 @@ export default function Page() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const [loginError, setLoginError] = useState<string | null>(null); // novo estado
-  const { setToken, setMail, setUserData, userData, token, setPromotoras, setSenha } = useAuth(); // pega o setToken do contexto
+  const { setToken, setMail, setUserData, userData, token, setPromotoras, setSenha } =
+    useAuth(); // pega o setToken do contexto
 
   const handleLogin = async () => {
     const result = loginSchema.safeParse({ email, password });
@@ -72,12 +73,14 @@ export default function Page() {
 
       // setToken(data?.token);
       setMail(email);
-      setSenha(password)
+      setSenha(password);
       // console.log("dados do user: ", data);
       // console.log("promotoas: ", data?.promotoras)
       // console.log("tipoUsuario: ", data?.tipo_usuario);
       // console.log("senha: ", password)
-      setPromotoras(data?.promotoras)
+      setPromotoras(data?.promotoras);
+
+
       if (data?.tipo_usuario === "Promotora") {
         setpromotorasModal("promotoras");
       } else {
