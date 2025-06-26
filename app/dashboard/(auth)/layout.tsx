@@ -10,11 +10,9 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { token, loading, userData } = useAuth();
+  const { token, tokenExpiraEm, loading } = useAuth();
 
   const [defaultOpen, setDefaultOpen] = useState(true);
-
-  // console.log("token: ", token)
 
   useEffect(() => {
     const sidebarCookie = document.cookie
@@ -25,11 +23,41 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     setDefaultOpen(sidebarCookie !== "false");
   }, []);
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     router.push('/dashboard/login')
-  //   }
-  // }, [token, loading, router, userData])
+  useEffect(() => {
+    if (!token) {
+      console.log("Token ausente: redirecionando para login em 2 segundos");
+      const timer = setTimeout(() => {
+        router.push("/dashboard/login");
+      }, 2000);
+
+      return () => clearTimeout(timer); // limpa caso o componente desmonte antes
+    }
+  }, [token, tokenExpiraEm, router]);
+
+  useEffect(() => {
+    if (!token || !tokenExpiraEm) return;
+
+    const timeoutInicial = setTimeout(() => {
+      const agora = new Date();
+      const expira = new Date(tokenExpiraEm);
+      const tempoRestante = expira.getTime() - agora.getTime();
+
+      if (tempoRestante <= 0) {
+        router.push("/dashboard/login");
+        return;
+      }
+
+      const timeoutExpiracao = setTimeout(() => {
+        router.push("/dashboard/login");
+      }, tempoRestante);
+
+      // Limpa o timeout de expiração se o token mudar antes do tempo
+      return () => clearTimeout(timeoutExpiracao);
+    }, 100000); // ⏱️ Espera 2 segundos antes de tudo
+
+    // Limpa o timeout inicial se o token/tokenExpiraEm mudar
+    return () => clearTimeout(timeoutInicial);
+  }, [token, tokenExpiraEm]);
 
   if (loading) {
     return (

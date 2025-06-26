@@ -58,6 +58,9 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
   const { token } = useAuth();
 
   const atualizarStatusPermissao = async (id: string, novoStatus: 0 | 1) => {
+
+    console.log("id: ",id)
+
     try {
       const response = await fetch(`${API_BASE_URL}/rel_permissao_perfil/atualizar`, {
         method: "PUT",
@@ -114,6 +117,9 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
       id: "acoes",
       header: "Ações",
       cell: ({ row }) => {
+
+        console.log(row.original)
+
         const { id, status } = row.original;
         const novoStatus = status === 1 ? 0 : 1;
         return (

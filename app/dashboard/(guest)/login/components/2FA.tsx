@@ -29,6 +29,7 @@ export default function FA({ onNext, onClose }: FAProps) {
     senha,
     selectedPromotoraId,
     setToken,
+    tokenExpiraEm,
     setTokenExpiraEm, // <-- adicionado
     setUserData,
     setUserPermissoes,
@@ -36,6 +37,8 @@ export default function FA({ onNext, onClose }: FAProps) {
   } = useAuth();
 
   const router = useRouter();
+
+  // console.log("token expira em: ", tokenExpiraEm)
 
   const handleSms = async () => {
     try {
