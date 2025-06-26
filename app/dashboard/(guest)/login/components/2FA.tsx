@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 
 type ModalType = "none" | "email" | "sms" | "google";
 
-// Adicionando suporte a props para navegação entre etapas e cancelamento
 type FAProps = {
   onNext?: () => void;
   onClose?: () => void;
@@ -23,38 +22,44 @@ export default function FA({ onNext, onClose }: FAProps) {
   const [emailModal, setEmailModal] = useState<ModalType>("none");
   const [smsModal, setSmsModal] = useState<ModalType>("none");
   const [googleModal, setGoogleModal] = useState<ModalType>("none");
-  const { token, email, selectedPromotoraId, senha, setToken, setUserData, userData, setUserPermissoes } = useAuth();
+
+  const {
+    token,
+    email,
+    senha,
+    selectedPromotoraId,
+    setToken,
+    setTokenExpiraEm, // <-- adicionado
+    setUserData,
+    setUserPermissoes,
+    userData,
+  } = useAuth();
+
   const router = useRouter();
 
   const handleSms = async () => {
-    // console.log("Token:", token);
-
     try {
       const login = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
-          senha: senha,
-          promotora: selectedPromotoraId
-        })
+          senha,
+          promotora: selectedPromotoraId,
+        }),
       });
 
       const dataLogin = await login.json();
 
-      setUserData(dataLogin?.dados_usuario?.[0]); // ← objeto direto
+      setUserData(dataLogin?.dados_usuario?.[0]);
       setToken(dataLogin?.token);
-
-      console.log(dataLogin?.dados_usuario);
+      setTokenExpiraEm(dataLogin?.expira_em); // <-- aqui
 
       sessionStorage.removeItem("auth_senha");
-      // console.log("email: ", email);
-      // console.log("senha: ", senha);
-      // console.log("promotora: ", selectedPromotoraId);
     } catch (err: any) {
-    } finally {
+      console.error("Erro no login:", err);
     }
 
     if (!token) {
@@ -67,11 +72,9 @@ export default function FA({ onNext, onClose }: FAProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          email
-        })
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
@@ -91,76 +94,32 @@ export default function FA({ onNext, onClose }: FAProps) {
 
   const handleEmail = async () => {
     try {
-      var request = selectedPromotoraId
-        ? {
-            email,
-            senha: senha,
-            promotora: selectedPromotoraId
-          }
-        : {
-            email,
-            senha: senha
-          };
+      const request = selectedPromotoraId
+        ? { email, senha, promotora: selectedPromotoraId }
+        : { email, senha };
 
       const login = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       });
 
       const dataLogin = await login.json();
 
-      // console.log("permissoes: ", dataLogin?.permissoes);
-
-      setUserData(dataLogin?.dados_usuario); // ← objeto direto
+      setUserData(dataLogin?.dados_usuario);
       setToken(dataLogin?.token);
+      setTokenExpiraEm(dataLogin?.expira_em); // <-- aqui
       setUserPermissoes(dataLogin?.permissoes);
-      // console.log("dados do user: ", userData);
+
       sessionStorage.removeItem("auth_senha");
-      // console.log("email: ", email);
-      // console.log("senha: ", senha);
-      // console.log("promotora: ", selectedPromotoraId);
+
     } catch (err: any) {
       console.error("Erro ao fazer Login: ", err);
-    } finally {
     }
-    // setTimeout(() => {
-    //   router.push("/dashboard/default"); // ← fallback
-    // }, 2000);
 
-    // if (!token) {
-    //   alert("Token de autenticação não encontrado.");
-    //   return;
-    // }
-
-    // try {
-    //   const response = await fetch("http://127.0.0.1:8000/auth/email_2fa_gerar", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`
-    //     },
-    //     body: JSON.stringify({
-    //       email
-    //     })
-    //   });
-
-    //   const data = await response.json();
-
-    //   if (!response.ok) {
-    //     alert(data.message || "Erro ao solicitar SMS.");
-    //     return;
-    //   }
-
-    //   setEmailModal("email");
-    // } catch (error: any) {
-    //   console.error("Erro ao solicitar SMS:", error);
-    //   alert("Erro na solicitação de SMS.");
-    // }
-
-    router.push("/dashboard/default"); // ← fallback ativado temporariamente
+    router.push("/dashboard/default"); // fallback
   };
 
   const handleGoogle = async () => {
@@ -168,27 +127,24 @@ export default function FA({ onNext, onClose }: FAProps) {
       const login = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
-          senha: senha,
-          promotora: selectedPromotoraId
-        })
+          senha,
+          promotora: selectedPromotoraId,
+        }),
       });
 
       const dataLogin = await login.json();
 
-      setUserData(dataLogin?.dados_usuario?.[0]); // ← objeto direto
+      setUserData(dataLogin?.dados_usuario?.[0]);
       setToken(dataLogin?.token);
+      setTokenExpiraEm(dataLogin?.expira_em); // <-- aqui
 
-      console.log(dataLogin?.dados_usuario);
       sessionStorage.removeItem("auth_senha");
-      // console.log("email: ", email);
-      // console.log("senha: ", senha);
-      // console.log("promotora: ", selectedPromotoraId);
     } catch (err: any) {
-    } finally {
+      console.error("Erro no login com Google:", err);
     }
 
     setGoogleModal("google");
@@ -199,12 +155,11 @@ export default function FA({ onNext, onClose }: FAProps) {
     setSmsModal("none");
     setGoogleModal("none");
 
-    if (onNext) onNext(); // aciona próxima etapa, se definido
+    if (onNext) onNext();
   };
 
   return (
     <div>
-      {/* Tela inicial com os botões de métodos de autenticação */}
       {emailModal === "none" && smsModal === "none" && googleModal === "none" && (
         <Card className="w-full md:w-[350px]">
           <CardHeader>
@@ -225,8 +180,6 @@ export default function FA({ onNext, onClose }: FAProps) {
                 Continue com Google
               </Button>
             </div>
-
-            {/* Botão para voltar ou cancelar, se a prop onClose existir */}
             {onClose && (
               <Button onClick={onClose} variant="ghost" className="w-full text-red-500">
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
@@ -237,7 +190,6 @@ export default function FA({ onNext, onClose }: FAProps) {
         </Card>
       )}
 
-      {/* Modais específicos de cada método */}
       {emailModal === "email" && <Email onNext={closeAllModals} />}
       {smsModal === "sms" && <Sms onNext={closeAllModals} />}
       {googleModal === "google" && <Google onNext={closeAllModals} />}
