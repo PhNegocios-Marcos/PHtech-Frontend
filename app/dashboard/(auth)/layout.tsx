@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!token) {
-      console.log("Token ausente: redirecionando para login em 2 segundos");
+      // console.log("Token ausente: redirecionando para login em 2 segundos");
       const timer = setTimeout(() => {
         router.push("/dashboard/login");
       }, 2000);

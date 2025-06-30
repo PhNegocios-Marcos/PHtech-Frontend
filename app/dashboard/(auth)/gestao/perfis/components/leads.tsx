@@ -60,8 +60,6 @@ export function EquipesTable() {
 
   const { token } = useAuth();
 
-  console.log(token)
-
   React.useEffect(() => {
     async function fetchEquipes() {
       try {

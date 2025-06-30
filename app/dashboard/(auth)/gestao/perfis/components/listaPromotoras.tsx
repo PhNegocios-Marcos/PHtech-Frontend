@@ -1,47 +1,22 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  Row
-} from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
-import { CarregandoTable } from "./leads_carregando";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type Usuario = {
+type Acao = "criar" | "ver" | "atualizar" | "desativar";
+
+type Permissao = {
   id: string;
-  permissao: string;
-  status: number; // 0 ou 1
+  acao: Acao;
+  status: number;
+};
+
+type PermissoesPorSecao = {
+  [secao: string]: Partial<Record<Acao, Permissao>>;
 };
 
 type UsuariosTableProps = {
@@ -49,26 +24,19 @@ type UsuariosTableProps = {
 };
 
 export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
   const [equipeLabel, setEquipeLabel] = useState<string>("");
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
   const { token } = useAuth();
 
   const atualizarStatusPermissao = async (id: string, novoStatus: 0 | 1) => {
-
-    console.log("id: ",id)
-
     try {
       const response = await fetch(`${API_BASE_URL}/rel_permissao_perfil/atualizar`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id, status: novoStatus })
+        body: JSON.stringify({ id, status: novoStatus }),
       });
 
       if (!response.ok) {
@@ -76,69 +44,27 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
         throw new Error(errorData?.detail || "Erro ao atualizar permissão");
       }
 
-      setUsuarios((prev) =>
-        prev.map((usuario) => (usuario.id === id ? { ...usuario, status: novoStatus } : usuario))
-      );
+      setPermissoesPorSecao((prev) => {
+        const atualizado: PermissoesPorSecao = { ...prev };
+
+        for (const secao in atualizado) {
+          for (const acao in atualizado[secao]) {
+            const perm = atualizado[secao][acao as Acao];
+            if (perm?.id === id) {
+              atualizado[secao][acao as Acao] = { ...perm, status: novoStatus };
+            }
+          }
+        }
+
+        return atualizado;
+      });
     } catch (error: any) {
       console.error("Erro ao atualizar permissão:", error.message || error);
     }
   };
 
-  const columns: ColumnDef<Usuario>[] = [
-    // {
-    //   id: "select",
-    //   header: ({ table }) => (
-    //     <Checkbox
-    //       checked={table.getIsAllPageRowsSelected()}
-    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-    //       aria-label="Selecionar todos"
-    //     />
-    //   ),
-    //   cell: ({ row }) => (
-    //     <Checkbox
-    //       checked={row.getIsSelected()}
-    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //       aria-label="Selecionar linha"
-    //     />
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false
-    // },
-    {
-      accessorKey: "permissao",
-      header: "Permissão"
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ getValue }) => (getValue() === 1 ? "Ativo" : "Inativo")
-    },
-    {
-      id: "acoes",
-      header: "Ações",
-      cell: ({ row }) => {
-
-        console.log(row.original)
-
-        const { id, status } = row.original;
-        const novoStatus = status === 1 ? 0 : 1;
-        return (
-          <Button
-            className={
-              status === 1
-                ? "flex justify-center border-2 border-solid border-red-600 bg-white text-red-600 hover:bg-red-100"
-                : "bg-red-600 text-white hover:bg-red-700"
-            }
-            onClick={() => atualizarStatusPermissao(id, novoStatus)}>
-            {status === 1 ? "Desativar" : "Ativar"}
-          </Button>
-        );
-      }
-    }
-  ];
-
   useEffect(() => {
-    async function fetchUsuariosDaEquipe() {
+    async function fetchPermissoes() {
       if (!token || !equipeNome) return;
 
       try {
@@ -146,8 +72,8 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
@@ -159,129 +85,81 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
         setEquipeLabel(data.perfil ?? equipeNome);
 
         const permissoes = data.permissões || {};
-        const usuariosFormatados: Usuario[] = Object.entries(permissoes).map(
-          ([id, obj]: [string, any]) => ({
-            id,
-            permissao: obj.permissao_nome,
-            status: obj.permissao_status
-          })
-        );
+        const novoFormato: PermissoesPorSecao = {};
 
-        setUsuarios(usuariosFormatados);
+        for (const secao in permissoes) {
+          for (const item of permissoes[secao]) {
+            const nome = item.permissao_nome; // exemplo: "Perfis_criar"
+            const partes = nome.split("_");
+            const acao = partes[1] as Acao;
+
+            if (!["criar", "ver", "atualizar", "desativar"].includes(acao)) continue;
+
+            if (!novoFormato[secao]) {
+              novoFormato[secao] = {};
+            }
+
+            novoFormato[secao][acao] = {
+              id: item.id_relacionamento,
+              acao,
+              status: item.permissao_status,
+            };
+          }
+        }
+
+        setPermissoesPorSecao(novoFormato);
       } catch (error: any) {
-        console.error("Erro ao buscar usuários:", error.message || error);
+        console.error("Erro ao buscar dados:", error.message || error);
       }
     }
 
-    fetchUsuariosDaEquipe();
+    fetchPermissoes();
   }, [token, equipeNome]);
 
-  async function handleDesativarSelecionadas() {
-    const selectedRows = table.getSelectedRowModel().rows as Row<Usuario>[];
-    for (const row of selectedRows) {
-      const { id, status } = row.original;
-      if (status === 1) {
-        await atualizarStatusPermissao(id, 0);
-      }
-    }
-  }
-
-  const table = useReactTable({
-    data: usuarios,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection
-    }
-  });
+  const acoes: Acao[] = ["criar", "ver", "atualizar", "desativar"];
 
   return (
     <Card className="col-span-2">
       <CardHeader>
         <CardTitle>Permissões do Perfil: {equipeLabel}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4 flex items-center gap-2">
-          <Input
-            placeholder="Filtrar por nome..."
-            value={(table.getColumn("permissao")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("permissao")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* <div className="mb-4">
-          <Button onClick={handleDesativarSelecionadas} variant="destructive">
-            Desativar Selecionadas
-          </Button>
-        </div> */}
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
+      <CardContent className="overflow-auto">
+        <table className="min-w-full border text-sm">
+          <thead className="bg-muted">
+            <tr>
+              <th className="border px-2 py-1 text-left">Seção</th>
+              {acoes.map((acao) => (
+                <th key={acao} className="border px-2 py-1 capitalize text-center">
+                  {acao}
+                </th>
               ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted">
-                    {row.getVisibleCells().map((cell, index) => (
-                      <TableCell
-                        key={cell.id}
-                        className={index === 2 ? "" : ""}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <CarregandoTable />
-              )}
-            </TableBody>
-          </Table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(permissoesPorSecao).map(([secao, acoesObj]) => (
+              <tr key={secao} className="even:bg-muted/30">
+                <td className="border px-2 py-1 capitalize font-medium">{secao.toLowerCase()}</td>
+                {acoes.map((acao) => {
+                  const permissao = acoesObj[acao];
+                  return (
+                    <td key={acao} className="border px-2 py-1 text-center">
+                      {permissao ? (
+                        <Checkbox
+                          checked={permissao.status === 1}
+                          onCheckedChange={(checked) =>
+                            atualizarStatusPermissao(permissao.id, checked ? 1 : 0)
+                          }
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </CardContent>
     </Card>
   );
