@@ -71,7 +71,7 @@ const equipeColumns: ColumnDef<Equipe>[] = [
   }
 ];
 
-export function EquipesTable({ isOpen, equipe, onClose, onRefresh }: EquipeDrawerProps) {
+export function EquipesTable() {
   const [equipes, setEquipes] = React.useState<Equipe[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
