@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { UserData } from "@/app/dashboard/(guest)/login/components/auth";
 
-// ✅ Defina o tipo de userPermissoes corretamente
 export type userPermissoes = "acesso_total" | string[];
 
 type PromotoraTheme = {
@@ -16,8 +15,8 @@ type PromotoraTheme = {
 type AuthContextType = {
   token: string | null;
   setToken: (token: string | null) => void;
-  tokenExpiraEm: string | null; // novo estado para expiração
-  setTokenExpiraEm: (expira: string | null) => void; // setter para expiração
+  tokenExpiraEm: string | null;
+  setTokenExpiraEm: (expira: string | null) => void;
   email: string | null;
   setMail: (email: string | null) => void;
   senha: string | null;
@@ -36,13 +35,15 @@ type AuthContextType = {
   setSelectedPromotoraTemas: (temas: string | null) => void;
   selectedPromotoraLogo: PromotoraTheme | null | string;
   setSelectedPromotoraLogo: (temas: string | null) => void;
+  selectedPromotoraNome: string | null;
+  setSelectedPromotoraNome: (nome: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setTokenState] = useState<string | null>(null);
-  const [tokenExpiraEm, setTokenExpiraEmState] = useState<string | null>(null); // estado de expiração do token
+  const [tokenExpiraEm, setTokenExpiraEmState] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [senha, setSenhaState] = useState<string | null>(null);
   const [userDataState, setUserDataState] = useState<UserData | null>(null);
@@ -52,10 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [selectedPromotoraTemas, setSelectedPromotoraTemas] = useState<string | null>(null);
   const [selectedPromotoraLogo, setSelectedPromotoraLogo] = useState<string | null>(null);
+  const [selectedPromotoraNome, setSelectedPromotoraNomeState] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem("auth_token");
-    const storedTokenExpira = sessionStorage.getItem("auth_tokenExpiraEm"); // ler expiração
+    const storedTokenExpira = sessionStorage.getItem("auth_tokenExpiraEm");
     const storedEmail = sessionStorage.getItem("auth_email");
     const storedSenha = sessionStorage.getItem("auth_senha");
     const storedUserData = sessionStorage.getItem("auth_userData");
@@ -64,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedSelectedPromotoraId = sessionStorage.getItem("auth_selectedPromotoraId");
     const storedSelectedPromotoraTemas = sessionStorage.getItem("auth_selectedPromotoraTemas");
     const storedSelectedPromotoraImg = sessionStorage.getItem("auth_selectedPromotoraImg");
+    const storedSelectedPromotoraNome = sessionStorage.getItem("auth_selectedPromotoraNome");
 
     if (storedToken) setTokenState(storedToken);
-    if (storedTokenExpira) setTokenExpiraEmState(storedTokenExpira); // setar expiração
+    if (storedTokenExpira) setTokenExpiraEmState(storedTokenExpira);
     if (storedEmail) setEmail(storedEmail);
     if (storedSenha) setSenhaState(storedSenha);
     if (storedUserData) setUserDataState(JSON.parse(storedUserData));
@@ -74,12 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedPromotoras) setPromotorasState(JSON.parse(storedPromotoras));
     if (storedSelectedPromotoraId) setSelectedPromotoraId(storedSelectedPromotoraId);
     if (storedSelectedPromotoraTemas) setSelectedPromotoraTemas(storedSelectedPromotoraTemas);
-    if (storedSelectedPromotoraTemas) setSelectedPromotoraTemas(storedSelectedPromotoraImg);
+    if (storedSelectedPromotoraImg) setSelectedPromotoraLogo(storedSelectedPromotoraImg);
+    if (storedSelectedPromotoraNome) setSelectedPromotoraNomeState(storedSelectedPromotoraNome);
 
     setLoading(false);
   }, []);
-
-  
 
   const setTokenExpiraEm = (expira: string | null) => {
     setTokenExpiraEmState(expira);
@@ -147,28 +149,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setSelectedPromotoraTemasStateLogo = (temas: string | null) => {
     setSelectedPromotoraLogo(temas);
     temas
-      ? sessionStorage.setItem("auth_selectedPromotoraTemas", temas)
-      : sessionStorage.removeItem("auth_selectedPromotoraTemas");
+      ? sessionStorage.setItem("auth_selectedPromotoraImg", temas)
+      : sessionStorage.removeItem("auth_selectedPromotoraImg");
+  };
+
+  const setSelectedPromotoraNome = (nome: string | null) => {
+    setSelectedPromotoraNomeState(nome);
+    nome
+      ? sessionStorage.setItem("auth_selectedPromotoraNome", nome)
+      : sessionStorage.removeItem("auth_selectedPromotoraNome");
   };
 
   const clearAuth = () => {
     setToken(null);
-    setTokenExpiraEm(null); // limpar expiração também
+    setTokenExpiraEm(null);
     setMail(null);
     setSenha(null);
     setUserData(null);
     setUserPermissoes(null);
     setPromotoras(null);
     setSelectedPromotoraId(null);
+    setSelectedPromotoraTemas(null);
+    setSelectedPromotoraLogo(null);
+    setSelectedPromotoraNome(null);
 
     sessionStorage.removeItem("auth_token");
-    sessionStorage.removeItem("auth_tokenExpiraEm"); // remover expiração
+    sessionStorage.removeItem("auth_tokenExpiraEm");
     sessionStorage.removeItem("auth_email");
     sessionStorage.removeItem("auth_senha");
     sessionStorage.removeItem("auth_userData");
     sessionStorage.removeItem("auth_userPermissoes");
     sessionStorage.removeItem("auth_promotoras");
     sessionStorage.removeItem("auth_selectedPromotoraId");
+    sessionStorage.removeItem("auth_selectedPromotoraTemas");
+    sessionStorage.removeItem("auth_selectedPromotoraImg");
+    sessionStorage.removeItem("auth_selectedPromotoraNome");
   };
 
   return (
@@ -193,9 +208,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         selectedPromotoraId,
         setSelectedPromotoraId: setSelectedPromotoraIdState,
         selectedPromotoraTemas,
-        setSelectedPromotoraTemas,
+        setSelectedPromotoraTemas: setSelectedPromotoraTemasState,
         selectedPromotoraLogo,
-        setSelectedPromotoraLogo: setSelectedPromotoraTemasStateLogo
+        setSelectedPromotoraLogo: setSelectedPromotoraTemasStateLogo,
+        selectedPromotoraNome,
+        setSelectedPromotoraNome
       }}>
       {children}
     </AuthContext.Provider>

@@ -1,5 +1,5 @@
 export const DEFAULT_THEME = {
-  preset: "default",
+  preset: "ocean-breeze",
   radius: "default",
   scale: "none",
   contentLayout: "full"

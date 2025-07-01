@@ -4,11 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Logo() {
   const { selectedPromotoraLogo } = useAuth();
 
-  if (!selectedPromotoraLogo) return null;
-
-  const logoSource = typeof selectedPromotoraLogo === 'string' 
-    ? selectedPromotoraLogo 
-    : "logo.png";
+  const logoSource =
+    typeof selectedPromotoraLogo === "string" && selectedPromotoraLogo.trim() !== ""
+      ? selectedPromotoraLogo
+      : "/logo.png"; // Use barra inicial para garantir caminho correto em Next.js
 
   return (
     <Image

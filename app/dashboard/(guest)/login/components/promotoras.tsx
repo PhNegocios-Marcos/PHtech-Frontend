@@ -1,17 +1,15 @@
-"use client";
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { Combobox } from "./Combobox"; // ajuste o path se for diferente
+import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
 import FA from "./2FA";
 
 type ModalType = "none" | "2FA" | "modal2" | "promotoras";
 
 type OTPFormProps = {
-  onNext?: () => void; // ← permite o uso opcional de um callback externo
+  onNext?: () => void;
   onClose?: () => void;
 };
 
@@ -28,7 +26,7 @@ type Tema = {
 type Promotora = {
   id: string;
   nome: string;
-  temas: Tema[]; // ← é um array
+  temas: Tema[];
 };
 
 export default function OTPForm({ onNext, onClose }: OTPFormProps) {
@@ -36,12 +34,14 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
     promotoras,
     setSelectedPromotoraId,
     setSelectedPromotoraTemas,
-    setSelectedPromotoraLogo
-  } = useAuth(); // ← Adicione setSelectedPromotoraTemas
+    setSelectedPromotoraLogo,
+    setSelectedPromotoraNome
+  } = useAuth();
+
   const router = useRouter();
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
-
   const [selectedPromotora, setSelectedPromotora] = useState<Promotora | null>(null);
+
   const handleConfirm = () => {
     if (selectedPromotora && selectedPromotora.id) {
       const tema =
@@ -52,14 +52,13 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
       setSelectedPromotoraId(selectedPromotora.id);
       setSelectedPromotoraTemas(tema?.preset ?? "default");
       setSelectedPromotoraLogo(tema?.image ?? "/logo.png");
+      setSelectedPromotoraNome(selectedPromotora.nome ?? "Ph tech"); // ✅ salva o nome
 
       setCurrentModal("2FA");
     } else {
       alert("Selecione uma promotora primeiro.");
     }
   };
-
-  // console.log("Dados completos:", selectedPromotora?.preset);
 
   const closeModal = () => setCurrentModal("none");
 

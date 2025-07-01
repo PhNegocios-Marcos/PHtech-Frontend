@@ -37,6 +37,7 @@ import Logo from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { useIsTablet } from "@/hooks/use-mobile";
 import { useFilteredPageRoutes } from "@/hooks/useFilteredPageRoutes"; // <-- adicionado
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -52,6 +53,9 @@ export default function Sidebar() {
     setOpen(!isTablet);
   }, [isTablet]);
 
+    const { selectedPromotoraNome } = useAuth();
+  
+
   return (
     <SidebarContainer collapsible="icon" variant="floating" className="bg-background">
       <SidebarHeader className="items-center justify-center pt-3 transition-all group-data-[collapsible=icon]:pt-2">
@@ -62,7 +66,7 @@ export default function Sidebar() {
                 <SidebarMenuButton className="hover:text-foreground rounded-none group-data-[collapsible=icon]:px-0! hover:bg-[var(--primary)]/10">
                   <Logo />
                   <div className="truncate font-semibold group-data-[collapsible=icon]:hidden">
-                    Shadcn UI Kit
+                    {selectedPromotoraNome ?? "PH TECH"}
                   </div>
                   <ChevronsUpDown className="ml-auto group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>

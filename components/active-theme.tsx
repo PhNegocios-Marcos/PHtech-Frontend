@@ -5,7 +5,7 @@ import { DEFAULT_THEME } from "@/lib/themes";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Tipos
-export type Preset = "default" | "sunset-glow";
+export type Preset = "default" | "sunset-glow" | "ocean-breeze";
 export type Radius = "default" | "md" | "lg";
 export type Scale = "none" | "sm" | "md" | "lg";
 export type Layout = "full" | "compact";
@@ -48,7 +48,7 @@ export function ActiveThemeProvider({
   promotoraId?: string;
 }) {
   const [theme, setTheme] = useState<ThemeType>(initialTheme || DEFAULT_THEME);
-  const { selectedPromotoraTemas, selectedPromotoraLogo } = useAuth();
+  const { selectedPromotoraTemas } = useAuth();
 
   // console.log(selectedPromotoraLogo)
 
