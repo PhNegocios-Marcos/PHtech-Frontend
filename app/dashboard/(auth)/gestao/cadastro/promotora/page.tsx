@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
 
@@ -109,66 +110,66 @@ export default function CadastroPromotora() {
   };
 
   return (
-    <div className="mx-auto mt-10 max-w-3xl space-y-6 rounded-xl border p-6">
-      <h2 className="text-center text-xl font-bold">Cadastrar Promotora</h2>
+    <ProtectedRoute requiredPermission="Gestão_Permissões">
+      <div className="mx-auto mt-10 max-w-3xl space-y-6 rounded-xl border p-6">
+        <h2 className="text-center text-xl font-bold">Cadastrar Promotora</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-sm">Nome Promotora</label>
-            <Input placeholder="Digite o nome" {...register("nome")} />
-            {errors.nome && <p className="text-sm text-red-500">{errors.nome.message}</p>}
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-1 block text-sm">Nome Promotora</label>
+              <Input placeholder="Digite o nome" {...register("nome")} />
+              {errors.nome && <p className="text-sm text-red-500">{errors.nome.message}</p>}
+            </div>
 
-          <div>
-            <label className="mb-1 block text-sm">Razão Social</label>
-            <Input placeholder="Digite a razão social" {...register("razao_social")} />
-            {errors.razao_social && (
-              <p className="text-sm text-red-500">{errors.razao_social.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm">CNPJ</label>
-            <Controller
-              name="cnpj"
-              control={control}
-              render={({ field }) => (
-                <InputCleaveCNPJ
-                  {...field}
-                  error={errors.cnpj?.message}
-                />
+            <div>
+              <label className="mb-1 block text-sm">Razão Social</label>
+              <Input placeholder="Digite a razão social" {...register("razao_social")} />
+              {errors.razao_social && (
+                <p className="text-sm text-red-500">{errors.razao_social.message}</p>
               )}
-            />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm">CNPJ</label>
+              <Controller
+                name="cnpj"
+                control={control}
+                render={({ field }) => <InputCleaveCNPJ {...field} error={errors.cnpj?.message} />}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm">Rateio</label>
+              <Input placeholder="Rateio (%)" type="number" {...register("rateio_master")} />
+              {errors.rateio_master && (
+                <p className="text-sm text-red-500">{errors.rateio_master.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm">É Master?</label>
+              <select {...register("master")} className="w-full rounded-lg border px-3 py-2">
+                <option value="1">Sim</option>
+                <option value="0">Não</option>
+              </select>
+              {errors.master && <p className="text-sm text-red-500">{errors.master.message}</p>}
+            </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm">Rateio</label>
-            <Input placeholder="Rateio (%)" type="number" {...register("rateio_master")} />
-            {errors.rateio_master && (
-              <p className="text-sm text-red-500">{errors.rateio_master.message}</p>
-            )}
+          <div className="flex justify-end gap-4 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => router.push("/dashboard/default")}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="bg-primary text-white">
+              Cadastrar
+            </Button>
           </div>
-
-          <div>
-            <label className="mb-1 block text-sm">É Master?</label>
-            <select {...register("master")} className="w-full rounded-lg border px-3 py-2">
-              <option value="1">Sim</option>
-              <option value="0">Não</option>
-            </select>
-            {errors.master && <p className="text-sm text-red-500">{errors.master.message}</p>}
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-4 pt-4">
-          <Button type="button" variant="secondary" onClick={() => router.push("/dashboard/default")}>
-            Cancelar
-          </Button>
-          <Button type="submit" className="bg-primary text-white">
-            Cadastrar
-          </Button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </ProtectedRoute>
   );
 }

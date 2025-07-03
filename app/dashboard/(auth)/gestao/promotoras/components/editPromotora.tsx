@@ -205,7 +205,10 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
             </CardContent>
           </Card>
 
-          <div className="col-span-2 p-4">
+          <div className="col-span-2 flex justify-end p-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
             <Button type="submit">Salvar Alterações</Button>
           </div>
         </form>

@@ -12,8 +12,10 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import CampoBoasVindas from "@/components/boasvindas";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -50,16 +52,19 @@ export default function CreditSimular() {
       try {
         const response = await fetch(`${API_BASE_URL}/produtos/listar`);
         const data = await response.json();
-        const formatado = data.map((item: any, index: number) => ({
-          id: index + 1,
-          name: item.produto_nome,
-          hash: item.produto_hash,
+
+        const formatado = data.map((item: any) => ({
+          id: item.id,
+          name: item.nome,
+          hash: item.id // ou outro campo caso `produto_hash` exista
         }));
+
         setProdutos(formatado);
       } catch (error) {
         console.error("Erro ao buscar produtos:", error);
       }
     };
+
     fetchProdutos();
   }, []);
 
@@ -68,7 +73,7 @@ export default function CreditSimular() {
   };
 
   const renderInput = (key: string, label: string, props = {}) => (
-    <Card>
+    <div>
       <CardHeader>
         <CardTitle>{label}</CardTitle>
       </CardHeader>
@@ -81,25 +86,23 @@ export default function CreditSimular() {
           {...props}
         />
       </CardContent>
-    </Card>
+    </div>
   );
 
   const renderDateInput = (key: string, label: string) => (
-    <Card>
-      <CardHeader>
-        <CardTitle>{label}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Cleave
-          id={key}
-          placeholder="dd/mm/yyyy"
-          options={{ date: true, delimiter: "/", datePattern: ["d", "m", "Y"] }}
-          value={formValues[key] || ""}
-          onChange={(e) => handleChange(key, e.target.value)}
-          className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-2">
+      <Label htmlFor={key} className="font-medium">
+        {label}
+      </Label>
+      <Cleave
+        id={key}
+        placeholder="dd/mm/yyyy"
+        options={{ date: true, delimiter: "/", datePattern: ["d", "m", "Y"] }}
+        value={formValues[key] || ""}
+        onChange={(e) => handleChange(key, e.target.value)}
+        className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+      />
+    </div>
   );
 
   const camposProdutoFgts = (
@@ -134,7 +137,7 @@ export default function CreditSimular() {
       mes_aniversario: Number(formValues.mes_aniversario),
       juros: formValues.juros?.replace(",", "."),
       parcelas_adiantadas: Number(formValues.parcelas_adiantadas),
-      data_inicio: formatarData(formValues.data_inicio),
+      data_inicio: formatarData(formValues.data_inicio)
     };
 
     setLoading(true);
@@ -142,9 +145,9 @@ export default function CreditSimular() {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {
@@ -163,68 +166,79 @@ export default function CreditSimular() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid w-full max-w-[1080px] grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <Combobox
-          data={produtos}
-          displayField="name"
-          value={selectedProduct}
-          onChange={(val) => {
-            setSelectedProduct(val);
-            setFormValues({});
-            setResultadoSimulacao(null);
-          }}
-          label="Produto"
-          placeholder="Selecione um produto"
-          searchFields={["name"]}
-        />
-      </div>
-
-      {selectedProduct?.name.toLowerCase() === "fgts" && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {camposProdutoFgts}
+    <ProtectedRoute requiredPermission="Credito_Simular">
+      <CampoBoasVindas />
+      <div className="space-y-6">
+        <div className="w-[400px] mb-0 mt-10">
+          <Combobox
+            data={produtos}
+            displayField="name"
+            value={selectedProduct}
+            onChange={(val) => {
+              setSelectedProduct(val);
+              setFormValues({});
+              setResultadoSimulacao(null);
+            }}
+            label="Produto"
+            placeholder="Selecione um produto"
+            searchFields={["name"]}
+          />
         </div>
-      )}
 
-      {selectedProduct?.name.toLowerCase() === "fgts" && (
-        <Button onClick={handleSimular} className="mt-4" disabled={loading}>
-          {loading ? "Simulando..." : "Simular"}
-        </Button>
-      )}
+        <div className="flex justify-end">
+          {selectedProduct?.name.toLowerCase() === "fgts" && (
+            <Button onClick={handleSimular} className="" disabled={loading}>
+              {loading ? "Simulando..." : "Simular"}
+            </Button>
+          )}
+        </div>
 
-      {resultadoSimulacao?.mensagem && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Resultado da Simulação</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Parcela</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Juros</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {resultadoSimulacao.mensagem.parcelas.map((p, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
-                    <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
+        {selectedProduct?.name.toLowerCase() === "fgts" && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{camposProdutoFgts}</div>
+        )}
+
+        {resultadoSimulacao?.mensagem && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Resultado da Simulação</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Parcela</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Juros</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex flex-wrap justify-around gap-4">
-              <p><strong>IOF:</strong> R$ {resultadoSimulacao.mensagem.iof}</p>
-              <p><strong>Taxa de Cadastro:</strong> R$ {resultadoSimulacao.mensagem.taxaCadastro}</p>
-              <p><strong>Valor Cliente:</strong> R$ {resultadoSimulacao.mensagem.valorCliente}</p>
-              <p><strong>CET:</strong> {resultadoSimulacao.mensagem.CET}%</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+                </TableHeader>
+                <TableBody>
+                  {resultadoSimulacao.mensagem.parcelas.map((p, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
+                      <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <div className="flex flex-wrap justify-around gap-4">
+                <p>
+                  <strong>IOF:</strong> R$ {resultadoSimulacao.mensagem.iof}
+                </p>
+                <p>
+                  <strong>Taxa de Cadastro:</strong> R$ {resultadoSimulacao.mensagem.taxaCadastro}
+                </p>
+                <p>
+                  <strong>Valor Cliente:</strong> R$ {resultadoSimulacao.mensagem.valorCliente}
+                </p>
+                <p>
+                  <strong>CET:</strong> {resultadoSimulacao.mensagem.CET}%
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

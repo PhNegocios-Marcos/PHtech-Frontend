@@ -5,20 +5,25 @@ import { Button } from "@/components/ui/button";
 import { PermissoesTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Page() {
   const router = useRouter();
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col justify-between">
-        <CampoBoasVindas />
-        <div className="mb-4 flex items-center justify-end space-x-2">
-          <CustomDateRangePicker />
-          <Button  onClick={() => router.push('/dashboard/cadastro/promotora')}>Nova Promotora</Button>
+    <ProtectedRoute requiredPermission="Gestão_Permissões">
+      <div className="space-y-4">
+        <div className="flex flex-col justify-between">
+          <CampoBoasVindas />
+          <div className="mb-4 flex items-center justify-end space-x-2">
+            <CustomDateRangePicker />
+            <Button onClick={() => router.push("/dashboard/cadastro/promotora")}>
+              Nova Promotora
+            </Button>
+          </div>
+          <PermissoesTable />
         </div>
-        <PermissoesTable />
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

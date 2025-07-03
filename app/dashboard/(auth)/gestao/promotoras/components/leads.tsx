@@ -35,20 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-import { PromotoraDrawer } from "./PromotoraModal";
-
-type Promotora = {
-  id: string;
-  nome: string;
-  razao_social: string;
-  cnpj: number;
-  representante: string | null;
-  master: string;
-  master_id: string;
-  rateio_master: string;
-  rateio_sub: string;
-  status: number;
-};
+import { PromotoraDrawer, Promotora } from "./PromotoraModal";
 
 const promotoraColumns: ColumnDef<Promotora>[] = [
   { accessorKey: "nome", header: "Nome" },
@@ -61,7 +48,11 @@ const promotoraColumns: ColumnDef<Promotora>[] = [
   { accessorKey: "status", header: "Status" }
 ];
 
-export function PromotorasTable() {
+type PromotorasTableProps = {
+  onSelectPromotora: (promotora: Promotora) => void;
+};
+
+export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const [promotoras, setPromotoras] = React.useState<Promotora[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -131,16 +122,8 @@ export function PromotorasTable() {
   });
 
   const handleRowClick = (promotora: Promotora) => {
-  setSelectedPromotora(null); // reseta o estado primeiro
-  setIsModalOpen(false);
-
-  // pequena espera para forçar re-render
-  setTimeout(() => {
-    setSelectedPromotora(promotora);
-    setIsModalOpen(true);
-  }, 50); // 50ms geralmente é o suficiente
-};
-
+    onSelectPromotora(promotora); // apenas isso!
+  };
 
   return (
     <Card className="col-span-2">

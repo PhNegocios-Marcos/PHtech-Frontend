@@ -42,7 +42,7 @@ export function Combobox<T extends Record<string, any>>({
 
   return (
     <div className="grid gap-1.5">
-      {label && <Label>{label}</Label>}
+      {label && <Label className='text-xl'>{label}</Label>}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

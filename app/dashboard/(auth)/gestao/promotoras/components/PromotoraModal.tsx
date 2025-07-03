@@ -4,12 +4,13 @@ import React, { useState, useEffect } from "react";
 import { UsuariosTable } from "./userPromotora";
 import { PromotorEdit } from "./editPromotora";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
-type Promotora = {
+export type Promotora = {
   id: string;
   nome: string;
   razao_social: string;
-  cnpj: string;
+  cnpj: string; // padronizado como string
   representante: string | null;
   master: string;
   master_id: string;
@@ -36,47 +37,26 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
   if (!isOpen || !formData) return null;
 
   return (
-    <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
+    <aside className="w-full rounded-md bg-white p-4 shadow">
+      <div className="mb-4 flex items-center justify-between border-b pb-4">
+        <h2 className="text-lg font-semibold">Usuários da Promotora</h2>
+        <Button onClick={onClose} variant="outline">
+          Voltar
+        </Button>
+      </div>
 
-      <aside
-        className="fixed top-0 right-0 z-50 flex h-full w-full flex-col bg-white shadow-lg md:w-1/2"
-        role="dialog"
-        aria-modal="true">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-lg font-semibold">Usuários da Promotora</h2>
-          <button
-            onClick={onClose}
-            aria-label="Fechar painel"
-            className="text-2xl leading-none text-gray-600 hover:text-gray-900">
-            ×
-          </button>
-        </div>
-
-        {/* ✅ Passando apenas o CNPJ */}
-        <div className="h-full overflow-y-auto p-4">
-          <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="z-10">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="activities" disabled>
-                Activities
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview" className="space-y-4">
-              <div className="">
-                <div className="lg:col-span-2">
-                  <PromotorEdit data={formData} onClose={onClose} />
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="reports">
-              <UsuariosTable cnpj={formData.cnpj} />
-            </TabsContent>
-            <TabsContent value="activities">...</TabsContent>
-          </Tabs>
-        </div>
-      </aside>
-    </>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Informações</TabsTrigger>
+          <TabsTrigger value="reports">Usuários</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <PromotorEdit data={formData} onClose={onClose} />
+        </TabsContent>
+        <TabsContent value="reports">
+          <UsuariosTable cnpj={formData.cnpj} />
+        </TabsContent>
+      </Tabs>
+    </aside>
   );
 }
