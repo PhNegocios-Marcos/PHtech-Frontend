@@ -43,9 +43,31 @@ const promotoraColumns: ColumnDef<Promotora>[] = [
   { accessorKey: "cnpj", header: "CNPJ" },
   { accessorKey: "representante", header: "Representante" },
   { accessorKey: "master", header: "É Master?" },
-  { accessorKey: "rateio_master", header: "Rateio Master" },
-  { accessorKey: "rateio_sub", header: "Rateio Sub" },
-  { accessorKey: "status", header: "Status" }
+  {
+    accessorKey: "rateio_master",
+    header: "Rateio Master",
+    cell: ({ getValue }) => {
+      const valor = getValue<number>();
+      // Converte para inteiro e adiciona %
+      return `${Math.round(valor)}%`;
+    }
+  },
+  {
+    accessorKey: "rateio_sub",
+    header: "Rateio Sub",
+    cell: ({ getValue }) => {
+      const valor = getValue<number>();
+      return `${Math.round(valor)}%`;
+    }
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ getValue }) => {
+      const valor = getValue<number>();
+      return valor === 1 ? "Ativo" : "Inativo";
+    }
+  }
 ];
 
 type PromotorasTableProps = {

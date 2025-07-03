@@ -47,8 +47,16 @@ type Equipe = {
 const equipeColumns: ColumnDef<Equipe>[] = [
   { accessorKey: "nome", header: "Nome da Equipe" },
   { accessorKey: "descricao", header: "Descrição" },
-  { accessorKey: "status", header: "Status" }
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ getValue }) => {
+      const valor = getValue<number>();
+      return valor === 1 ? "Ativo" : "Inativo";
+    }
+  }
 ];
+
 
 export function EquipesTable() {
   const [equipes, setEquipes] = React.useState<Equipe[]>([]);
