@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import CampoBoasVindas from "@/components/boasvindas";
 import { Combobox } from "./components/Combobox";
-import SimuladorFgts from "./components/SimuladorFgts";
+import SimuladorFgts from "./components/Simulador";
 import Proposta from "./components/cadastrarCliente"; // importe seu componente Proposta
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -42,7 +42,7 @@ export default function CreditSimular() {
   }, []);
 
   // Callback para abrir a tela de proposta com o CPF
-  const handleAbrirProposta = (cpf: string) => {
+  const handleAbrirCadastro = (cpf: string) => {
     setCpfProposta(cpf);
   };
 
@@ -64,11 +64,11 @@ export default function CreditSimular() {
               />
             </div>
 
-            {selectedProduct?.name.toLowerCase() === "fgts" && (
+            {selectedProduct?.name.toLowerCase() && (
               <SimuladorFgts
                 produtoHash={selectedProduct.hash}
-                onMontarProposta={handleAbrirProposta} // passa callback
-                proutoName={selectedProduct.name}
+                onCadastrarCliente={handleAbrirCadastro} // passa callback
+                proutoName={selectedProduct.name.toLowerCase()}
               />
             )}
 

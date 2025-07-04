@@ -1,48 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { Card } from "@/components/ui/card";
+import { DadosPessoais } from "./DadosPessoais";
+import { Telefones } from "./Contato";
+import { Enderecos } from "./Enderecos";
+import { DadosBancarios } from "./DadosBancarios";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { error } from "console";
 
-type Telefone = { ddd: string; numero: string };
-type Endereco = {
-  cep: string;
-  logradouro: string;
-  numero: number;
-  complemento: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  uf: string;
-};
-type Email = { email: string; status: number };
-type DadosBancarios = {
-  id_banco: string;
-  agencia: string;
-  conta: string;
-  status: number;
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type FormDataType = {
-  nome: string;
-  nome_pai: string;
-  tipo_documento: string;
-  numero_documento: string;
-  cpf: string;
-  sexo: string;
-  telefones: { [key: number]: Telefone };
-  enderecos: { [key: number]: Endereco };
-  emails: { [key: number]: Email };
-  dados_bancarios: { [key: number]: DadosBancarios };
-};
+export default function Cadastrar({ cpf }: { cpf: string }) {
+  const { token } = useAuth();
 
-interface PropostaProps {
-  cpf: string;
-}
+  const [activeTab, setActiveTab] = useState("DadosPessoais");
+  const tabOrder = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
 
-export default function Proposta({ cpf }: PropostaProps) {
-  const [formData, setFormData] = useState<FormDataType>({
+  // Refs para cada aba
+  const dadosPessoaisRef = useRef<{ validate: () => Promise<boolean> }>(null);
+  const telefonesRef = useRef<{ validate: () => Promise<boolean> }>(null);
+  const enderecosRef = useRef<{ validate: () => Promise<boolean> }>(null);
+  const bancariosRef = useRef<{ validate: () => Promise<boolean> }>(null);
+
+  const tabRefs: Record<string, React.RefObject<any>> = {
+    DadosPessoais: dadosPessoaisRef,
+    Contato: telefonesRef,
+    Enderecos: enderecosRef,
+    DadosBancarios: bancariosRef
+  };
+
+  const [formData, setFormData] = useState({
     nome: "",
     nome_pai: "",
     tipo_documento: "1",
@@ -50,9 +40,7 @@ export default function Proposta({ cpf }: PropostaProps) {
     cpf: cpf,
     sexo: "M",
     telefones: {
-      0: { ddd: "", numero: "" },
-      1: { ddd: "", numero: "" },
-      2: { ddd: "", numero: "" }
+      0: { ddd: "", numero: "" }
     },
     enderecos: {
       0: {
@@ -72,38 +60,67 @@ export default function Proposta({ cpf }: PropostaProps) {
         status: 1
       }
     },
-    dados_bancarios: {
-      0: {
+    dados_bancarios: [
+      {
         id_banco: "019611f9-3d2d-7200-9289-688323e474b5",
         agencia: "",
         conta: "",
         status: 1
       }
-    }
+    ]
   });
 
   const handleChange = (path: string, value: any) => {
     const keys = path.split(".");
-    const updated = { ...formData };
-    let obj: any = updated;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      obj = obj[keys[i]];
-    }
-
-    obj[keys[keys.length - 1]] = value;
-    setFormData(updated);
+    setFormData((prev) => {
+      const updated = structuredClone(prev);
+      let obj: any = updated;
+      for (let i = 0; i < keys.length - 1; i++) {
+        obj = obj[keys[i]];
+      }
+      obj[keys[keys.length - 1]] = value;
+      return updated;
+    });
   };
 
-  const { token } = useAuth();
+  const handleNext = async () => {
+    const ref = tabRefs[activeTab];
+    if (ref?.current?.validate) {
+      const isValid = await ref.current.validate();
+      if (!isValid) return; // bloqueia avanço se inválido
+    }
+
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const nextTab = tabOrder[currentIndex + 1];
+    if (nextTab) {
+      setActiveTab(nextTab);
+    }
+  };
 
   const handleSubmit = async () => {
+    // opcional: validar todas as abas antes de enviar
+    for (const tab of tabOrder) {
+      const ref = tabRefs[tab];
+      if (ref?.current?.validate) {
+        const valid = await ref.current.validate();
+        if (!valid) {
+          setActiveTab(tab);
+          return alert("Preencha os campos obrigatórios.");
+        }
+      }
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/cliente`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(formData)
       });
+
+      console.log(formData)
 
       if (res.ok) {
         alert("Cliente cadastrado com sucesso!");
@@ -114,152 +131,44 @@ export default function Proposta({ cpf }: PropostaProps) {
       console.error("Erro:", err);
       alert("Erro inesperado.");
     }
+
   };
 
   return (
-    <div className="mx-auto max-w-xl space-y-4 p-6">
-      <h1 className="text-xl font-bold">Cadastro de Cliente</h1>
+    <div>
+      <Card className="mx-auto mt-10 max-w-6xl space-y-6 p-6">
+        <h1 className="mb-4 text-2xl font-bold">Cadastro de Cliente</h1>
 
-      <input
-        placeholder="Nome"
-        value={formData.nome}
-        onChange={(e) => handleChange("nome", e.target.value)}
-        className="w-full rounded border p-2"
-      />
-      <input
-        placeholder="Nome do Pai"
-        value={formData.nome_pai}
-        onChange={(e) => handleChange("nome_pai", e.target.value)}
-        className="w-full rounded border p-2"
-      />
-      <input
-        placeholder="Tipo Documento"
-        value={formData.tipo_documento}
-        onChange={(e) => handleChange("tipo_documento", e.target.value)}
-        className="w-full rounded border p-2"
-      />
-      <input
-        placeholder="Número Documento"
-        value={formData.numero_documento}
-        onChange={(e) => handleChange("numero_documento", e.target.value)}
-        className="w-full rounded border p-2"
-      />
-      <input
-        placeholder="CPF"
-        value={formData.cpf}
-        onChange={(e) => handleChange("cpf", e.target.value)}
-        className="w-full rounded border p-2"
-        disabled
-      />
-      <input
-        placeholder="Sexo"
-        value={formData.sexo}
-        onChange={(e) => handleChange("sexo", e.target.value)}
-        className="w-full rounded border p-2"
-      />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="DadosPessoais">Dados Pessoais</TabsTrigger>
+            <TabsTrigger value="Contato">Contato</TabsTrigger>
+            <TabsTrigger value="Enderecos">Endereços</TabsTrigger>
+            <TabsTrigger value="DadosBancarios">Dados Bancários</TabsTrigger>
+          </TabsList>
 
-      {/* Telefones (exemplo do primeiro telefone) */}
-      <div>
-        <h2 className="mt-4 font-semibold">Telefone 1</h2>
-        <input
-          placeholder="DDD"
-          value={formData.telefones[0].ddd}
-          onChange={(e) => handleChange("telefones.0.ddd", e.target.value)}
-          className="mr-2 w-20 rounded border p-2"
-        />
-        <input
-          placeholder="Número"
-          value={formData.telefones[0].numero}
-          onChange={(e) => handleChange("telefones.0.numero", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-      </div>
+          <TabsContent value="DadosPessoais">
+            <DadosPessoais ref={dadosPessoaisRef} formData={formData} onChange={handleChange} />
+          </TabsContent>
+          <TabsContent value="Contato">
+            <Telefones ref={telefonesRef} formData={formData} onChange={handleChange} />
+          </TabsContent>
+          <TabsContent value="Enderecos">
+            <Enderecos ref={enderecosRef} formData={formData} onChange={handleChange} />
+          </TabsContent>
+          <TabsContent value="DadosBancarios">
+            <DadosBancarios ref={bancariosRef} formData={formData} onChange={handleChange} />
+          </TabsContent>
+        </Tabs>
 
-      {/* Endereço (exemplo do primeiro) */}
-      <div>
-        <h2 className="mt-4 font-semibold">Endereço</h2>
-        <input
-          placeholder="CEP"
-          value={formData.enderecos[0].cep}
-          onChange={(e) => handleChange("enderecos.0.cep", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Logradouro"
-          value={formData.enderecos[0].logradouro}
-          onChange={(e) => handleChange("enderecos.0.logradouro", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Número"
-          type="number"
-          value={formData.enderecos[0].numero}
-          onChange={(e) => handleChange("enderecos.0.numero", Number(e.target.value))}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Complemento"
-          value={formData.enderecos[0].complemento}
-          onChange={(e) => handleChange("enderecos.0.complemento", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Bairro"
-          value={formData.enderecos[0].bairro}
-          onChange={(e) => handleChange("enderecos.0.bairro", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Cidade"
-          value={formData.enderecos[0].cidade}
-          onChange={(e) => handleChange("enderecos.0.cidade", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Estado"
-          value={formData.enderecos[0].estado}
-          onChange={(e) => handleChange("enderecos.0.estado", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="UF"
-          value={formData.enderecos[0].uf}
-          onChange={(e) => handleChange("enderecos.0.uf", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-      </div>
-
-      {/* E-mails (exemplo do primeiro) */}
-      <div>
-        <h2 className="mt-4 font-semibold">E-mail</h2>
-        <input
-          placeholder="E-mail"
-          value={formData.emails[0].email}
-          onChange={(e) => handleChange("emails.0.email", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-      </div>
-
-      {/* Dados Bancários (exemplo do primeiro) */}
-      <div>
-        <h2 className="mt-4 font-semibold">Dados Bancários</h2>
-        <input
-          placeholder="Agência"
-          value={formData.dados_bancarios[0].agencia}
-          onChange={(e) => handleChange("dados_bancarios.0.agencia", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-        <input
-          placeholder="Conta"
-          value={formData.dados_bancarios[0].conta}
-          onChange={(e) => handleChange("dados_bancarios.0.conta", e.target.value)}
-          className="w-full rounded border p-2"
-        />
-      </div>
-
-      <Button onClick={handleSubmit} className="mt-4">
-        Cadastrar
-      </Button>
+        <div className="flex justify-end">
+          {activeTab === tabOrder[tabOrder.length - 1] ? (
+            <Button onClick={handleSubmit}>Cadastrar</Button>
+          ) : (
+            <Button onClick={handleNext}>Próximo</Button>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import Cleave from "cleave.js/react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableHeader,
@@ -18,7 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 interface Props {
   produtoHash: string;
   proutoName: string;
-  onMontarProposta?: (cpf: string) => void;
+  onCadastrarCliente?: (cpf: string) => void;
 }
 
 interface Parcela {
@@ -38,13 +40,12 @@ interface ResultadoSimulacao {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoName }: Props) {
+export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoName }: Props) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
 
-  // 🔁 Simulação de retorno do backend (deveria vir de uma API tipo /api/fgts-form-config)
   const sections = [
     {
       type: "form",
@@ -72,18 +73,16 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
     setFormValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Função para montar o body da requisição de forma dinâmica
   const buildRequestBody = () => {
     const fields = sections[0].fields;
     const body: Record<string, any> = {
       produto_hash: produtoHash,
-      taxa_banco: "20", // pode parametrizar se quiser
+      taxa_banco: "20"
     };
 
     fields.forEach(({ key, type }) => {
       let value = formValues[key];
-
-      if (value === undefined || value === null || value === "") return; // ignora vazio
+      if (value === undefined || value === null || value === "") return;
 
       if (type === "number") {
         value = Number(value);
@@ -91,7 +90,6 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
       }
 
       if (type === "date") {
-        // converte dd/mm/yyyy para yyyy-mm-dd
         const parts = value.split("/");
         if (parts.length === 3) {
           value = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -108,14 +106,9 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
     return body;
   };
 
-  // console.log(proutoName)
-
   const handleSimular = async () => {
     const endpoint = `${API_BASE_URL}/simulacao/v0/${proutoName}`;
-
     const body = buildRequestBody();
-
-    // console.log("Requisição:", body);
 
     setLoading(true);
     try {
@@ -133,7 +126,7 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
     }
   };
 
-  const handleMontarProposta = async () => {
+  const handleCadastrarCliente = async () => {
     const cpf = formValues.cpf;
     if (!cpf) {
       alert("CPF não informado");
@@ -151,11 +144,11 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
       if (data?.cliente) {
         alert("Cliente já cadastrado.");
         return;
-      }
-      if (onMontarProposta) {
-        onMontarProposta(cpf);
       } else {
-        window.location.href = `/proposta?cpf=${cpf}`;
+        if (onCadastrarCliente) {
+          onCadastrarCliente(cpf);
+        }
+        alert("Cliente não tem cadastro.");
       }
     } catch (error) {
       console.error("Erro ao verificar cliente:", error);
@@ -182,7 +175,7 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
     return (
       <div key={item.key} className="space-y-2">
         <Label htmlFor={item.key}>{item.label}</Label>
-        <input
+        <Input
           type="text"
           id={item.key}
           placeholder={item.placeholder || ""}
@@ -201,8 +194,8 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoNam
           {loading ? "Simulando..." : "Simular"}
         </Button>
         {resultado?.mensagem && (
-          <Button variant="secondary" onClick={handleMontarProposta}>
-            Montar Proposta
+          <Button onClick={handleCadastrarCliente}>
+            Montar promosta
           </Button>
         )}
       </div>
