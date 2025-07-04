@@ -68,6 +68,7 @@ export default function CreditSimular() {
               <SimuladorFgts
                 produtoHash={selectedProduct.hash}
                 onMontarProposta={handleAbrirProposta} // passa callback
+                proutoName={selectedProduct.name}
               />
             )}
 

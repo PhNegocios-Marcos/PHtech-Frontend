@@ -13,9 +13,11 @@ import {
   TableCell,
   TableHead
 } from "@/components/ui/table";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   produtoHash: string;
+  proutoName: string;
   onMontarProposta?: (cpf: string) => void;
 }
 
@@ -36,36 +38,84 @@ interface ResultadoSimulacao {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) {
+export default function SimuladorFgts({ produtoHash, onMontarProposta, proutoName }: Props) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
+
+  // 🔁 Simulação de retorno do backend (deveria vir de uma API tipo /api/fgts-form-config)
+  const sections = [
+    {
+      type: "form",
+      title: "Dados da Simulação",
+      items: [
+        { key: "cpf", label: "CPF", type: "text", placeholder: "Digite seu CPF" },
+        { key: "saldo", label: "Saldo FGTS", type: "text" },
+        { key: "mes_aniversario", label: "Mês Aniversário (1 a 12)", type: "text" },
+        { key: "juros", label: "Taxa de Juros (%)", type: "text" },
+        { key: "parcelas_adiantadas", label: "Parcelas Adiantadas", type: "text" },
+        { key: "data_inicio", label: "Data de Início", type: "date" }
+      ],
+      fields: [
+        { key: "cpf", label: "CPF", type: "text", required: true },
+        { key: "saldo", label: "Saldo FGTS", type: "text" },
+        { key: "mes_aniversario", label: "Mês Aniversário", type: "number" },
+        { key: "juros", label: "Taxa de Juros", type: "text" },
+        { key: "parcelas_adiantadas", label: "Parcelas Adiantadas", type: "number" },
+        { key: "data_inicio", label: "Data de Início", type: "date" }
+      ]
+    }
+  ];
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  const formatarData = (data: string): string => {
-    if (!data) return "";
-    const [dia, mes, ano] = data.split("/");
-    return `${ano}-${mes}-${dia}`;
+  // Função para montar o body da requisição de forma dinâmica
+  const buildRequestBody = () => {
+    const fields = sections[0].fields;
+    const body: Record<string, any> = {
+      produto_hash: produtoHash,
+      taxa_banco: "20", // pode parametrizar se quiser
+    };
+
+    fields.forEach(({ key, type }) => {
+      let value = formValues[key];
+
+      if (value === undefined || value === null || value === "") return; // ignora vazio
+
+      if (type === "number") {
+        value = Number(value);
+        if (isNaN(value)) value = 0;
+      }
+
+      if (type === "date") {
+        // converte dd/mm/yyyy para yyyy-mm-dd
+        const parts = value.split("/");
+        if (parts.length === 3) {
+          value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
+
+      if (typeof value === "string" && value.includes(",")) {
+        value = value.replace(",", ".");
+      }
+
+      body[key] = value;
+    });
+
+    return body;
   };
 
-  const handleSimular = async () => {
-    const endpoint = `${API_BASE_URL}/simulacao/v0/fgts`;
+  // console.log(proutoName)
 
-    const body = {
-      produto_hash: produtoHash,
-      banco_hash: "019611f9-3d47-7048-b9b2-4f96d5264cf4",
-      usuario_hash: "0196a5ff-1706-7246-b0ac-715fbb7b29a6",
-      taxa_banco: "20",
-      cpf: formValues.cpf,
-      saldo: formValues.saldo,
-      mes_aniversario: Number(formValues.mes_aniversario),
-      juros: formValues.juros?.replace(",", "."),
-      parcelas_adiantadas: Number(formValues.parcelas_adiantadas),
-      data_inicio: formatarData(formValues.data_inicio)
-    };
+  const handleSimular = async () => {
+    const endpoint = `${API_BASE_URL}/simulacao/v0/${proutoName}`;
+
+    const body = buildRequestBody();
+
+    // console.log("Requisição:", body);
 
     setLoading(true);
     try {
@@ -74,7 +124,6 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
-
       const data = await response.json();
       setResultado(data);
     } catch (err) {
@@ -86,24 +135,23 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) 
 
   const handleMontarProposta = async () => {
     const cpf = formValues.cpf;
-
     if (!cpf) {
       alert("CPF não informado");
       return;
     }
-
     try {
-      const response = await fetch(`${API_BASE_URL}/cliente/buscar/${cpf}`);
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data?.cliente) {
-          alert("Cliente já cadastrado.");
-          return;
+      const response = await fetch(`${API_BASE_URL}/cliente/${cpf}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         }
+      });
+      const data = await response.json();
+      if (data?.cliente) {
+        alert("Cliente já cadastrado.");
+        return;
       }
-
       if (onMontarProposta) {
         onMontarProposta(cpf);
       } else {
@@ -115,36 +163,36 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) 
     }
   };
 
-  const renderInput = (key: string, label: string, props = {}) => (
-    <div>
-      <CardHeader>
-        <CardTitle>{label}</CardTitle>
-      </CardHeader>
-      <CardContent>
+  const renderInputField = (item: any) => {
+    if (item.type === "date") {
+      return (
+        <div className="space-y-2" key={item.key}>
+          <Label htmlFor={item.key}>{item.label}</Label>
+          <Cleave
+            id={item.key}
+            placeholder="dd/mm/yyyy"
+            options={{ date: true, delimiter: "/", datePattern: ["d", "m", "Y"] }}
+            value={formValues[item.key] || ""}
+            onChange={(e) => handleChange(item.key, e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2"
+          />
+        </div>
+      );
+    }
+    return (
+      <div key={item.key} className="space-y-2">
+        <Label htmlFor={item.key}>{item.label}</Label>
         <input
-          id={key}
-          value={formValues[key] || ""}
-          onChange={(e) => handleChange(key, e.target.value)}
+          type="text"
+          id={item.key}
+          placeholder={item.placeholder || ""}
+          value={formValues[item.key] || ""}
+          onChange={(e) => handleChange(item.key, e.target.value)}
           className="w-full rounded border border-gray-300 px-3 py-2"
-          {...props}
         />
-      </CardContent>
-    </div>
-  );
-
-  const renderDateInput = (key: string, label: string) => (
-    <div className="space-y-2">
-      <Label htmlFor={key}>{label}</Label>
-      <Cleave
-        id={key}
-        placeholder="dd/mm/yyyy"
-        options={{ date: true, delimiter: "/", datePattern: ["d", "m", "Y"] }}
-        value={formValues[key] || ""}
-        onChange={(e) => handleChange(key, e.target.value)}
-        className="w-full rounded border border-gray-300 px-3 py-2"
-      />
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -152,7 +200,6 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) 
         <Button onClick={handleSimular} disabled={loading}>
           {loading ? "Simulando..." : "Simular"}
         </Button>
-
         {resultado?.mensagem && (
           <Button variant="secondary" onClick={handleMontarProposta}>
             Montar Proposta
@@ -160,14 +207,11 @@ export default function SimuladorFgts({ produtoHash, onMontarProposta }: Props) 
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {renderInput("cpf", "CPF")}
-        {renderInput("saldo", "Saldo FGTS")}
-        {renderInput("mes_aniversario", "Mês Aniversário (1 a 12)")}
-        {renderInput("juros", "Taxa de Juros (%)")}
-        {renderInput("parcelas_adiantadas", "Parcelas Adiantadas")}
-        {renderDateInput("data_inicio", "Data de Início")}
-      </div>
+      {sections.map((section, i) => (
+        <div key={i} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {section.items.map(renderInputField)}
+        </div>
+      ))}
 
       {resultado?.mensagem && (
         <Card>

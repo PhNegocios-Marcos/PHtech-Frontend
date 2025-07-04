@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useAuth } from "@/contexts/AuthContext";
 
 type Telefone = { ddd: string; numero: string };
 type Endereco = {
@@ -93,11 +95,13 @@ export default function Proposta({ cpf }: PropostaProps) {
     setFormData(updated);
   };
 
+  const { token } = useAuth();
+
   const handleSubmit = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cliente`, {
+      const res = await fetch(`${API_BASE_URL}/cliente`, {
         method: "POST",
-                headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData)
       });
 
@@ -113,7 +117,7 @@ export default function Proposta({ cpf }: PropostaProps) {
   };
 
   return (
-    <div className="space-y-4 p-6 max-w-xl mx-auto">
+    <div className="mx-auto max-w-xl space-y-4 p-6">
       <h1 className="text-xl font-bold">Cadastro de Cliente</h1>
 
       <input
@@ -156,12 +160,12 @@ export default function Proposta({ cpf }: PropostaProps) {
 
       {/* Telefones (exemplo do primeiro telefone) */}
       <div>
-        <h2 className="font-semibold mt-4">Telefone 1</h2>
+        <h2 className="mt-4 font-semibold">Telefone 1</h2>
         <input
           placeholder="DDD"
           value={formData.telefones[0].ddd}
           onChange={(e) => handleChange("telefones.0.ddd", e.target.value)}
-          className="w-20 rounded border p-2 mr-2"
+          className="mr-2 w-20 rounded border p-2"
         />
         <input
           placeholder="Número"
@@ -173,7 +177,7 @@ export default function Proposta({ cpf }: PropostaProps) {
 
       {/* Endereço (exemplo do primeiro) */}
       <div>
-        <h2 className="font-semibold mt-4">Endereço</h2>
+        <h2 className="mt-4 font-semibold">Endereço</h2>
         <input
           placeholder="CEP"
           value={formData.enderecos[0].cep}
@@ -227,7 +231,7 @@ export default function Proposta({ cpf }: PropostaProps) {
 
       {/* E-mails (exemplo do primeiro) */}
       <div>
-        <h2 className="font-semibold mt-4">E-mail</h2>
+        <h2 className="mt-4 font-semibold">E-mail</h2>
         <input
           placeholder="E-mail"
           value={formData.emails[0].email}
@@ -238,7 +242,7 @@ export default function Proposta({ cpf }: PropostaProps) {
 
       {/* Dados Bancários (exemplo do primeiro) */}
       <div>
-        <h2 className="font-semibold mt-4">Dados Bancários</h2>
+        <h2 className="mt-4 font-semibold">Dados Bancários</h2>
         <input
           placeholder="Agência"
           value={formData.dados_bancarios[0].agencia}
@@ -259,4 +263,3 @@ export default function Proposta({ cpf }: PropostaProps) {
     </div>
   );
 }
-
