@@ -127,29 +127,40 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
   };
 
   const handleCadastrarCliente = async () => {
-    const cpf = formValues.cpf;
+    const cpf = formValues.cpf?.replace(/\D/g, ""); // remove pontos e traços se tiver
     if (!cpf) {
       alert("CPF não informado");
       return;
     }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/cliente/${cpf}`, {
+      const response = await fetch(`${API_BASE_URL}/cliente`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         }
       });
+
       const data = await response.json();
-      if (data?.cliente) {
+      console.log(data);
+
+      // Verifica se existe algum cliente com o CPF igual
+      const clienteExiste = data?.some((cliente: any) => {
+        const clienteCpf = cliente.cpf?.replace(/\D/g, "");
+        return clienteCpf === cpf;
+      });
+
+      if (clienteExiste) {
         alert("Cliente já cadastrado.");
         return;
-      } else {
-        if (onCadastrarCliente) {
-          onCadastrarCliente(cpf);
-        }
-        alert("Cliente não tem cadastro.");
       }
+
+      if (onCadastrarCliente) {
+        onCadastrarCliente(cpf);
+      }
+
+      alert("Cliente não tem cadastro.");
     } catch (error) {
       console.error("Erro ao verificar cliente:", error);
       alert("Erro na verificação. Tente novamente.");
@@ -193,11 +204,7 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
         <Button onClick={handleSimular} disabled={loading}>
           {loading ? "Simulando..." : "Simular"}
         </Button>
-        {resultado?.mensagem && (
-          <Button onClick={handleCadastrarCliente}>
-            Montar promosta
-          </Button>
-        )}
+        {resultado?.mensagem && <Button onClick={handleCadastrarCliente}>Montar promosta</Button>}
       </div>
 
       {sections.map((section, i) => (
