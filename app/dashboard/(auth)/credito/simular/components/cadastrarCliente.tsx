@@ -9,17 +9,33 @@ import { Enderecos } from "./Enderecos";
 import { DadosBancarios } from "./DadosBancarios";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { error } from "console";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Cadastrar({ cpf }: { cpf: string }) {
+interface CadastrarProps {
+  cpf: string;
+  simulacao: any;
+  onCadastrado?: (cpf: string, simulacao: any) => void;
+}
+
+interface CadastrarProps {
+  cpf: string;
+  simulacao: any;
+  onCadastrado?: (cpf: string, simulacao: any) => void;
+  onClienteExiste?: (cpf: string) => void; // << adicione aqui
+}
+
+
+export default function Cadastrar({
+  cpf,
+  simulacao,
+  onCadastrado,
+}: CadastrarProps) {
   const { token } = useAuth();
 
   const [activeTab, setActiveTab] = useState("DadosPessoais");
   const tabOrder = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
 
-  // Refs para cada aba
   const dadosPessoaisRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const telefonesRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const enderecosRef = useRef<{ validate: () => Promise<boolean> }>(null);
@@ -29,7 +45,7 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
     Enderecos: enderecosRef,
-    DadosBancarios: bancariosRef
+    DadosBancarios: bancariosRef,
   };
 
   const [formData, setFormData] = useState({
@@ -40,7 +56,7 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
     cpf: cpf,
     sexo: "M",
     telefones: {
-      0: { ddd: "", numero: "" }
+      0: { ddd: "", numero: "" },
     },
     enderecos: {
       0: {
@@ -51,23 +67,23 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
         bairro: "",
         cidade: "",
         estado: "",
-        uf: ""
-      }
+        uf: "",
+      },
     },
     emails: {
       0: {
         email: "",
-        status: 1
-      }
+        status: 1,
+      },
     },
     dados_bancarios: [
       {
         id_banco: "019611f9-3d2d-7200-9289-688323e474b5",
         agencia: "",
         conta: "",
-        status: 1
-      }
-    ]
+        status: 1,
+      },
+    ],
   });
 
   const handleChange = (path: string, value: any) => {
@@ -87,9 +103,8 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
     const ref = tabRefs[activeTab];
     if (ref?.current?.validate) {
       const isValid = await ref.current.validate();
-      if (!isValid) return; // bloqueia avanço se inválido
+      if (!isValid) return;
     }
-
     const currentIndex = tabOrder.indexOf(activeTab);
     const nextTab = tabOrder[currentIndex + 1];
     if (nextTab) {
@@ -98,7 +113,6 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
   };
 
   const handleSubmit = async () => {
-    // opcional: validar todas as abas antes de enviar
     for (const tab of tabOrder) {
       const ref = tabRefs[tab];
       if (ref?.current?.validate) {
@@ -111,19 +125,20 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/cliente`, {
+      const resPost = await fetch(`${API_BASE_URL}/cliente`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
-      console.log(formData)
-
-      if (res.ok) {
+      if (resPost.ok) {
         alert("Cliente cadastrado com sucesso!");
+        if (onCadastrado) {
+          onCadastrado(formData.cpf, simulacao);
+        }
       } else {
         alert("Erro ao cadastrar cliente.");
       }
@@ -131,7 +146,6 @@ export default function Cadastrar({ cpf }: { cpf: string }) {
       console.error("Erro:", err);
       alert("Erro inesperado.");
     }
-
   };
 
   return (

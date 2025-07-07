@@ -47,8 +47,9 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
     <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
       {/* <h2 className="mb-2 font-semibold">Dados Bancários</h2> */}
 
-      <div className="grid grid-cols-2 w-62 gap-2">
+      <div className="grid w-62 grid-cols-2 gap-2">
         <div>
+          <span>Agência</span>
           <Input
             {...register("agencia")}
             placeholder="Agência"
@@ -57,7 +58,7 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
               setValue("agencia", e.target.value);
               onChange("dados_bancarios.0.agencia", e.target.value);
             }}
-            className=""
+            className="mt-1"
           />
           {errors.agencia?.message && (
             <p className="text-sm text-red-600">{errors.agencia.message}</p>
@@ -65,6 +66,7 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
         </div>
 
         <div>
+          <span>Conta</span>
           <Input
             {...register("conta")}
             placeholder="Conta"
@@ -73,7 +75,7 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
               setValue("conta", e.target.value);
               onChange("dados_bancarios.0.conta", e.target.value);
             }}
-            className=""
+            className="mt-1"
           />
           {errors.conta?.message && <p className="text-sm text-red-600">{errors.conta.message}</p>}
         </div>

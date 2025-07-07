@@ -47,6 +47,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
       className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-2"
       onSubmit={(e) => e.preventDefault()}>
       <div>
+        <span>Nome</span>
         <Input
           {...register("nome")}
           placeholder="Nome"
@@ -55,11 +56,13 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
             onChange("nome", e.target.value);
           }}
           value={formData.nome}
+          className="mt-1"
         />
         {errors.nome?.message && <p className="text-sm text-red-600">{errors.nome.message}</p>}
       </div>
 
       <div>
+        <span>Nomae do pai</span>
         <Input
           {...register("nome_pai")}
           placeholder="Nome do Pai"
@@ -67,6 +70,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
             setValue("nome_pai", e.target.value);
             onChange("nome_pai", e.target.value);
           }}
+          className="mt-1"
           value={formData.nome_pai}
         />
         {errors.nome_pai?.message && (
@@ -75,6 +79,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
       </div>
 
       <div>
+        <span>Tipo do Documento</span>
         <Input
           {...register("tipo_documento")}
           placeholder="Tipo Documento"
@@ -83,6 +88,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
             onChange("tipo_documento", e.target.value);
           }}
           value={formData.tipo_documento}
+          className="mt-1"
         />
         {errors.tipo_documento?.message && (
           <p className="text-sm text-red-600">{errors.tipo_documento.message}</p>
@@ -90,6 +96,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
       </div>
 
       <div>
+        <span>Numero do Documento</span>
         <Input
           {...register("numero_documento")}
           placeholder="Número Documento"
@@ -98,6 +105,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
             onChange("numero_documento", e.target.value);
           }}
           value={formData.numero_documento}
+          className="mt-1"
         />
         {errors.numero_documento?.message && (
           <p className="text-sm text-red-600">{errors.numero_documento.message}</p>
@@ -105,6 +113,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
       </div>
 
       <div>
+        <span>Sexo</span>
         <Input
           {...register("sexo")}
           placeholder="Sexo"
@@ -113,15 +122,18 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
             onChange("sexo", e.target.value);
           }}
           value={formData.sexo}
+          className="mt-1"
         />
         {errors.sexo?.message && <p className="text-sm text-red-600">{errors.sexo.message}</p>}
       </div>
 
       <div>
+        <span>CPF</span>
         <Input
           placeholder="CPF"
           value={formData.cpf}
           onChange={(e) => onChange("cpf", e.target.value)}
+          className="mt-1"
         />
         {/* Caso queira mostrar erro relacionado a CPF, pode adicionar aqui */}
       </div>

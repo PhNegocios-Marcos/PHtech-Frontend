@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 
+import PropostaCliente from "./proposta";
+import Cadastrar from "./cadastrarCliente";
+
 interface Props {
   produtoHash: string;
   proutoName: string;
@@ -44,6 +47,9 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cpfProposta, setCpfProposta] = useState<string | null>(null);
+  const [abrirCadastro, setAbrirCadastro] = useState(false);
+
   const { token } = useAuth();
 
   const sections = [
@@ -127,7 +133,8 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
   };
 
   const handleCadastrarCliente = async () => {
-    const cpf = formValues.cpf?.replace(/\D/g, ""); // remove pontos e traços se tiver
+    const cpfRaw = formValues.cpf;
+    const cpf = cpfRaw?.replace(/\D/g, "");
     if (!cpf) {
       alert("CPF não informado");
       return;
@@ -142,25 +149,26 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
         }
       });
 
-      const data = await response.json();
-      console.log(data);
+      if (!response.ok) {
+        alert("Erro ao verificar cliente.");
+        return;
+      }
 
-      // Verifica se existe algum cliente com o CPF igual
+      const data = await response.json();
+
       const clienteExiste = data?.some((cliente: any) => {
         const clienteCpf = cliente.cpf?.replace(/\D/g, "");
         return clienteCpf === cpf;
       });
 
       if (clienteExiste) {
-        alert("Cliente já cadastrado.");
+        setCpfProposta(cpf);
+        setAbrirCadastro(false);
         return;
       }
 
-      if (onCadastrarCliente) {
-        onCadastrarCliente(cpf);
-      }
-
-      alert("Cliente não tem cadastro.");
+      // Cliente não existe, abre cadastro
+      setAbrirCadastro(true);
     } catch (error) {
       console.error("Erro ao verificar cliente:", error);
       alert("Erro na verificação. Tente novamente.");
@@ -198,13 +206,40 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
     );
   };
 
+  // Se cadastro estiver aberto, renderiza componente Cadastrar
+  if (abrirCadastro && formValues.cpf) {
+    return (
+      <Cadastrar
+        cpf={formValues.cpf}
+        simulacao={resultado?.mensagem}
+        onCadastrado={(cpf, simulacao) => {
+          setCpfProposta(cpf);
+          setAbrirCadastro(false);
+          if (simulacao) setResultado({ mensagem: simulacao });
+        }}
+        onClienteExiste={(cpf) => {
+          setCpfProposta(cpf);
+          setAbrirCadastro(false);
+        }}
+      />
+    );
+  }
+
+  // Se cpfProposta definido, mostra proposta
+  if (cpfProposta) {
+    return <PropostaCliente cpf={cpfProposta} simulacao={resultado?.mensagem} />;
+  }
+
+  // Renderiza formulário e botões normais
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-4">
         <Button onClick={handleSimular} disabled={loading}>
           {loading ? "Simulando..." : "Simular"}
         </Button>
-        {resultado?.mensagem && <Button onClick={handleCadastrarCliente}>Montar promosta</Button>}
+        {resultado?.mensagem && (
+          <Button onClick={handleCadastrarCliente}>Montar proposta</Button>
+        )}
       </div>
 
       {sections.map((section, i) => (

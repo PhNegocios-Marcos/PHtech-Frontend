@@ -96,6 +96,7 @@ export const Enderecos = forwardRef(
         className="m-10 grid grid-cols-1 gap-5 md:grid-cols-3"
         onSubmit={(e) => e.preventDefault()}>
         <div>
+          <span>CEP</span>
           <Input
             {...register("cep")}
             placeholder="CEP"
@@ -108,11 +109,13 @@ export const Enderecos = forwardRef(
                 await buscarEndereco(cep);
               }
             }}
+            className="mt-1"
           />
           {errors.cep?.message && <p className="text-sm text-red-600">{errors.cep.message}</p>}
         </div>
 
         <div>
+          <span>Logradouro</span>
           <Input
             {...register("logradouro")}
             placeholder="Logradouro"
@@ -121,6 +124,7 @@ export const Enderecos = forwardRef(
               setValue("logradouro", ev.target.value);
               onChange("enderecos.0.logradouro", ev.target.value);
             }}
+            className="mt-1"
           />
           {errors.logradouro?.message && (
             <p className="text-sm text-red-600">{errors.logradouro.message}</p>
@@ -128,6 +132,7 @@ export const Enderecos = forwardRef(
         </div>
 
         <div>
+          <span>Número</span>
           <Input
             {...register("numero")}
             placeholder="Número"
@@ -136,6 +141,7 @@ export const Enderecos = forwardRef(
               setValue("numero", ev.target.value);
               onChange("enderecos.0.numero", Number(ev.target.value));
             }}
+            className="mt-1"
           />
           {errors.numero?.message && (
             <p className="text-sm text-red-600">{errors.numero.message}</p>
@@ -143,6 +149,7 @@ export const Enderecos = forwardRef(
         </div>
 
         <div>
+          <span>Bairro</span>
           <Input
             {...register("bairro")}
             placeholder="Bairro"
@@ -151,6 +158,7 @@ export const Enderecos = forwardRef(
               setValue("bairro", ev.target.value);
               onChange("enderecos.0.bairro", ev.target.value);
             }}
+            className="mt-1"
           />
           {errors.bairro?.message && (
             <p className="text-sm text-red-600">{errors.bairro.message}</p>
@@ -158,6 +166,7 @@ export const Enderecos = forwardRef(
         </div>
 
         <div>
+          <span>Cidade</span>
           <Input
             {...register("cidade")}
             placeholder="Cidade"
@@ -166,6 +175,7 @@ export const Enderecos = forwardRef(
               setValue("cidade", ev.target.value);
               onChange("enderecos.0.cidade", ev.target.value);
             }}
+            className="mt-1"
           />
           {errors.cidade?.message && (
             <p className="text-sm text-red-600">{errors.cidade.message}</p>
@@ -173,6 +183,7 @@ export const Enderecos = forwardRef(
         </div>
 
         <div>
+          <span>Estado</span>
           <Input
             {...register("estado")}
             placeholder="Estado"
@@ -181,6 +192,7 @@ export const Enderecos = forwardRef(
               setValue("estado", ev.target.value);
               onChange("enderecos.0.estado", ev.target.value);
             }}
+            className="mt-1"
           />
           {errors.estado?.message && (
             <p className="text-sm text-red-600">{errors.estado.message}</p>
@@ -188,6 +200,7 @@ export const Enderecos = forwardRef(
         </div>
 
         <div>
+          <span>UF</span>
           <Input
             {...register("uf")}
             placeholder="UF"
@@ -196,6 +209,7 @@ export const Enderecos = forwardRef(
               setValue("uf", ev.target.value);
               onChange("enderecos.0.uf", ev.target.value);
             }}
+            className="mt-1"
           />
           {errors.uf?.message && <p className="text-sm text-red-600">{errors.uf.message}</p>}
         </div>

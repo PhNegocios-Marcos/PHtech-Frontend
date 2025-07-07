@@ -47,6 +47,7 @@ export const Telefones = forwardRef(
       <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-4 gap-2">
           <div className="col-span-1">
+            <span>DDD</span>
             <Input
               {...register("ddd")}
               placeholder="DDD"
@@ -55,11 +56,13 @@ export const Telefones = forwardRef(
                 setValue("ddd", e.target.value);
                 onChange("telefones.0.ddd", e.target.value);
               }}
+              className="mt-1"
             />
             {errors.ddd?.message && <p className="text-sm text-red-600">{errors.ddd.message}</p>}
           </div>
 
           <div className="col-span-3">
+            <span>Número</span>
             <Input
               {...register("numero")}
               placeholder="Número"
@@ -68,6 +71,7 @@ export const Telefones = forwardRef(
                 setValue("numero", e.target.value);
                 onChange("telefones.0.numero", e.target.value);
               }}
+              className="mt-1"
             />
             {errors.numero?.message && (
               <p className="text-sm text-red-600">{errors.numero.message}</p>
@@ -76,6 +80,7 @@ export const Telefones = forwardRef(
         </div>
 
         <div>
+          <span>E-mail</span>
           <Input
             {...register("email")}
             placeholder="E-mail"

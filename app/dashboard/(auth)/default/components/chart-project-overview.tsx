@@ -40,8 +40,7 @@ const generateChartData = () => {
       desktop: Math.floor(Math.random() * (400 - 50) + 50),
       mobile: Math.floor(Math.random() * (400 - 50) + 50),
       tablet: Math.floor(Math.random() * (400 - 50) + 50),
-      tv: Math.floor(Math.random() * (400 - 50) + 50),
-      banana: 999
+      tv: Math.floor(Math.random() * (400 - 50) + 50)
     });
   }
 
