@@ -12,14 +12,14 @@ import CadastroUsuarioModal from "./components/CadastroEquipesModal";
 
 export default function Page() {
   const router = useRouter();
-  const podeCriar = useHasPermission("Usuarios_criar");
+  const podeCriar = useHasPermission("Equipes_criar");
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
-    <ProtectedRoute requiredPermission="Usuarios_ver">
+    <ProtectedRoute requiredPermission="Equipes_ver">
       <div className="space-y-4">
         <div className="flex flex-col justify-between">
           <CampoBoasVindas />
@@ -28,7 +28,7 @@ export default function Page() {
             {/* <CustomDateRangePicker /> */}
 
             {podeCriar && (
-              <Button id="Usuarios_criar" onClick={() => setIsCadastroOpen(true)}>
+              <Button id="Equipes_criar" onClick={() => setIsCadastroOpen(true)}>
                 Nova Equipe
               </Button>
             )}

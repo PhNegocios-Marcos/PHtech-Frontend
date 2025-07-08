@@ -178,12 +178,12 @@ export function EquipesTable() {
           </div>
 
           <div className="rounded-md border">
-            <Table>
+            <Table  className="w-full table-fixed">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
+                      <TableHead className="w-32 truncate overflow-hidden whitespace-nowrap" key={header.id}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
@@ -198,7 +198,7 @@ export function EquipesTable() {
                       onDoubleClick={() => handleRowDoubleClick(row.original)}
                       className="hover:bg-muted cursor-pointer">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell className="w-32 truncate overflow-hidden whitespace-nowrap" key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

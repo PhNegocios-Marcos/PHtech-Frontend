@@ -87,17 +87,19 @@ export function UsuariosTable() {
         }
 
         const data = await response.json();
-        setUsuarios(data.map((usuario: any) => ({
-          id: usuario.id,
-          nome: usuario.nome,
-          cpf: usuario.cpf,
-          email: usuario.email,
-          tipo_acesso: usuario.tipo_usuario,
-          telefone: usuario.telefone,
-          endereco: usuario.endereco,
-          status: usuario.status,
-          cnpj: usuario.cnpj || ""
-        })));
+        setUsuarios(
+          data.map((usuario: any) => ({
+            id: usuario.id,
+            nome: usuario.nome,
+            cpf: usuario.cpf,
+            email: usuario.email,
+            tipo_acesso: usuario.tipo_usuario,
+            telefone: usuario.telefone,
+            endereco: usuario.endereco,
+            status: usuario.status,
+            cnpj: usuario.cnpj || ""
+          }))
+        );
       } catch (error: any) {
         console.error("Erro ao buscar usuários:", error.message);
       }
@@ -124,7 +126,7 @@ export function UsuariosTable() {
   });
 
   const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -134,8 +136,8 @@ export function UsuariosTable() {
       </CardHeader>
       <CardContent>
         {selectedUser ? (
-          <UsuarioPerfil 
-            usuario={selectedUser} 
+          <UsuarioPerfil
+            usuario={selectedUser}
             onClose={() => setSelectedUser(null)}
             onRefresh={handleRefresh}
           />
@@ -172,12 +174,14 @@ export function UsuariosTable() {
             </div>
 
             <div className="rounded-md border">
-              <Table>
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
+                        <TableHead
+                          key={header.id}
+                          className="w-32 truncate overflow-hidden whitespace-nowrap">
                           {flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       ))}
@@ -192,7 +196,9 @@ export function UsuariosTable() {
                         onDoubleClick={() => setSelectedUser(row.original)}
                         className="hover:bg-muted cursor-pointer">
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
+                          <TableCell
+                            key={cell.id}
+                            className="w-32 truncate overflow-hidden whitespace-nowrap">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}

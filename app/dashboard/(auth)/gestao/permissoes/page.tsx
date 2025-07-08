@@ -6,9 +6,12 @@ import { PermissoesTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+
 
 export default function Page() {
   const router = useRouter();
+  const podeCriar = useHasPermission("Usuarios_criar");
 
   return (
     <ProtectedRoute requiredPermission="Gestão_Permissões">
@@ -17,9 +20,12 @@ export default function Page() {
           <CampoBoasVindas />
           <div className="mb-4 flex items-center justify-end space-x-2">
             <CustomDateRangePicker />
-            <Button onClick={() => router.push("/dashboard/cadastro/promotora")}>
-              Nova Promotora
-            </Button>
+
+            {podeCriar && (
+              <Button onClick={() => router.push("/dashboard/cadastro/promotora")}>
+                Nova Promotora
+              </Button>
+            )}
           </div>
           <PermissoesTable />
         </div>
