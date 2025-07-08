@@ -26,64 +26,61 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import axios from "axios";
 
-const generateChartData = () => {
+const generateChartData = async () => {
   const data = [];
+  let chartConfig = {};
   const today = new Date();
 
-  for (let i = 89; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
+  const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`).then(response => {
 
-    data.push({
-      date: date.toISOString().split("T")[0],
-      desktop: Math.floor(Math.random() * (400 - 50) + 50),
-      mobile: Math.floor(Math.random() * (400 - 50) + 50),
-      tablet: Math.floor(Math.random() * (400 - 50) + 50),
-      tv: Math.floor(Math.random() * (400 - 50) + 50)
+    Object.values(response.data.dataValues).forEach(e => {
+      data.push(e);
     });
-  }
 
-  return data;
+    chartConfig = response.data.charConfig as ChartConfig;
+
+
+  });
+
+  return { data, chartConfig };
 };
 
-const chartData = generateChartData();
+(async () => {
+  const { data: chartData, chartConfig } = await generateChartData();
+})
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors"
-  },
-  desktop: {
-    label: "Desktop",
-    color: "var(--secondary)"
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--primary)"
-  },
-  tablet: {
-    label: "Tablet",
-    color: "#f59e0b" // Ex: cor amarela
-  },
-  tv: {
-    label: "TV",
-    color: "#10b981" // Ex: cor verde
-  },
-  banana : {
-    label : 'chiclete',
-    color : 'pink'
-  }
-} satisfies ChartConfig;
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 
 export function ChartProjectOverview() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
+
+
+  // Estado local para guardar os dados do gráfico e config
+  const [chartData, setChartData] = React.useState([]);
+  const [chartConfig, setChartConfig] = React.useState({});
 
   React.useEffect(() => {
     if (isMobile) {
       setTimeRange("7d");
     }
   }, [isMobile]);
+
+  // Buscar os dados e config na montagem do componente
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const { data, chartConfig } = await generateChartData();
+      setChartData(data);
+      setChartConfig(chartConfig);
+    };
+    fetchData();
+  }, []);
+
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
@@ -143,26 +140,12 @@ export function ChartProjectOverview() {
         <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full lg:h-[250px]">
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-desktop)" stopOpacity={1.0} />
-                <stop offset="95%" stopColor="var(--color-desktop)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-mobile)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-mobile)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="fillTablet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="fillTv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="fillBanana" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
+              {Object.entries(chartConfig).map(([key, { color }]) => (
+                <linearGradient key={key} id={`fill${capitalize(key)}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              ))}
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -194,34 +177,16 @@ export function ChartProjectOverview() {
                 />
               }
             />
-            <Area
-              dataKey="mobile"
-              type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
-              stackId="a"
-            />
-            <Area
-              dataKey="tablet"
-              type="natural"
-              fill="url(#fillTablet)"
-              stroke="#f59e0b"
-              stackId="a"
-            />
-            <Area
-              dataKey="banana"
-              type="natural"
-              fill="url(#fillBanana)"
-              stroke="#f59e0b"
-              stackId="a"
-            />
+            {Object.entries(chartConfig).map(([key, { color }]) => (
+              <Area
+                key={key}
+                dataKey={key}
+                type="natural"
+                fill={`url(#fill${capitalize(key)})`}
+                stroke={color}
+                stackId="a"
+              />
+            ))}
             <Area dataKey="tv" type="natural" fill="url(#fillTv)" stroke="#10b981" stackId="a" />
           </AreaChart>
         </ChartContainer>
