@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cleave from "cleave.js/react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableHead
+  TableHead,
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -41,49 +41,86 @@ interface ResultadoSimulacao {
   };
 }
 
+interface Section {
+  type: string;
+  title: string;
+  items: any[];
+  fields: any[];
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoName }: SimuladorFgtsProps) {
+export default function SimuladorFgts({
+  produtoHash,
+  onCadastrarCliente,
+  proutoName,
+}: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
   const [loading, setLoading] = useState(false);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [abrirCadastro, setAbrirCadastro] = useState(false);
+  const [sections, setSections] = useState<Section[]>([]); // novo estado para sections dinâmicas
 
   const { token } = useAuth();
 
-  const sections = [
-    {
-      type: "form",
-      title: "Dados da Simulação",
-      items: [
-        { key: "cpf", label: "CPF", type: "text", placeholder: "Digite seu CPF" },
-        { key: "saldo", label: "Saldo FGTS", type: "text" },
-        { key: "mes_aniversario", label: "Mês Aniversário (1 a 12)", type: "text" },
-        { key: "juros", label: "Taxa de Juros (%)", type: "text" },
-        { key: "parcelas_adiantadas", label: "Parcelas Adiantadas", type: "text" },
-        { key: "data_inicio", label: "Data de Início", type: "date" }
-      ],
-      fields: [
-        { key: "cpf", label: "CPF", type: "text", required: true },
-        { key: "saldo", label: "Saldo FGTS", type: "text" },
-        { key: "mes_aniversario", label: "Mês Aniversário", type: "number" },
-        { key: "juros", label: "Taxa de Juros", type: "text" },
-        { key: "parcelas_adiantadas", label: "Parcelas Adiantadas", type: "number" },
-        { key: "data_inicio", label: "Data de Início", type: "date" }
-      ]
+  console.log(produtoHash)
+
+  // Função para carregar os campos da API na montagem do componente
+  useEffect(() => {
+    async function fetchSections() {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/simulacao-campos-produtos/listar`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              simulacao_campos_produtos_produto_id: produtoHash,
+            }),
+          }
+        );
+        if (!response.ok) {
+          console.error("Erro ao buscar campos do produto");
+          return;
+        }
+        const data = await response.json();
+
+        // Mapear o retorno para montar sections
+        // O retorno deve ter objetos com keys como:
+        // simulacao_campos_produtos_type, simulacao_campos_produtos_title, simulacao_campos_produtos_items, simulacao_campos_produtos_fields
+        // itens e fields são strings JSON, precisamos parsear
+
+        // Se vier um array, mapeia todos, senão trata um único objeto
+        const arrData = Array.isArray(data) ? data : [data];
+
+        const parsedSections: Section[] = arrData.map((item: any) => ({
+          type: item.simulacao_campos_produtos_type,
+          title: item.simulacao_campos_produtos_title,
+          items: JSON.parse(item.simulacao_campos_produtos_items),
+          fields: JSON.parse(item.simulacao_campos_produtos_fields),
+        }));
+
+        setSections(parsedSections);
+      } catch (error) {
+        console.error("Erro ao carregar campos da simulação:", error);
+      }
     }
-  ];
+
+    fetchSections();
+  }, [produtoHash]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const buildRequestBody = () => {
-    const fields = sections[0].fields;
+    if (!sections.length) return {};
+
+    const fields = sections[0].fields; // assumindo 1 seção (igual antes)
     const body: Record<string, any> = {
       produto_hash: produtoHash,
-      taxa_banco: "20"
+      taxa_banco: "20",
     };
 
     fields.forEach(({ key, type }) => {
@@ -96,6 +133,7 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
       }
 
       if (type === "date") {
+        // se valor no formato dd/mm/yyyy converte para yyyy-mm-dd
         const parts = value.split("/");
         if (parts.length === 3) {
           value = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -121,7 +159,7 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       setResultado(data);
@@ -145,8 +183,8 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -241,11 +279,12 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
         )}
       </div>
 
-      {sections.map((section, i) => (
-        <div key={i} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {section.items.map(renderInputField)}
-        </div>
-      ))}
+      {sections.length > 0 &&
+        sections.map((section, i) => (
+          <div key={i} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {section.items.map(renderInputField)}
+          </div>
+        ))}
 
       {resultado?.mensagem && (
         <Card>
