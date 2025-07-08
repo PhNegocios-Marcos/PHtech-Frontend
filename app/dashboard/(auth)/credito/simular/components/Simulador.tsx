@@ -19,6 +19,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import PropostaCliente from "./proposta";
 import Cadastrar from "./cadastrarCliente";
+import axios from "axios";
+
 
 interface SimuladorFgtsProps {
   produtoHash: string;
@@ -68,47 +70,37 @@ export default function SimuladorFgts({
 
   // Função para carregar os campos da API na montagem do componente
   useEffect(() => {
-    async function fetchSections() {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/simulacao-campos-produtos/listar`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              simulacao_campos_produtos_produto_id: produtoHash,
-            }),
-          }
-        );
-        if (!response.ok) {
-          console.error("Erro ao buscar campos do produto");
-          return;
+  async function fetchSections() {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/simulacao-campos-produtos/listar`,
+        {
+          params: {
+            simulacao_campos_produtos_produto_id: produtoHash,
+          },
         }
-        const data = await response.json();
+      );
 
-        // Mapear o retorno para montar sections
-        // O retorno deve ter objetos com keys como:
-        // simulacao_campos_produtos_type, simulacao_campos_produtos_title, simulacao_campos_produtos_items, simulacao_campos_produtos_fields
-        // itens e fields são strings JSON, precisamos parsear
+      const data = response.data;
 
-        // Se vier um array, mapeia todos, senão trata um único objeto
-        const arrData = Array.isArray(data) ? data : [data];
+      // Se vier um array, mapeia todos, senão trata um único objeto
+      const arrData = Array.isArray(data) ? data : [data];
 
-        const parsedSections: Section[] = arrData.map((item: any) => ({
-          type: item.simulacao_campos_produtos_type,
-          title: item.simulacao_campos_produtos_title,
-          items: JSON.parse(item.simulacao_campos_produtos_items),
-          fields: JSON.parse(item.simulacao_campos_produtos_fields),
-        }));
+      const parsedSections: Section[] = arrData.map((item: any) => ({
+        type: item.simulacao_campos_produtos_type,
+        title: item.simulacao_campos_produtos_title,
+        items: JSON.parse(item.simulacao_campos_produtos_items),
+        fields: JSON.parse(item.simulacao_campos_produtos_fields),
+      }));
 
-        setSections(parsedSections);
-      } catch (error) {
-        console.error("Erro ao carregar campos da simulação:", error);
-      }
+      setSections(parsedSections);
+    } catch (error) {
+      console.error("Erro ao carregar campos da simulação:", error);
     }
+  }
 
-    fetchSections();
-  }, [produtoHash]);
+  fetchSections();
+}, [produtoHash]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
