@@ -5,7 +5,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import CampoBoasVindas from "@/components/boasvindas";
 import { Combobox } from "./components/Combobox";
 import SimuladorFgts from "./components/Simulador";
-import Proposta from "./components/cadastrarCliente"; // importe seu componente Proposta
+import Proposta from "./components/cadastrarCliente";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,10 +15,13 @@ interface Produto {
   hash: string;
 }
 
+
+
 export default function CreditSimular() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Produto | null>(null);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
+  const [simulacao, setSimulacao] = useState<any>(null);
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -29,7 +32,7 @@ export default function CreditSimular() {
         const formatado = data.map((item: any) => ({
           id: item.id,
           name: item.nome,
-          hash: item.id,
+          hash: item.id
         }));
 
         setProdutos(formatado);
@@ -41,9 +44,9 @@ export default function CreditSimular() {
     fetchProdutos();
   }, []);
 
-  // Callback para abrir a tela de proposta com o CPF
-  const handleAbrirCadastro = (cpf: string) => {
+  const handleAbrirCadastro = (cpf: string, dadosSimulacao: any) => {
     setCpfProposta(cpf);
+    setSimulacao(dadosSimulacao);
   };
 
   return (
@@ -52,7 +55,7 @@ export default function CreditSimular() {
       <div className="space-y-6">
         {!cpfProposta ? (
           <>
-            <div className="w-[400px] mt-10">
+            <div className="mt-10 w-[400px]">
               <Combobox
                 data={produtos}
                 displayField="name"
@@ -67,18 +70,16 @@ export default function CreditSimular() {
             {selectedProduct?.name.toLowerCase() && (
               <SimuladorFgts
                 produtoHash={selectedProduct.hash}
-                onCadastrarCliente={handleAbrirCadastro} // passa callback
+                onCadastrarCliente={(cpf, dadosSimulacao) =>
+                  handleAbrirCadastro(cpf, dadosSimulacao)
+                }
                 proutoName={selectedProduct.name.toLowerCase()}
               />
             )}
-
-            {/* Futuro suporte para "consignado"
-            {selectedProduct?.name.toLowerCase() === "consignado" && (
-              <SimuladorConsignado produtoHash={selectedProduct.hash} />
-            )} */}
           </>
         ) : (
-          <Proposta cpf={cpfProposta} />
+          // ✅ usa os dados reais da simulação
+          simulacao && <Proposta cpf={cpfProposta} simulacao={simulacao} />
         )}
       </div>
     </ProtectedRoute>

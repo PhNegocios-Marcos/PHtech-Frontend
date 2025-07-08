@@ -45,7 +45,9 @@ const data: Project[] = [
     id: 1,
     name: "Product Development",
     client: {
-      avatar: `${process.env.ASSETS_URL}/avatars/01.png`,
+      // avatar: `${process.env.ASSETS_URL}/avatars/01.png`,
+      avatar: "",
+
       name: "Kevin Heal"
     },
     date: "20/03/2024",

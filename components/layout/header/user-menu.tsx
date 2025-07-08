@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function UserMenu() {
-
   const logOut = () => {
     sessionStorage.clear(); // ou removeItem("token"), etc.
     window.location.href = "/dashboard/login";
@@ -21,7 +20,9 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar>
-          <AvatarImage src={`${process.env.ASSETS_URL}/avatars/01.png`} alt="shadcn ui kit" />
+          {/* <AvatarImage src={`${process.env.ASSETS_URL}/avatars/01.png`} alt="shadcn ui kit" /> */}
+          <AvatarImage alt="shadcn ui kit" />
+
           <AvatarFallback className="rounded-lg">TB</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

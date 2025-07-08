@@ -12,11 +12,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-interface CadastrarProps {
-  cpf: string;
-  simulacao: any;
-  onCadastrado?: (cpf: string, simulacao: any) => void;
-}
+// interface CadastrarProps {
+//   cpf: string;
+//   simulacao: any;
+//   onCadastrado?: (cpf: string, simulacao: any) => void;
+// }
 
 interface CadastrarProps {
   cpf: string;
@@ -24,6 +24,7 @@ interface CadastrarProps {
   onCadastrado?: (cpf: string, simulacao: any) => void;
   onClienteExiste?: (cpf: string) => void; // << adicione aqui
 }
+
 
 
 export default function Cadastrar({

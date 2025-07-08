@@ -20,10 +20,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import PropostaCliente from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 
-interface Props {
+interface SimuladorFgtsProps {
   produtoHash: string;
+  onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void; // aceita dois parâmetros
   proutoName: string;
-  onCadastrarCliente?: (cpf: string) => void;
 }
 
 interface Parcela {
@@ -43,7 +43,7 @@ interface ResultadoSimulacao {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoName }: Props) {
+export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoName }: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
   const [loading, setLoading] = useState(false);
@@ -200,7 +200,6 @@ export default function SimuladorFgts({ produtoHash, onCadastrarCliente, proutoN
           placeholder={item.placeholder || ""}
           value={formValues[item.key] || ""}
           onChange={(e) => handleChange(item.key, e.target.value)}
-          className="w-full rounded border border-gray-300 px-3 py-2"
         />
       </div>
     );
