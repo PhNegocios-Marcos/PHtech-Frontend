@@ -6,6 +6,7 @@ import CampoBoasVindas from "@/components/boasvindas";
 import { Combobox } from "./components/Combobox";
 import SimuladorFgts from "./components/Simulador";
 import Proposta from "./components/cadastrarCliente";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,11 +23,16 @@ export default function CreditSimular() {
   const [selectedProduct, setSelectedProduct] = useState<Produto | null>(null);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [simulacao, setSimulacao] = useState<any>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/produtos/listar`);
+        const response = await fetch(`${API_BASE_URL}/produtos/listar`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         const data = await response.json();
 
         const formatado = data.map((item: any) => ({

@@ -13,17 +13,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ProcessStepper } from "./process";
 
-type Usuario = {
+type Proposta = {
   id: string;
-  nome: string;
-  cpf: string;
-  email: string;
-  tipo_acesso: string;
-  telefone: string;
-  endereco: string;
+  Correspondente: string;
+  Operação: string;
+  Produto: string;
+  Tomador: string;
+  CPF: string;
+  Valor: string;
+  Data: string;
   status: number;
-  cnpj: string;
-  perfil: string;
+  roteiro: string;
+  Taxa: string;
 };
 
 type Equipe = {
@@ -33,20 +34,20 @@ type Equipe = {
   status: number;
 };
 
-type UsuarioDrawerProps = {
+type PropostaDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  usuario: Usuario | Equipe | null;
+  Proposta: Proposta | null;
 };
 
-export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
-  const [formData, setFormData] = useState<Usuario | Equipe | null>(null);
+export function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaDrawerProps) {
+  const [formData, setFormData] = useState<Proposta | null>(null);
 
   useEffect(() => {
-    if (isOpen && usuario) {
-      setFormData({ ...usuario });
+    if (isOpen && Proposta) {
+      setFormData({ ...Proposta });
     }
-  }, [usuario, isOpen]);
+  }, [Proposta, isOpen]);
 
   if (!isOpen || !formData) return null;
 
@@ -74,11 +75,11 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
         </TabsList>
 
         <TabsContent value="Informações" className="space-y-4">
-          <Informacoes perfil={formData} onClose={onClose} />
+          <Informacoes Proposta={formData} onClose={onClose} />
         </TabsContent>
 
         <TabsContent value="Envolvidos">
-          <Envolvidos equipeNome={formData.nome} />
+          <Envolvidos />
         </TabsContent>
 
         <TabsContent value="Operação">

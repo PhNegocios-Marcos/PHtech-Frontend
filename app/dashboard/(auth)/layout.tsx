@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { tokensToHast } from "shiki";
+
+const TEMPO_INATIVIDADE = 30 * 60 * 1000; // 30 minutos
+// const TEMPO_INATIVIDADE = 30 * 1000; // 30 minutos
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -23,41 +27,29 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     setDefaultOpen(sidebarCookie !== "false");
   }, []);
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     // console.log("Token ausente: redirecionando para login em 2 segundos");
-  //     const timer = setTimeout(() => {
-  //       router.push("/dashboard/login");
-  //     }, 2000);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  //     return () => clearTimeout(timer); // limpa caso o componente desmonte antes
-  //   }
-  // }, [token, tokenExpiraEm, router]);
+  const handleInatividade = () => {
+    // alert("Você está inativo há 30 minutos!");
+    router.push("/dashboard/login");
+  };
 
-  // useEffect(() => {
-  //   if (!token || !tokenExpiraEm) return;
+  const resetTimer = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(handleInatividade, TEMPO_INATIVIDADE);
+  };
 
-  //   const timeoutInicial = setTimeout(() => {
-  //     const agora = new Date();
-  //     const expira = new Date(tokenExpiraEm);
-  //     const tempoRestante = expira.getTime() - agora.getTime();
+  useEffect(() => {
+    const eventos = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+    eventos.forEach((event) => window.addEventListener(event, resetTimer));
 
-  //     if (tempoRestante <= 0) {
-  //       router.push("/dashboard/login");
-  //       return;
-  //     }
+    resetTimer(); // inicia o timer ao montar
 
-  //     const timeoutExpiracao = setTimeout(() => {
-  //       router.push("/dashboard/login");
-  //     }, tempoRestante);
-
-  //     // Limpa o timeout de expiração se o token mudar antes do tempo
-  //     return () => clearTimeout(timeoutExpiracao);
-  //   }, 100000); // ⏱️ Espera 2 segundos antes de tudo
-
-  //   // Limpa o timeout inicial se o token/tokenExpiraEm mudar
-  //   return () => clearTimeout(timeoutInicial);
-  // }, [token, tokenExpiraEm]);
+    return () => {
+      eventos.forEach((event) => window.removeEventListener(event, resetTimer));
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   if (loading) {
     return (

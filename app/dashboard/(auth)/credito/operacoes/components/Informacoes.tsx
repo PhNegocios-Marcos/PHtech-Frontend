@@ -26,40 +26,40 @@ import {
 } from "@/components/ui/form";
 
 // Validação com Zod
-const perfilSchema = z.object({
+const operacoesSchema = z.object({
   id: z.string(),
-  nome: z.string().min(2),
-  descricao: z.string().optional(),
-  status: z.number()
+  Produto: z.string().min(2),
+  Tomador: z.string().optional(),
+  // status: z.number()
 });
 
-type Perfil = z.infer<typeof perfilSchema>;
+type Proposta = z.infer<typeof operacoesSchema>;
 
-type PerfilDrawerProps = {
+type PropostaDrawerProps = {
   onClose: () => void;
-  perfil: Perfil | null;
+  Proposta: Proposta | null;
 };
 
-export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
-  const methods = useForm<Perfil>({
-    resolver: zodResolver(perfilSchema),
-    defaultValues: perfil || {}
+export function Informacoes({ Proposta, onClose }: PropostaDrawerProps) {
+  const methods = useForm<Proposta>({
+    resolver: zodResolver(operacoesSchema),
+    defaultValues: Proposta || {}
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
-    if (perfil) {
-      methods.reset(perfil);
+    if (Proposta) {
+      methods.reset(Proposta);
     }
-  }, [perfil, methods]);
+  }, [Proposta, methods]);
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: Perfil) => {
+  const onSubmit = async (data: Proposta) => {
     if (!token) {
       console.error("Token global não definido!");
       return;
@@ -94,10 +94,10 @@ export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={methods.control}
-                  name="nome"
+                  name="Produto"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome</FormLabel>
+                      <FormLabel>Produto</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -108,10 +108,10 @@ export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
 
                 <FormField
                   control={methods.control}
-                  name="descricao"
+                  name="Tomador"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descrição</FormLabel>
+                      <FormLabel>Tomador</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -120,7 +120,7 @@ export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
                   )}
                 />
 
-                <FormField
+                {/* <FormField
                   control={methods.control}
                   name="status"
                   render={({ field }) => (
@@ -138,14 +138,10 @@ export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
             </CardContent>
           </Card>
-
-          <div className="col-span-2 p-4">
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
         </form>
       </Form>
     </FormProvider>

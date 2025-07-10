@@ -13,14 +13,13 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableHead,
+  TableHead
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 
 import PropostaCliente from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
-
 
 interface SimuladorFgtsProps {
   produtoHash: string;
@@ -55,7 +54,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function SimuladorFgts({
   produtoHash,
   onCadastrarCliente,
-  proutoName,
+  proutoName
 }: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
@@ -66,41 +65,42 @@ export default function SimuladorFgts({
 
   const { token } = useAuth();
 
-  console.log(produtoHash)
+  console.log(produtoHash);
 
   // Função para carregar os campos da API na montagem do componente
   useEffect(() => {
-  async function fetchSections() {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/simulacao-campos-produtos/listar`,
-        {
-          params: {
-            simulacao_campos_produtos_produto_id: produtoHash,
+    async function fetchSections() {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/simulacao-campos-produtos/listar`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
           },
-        }
-      );
+          params: {
+            simulacao_campos_produtos_produto_id: produtoHash
+          }
+        });
 
-      const data = response.data;
+        const data = response.data;
 
-      // Se vier um array, mapeia todos, senão trata um único objeto
-      const arrData = Array.isArray(data) ? data : [data];
+        // Se vier um array, mapeia todos, senão trata um único objeto
+        const arrData = Array.isArray(data) ? data : [data];
 
-      const parsedSections: Section[] = arrData.map((item: any) => ({
-        type: item.simulacao_campos_produtos_type,
-        title: item.simulacao_campos_produtos_title,
-        items: JSON.parse(item.simulacao_campos_produtos_items),
-        fields: JSON.parse(item.simulacao_campos_produtos_fields),
-      }));
+        const parsedSections: Section[] = arrData.map((item: any) => ({
+          type: item.simulacao_campos_produtos_type,
+          title: item.simulacao_campos_produtos_title,
+          items: JSON.parse(item.simulacao_campos_produtos_items),
+          fields: JSON.parse(item.simulacao_campos_produtos_fields)
+        }));
 
-      setSections(parsedSections);
-    } catch (error) {
-      console.error("Erro ao carregar campos da simulação:", error);
+        setSections(parsedSections);
+      } catch (error) {
+        console.error("Erro ao carregar campos da simulação:", error);
+      }
     }
-  }
 
-  fetchSections();
-}, [produtoHash]);
+    fetchSections();
+  }, [produtoHash]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -112,7 +112,7 @@ export default function SimuladorFgts({
     const fields = sections[0].fields; // assumindo 1 seção (igual antes)
     const body: Record<string, any> = {
       produto_hash: produtoHash,
-      taxa_banco: "20",
+      taxa_banco: "20"
     };
 
     fields.forEach(({ key, type }) => {
@@ -150,8 +150,8 @@ export default function SimuladorFgts({
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
       });
       const data = await response.json();
       setResultado(data);
@@ -175,8 +175,8 @@ export default function SimuladorFgts({
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {
@@ -266,9 +266,7 @@ export default function SimuladorFgts({
         <Button onClick={handleSimular} disabled={loading}>
           {loading ? "Simulando..." : "Simular"}
         </Button>
-        {resultado?.mensagem && (
-          <Button onClick={handleCadastrarCliente}>Montar proposta</Button>
-        )}
+        {resultado?.mensagem && <Button onClick={handleCadastrarCliente}>Montar proposta</Button>}
       </div>
 
       {sections.length > 0 &&

@@ -1,166 +1,58 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useEffect } from "react";
+import axios from "axios";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { Combobox } from "@/components/Combobox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// Validação com Zod
+const perfilSchema = z.object({
+  id: z.string(),
+  nome: z.string().min(2),
+  descricao: z.string().optional(),
+  status: z.number()
+});
 
-type Acao = "criar" | "ver" | "atualizar" | "desativar";
+type Perfil = z.infer<typeof perfilSchema>;
 
-type Permissao = {
-  id: string;
-  acao: Acao;
-  status: number;
+type PerfilDrawerProps = {
+  onClose: () => void;
+  perfil: Perfil | null;
 };
 
-type PermissoesPorSecao = {
-  [secao: string]: Partial<Record<Acao, Permissao>>;
-};
+export function Envolvidos() {
+  const methods = useForm<Perfil>({
+    resolver: zodResolver(perfilSchema),
+  });
 
-type UsuariosTableProps = {
-  equipeNome: string;
-};
-
-export function Envolvidos({ equipeNome }: UsuariosTableProps) {
-  const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
-  const [equipeLabel, setEquipeLabel] = useState<string>("");
-  const { token } = useAuth();
-
-  const atualizarStatusPermissao = async (id: string, novoStatus: 0 | 1) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/rel_permissao_perfil/atualizar`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ id, status: novoStatus }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.detail || "Erro ao atualizar permissão");
-      }
-
-      setPermissoesPorSecao((prev) => {
-        const atualizado: PermissoesPorSecao = { ...prev };
-
-        for (const secao in atualizado) {
-          for (const acao in atualizado[secao]) {
-            const perm = atualizado[secao][acao as Acao];
-            if (perm?.id === id) {
-              atualizado[secao][acao as Acao] = { ...perm, status: novoStatus };
-            }
-          }
-        }
-
-        return atualizado;
-      });
-    } catch (error: any) {
-      console.error("Erro ao atualizar permissão:", error.message || error);
-    }
-  };
-
-  useEffect(() => {
-    async function fetchPermissoes() {
-      if (!token || !equipeNome) return;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/rel_permissao_perfil/${equipeNome}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar permissões da equipe");
-        }
-
-        const data = await response.json();
-        setEquipeLabel(data.perfil ?? equipeNome);
-
-        const permissoes = data.permissões || {};
-        const novoFormato: PermissoesPorSecao = {};
-
-        for (const secao in permissoes) {
-          for (const item of permissoes[secao]) {
-            const nome = item.permissao_nome; // exemplo: "Perfis_criar"
-            const partes = nome.split("_");
-            const acao = partes[1] as Acao;
-
-            if (!["criar", "ver", "atualizar", "desativar"].includes(acao)) continue;
-
-            if (!novoFormato[secao]) {
-              novoFormato[secao] = {};
-            }
-
-            novoFormato[secao][acao] = {
-              id: item.id_relacionamento,
-              acao,
-              status: item.permissao_status,
-            };
-          }
-        }
-
-        setPermissoesPorSecao(novoFormato);
-      } catch (error: any) {
-        console.error("Erro ao buscar dados:", error.message || error);
-      }
-    }
-
-    fetchPermissoes();
-  }, [token, equipeNome]);
-
-  const acoes: Acao[] = ["criar", "ver", "atualizar", "desativar"];
 
   return (
-    <Card className="col-span-2">
-      <CardHeader>
-        <CardTitle>Permissões do Perfil: {equipeLabel}</CardTitle>
-      </CardHeader>
-      <CardContent className="overflow-auto">
-        <table className="min-w-full border text-sm">
-          <thead className="bg-muted">
-            <tr>
-              <th className="border px-2 py-1 text-left">Seção</th>
-              {acoes.map((acao) => (
-                <th key={acao} className="border px-2 py-1 capitalize text-center">
-                  {acao}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(permissoesPorSecao).map(([secao, acoesObj]) => (
-              <tr key={secao} className="even:bg-muted/30">
-                <td className="border px-2 py-1 capitalize font-medium">{secao.toLowerCase()}</td>
-                {acoes.map((acao) => {
-                  const permissao = acoesObj[acao];
-                  return (
-                    <td key={acao} className="border px-2 py-1 text-center">
-                      {permissao ? (
-                        <Checkbox
-                          checked={permissao.status === 1}
-                          onCheckedChange={(checked) =>
-                            atualizarStatusPermissao(permissao.id, checked ? 1 : 0)
-                          }
-                        />
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </CardContent>
-    </Card>
+    <FormProvider {...methods}>
+      <Form {...methods}>
+        <form
+          className="grid grid-cols-2 gap-4 overflow-y-auto p-6">
+          <Card className="col-span-2">
+            <CardHeader>
+              <CardTitle></CardTitle>
+            </CardHeader>
+          </Card>
+        </form>
+      </Form>
+    </FormProvider>
   );
 }

@@ -20,13 +20,13 @@ export default function Page() {
           <CampoBoasVindas />
           <div className="flex items-center space-x-2">
             <CalendarDateRangePicker />
-            <ExportButton />
+            {/* <ExportButton /> */}
           </div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="z-10">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            {/* <TabsTrigger value="overview">Overview</TabsTrigger> */}
             {/* <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="activities" disabled>
             Activities

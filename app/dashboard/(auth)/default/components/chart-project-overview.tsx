@@ -22,8 +22,9 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { useAuth } from "@/contexts/AuthContext";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type ChartConfig = {
   [key: string]: {
@@ -46,6 +47,7 @@ export function ChartProjectOverview() {
   const [timeRange, setTimeRange] = React.useState("90d");
   const [chartData, setChartData] = React.useState<ChartPoint[]>([]);
   const [chartConfig, setChartConfig] = React.useState<ChartConfig>({});
+  const { token } = useAuth();
 
   React.useEffect(() => {
     if (isMobile) {
@@ -55,7 +57,12 @@ export function ChartProjectOverview() {
 
   React.useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/dashboard`)
+      .get(`${API_BASE_URL}/dashboard`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      })
       .then((res) => {
         const { charConfig, dataValues } = res.data;
 
