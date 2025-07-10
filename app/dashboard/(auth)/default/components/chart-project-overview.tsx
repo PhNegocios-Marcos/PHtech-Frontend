@@ -64,8 +64,6 @@ export function ChartProjectOverview() {
           (a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime()
         );
 
-        console.log(dataArray)
-
         setChartData(dataArray);
         setChartConfig(charConfig);
       })
