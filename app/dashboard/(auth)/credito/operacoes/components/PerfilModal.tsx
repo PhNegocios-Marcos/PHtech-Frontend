@@ -1,11 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { EquipeEditForm } from "./editUsuario";
-import { UsuariosPorEquipeTable } from "./listaPromotoras";
-import { Permissoes } from "./listaNovaPermissao";
+import { Informacoes } from "./Informacoes";
+import { Envolvidos } from "./Envolvidos";
+import { Operacao } from "./operacao";
+import { Documentos } from "./documentos"
+import { Assinaturas } from "./assinaturas";
+import { KYC } from "./KYC";
+import { Credito } from "./credito";
+import { Historico } from "./historico";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { ProcessStepper } from "./process";
 
 type Usuario = {
   id: string;
@@ -47,30 +53,58 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between border-b pb-4">
-        <h2 className="text-2xl font-semibold">Detalhes da Equipe</h2>
+        <h2 className="text-2xl font-semibold">Detalhes da operação</h2>
         <Button onClick={onClose} variant="outline">
           Voltar
         </Button>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Informações</TabsTrigger>
-          <TabsTrigger value="reports">Permissões</TabsTrigger>
-          <TabsTrigger value="activities">ADD Nova Permissão</TabsTrigger>
+      <ProcessStepper />
+
+      <Tabs defaultValue="Informações" className="space-y-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="Informações">Informações</TabsTrigger>
+          <TabsTrigger value="Envolvidos">Envolvidos</TabsTrigger>
+          <TabsTrigger value="Operação">Operação</TabsTrigger>
+          <TabsTrigger value="Documentos">Documentos</TabsTrigger>
+          <TabsTrigger value="Assinaturas">Assinaturas</TabsTrigger>
+          <TabsTrigger value="KYC">KYC</TabsTrigger>
+          <TabsTrigger value="Crédito">Crédito</TabsTrigger>
+          <TabsTrigger value="Histórico">Histórico</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <EquipeEditForm perfil={formData} onClose={onClose} />
+        <TabsContent value="Informações" className="space-y-4">
+          <Informacoes perfil={formData} onClose={onClose} />
         </TabsContent>
 
-        <TabsContent value="reports">
-          <UsuariosPorEquipeTable equipeNome={formData.nome} />
+        <TabsContent value="Envolvidos">
+          <Envolvidos equipeNome={formData.nome} />
         </TabsContent>
 
-        <TabsContent value="activities">
-          <Permissoes equipeNome={formData.nome} perfilId={formData.id} />
+        <TabsContent value="Operação">
+          <Operacao />
         </TabsContent>
+
+        <TabsContent value="Documentos">
+          <Documentos />
+        </TabsContent>
+
+        <TabsContent value="Assinaturas">
+          <Assinaturas />
+        </TabsContent>
+
+        <TabsContent value="KYC">
+          <KYC />
+        </TabsContent>
+
+        <TabsContent value="Crédito">
+          <Credito />
+        </TabsContent>
+
+        <TabsContent value="Histórico">
+          <Historico />
+        </TabsContent>
+
       </Tabs>
     </div>
   );

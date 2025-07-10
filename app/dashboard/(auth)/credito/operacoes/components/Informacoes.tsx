@@ -40,7 +40,7 @@ type PerfilDrawerProps = {
   perfil: Perfil | null;
 };
 
-export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
+export function Informacoes({ perfil, onClose }: PerfilDrawerProps) {
   const methods = useForm<Perfil>({
     resolver: zodResolver(perfilSchema),
     defaultValues: perfil || {}

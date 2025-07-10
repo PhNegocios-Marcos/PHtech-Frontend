@@ -34,6 +34,7 @@ export default function Page() {
             )}
           </div>
 
+
           {!isCadastroOpen && <OperacoesTable />}
 
         </div>

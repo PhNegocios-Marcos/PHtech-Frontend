@@ -58,12 +58,12 @@ export const page_routes: PageRoutesType[] = [
         href: "/dashboard/credito",
         icon: "BanknoteArrowUp",
         items: [
-          {
-            id: "Credito_Excluidos",
-            title: "Excluidos",
-            href: "/dashboard/credito/excluidos",
-            // icon: "Trash"
-          },
+          // {
+          //   id: "Credito_Excluidos",
+          //   title: "Excluidos",
+          //   href: "/dashboard/credito/excluidos",
+          //   // icon: "Trash"
+          // },
           {
             id: "Credito_Operações",
             title: "Operações",

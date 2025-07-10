@@ -23,7 +23,7 @@ type UsuariosTableProps = {
   equipeNome: string;
 };
 
-export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
+export function Envolvidos({ equipeNome }: UsuariosTableProps) {
   const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
   const [equipeLabel, setEquipeLabel] = useState<string>("");
   const { token } = useAuth();
