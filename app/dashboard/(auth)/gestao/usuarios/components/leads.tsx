@@ -32,6 +32,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { UsuarioPerfil } from "./UsuarioModal";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 type Usuario = {
   id: string;
@@ -73,7 +75,7 @@ export function UsuariosTable() {
   React.useEffect(() => {
     async function fetchUsuarios() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuario/listar`, {
+        const response = await fetch(`${API_BASE_URL}/usuario/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

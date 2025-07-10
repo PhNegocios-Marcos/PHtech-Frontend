@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import axios from "axios";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,12 +13,7 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
@@ -26,44 +22,30 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import axios from "axios";
-
-const generateChartData = async () => {
-  const data = [];
-  let chartConfig = {};
-  const today = new Date();
-
-  const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`).then(response => {
-
-    Object.values(response.data.dataValues).forEach(e => {
-      data.push(e);
-    });
-
-    chartConfig = response.data.charConfig as ChartConfig;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
-  });
-
-  return { data, chartConfig };
+type ChartConfig = {
+  [key: string]: {
+    label: string;
+    color: string;
+  };
 };
 
-(async () => {
-  const { data: chartData, chartConfig } = await generateChartData();
-})
+type ChartPoint = {
+  date: string;
+  [key: string]: number | string;
+};
 
-function capitalize(str) {
+function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
 
 export function ChartProjectOverview() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
-
-
-  // Estado local para guardar os dados do gráfico e config
-  const [chartData, setChartData] = React.useState([]);
-  const [chartConfig, setChartConfig] = React.useState({});
+  const [chartData, setChartData] = React.useState<ChartPoint[]>([]);
+  const [chartConfig, setChartConfig] = React.useState<ChartConfig>({});
 
   React.useEffect(() => {
     if (isMobile) {
@@ -71,38 +53,48 @@ export function ChartProjectOverview() {
     }
   }, [isMobile]);
 
-  // Buscar os dados e config na montagem do componente
   React.useEffect(() => {
-    const fetchData = async () => {
-      const { data, chartConfig } = await generateChartData();
-      setChartData(data);
-      setChartConfig(chartConfig);
-    };
-    fetchData();
+    axios
+      .get(`${API_BASE_URL}/dashboard`)
+      .then((res) => {
+        const { charConfig, dataValues } = res.data;
+
+        // Converte o objeto dataValues em array ordenado por data
+        const dataArray = (Object.values(dataValues) as ChartPoint[]).sort(
+          (a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime()
+        );
+
+        console.log(dataArray)
+
+        setChartData(dataArray);
+        setChartConfig(charConfig);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar gráfico:", err);
+      });
   }, []);
 
-
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date);
+    const date = new Date(item.date as string);
     const referenceDate = new Date();
     let daysToSubtract = 90;
-    if (timeRange === "30d") {
-      daysToSubtract = 30;
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7;
-    }
+    if (timeRange === "30d") daysToSubtract = 30;
+    else if (timeRange === "7d") daysToSubtract = 7;
+
     const startDate = new Date(referenceDate);
     startDate.setDate(startDate.getDate() - daysToSubtract);
     return date >= startDate;
   });
+
+  const dataKeys = Object.keys(chartConfig);
 
   return (
     <Card className="@container/card">
       <CardHeader>
         <CardTitle>Projects Overview</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">Total for the last 3 months</span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="hidden @[540px]/card:block">Total for the selected period</span>
+          <span className="@[540px]/card:hidden">Last period</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -115,6 +107,7 @@ export function ChartProjectOverview() {
             <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
             <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
           </ToggleGroup>
+
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
@@ -136,17 +129,25 @@ export function ChartProjectOverview() {
           </Select>
         </CardAction>
       </CardHeader>
+
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full lg:h-[250px]">
           <AreaChart data={filteredData}>
             <defs>
-              {Object.entries(chartConfig).map(([key, { color }]) => (
-                <linearGradient key={key} id={`fill${capitalize(key)}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+              {dataKeys.map((key) => (
+                <linearGradient
+                  key={key}
+                  id={`fill${capitalizeFirstLetter(key.replace(/\s+/g, ""))}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1">
+                  <stop offset="5%" stopColor={chartConfig[key].color} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={chartConfig[key].color} stopOpacity={0} />
                 </linearGradient>
               ))}
             </defs>
+
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -156,38 +157,39 @@ export function ChartProjectOverview() {
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
+                return date.toLocaleDateString("pt-BR", {
                   month: "short",
                   day: "numeric"
                 });
               }}
             />
+
             <ChartTooltip
               cursor={false}
               defaultIndex={isMobile ? -1 : 10}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleDateString("pt-BR", {
                       month: "short",
                       day: "numeric"
-                    });
-                  }}
+                    })
+                  }
                   indicator="dot"
                 />
               }
             />
-            {Object.entries(chartConfig).map(([key, { color }]) => (
+
+            {dataKeys.map((key) => (
               <Area
                 key={key}
                 dataKey={key}
                 type="natural"
-                fill={`url(#fill${capitalize(key)})`}
-                stroke={color}
+                fill={`url(#fill${capitalizeFirstLetter(key.replace(/\s+/g, ""))})`}
+                stroke={chartConfig[key].color}
                 stackId="a"
               />
             ))}
-            <Area dataKey="tv" type="natural" fill="url(#fillTv)" stroke="#10b981" stackId="a" />
           </AreaChart>
         </ChartContainer>
       </CardContent>
