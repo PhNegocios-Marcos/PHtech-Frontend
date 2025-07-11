@@ -102,17 +102,17 @@ export function OperacoesTable() {
         console.log("data: ", data);
 
         const operacoesArray = data.map((proposta: any) => ({
-          id: proposta.proposta_hash,
-          Correspondente: proposta.proposta_nome,
-          Operação: proposta,
-          Produto: proposta,
-          Tomador: proposta,
-          CPF: proposta.proposta_cpf,
-          Valor: proposta.proposta_valor_solicitado,
-          Data: proposta,
+          id: proposta.id,
+          Correspondente: proposta.Correspondente,
+          Operação: proposta.produto,
+          Produto: proposta.produto,
+          Tomador: proposta.tomador,
+          CPF: proposta.cpf,
+          Valor: proposta.valor,
+          Data: proposta.data,
           status: proposta.status,
-          roteiro: proposta,
-          Taxa: proposta,
+          roteiro: proposta.roteiro,
+          Taxa: proposta.taxa,
         }));
 
         setEquipes(operacoesArray);
