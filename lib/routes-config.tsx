@@ -71,7 +71,7 @@ export const page_routes: PageRoutesType[] = [
             // icon: "Handshake"
           },
           {
-            id: "Credito_Simular",
+            id: "Simular_ver",
             title: "Simular",
             href: "/dashboard/credito/simular",
             // icon: "BetweenHorizontalStart"

@@ -65,7 +65,7 @@ export default function SimuladorFgts({
 
   const { token } = useAuth();
 
-  console.log(produtoHash);
+  // console.log(produtoHash);
 
   // Função para carregar os campos da API na montagem do componente
   useEffect(() => {
@@ -256,7 +256,7 @@ export default function SimuladorFgts({
 
   // Se cpfProposta definido, mostra proposta
   if (cpfProposta) {
-    return <PropostaCliente cpf={cpfProposta} simulacao={resultado?.mensagem} />;
+    return <PropostaCliente cpf={cpfProposta} produtoHash={produtoHash} simulacao={resultado?.mensagem} />;
   }
 
   // Renderiza formulário e botões normais

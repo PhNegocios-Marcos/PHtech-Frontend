@@ -56,7 +56,7 @@ export default function CreditSimular() {
   };
 
   return (
-    <ProtectedRoute requiredPermission="Credito_Simular">
+    <ProtectedRoute requiredPermission="Simular_ver">
       <CampoBoasVindas />
       <div className="space-y-6">
         {!cpfProposta ? (

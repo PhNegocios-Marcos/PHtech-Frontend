@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 import {
   Table,
@@ -81,19 +83,25 @@ interface ClienteApiResponse {
 interface PropostaClienteProps {
   cpf: string;
   simulacao?: Simulacao;
+  produtoHash: string;
 }
 
-export default function PropostaCliente({ cpf, simulacao }: PropostaClienteProps) {
+export default function PropostaCliente({ cpf, simulacao, produtoHash }: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const { token, selectedPromotoraId, userData } = useAuth();
+  
+  // console.log("promotoras: ", selectedPromotoraId)
+  // console.log("id: ", (userData as any)?.id ?? "Usuário")
+
+  const idUser = (userData as any)?.id ?? "null";
 
   useEffect(() => {
     async function fetchCliente() {
       setLoading(true);
       setError(null);
-      console.log("cpf: ", cpf)
+      // console.log("cpf: ", cpf);
       try {
         const res = await fetch(`${API_BASE_URL}/cliente/${cpf}`, {
           headers: {
@@ -140,8 +148,67 @@ export default function PropostaCliente({ cpf, simulacao }: PropostaClienteProps
     .slice(0, 2);
   const endereco = Object.values(cliente.enderecos || {})[0];
 
+  const gerarProposta = async () => {
+    try {
+
+
+      const body = {
+        cliente_hash: cliente.hash,
+        produto_hash: produtoHash, // precisa ser definido em algum lugar (ex: dropdown selecionado)
+        promotora_hash: selectedPromotoraId, // idem
+        responsavel_hash: idUser, // idem
+        cliente_banco_hash: cliente.dados_bancarios?.[0]?.id ?? null, // primeiro dado bancário
+        banco_hash: cliente.dados_bancarios?.[0]?.id_banco ?? null,
+        proposta_nome: cliente.nome,
+        proposta_email: cliente.emails?.email ?? "", // pode ser undefined
+        proposta_telefone: cliente.telefones?.[0]?.numero ?? "", // você pode mapear melhor isso se quiser
+        proposta_numero_documento: cliente.numero_documento,
+        proposta_tipo_documento: cliente.tipo_documento,
+        proposta_cpf: cliente.cpf,
+        proposta_sexo: "", // ❌ não informado no ClienteApiResponse, precisa ser preenchido manualmente
+        proposta_nome_mae: cliente.nome_mae,
+        proposta_nome_pai: cliente.nome_pai,
+        proposta_estado_civil: "", // ❌ não informado, precisa ser preenchido
+        proposta_naturalidade: "", // ❌ não informado, precisa ser preenchido
+        proposta_data_nascimento: "", // ❌ não informado, precisa ser preenchido
+
+        proposta_endereco_cep: cliente.enderecos?.[0]?.cep ?? "",
+        proposta_enderco_logradouro: cliente.enderecos?.[0]?.logradouro ?? "",
+        proposta_endereco_numero: cliente.enderecos?.[0]?.numero ?? "",
+        proposta_endereco_complemento: cliente.enderecos?.[0]?.complemento ?? "",
+        proposta_endereco_bairro: cliente.enderecos?.[0]?.bairro ?? "",
+        proposta_endereco_cidade: cliente.enderecos?.[0]?.cidade ?? "",
+        proposta_endereco_estado: cliente.enderecos?.[0]?.estado ?? "",
+        proposta_endereco_uf: cliente.enderecos?.[0]?.uf ?? "",
+
+        proposta_valor_solicitado: simulacao?.valorCliente ?? 0, // vindo do `PropostaClienteProps.simulacao`
+        proposta_banco_agencia: cliente.dados_bancarios?.[0]?.agencia ?? "",
+        proposta_banco_conta: cliente.dados_bancarios?.[0]?.conta ?? "",
+        proposta_banco_pix: "", // ❌ não informado
+        proposta_banco_tipo_chave_pix: "", // ❌ não informado
+        proposta_status: "EM ANALISE" // ou o status padrão que a sua API espera
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = response.data;
+
+      // console.log(data);
+    } catch (error) {
+      console.error("erro ao gerar proposta", error);
+    }
+  };
+
   return (
     <>
+      <div className="flex justify-end gap-4">
+        <Button onClick={gerarProposta}>Gerar Proposta</Button>
+      </div>
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Dados do Cliente</CardTitle>
