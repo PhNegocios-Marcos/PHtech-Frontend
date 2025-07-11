@@ -79,6 +79,40 @@ export const Telefones = forwardRef(
           </div>
         </div>
 
+        <div className="grid grid-cols-4 gap-2">
+          <div className="col-span-1">
+            <span>DDD</span>
+            <Input
+              {...register("ddd")}
+              placeholder="DDD"
+              value={formData.telefones[0].ddd}
+              onChange={(e) => {
+                setValue("ddd", e.target.value);
+                onChange("telefones.0.ddd", e.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.ddd?.message && <p className="text-sm text-red-600">{errors.ddd.message}</p>}
+          </div>
+
+          <div className="col-span-3">
+            <span>Número</span>
+            <Input
+              {...register("numero")}
+              placeholder="Número"
+              value={formData.telefones[0].numero}
+              onChange={(e) => {
+                setValue("numero", e.target.value);
+                onChange("telefones.0.numero", e.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.numero?.message && (
+              <p className="text-sm text-red-600">{errors.numero.message}</p>
+            )}
+          </div>
+        </div>
+
         <div>
           <span>E-mail</span>
           <Input

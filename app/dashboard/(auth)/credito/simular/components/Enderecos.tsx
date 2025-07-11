@@ -54,10 +54,9 @@ export const Enderecos = forwardRef(
     }));
 
     const buscarEndereco = async (cep: string) => {
-      // Remover tudo que não for número
       const cepLimpo = cep.replace(/\D/g, "");
 
-      if (cepLimpo.length !== 8) return; // só busca se tiver 8 dígitos
+      if (cepLimpo.length !== 8) return;
 
       try {
         const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
@@ -92,128 +91,142 @@ export const Enderecos = forwardRef(
     };
 
     return (
-      <form
-        className="m-10 grid grid-cols-1 gap-5 md:grid-cols-3"
-        onSubmit={(e) => e.preventDefault()}>
-        <div>
-          <span>CEP</span>
-          <Input
-            {...register("cep")}
-            placeholder="CEP"
-            value={e.cep}
-            onChange={async (ev) => {
-              const cep = ev.target.value;
-              setValue("cep", cep);
-              onChange("enderecos.0.cep", cep);
-              if (cep.length === 8) {
-                await buscarEndereco(cep);
-              }
-            }}
-            className="mt-1"
-          />
-          {errors.cep?.message && <p className="text-sm text-red-600">{errors.cep.message}</p>}
-        </div>
+      <div className="m-10">
+        <form
+          className="grid grid-cols-1 gap-5 md:grid-cols-3"
+          onSubmit={(e) => e.preventDefault()}>
+          <div>
+            <span>CEP</span>
+            <Input
+              {...register("cep")}
+              placeholder="CEP"
+              value={e.cep}
+              onChange={async (ev) => {
+                const cep = ev.target.value;
+                setValue("cep", cep);
+                onChange("enderecos.0.cep", cep);
+                if (cep.length === 8) {
+                  await buscarEndereco(cep);
+                }
+              }}
+              className="mt-1"
+            />
+            {errors.cep?.message && <p className="text-sm text-red-600">{errors.cep.message}</p>}
+          </div>
 
-        <div>
-          <span>Logradouro</span>
-          <Input
-            {...register("logradouro")}
-            placeholder="Logradouro"
-            value={e.logradouro}
-            onChange={(ev) => {
-              setValue("logradouro", ev.target.value);
-              onChange("enderecos.0.logradouro", ev.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.logradouro?.message && (
-            <p className="text-sm text-red-600">{errors.logradouro.message}</p>
-          )}
-        </div>
+          <div>
+            <span>Logradouro</span>
+            <Input
+              {...register("logradouro")}
+              placeholder="Logradouro"
+              value={e.logradouro}
+              onChange={(ev) => {
+                setValue("logradouro", ev.target.value);
+                onChange("enderecos.0.logradouro", ev.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.logradouro?.message && (
+              <p className="text-sm text-red-600">{errors.logradouro.message}</p>
+            )}
+          </div>
 
-        <div>
-          <span>Número</span>
-          <Input
-            {...register("numero")}
-            placeholder="Número"
-            value={String(e.numero)}
-            onChange={(ev) => {
-              setValue("numero", ev.target.value);
-              onChange("enderecos.0.numero", Number(ev.target.value));
-            }}
-            className="mt-1"
-          />
-          {errors.numero?.message && (
-            <p className="text-sm text-red-600">{errors.numero.message}</p>
-          )}
-        </div>
+          <div>
+            <span>Número</span>
+            <Input
+              {...register("numero")}
+              placeholder="Número"
+              value={String(e.numero)}
+              onChange={(ev) => {
+                setValue("numero", ev.target.value);
+                onChange("enderecos.0.numero", Number(ev.target.value));
+              }}
+              className="mt-1"
+            />
+            {errors.numero?.message && (
+              <p className="text-sm text-red-600">{errors.numero.message}</p>
+            )}
+          </div>
 
-        <div>
-          <span>Bairro</span>
-          <Input
-            {...register("bairro")}
-            placeholder="Bairro"
-            value={e.bairro}
-            onChange={(ev) => {
-              setValue("bairro", ev.target.value);
-              onChange("enderecos.0.bairro", ev.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.bairro?.message && (
-            <p className="text-sm text-red-600">{errors.bairro.message}</p>
-          )}
-        </div>
+          <div>
+            <span>Bairro</span>
+            <Input
+              {...register("bairro")}
+              placeholder="Bairro"
+              value={e.bairro}
+              onChange={(ev) => {
+                setValue("bairro", ev.target.value);
+                onChange("enderecos.0.bairro", ev.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.bairro?.message && (
+              <p className="text-sm text-red-600">{errors.bairro.message}</p>
+            )}
+          </div>
 
-        <div>
-          <span>Cidade</span>
-          <Input
-            {...register("cidade")}
-            placeholder="Cidade"
-            value={e.cidade}
-            onChange={(ev) => {
-              setValue("cidade", ev.target.value);
-              onChange("enderecos.0.cidade", ev.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.cidade?.message && (
-            <p className="text-sm text-red-600">{errors.cidade.message}</p>
-          )}
-        </div>
+          <div>
+            <span>Cidade</span>
+            <Input
+              {...register("cidade")}
+              placeholder="Cidade"
+              value={e.cidade}
+              onChange={(ev) => {
+                setValue("cidade", ev.target.value);
+                onChange("enderecos.0.cidade", ev.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.cidade?.message && (
+              <p className="text-sm text-red-600">{errors.cidade.message}</p>
+            )}
+          </div>
 
-        <div>
-          <span>Estado</span>
-          <Input
-            {...register("estado")}
-            placeholder="Estado"
-            value={e.estado}
-            onChange={(ev) => {
-              setValue("estado", ev.target.value);
-              onChange("enderecos.0.estado", ev.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.estado?.message && (
-            <p className="text-sm text-red-600">{errors.estado.message}</p>
-          )}
-        </div>
+          <div>
+            <span>Estado</span>
+            <Input
+              {...register("estado")}
+              placeholder="Estado"
+              value={e.estado}
+              onChange={(ev) => {
+                setValue("estado", ev.target.value);
+                onChange("enderecos.0.estado", ev.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.estado?.message && (
+              <p className="text-sm text-red-600">{errors.estado.message}</p>
+            )}
+          </div>
 
-        <div>
-          <span>UF</span>
-          <Input
-            {...register("uf")}
-            placeholder="UF"
-            value={e.uf}
-            onChange={(ev) => {
-              setValue("uf", ev.target.value);
-              onChange("enderecos.0.uf", ev.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.uf?.message && <p className="text-sm text-red-600">{errors.uf.message}</p>}
-        </div>
-      </form>
+          <div>
+            <span>UF</span>
+            <Input
+              {...register("uf")}
+              placeholder="UF"
+              value={e.uf}
+              onChange={(ev) => {
+                setValue("uf", ev.target.value);
+                onChange("enderecos.0.uf", ev.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.uf?.message && <p className="text-sm text-red-600">{errors.uf.message}</p>}
+          </div>
+
+          <div>
+            <span>Complemento</span>
+            <Input
+              placeholder="Complemento"
+              value={e.complemento}
+              onChange={(ev) => {
+                onChange("enderecos.0.complemento", ev.target.value);
+              }}
+              className="mt-1"
+            />
+          </div>
+        </form>
+      </div>
     );
   }
 );

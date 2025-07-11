@@ -12,20 +12,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// interface CadastrarProps {
-//   cpf: string;
-//   simulacao: any;
-//   onCadastrado?: (cpf: string, simulacao: any) => void;
-// }
-
 interface CadastrarProps {
   cpf: string;
   simulacao: any;
   onCadastrado?: (cpf: string, simulacao: any) => void;
-  onClienteExiste?: (cpf: string) => void; // << adicione aqui
+  onClienteExiste?: (cpf: string) => void;
 }
-
-
 
 export default function Cadastrar({
   cpf,
@@ -52,12 +44,18 @@ export default function Cadastrar({
   const [formData, setFormData] = useState({
     nome: "",
     nome_pai: "",
+    nome_mae: "",
     tipo_documento: "1",
     numero_documento: "",
     cpf: cpf,
     sexo: "M",
+    data_nascimento: "",
+    estado_civil: "",
+    naturalidade: "",
+    nacionalidade: "Brasileira",
     telefones: {
       0: { ddd: "", numero: "" },
+      1: { ddd: "", numero: "" }
     },
     enderecos: {
       0: {
@@ -77,14 +75,14 @@ export default function Cadastrar({
         status: 1,
       },
     },
-    dados_bancarios: [
-      {
+    dados_bancarios: {
+      0: {
         id_banco: "019611f9-3d2d-7200-9289-688323e474b5",
         agencia: "",
         conta: "",
         status: 1,
       },
-    ],
+    },
   });
 
   const handleChange = (path: string, value: any) => {

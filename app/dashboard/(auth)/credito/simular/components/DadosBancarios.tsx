@@ -16,9 +16,11 @@ type DadosBancariosFormData = z.infer<typeof dadosBancariosSchema>;
 type DadosBancariosProps = {
   formData: {
     dados_bancarios: {
-      agencia: string;
-      conta: string;
-    }[];
+      0: {
+        agencia: string;
+        conta: string;
+      }
+    }
   };
   onChange: (path: string, value: any) => void;
 };
@@ -44,42 +46,44 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
   }));
 
   return (
-    <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-      {/* <h2 className="mb-2 font-semibold">Dados Bancários</h2> */}
+    <div className="m-10">
+      <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+        <div className="grid w-62 grid-cols-2 gap-2">
+          <div>
+            <span>Agência</span>
+            <Input
+              {...register("agencia")}
+              placeholder="Agência"
+              value={d.agencia}
+              onChange={(e) => {
+                setValue("agencia", e.target.value);
+                onChange("dados_bancarios.0.agencia", e.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.agencia?.message && (
+              <p className="text-sm text-red-600">{errors.agencia.message}</p>
+            )}
+          </div>
 
-      <div className="grid w-62 grid-cols-2 gap-2">
-        <div>
-          <span>Agência</span>
-          <Input
-            {...register("agencia")}
-            placeholder="Agência"
-            value={d.agencia}
-            onChange={(e) => {
-              setValue("agencia", e.target.value);
-              onChange("dados_bancarios.0.agencia", e.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.agencia?.message && (
-            <p className="text-sm text-red-600">{errors.agencia.message}</p>
-          )}
+          <div>
+            <span>Conta</span>
+            <Input
+              {...register("conta")}
+              placeholder="Conta"
+              value={d.conta}
+              onChange={(e) => {
+                setValue("conta", e.target.value);
+                onChange("dados_bancarios.0.conta", e.target.value);
+              }}
+              className="mt-1"
+            />
+            {errors.conta?.message && (
+              <p className="text-sm text-red-600">{errors.conta.message}</p>
+            )}
+          </div>
         </div>
-
-        <div>
-          <span>Conta</span>
-          <Input
-            {...register("conta")}
-            placeholder="Conta"
-            value={d.conta}
-            onChange={(e) => {
-              setValue("conta", e.target.value);
-              onChange("dados_bancarios.0.conta", e.target.value);
-            }}
-            className="mt-1"
-          />
-          {errors.conta?.message && <p className="text-sm text-red-600">{errors.conta.message}</p>}
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 });
