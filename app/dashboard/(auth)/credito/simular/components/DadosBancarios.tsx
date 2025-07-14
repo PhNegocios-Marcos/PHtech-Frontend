@@ -158,3 +158,5 @@ export const DadosBancarios = forwardRef(({ formData, onChange }: DadosBancarios
     </div>
   );
 });
+
+DadosBancarios.displayName = "DadosBancarios";

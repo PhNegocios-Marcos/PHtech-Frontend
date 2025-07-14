@@ -397,3 +397,6 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     </>
   );
 }
+
+
+CadastroPromotoraModal.displayName = "CadastroPromotoraModal";

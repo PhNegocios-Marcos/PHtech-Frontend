@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 
 import {
   Form,
@@ -37,8 +36,8 @@ import {
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  perfil_do_banco: z.enum(["0", "1"]), // se tiver só 0 e 1, mantenho enum string para select
-  status: z.enum(["0", "1"]), // status ativo (1) ou inativo (0)
+  perfil_do_banco: z.enum(["0", "1"]),
+  status: z.enum(["0", "1"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -52,7 +51,7 @@ export default function CadastroPerfilModal({
   isOpen,
   onClose,
 }: CadastroPerfilModalProps) {
-  const methods = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       nome: "",
@@ -77,8 +76,6 @@ export default function CadastroPerfilModal({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Se precisar de token, adicione aqui
-          // Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -90,7 +87,7 @@ export default function CadastroPerfilModal({
 
       alert("Perfil cadastrado com sucesso!");
       onClose();
-      router.refresh(); // Atualiza página ou faça o que precisar
+      router.refresh();
     } catch (error) {
       console.error("Erro ao cadastrar perfil:", error);
       alert("Erro ao cadastrar perfil: " + error);
@@ -112,115 +109,113 @@ export default function CadastroPerfilModal({
         aria-modal="true"
         className="fixed top-0 right-0 z-50 h-full w-1/2 bg-white shadow-lg overflow-auto p-6"
       >
-        <FormProvider {...methods}>
-          <Form {...methods}>
-            <form
-              onSubmit={methods.handleSubmit(onSubmit)}
-              className="flex flex-col h-full"
-            >
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Perfil</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
-              </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col h-full"
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Cadastrar Novo Perfil</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-2xl font-bold hover:text-gray-900"
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+            </div>
 
-              <Card className="flex-grow overflow-auto">
-                <CardHeader>
-                  <CardTitle>Dados do Perfil</CardTitle>
-                </CardHeader>
+            <Card className="flex-grow overflow-auto">
+              <CardHeader>
+                <CardTitle>Dados do Perfil</CardTitle>
+              </CardHeader>
 
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={methods.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome</FormLabel>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome do perfil" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="descricao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Descrição do perfil" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="perfil_do_banco"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Perfil do Banco</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input placeholder="Nome do perfil" {...field} />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          <SelectContent>
+                            <SelectItem value="0">Não</SelectItem>
+                            <SelectItem value="1">Sim</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={methods.control}
-                      name="descricao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input placeholder="Descrição do perfil" {...field} />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          <SelectContent>
+                            <SelectItem value="1">Ativo</SelectItem>
+                            <SelectItem value="0">Inativo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-                    <FormField
-                      control={methods.control}
-                      name="perfil_do_banco"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Perfil do Banco</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="0">Não</SelectItem>
-                              <SelectItem value="1">Sim</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1">Ativo</SelectItem>
-                              <SelectItem value="0">Inativo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="mt-6 flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Cadastrar</Button>
-              </div>
-            </form>
-          </Form>
-        </FormProvider>
+            <div className="mt-6 flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit">Cadastrar</Button>
+            </div>
+          </form>
+        </Form>
       </aside>
     </>
   );

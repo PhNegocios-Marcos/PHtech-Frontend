@@ -126,3 +126,5 @@ export const Telefones = forwardRef(
     );
   }
 );
+
+Telefones.displayName = "Telefones";

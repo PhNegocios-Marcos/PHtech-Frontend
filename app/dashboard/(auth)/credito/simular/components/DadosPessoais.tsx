@@ -232,3 +232,5 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
     </form>
   );
 });
+
+DadosPessoais.displayName = "DadosPessoais";
