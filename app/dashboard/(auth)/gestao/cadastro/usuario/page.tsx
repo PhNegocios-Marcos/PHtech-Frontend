@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 const telefoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
@@ -112,7 +113,7 @@ export default function CadastroPromotora() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/usuario/criar", {
+      const response = await fetch(`${API_BASE_URL}/usuario/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

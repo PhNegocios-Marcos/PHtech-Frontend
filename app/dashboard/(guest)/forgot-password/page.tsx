@@ -19,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Loader2Icon, MailIcon } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/contexts/AuthContext";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address")
@@ -40,7 +41,7 @@ export default function Page() {
 
   const onSubmit = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/auth/email_resetar_senha", {
+      const response = await axios.post(`${API_BASE_URL}/auth/email_resetar_senha`, {
         email: email
       });
 

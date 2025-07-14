@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
 
@@ -87,7 +88,7 @@ export default function CadastroPromotora() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/promotora", {
+      const response = await fetch(`${API_BASE_URL}/promotora`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

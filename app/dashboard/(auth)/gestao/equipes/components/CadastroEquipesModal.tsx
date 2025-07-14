@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
   Form,
@@ -66,7 +67,7 @@ export default function CadastroEquipeModal({
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/equipe/criar", {
+      const response = await fetch(`${API_BASE_URL}/equipe/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

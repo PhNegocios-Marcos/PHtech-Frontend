@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 import {
   Form,
@@ -71,7 +73,7 @@ export default function CadastroPerfilModal({
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/perfil/criar", {
+      const response = await fetch(`${API_BASE_URL}/perfil/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

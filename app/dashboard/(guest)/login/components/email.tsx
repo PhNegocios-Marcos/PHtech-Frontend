@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type OTPFormProps = {
   onNext?: () => void;
@@ -29,7 +30,7 @@ export default function OTPForm({ onNext }: OTPFormProps) {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/email_2fa_verificar", {
+      const response = await fetch(`${API_BASE_URL}/auth/email_2fa_verificar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

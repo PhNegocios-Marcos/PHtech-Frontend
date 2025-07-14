@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Tipo de dados da Promotora
 type Promotora = {
@@ -62,7 +63,7 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
     };
 
     try {
-      await axios.put("http://127.0.0.1:8000/promotora/atualizar", payload, {
+      await axios.put(`${API_BASE_URL}/promotora/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }

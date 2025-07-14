@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
 
@@ -151,7 +152,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     };
 
     try {
-      await axios.post("http://127.0.0.1:8000/promotora/criar", payload, {
+      await axios.post(`${API_BASE_URL}/promotora/criar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Alcadas = {
   id: string;
@@ -56,7 +57,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
     };
 
     try {
-      const response = await axios.put("http://127.0.0.1:8000/usuario/atualizar", payload, {
+      const response = await axios.put(`${API_BASE_URL}/usuario/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

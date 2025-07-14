@@ -5,6 +5,7 @@ import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +67,7 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
     }
 
     try {
-      await axios.put("http://127.0.0.1:8000/perfil/atualizar", data, {
+      await axios.put(`${API_BASE_URL}/perfil/atualizar`, data, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

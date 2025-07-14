@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import FA from "./components/2FA";
 import Promotoras from "./components/promotoras";
 import { useAuth } from "@/contexts/AuthContext";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type ModalType = "none" | "2FA" | "modal2" | "promotoras";
 
@@ -56,7 +57,7 @@ export default function Page() {
       setErrors({});
       setLoginError(null);
 
-      const response = await fetch("http://127.0.0.1:8000/auth/pre_login", {
+      const response = await fetch(`${API_BASE_URL}/auth/pre_login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

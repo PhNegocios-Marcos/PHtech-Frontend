@@ -10,6 +10,7 @@ import Sms from "./sms";
 import Google from "./google";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type ModalType = "none" | "email" | "sms" | "google";
 
@@ -44,7 +45,7 @@ export default function FA({ onNext, onClose }: FAProps) {
 
   const handleSms = async () => {
     try {
-      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+      const login = await fetch("${API_BASE_URL}/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +74,7 @@ export default function FA({ onNext, onClose }: FAProps) {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/sms_2fa_gerar", {
+      const response = await fetch("${API_BASE_URL}/auth/sms_2fa_gerar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +104,7 @@ export default function FA({ onNext, onClose }: FAProps) {
         ? { email, senha, promotora: selectedPromotoraId }
         : { email, senha };
 
-      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+      const login = await fetch("${API_BASE_URL}/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +130,7 @@ export default function FA({ onNext, onClose }: FAProps) {
 
   const handleGoogle = async () => {
     try {
-      const login = await fetch("http://127.0.0.1:8000/auth/login", {
+      const login = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

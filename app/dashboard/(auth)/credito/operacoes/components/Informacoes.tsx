@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 import {
   Card,
   CardContent,
@@ -66,7 +68,7 @@ export function Informacoes({ Proposta, onClose }: PropostaDrawerProps) {
     }
 
     try {
-      await axios.put("http://127.0.0.1:8000/perfil/atualizar", data, {
+      await axios.put(`${API_BASE_URL}/perfil/atualizar`, data, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
