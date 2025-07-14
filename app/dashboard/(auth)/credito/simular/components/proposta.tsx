@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import InputMask from "react-input-mask";
 import axios from "axios";
 
 import {
@@ -58,6 +59,8 @@ interface DadosBancarios {
   agencia: string;
   conta: string;
   status: number;
+  tipo_pix: string;
+  pix: string;
 }
 
 interface Emails {
@@ -86,16 +89,44 @@ interface PropostaClienteProps {
   produtoHash: string;
 }
 
+const pixKeyTypeOptions = [
+  { id: "1", name: "CPF" },
+  { id: "2", name: "Telefone" },
+  { id: "3", name: "E-mail" },
+  { id: "4", name: "Chave Aleatória" }
+];
+
 export default function PropostaCliente({ cpf, simulacao, produtoHash }: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
-  
+
   // console.log("promotoras: ", selectedPromotoraId)
   // console.log("id: ", (userData as any)?.id ?? "Usuário")
 
   const idUser = (userData as any)?.id ?? "null";
+
+  const [tipoPix, setTipoPix] = useState("1"); // default CPF
+  const [pixValue, setPixValue] = useState("");
+
+  // Máscaras para cada tipo PIX
+  const getMask = () => {
+    switch (tipoPix) {
+      case "1": // CPF
+        return "999.999.999-99";
+      case "2": // Telefone (celular brasileiro)
+        return "+55 (99) 99999-9999";
+      case "3": // E-mail não tem máscara, retorna null
+        return null;
+      case "4": // Chave aleatória: sem máscara
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const mask = getMask();
 
   useEffect(() => {
     async function fetchCliente() {
@@ -150,8 +181,6 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
 
   const gerarProposta = async () => {
     try {
-
-
       const body = {
         cliente_hash: cliente.hash,
         produto_hash: produtoHash, // precisa ser definido em algum lugar (ex: dropdown selecionado)
@@ -235,7 +264,7 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
 
             {telefonesAtivos.map((tel, i) => (
               <div key={i}>
-                <Label>Telefone {i + 1}</Label>
+                <Label>Telefone</Label>
                 <Input value={`(${String(tel.ddd)}) ${String(tel.numero)}`} readOnly />
               </div>
             ))}
@@ -251,12 +280,50 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
             )}
 
             {cliente.dados_bancarios && cliente.dados_bancarios.length > 0 && (
-              <div>
-                <Label>Conta Bancária</Label>
+              <div className="space-y-2">
+                <Label htmlFor="agenciaConta">Conta Bancária</Label>
                 <Input
+                  id="agenciaConta"
                   value={`Agência: ${cliente.dados_bancarios[0].agencia} - Conta: ${cliente.dados_bancarios[0].conta}`}
                   readOnly
                 />
+
+                <div className="mb-4">
+                  <Label htmlFor="tipoPix">Tipo de Chave PIX</Label>
+                  <select
+                    id="tipoPix"
+                    value={tipoPix}
+                    onChange={(e) => {
+                      setTipoPix(e.target.value);
+                      setPixValue(""); // limpa input ao mudar tipo
+                    }}
+                    className="block w-full rounded border border-gray-300 p-2">
+                    {pixKeyTypeOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="pixValue">Valor da Chave PIX</Label>
+                  {mask ? (
+                    <InputMask
+                      mask={mask}
+                      value={pixValue}
+                      onChange={(e) => setPixValue(e.target.value)}>
+                      {(inputProps: any) => <Input {...inputProps} id="pixValue" />}
+                    </InputMask>
+                  ) : (
+                    <Input
+                      id="pixValue"
+                      value={pixValue}
+                      onChange={(e) => setPixValue(e.target.value)}
+                      placeholder="Digite a chave PIX"
+                    />
+                  )}
+                </div>
               </div>
             )}
           </div>

@@ -81,6 +81,8 @@ export default function Cadastrar({
         agencia: "",
         conta: "",
         status: 1,
+        tipo_pix: "",
+        pix: "",
       },
     },
   });

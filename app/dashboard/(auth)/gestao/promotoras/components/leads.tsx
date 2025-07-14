@@ -83,6 +83,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedPromotora, setSelectedPromotora] = React.useState<Promotora | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
 
@@ -136,11 +137,18 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
@@ -156,9 +164,9 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
           <Input
-            placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+            placeholder="Filtrar por qualquer campo..."
+            value={globalFilter}
+            onChange={(event) => setGlobalFilter(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>

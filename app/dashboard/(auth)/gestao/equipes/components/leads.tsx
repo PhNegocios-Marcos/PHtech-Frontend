@@ -79,6 +79,7 @@ export function EquipesTable() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedEquipe, setSelectedEquipe] = React.useState<Equipe | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
 
@@ -119,11 +120,18 @@ export function EquipesTable() {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
@@ -149,9 +157,9 @@ export function EquipesTable() {
         <CardContent>
           <div className="mb-4 flex items-center gap-2">
             <Input
-              placeholder="Filtrar por nome..."
-              value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+              placeholder="Filtrar por qualquer campo..."
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
             />
             <DropdownMenu>
@@ -178,12 +186,14 @@ export function EquipesTable() {
           </div>
 
           <div className="rounded-md border">
-            <Table  className="w-full table-fixed">
+            <Table className="w-full table-fixed">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead className="w-32 truncate overflow-hidden whitespace-nowrap" key={header.id}>
+                      <TableHead
+                        className="w-32 truncate overflow-hidden whitespace-nowrap"
+                        key={header.id}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
@@ -198,7 +208,9 @@ export function EquipesTable() {
                       onDoubleClick={() => handleRowDoubleClick(row.original)}
                       className="hover:bg-muted cursor-pointer">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell className="w-32 truncate overflow-hidden whitespace-nowrap" key={cell.id}>
+                        <TableCell
+                          className="w-32 truncate overflow-hidden whitespace-nowrap"
+                          key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

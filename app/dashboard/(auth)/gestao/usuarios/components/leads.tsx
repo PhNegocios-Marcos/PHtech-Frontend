@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -47,20 +48,6 @@ type Usuario = {
   cnpj: string;
 };
 
-const usuarioColumns: ColumnDef<Usuario>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "cpf", header: "CPF" },
-  { accessorKey: "email", header: "Email" },
-  { accessorKey: "telefone", header: "Telefone" },
-  { accessorKey: "endereco", header: "Endereço" },
-  { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-  }
-];
-
 export function UsuariosTable() {
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -69,8 +56,41 @@ export function UsuariosTable() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
+
+  const usuarioColumns = React.useMemo<ColumnDef<Usuario>[]>(
+    () => [
+      { accessorKey: "nome", header: "Nome" },
+      { accessorKey: "cpf", header: "CPF" },
+      { accessorKey: "email", header: "Email" },
+      { accessorKey: "telefone", header: "Telefone" },
+      { accessorKey: "endereco", header: "Endereço" },
+      { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+      },
+      {
+        id: "editar",
+        header: "Editar",
+        cell: ({ row }) => (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSelectedUser(row.original)}
+            title="Editar usuário">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        ),
+        enableSorting: false,
+        enableHiding: false
+      }
+    ],
+    []
+  );
 
   React.useEffect(() => {
     async function fetchUsuarios() {
@@ -119,11 +139,18 @@ export function UsuariosTable() {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
@@ -147,9 +174,9 @@ export function UsuariosTable() {
           <>
             <div className="mb-4 flex items-center gap-2">
               <Input
-                placeholder="Filtrar por nome..."
-                value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-                onChange={(e) => table.getColumn("nome")?.setFilterValue(e.target.value)}
+                placeholder="Filtrar por qualquer campo..."
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
                 className="max-w-sm"
               />
               <DropdownMenu>
@@ -180,13 +207,18 @@ export function UsuariosTable() {
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead
-                          key={header.id}
-                          className="w-32 truncate overflow-hidden whitespace-nowrap">
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      ))}
+                      {headerGroup.headers.map((header, index) => {
+                        const isLast = index === headerGroup.headers.length - 1;
+                        return (
+                          <TableHead
+                            key={header.id}
+                            className={`truncate overflow-hidden whitespace-nowrap ${
+                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                            }`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
+                        );
+                      })}
                     </TableRow>
                   ))}
                 </TableHeader>
@@ -197,13 +229,18 @@ export function UsuariosTable() {
                         key={row.id}
                         onDoubleClick={() => setSelectedUser(row.original)}
                         className="hover:bg-muted cursor-pointer">
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className="w-32 truncate overflow-hidden whitespace-nowrap">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
+                        {row.getVisibleCells().map((cell, index) => {
+                          const isLast = index === row.getVisibleCells().length - 1;
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={`truncate overflow-hidden whitespace-nowrap ${
+                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                              }`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     ))
                   ) : (
