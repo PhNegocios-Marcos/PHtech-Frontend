@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge"; // substituto visual para Switch
+import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -159,5 +161,7 @@ export function PermissoesTable() {
         </TableBody>
       </Table>
     </div>
+    
+    
   );
 }

@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 
 import {
   Table,
@@ -78,6 +79,7 @@ export function OperacoesTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedUser, setSelectedUser] = React.useState<Proposta | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
 
@@ -99,8 +101,6 @@ export function OperacoesTable() {
 
         const data = await response.json();
 
-        console.log("data: ", data);
-
         const operacoesArray = data.map((proposta: any) => ({
           id: proposta.id,
           Correspondente: proposta.Correspondente,
@@ -112,7 +112,7 @@ export function OperacoesTable() {
           Data: proposta.data,
           status: proposta.status,
           roteiro: proposta.roteiro,
-          Taxa: proposta.taxa,
+          Taxa: proposta.taxa
         }));
 
         setEquipes(operacoesArray);
@@ -135,11 +135,18 @@ export function OperacoesTable() {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
@@ -159,9 +166,9 @@ export function OperacoesTable() {
           <>
             <div className="mb-4 flex items-center gap-2">
               <Input
-                placeholder="Filtrar por nome..."
-                value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+                placeholder="Filtrar por qualquer campo..."
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
                 className="max-w-sm"
               />
               <DropdownMenu>
@@ -219,6 +226,28 @@ export function OperacoesTable() {
                   )}
                 </TableBody>
               </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
+              </div>
             </div>
           </>
         )}

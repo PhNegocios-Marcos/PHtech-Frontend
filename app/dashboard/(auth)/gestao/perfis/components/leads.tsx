@@ -36,6 +36,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { PerfilDrawer } from "./PerfilModal";
+import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 
 type Equipe = {
   id: string;
@@ -56,7 +57,6 @@ const equipeColumns: ColumnDef<Equipe>[] = [
     }
   }
 ];
-
 
 export function EquipesTable() {
   const [equipes, setEquipes] = React.useState<Equipe[]>([]);
@@ -156,8 +156,7 @@ export function EquipesTable() {
                         key={column.id}
                         className="capitalize"
                         checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                      >
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
                         {column.id}
                       </DropdownMenuCheckboxItem>
                     ))}
@@ -166,12 +165,14 @@ export function EquipesTable() {
             </div>
 
             <div className="rounded-md border">
-              <Table  className="w-full table-fixed">
+              <Table className="w-full table-fixed">
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
-                        <TableHead className="w-32 truncate overflow-hidden whitespace-nowrap" key={header.id}>
+                        <TableHead
+                          className="w-32 truncate overflow-hidden whitespace-nowrap"
+                          key={header.id}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       ))}
@@ -184,21 +185,43 @@ export function EquipesTable() {
                       <TableRow
                         key={row.id}
                         className="hover:bg-muted cursor-pointer"
-                        onDoubleClick={() => setSelectedUser(row.original)}
-                      >
+                        onDoubleClick={() => setSelectedUser(row.original)}>
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell className="w-32 truncate overflow-hidden whitespace-nowrap" key={cell.id}>
+                          <TableCell
+                            className="w-32 truncate overflow-hidden whitespace-nowrap"
+                            key={cell.id}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
                       </TableRow>
                     ))
-                    
                   ) : (
                     <CarregandoTable />
                   )}
                 </TableBody>
               </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
+              </div>
             </div>
           </>
         )}

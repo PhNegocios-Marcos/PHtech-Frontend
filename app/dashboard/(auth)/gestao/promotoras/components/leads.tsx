@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 
 import {
   Table,
@@ -189,7 +190,9 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead className="w-32 truncate overflow-hidden whitespace-nowrap" key={header.id}>
+                    <TableHead
+                      className="w-32 truncate overflow-hidden whitespace-nowrap"
+                      key={header.id}>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
@@ -204,7 +207,9 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
                     onDoubleClick={() => handleRowClick(row.original)}
                     className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell className="w-32 truncate overflow-hidden whitespace-nowrap" key={cell.id}>
+                      <TableCell
+                        className="w-32 truncate overflow-hidden whitespace-nowrap"
+                        key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -215,6 +220,28 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
               )}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 pt-4">
+          <div className="text-muted-foreground flex-1 text-sm">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}>
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}>
+              <ChevronRight />
+            </Button>
+          </div>
         </div>
 
         <PromotoraDrawer

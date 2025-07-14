@@ -62,7 +62,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Gestão_Modulos",
       "Credito_Excluidos",
       "Credito_Operações",
-      "Credito_Simular"
+      "Credito_Simular",
+      "Simular_ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
