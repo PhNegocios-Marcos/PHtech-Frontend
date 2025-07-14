@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { Pencil } from "lucide-react";
 
 import {
   Table,
@@ -52,25 +53,6 @@ type EquipeDrawerProps = {
   onRefresh: () => void;
 };
 
-const equipeColumns: ColumnDef<Equipe>[] = [
-  { accessorKey: "promotora", header: "Promotora" },
-  { accessorKey: "nome", header: "Nome da Equipe" },
-  {
-    accessorKey: "descricao",
-    header: "Descrição",
-    cell: ({ getValue }) => {
-      const texto = getValue<string>();
-      const palavras = texto.split(" ");
-      return palavras.slice(0, 3).join(" ") + (palavras.length > 3 ? "..." : "");
-    }
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-  }
-];
-
 export function EquipesTable() {
   const [equipes, setEquipes] = React.useState<Equipe[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -80,8 +62,43 @@ export function EquipesTable() {
   const [selectedEquipe, setSelectedEquipe] = React.useState<Equipe | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [selectedUser, setSelectedUser] = React.useState<Equipe | null>(null);
 
   const { token } = useAuth();
+
+  const equipeColumns: ColumnDef<Equipe>[] = [
+    { accessorKey: "promotora", header: "Promotora" },
+    { accessorKey: "nome", header: "Nome da Equipe" },
+    {
+      accessorKey: "descricao",
+      header: "Descrição",
+      cell: ({ getValue }) => {
+        const texto = getValue<string>();
+        const palavras = texto.split(" ");
+        return palavras.slice(0, 3).join(" ") + (palavras.length > 3 ? "..." : "");
+      }
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+    },
+    {
+      id: "editar",
+      header: "Editar",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSelectedUser(row.original)}
+          title="Editar usuário">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
+    }
+  ];
 
   React.useEffect(() => {
     async function fetchEquipes() {
@@ -190,13 +207,18 @@ export function EquipesTable() {
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        className="w-32 truncate overflow-hidden whitespace-nowrap"
-                        key={header.id}>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    ))}
+                    {headerGroup.headers.map((header, index) => {
+                      const isLast = index === headerGroup.headers.length - 1;
+                      return (
+                        <TableHead
+                          key={header.id}
+                          className={`truncate overflow-hidden whitespace-nowrap ${
+                            isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                          }`}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableHeader>
@@ -205,15 +227,20 @@ export function EquipesTable() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      onDoubleClick={() => handleRowDoubleClick(row.original)}
+                      onDoubleClick={() => setSelectedUser(row.original)}
                       className="hover:bg-muted cursor-pointer">
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          className="w-32 truncate overflow-hidden whitespace-nowrap"
-                          key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell, index) => {
+                        const isLast = index === row.getVisibleCells().length - 1;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={`truncate overflow-hidden whitespace-nowrap ${
+                              isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                            }`}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))
                 ) : (

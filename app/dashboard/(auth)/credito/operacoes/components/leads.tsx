@@ -14,6 +14,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import {
   Table,
@@ -52,26 +53,6 @@ type Proposta = {
   Taxa: string;
 };
 
-const equipeColumns: ColumnDef<Proposta>[] = [
-  { accessorKey: "Correspondente", header: "Correspondente" },
-  { accessorKey: "Operação", header: "Operação" },
-  { accessorKey: "Produto", header: "Produto" },
-  { accessorKey: "Tomador", header: "Tomador" },
-  { accessorKey: "CPF", header: "CPF/CNPJ" },
-  { accessorKey: "Valor", header: "Valor principal" },
-  { accessorKey: "Data", header: "Data de início" },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ getValue }) => {
-      const valor = getValue<number>();
-      return valor === 1 ? "Ativo" : "Inativo";
-    }
-  },
-  { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
-  { accessorKey: "Taxa", header: "Taxa" }
-];
-
 export function OperacoesTable() {
   const [equipes, setEquipes] = React.useState<Proposta[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -82,6 +63,41 @@ export function OperacoesTable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
+
+  const equipeColumns: ColumnDef<Proposta>[] = [
+    { accessorKey: "Correspondente", header: "Correspondente" },
+    { accessorKey: "Operação", header: "Operação" },
+    { accessorKey: "Produto", header: "Produto" },
+    { accessorKey: "Tomador", header: "Tomador" },
+    { accessorKey: "CPF", header: "CPF/CNPJ" },
+    { accessorKey: "Valor", header: "Valor principal" },
+    { accessorKey: "Data", header: "Data de início" },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ getValue }) => {
+        const valor = getValue<number>();
+        return valor === 1 ? "Ativo" : "Inativo";
+      }
+    },
+    { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
+    { accessorKey: "Taxa", header: "Taxa" },
+    {
+      id: "editar",
+      header: "Editar",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSelectedUser(row.original)}
+          title="Editar usuário">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
+    }
+  ];
 
   React.useEffect(() => {
     async function fetchEquipes() {
@@ -199,11 +215,18 @@ export function OperacoesTable() {
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      ))}
+                      {headerGroup.headers.map((header, index) => {
+                        const isLast = index === headerGroup.headers.length - 1;
+                        return (
+                          <TableHead
+                            key={header.id}
+                            className={`truncate overflow-hidden whitespace-nowrap ${
+                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                            }`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
+                        );
+                      })}
                     </TableRow>
                   ))}
                 </TableHeader>
@@ -212,13 +235,20 @@ export function OperacoesTable() {
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        className="hover:bg-muted cursor-pointer"
-                        onDoubleClick={() => setSelectedUser(row.original)}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
+                        onDoubleClick={() => setSelectedUser(row.original)}
+                        className="hover:bg-muted cursor-pointer">
+                        {row.getVisibleCells().map((cell, index) => {
+                          const isLast = index === row.getVisibleCells().length - 1;
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={`truncate overflow-hidden whitespace-nowrap ${
+                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                              }`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     ))
                   ) : (

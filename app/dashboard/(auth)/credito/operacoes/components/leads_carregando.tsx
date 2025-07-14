@@ -12,7 +12,7 @@ export function CarregandoTable() {
     <>
       {Array.from({ length: 5 }).map((_, rowIndex) => (
         <TableRow key={rowIndex}>
-          {Array.from({ length: 10 }).map((_, cellIndex) => (
+          {Array.from({ length: 11 }).map((_, cellIndex) => (
             <TableCell
               key={cellIndex}
               className="truncate overflow-hidden whitespace-nowrap"

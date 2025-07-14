@@ -14,6 +14,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import {
   Table,
@@ -38,39 +39,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { PromotoraDrawer, Promotora } from "./PromotoraModal";
 
-const promotoraColumns: ColumnDef<Promotora>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "razao_social", header: "Razão Social" },
-  { accessorKey: "cnpj", header: "CNPJ" },
-  { accessorKey: "representante", header: "Representante" },
-  { accessorKey: "master", header: "É Master?" },
-  {
-    accessorKey: "rateio_master",
-    header: "Rateio Master",
-    cell: ({ getValue }) => {
-      const valor = getValue<number>();
-      // Converte para inteiro e adiciona %
-      return `${Math.round(valor)}%`;
-    }
-  },
-  {
-    accessorKey: "rateio_sub",
-    header: "Rateio Sub",
-    cell: ({ getValue }) => {
-      const valor = getValue<number>();
-      return `${Math.round(valor)}%`;
-    }
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ getValue }) => {
-      const valor = getValue<number>();
-      return valor === 1 ? "Ativo" : "Inativo";
-    }
-  }
-];
-
 type PromotorasTableProps = {
   onSelectPromotora: (promotora: Promotora) => void;
 };
@@ -84,8 +52,57 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const [selectedPromotora, setSelectedPromotora] = React.useState<Promotora | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [selectedUser, setSelectedUser] = React.useState<Promotora | null>(null);
 
   const { token } = useAuth();
+
+  const promotoraColumns: ColumnDef<Promotora>[] = [
+    { accessorKey: "nome", header: "Nome" },
+    { accessorKey: "razao_social", header: "Razão Social" },
+    { accessorKey: "cnpj", header: "CNPJ" },
+    { accessorKey: "representante", header: "Representante" },
+    { accessorKey: "master", header: "É Master?" },
+    {
+      accessorKey: "rateio_master",
+      header: "Rateio Master",
+      cell: ({ getValue }) => {
+        const valor = getValue<number>();
+        // Converte para inteiro e adiciona %
+        return `${Math.round(valor)}%`;
+      }
+    },
+    {
+      accessorKey: "rateio_sub",
+      header: "Rateio Sub",
+      cell: ({ getValue }) => {
+        const valor = getValue<number>();
+        return `${Math.round(valor)}%`;
+      }
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ getValue }) => {
+        const valor = getValue<number>();
+        return valor === 1 ? "Ativo" : "Inativo";
+      }
+    },
+    {
+      id: "editar",
+      header: "Editar",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSelectedUser(row.original)}
+          title="Editar usuário">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
+    }
+  ];
 
   React.useEffect(() => {
     async function fetchPromotoras() {
@@ -197,13 +214,18 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      className="w-32 truncate overflow-hidden whitespace-nowrap"
-                      key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const isLast = index === headerGroup.headers.length - 1;
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className={`truncate overflow-hidden whitespace-nowrap ${
+                          isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                        }`}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -212,15 +234,20 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onDoubleClick={() => handleRowClick(row.original)}
+                    onDoubleClick={() => setSelectedUser(row.original)}
                     className="hover:bg-muted cursor-pointer">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        className="w-32 truncate overflow-hidden whitespace-nowrap"
-                        key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell, index) => {
+                      const isLast = index === row.getVisibleCells().length - 1;
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={`truncate overflow-hidden whitespace-nowrap ${
+                            isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                          }`}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))
               ) : (
