@@ -52,7 +52,7 @@ export function ActiveThemeProvider({
 
   // console.log(selectedPromotoraLogo)
 
-  console.log(selectedPromotoraTemas);
+  // console.log(selectedPromotoraTemas);
 
   // Aplica tema com base no tema da promotora
   useEffect(() => {
