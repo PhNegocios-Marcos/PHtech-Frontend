@@ -58,7 +58,7 @@ export function ActiveThemeProvider({
   useEffect(() => {
     if (selectedPromotoraTemas) {
       const themeFromPromotora: ThemeType = {
-        preset: (selectedPromotoraTemas || "default") as Preset,
+        preset: (selectedPromotoraTemas || "sunset-glow") as Preset,
         radius: "default",
         scale: "md",
         contentLayout: "compact"
