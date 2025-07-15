@@ -1,7 +1,7 @@
 export const DEFAULT_THEME = {
-  preset: "ocean-breeze",
-  radius: "lg",
-  scale: "none",
+  preset: "sunset-glow",
+  radius: "md",
+  scale: "md",
   contentLayout: "full"
 } as const;
 

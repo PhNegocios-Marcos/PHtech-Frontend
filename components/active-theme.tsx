@@ -41,7 +41,7 @@ function setThemeCookie(key: string, value: string | null) {
 export function ActiveThemeProvider({
   children,
   initialTheme,
-  promotoraId,
+  promotoraId
 }: {
   children: ReactNode;
   initialTheme?: ThemeType;
@@ -52,6 +52,8 @@ export function ActiveThemeProvider({
 
   // console.log(selectedPromotoraLogo)
 
+  console.log(selectedPromotoraTemas);
+
   // Aplica tema com base no tema da promotora
   useEffect(() => {
     if (selectedPromotoraTemas) {
@@ -59,7 +61,7 @@ export function ActiveThemeProvider({
         preset: (selectedPromotoraTemas || "default") as Preset,
         radius: "default",
         scale: "md",
-        contentLayout: "compact",
+        contentLayout: "compact"
       };
       setTheme(themeFromPromotora);
     }
@@ -85,11 +87,7 @@ export function ActiveThemeProvider({
     updateAttr("theme_scale", theme.scale !== "none" ? theme.scale : null);
   }, [theme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 // Hook para uso do tema
