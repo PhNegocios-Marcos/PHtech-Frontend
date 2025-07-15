@@ -191,6 +191,8 @@ export default function SimuladorFgts({
         return clienteCpf === cpf;
       });
 
+      console.log("cliente Existe: ", clienteExiste);
+
       if (clienteExiste) {
         setCpfProposta(cpf);
         setAbrirCadastro(false);
@@ -256,7 +258,13 @@ export default function SimuladorFgts({
 
   // Se cpfProposta definido, mostra proposta
   if (cpfProposta) {
-    return <PropostaCliente cpf={cpfProposta} produtoHash={produtoHash} simulacao={resultado?.mensagem} />;
+    return (
+      <PropostaCliente
+        cpf={cpfProposta}
+        produtoHash={produtoHash}
+        simulacao={resultado?.mensagem}
+      />
+    );
   }
 
   // Renderiza formulário e botões normais

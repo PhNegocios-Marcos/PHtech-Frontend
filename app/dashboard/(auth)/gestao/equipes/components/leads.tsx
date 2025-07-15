@@ -90,7 +90,7 @@ export function EquipesTable() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSelectedUser(row.original)}
+          onClick={() => handleRowDoubleClick(row.original)}
           title="Editar usuário">
           <Pencil className="h-4 w-4" />
         </Button>
@@ -227,7 +227,7 @@ export function EquipesTable() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      onDoubleClick={() => setSelectedUser(row.original)}
+                      onDoubleClick={() => handleRowDoubleClick(row.original)}
                       className="hover:bg-muted cursor-pointer">
                       {row.getVisibleCells().map((cell, index) => {
                         const isLast = index === row.getVisibleCells().length - 1;

@@ -7,14 +7,14 @@ import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { tokensToHast } from "shiki";
 
 const TEMPO_INATIVIDADE = 30 * 60 * 1000; // 30 minutos
-// const TEMPO_INATIVIDADE = 30 * 1000; // 30 minutos
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { token, tokenExpiraEm, loading } = useAuth();
+
+  // console.log(token)
 
   const [defaultOpen, setDefaultOpen] = useState(true);
 
@@ -30,7 +30,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleInatividade = () => {
-    // alert("Você está inativo há 30 minutos!");
     router.push("/dashboard/login");
   };
 
@@ -50,6 +49,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  // ✅ Verifica se está autenticado
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [loading, token, router]);
 
   if (loading) {
     return (
