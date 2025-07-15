@@ -51,7 +51,7 @@ export default function OTPForm({ onNext }: OTPFormProps) {
 
       setSuccess(true);
 
-      console.log("funcionou");
+      // console.log("funcionou");
 
       // setTimeout(() => {
       //   router.push("/dashboard/default"); // ← fallback

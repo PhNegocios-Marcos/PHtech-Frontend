@@ -54,7 +54,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        console.log("token null");
+        // console.log("token null");
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");

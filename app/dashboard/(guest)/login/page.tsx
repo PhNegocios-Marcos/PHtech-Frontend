@@ -82,9 +82,9 @@ export default function Page() {
       setPromotoras(data?.promotoras);
       setId(data?.id); // ✅ ID do usuário sendo armazenado
 
-      console.log("data: ", data)
+      // console.log("data: ", data)
 
-      console.log(id)
+      // console.log(id)
 
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");

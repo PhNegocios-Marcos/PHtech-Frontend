@@ -62,7 +62,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Usuário atualizado:", response.data);
+      // console.log("Usuário atualizado:", response.data);
       alert("Usuário atualizado com sucesso!");
       onClose();
       window.location.reload();

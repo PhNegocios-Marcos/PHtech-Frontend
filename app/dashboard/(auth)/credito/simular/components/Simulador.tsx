@@ -191,7 +191,7 @@ export default function SimuladorFgts({
         return clienteCpf === cpf;
       });
 
-      console.log("cliente Existe: ", clienteExiste);
+      // console.log("cliente Existe: ", clienteExiste);
 
       if (clienteExiste) {
         setCpfProposta(cpf);

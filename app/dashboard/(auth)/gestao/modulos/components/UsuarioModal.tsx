@@ -62,7 +62,7 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("Usuário atualizado:", response.data);
+      // console.log("Usuário atualizado:", response.data);
       alert("Usuário atualizado com sucesso!");
       onClose(); // fecha o drawer após sucesso
     } catch (error: any) {

@@ -45,7 +45,7 @@ export default function Page() {
         email: email
       });
 
-      console.log("resposta: ", response.data);
+      // console.log("resposta: ", response.data);
       alert("E-mail enviado com sucesseso!");
     } catch (error) {
       // if (error.response) {
