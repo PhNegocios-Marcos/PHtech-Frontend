@@ -98,7 +98,7 @@ export function SubprodutosTable() {
         }
 
         const data = await response.json();
-        console.log("data: ", data)
+        // console.log("data: ", data)
         setSubprodutos(data);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);

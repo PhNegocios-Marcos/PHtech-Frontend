@@ -70,7 +70,7 @@ export function SubprodutoEdit({
   ];
 
   const onSubmit = async (data: Subproduto) => {
-    console.log("subpro: ", data);
+    // console.log("subpro: ", data);
 
     if (!token) {
       console.error("Token global não definido!");
@@ -84,7 +84,7 @@ export function SubprodutoEdit({
       status: data.produtos_subprodutos_status
     };
 
-    console.log("payload", payload);
+    // console.log("payload", payload);
 
     try {
       await axios.put(`${API_BASE_URL}/subprodutos/atualizar`, payload, {
