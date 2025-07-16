@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +28,7 @@ const produtoSchema = z.object({
   prazo_minimo: z.number(),
   prazo_maximo: z.number(),
   id_uy3: z.string().nullable(),
-  cor_grafico: z.string().nullable().optional() // Adicionado .optional() para tornar o campo opcional
+  cor_grafico: z.string().nullable().optional()
 });
 
 type Produto = z.infer<typeof produtoSchema>;
@@ -44,17 +44,20 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
     resolver: zodResolver(produtoSchema),
     defaultValues: {
       ...produto,
-      cor_grafico: produto.cor_grafico || "" // Garante que não será null
+      cor_grafico: produto.cor_grafico || ""
     }
   });
 
   const { token } = useAuth();
 
+  const originalData = useRef<Produto>({ ...produto, cor_grafico: produto.cor_grafico || "" });
+
   useEffect(() => {
     methods.reset({
       ...produto,
-      cor_grafico: produto.cor_grafico || "" // Garante que não será null
+      cor_grafico: produto.cor_grafico || ""
     });
+    originalData.current = { ...produto, cor_grafico: produto.cor_grafico || "" };
   }, [produto, methods]);
 
   const statusOptions = [
@@ -68,8 +71,28 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
       return;
     }
 
+    const updatedFields: Partial<Produto> = { id: data.id };
+
+    for (const key in data) {
+      if (key === "id") continue;
+
+      const newValue = data[key as keyof Produto];
+      const oldValue = originalData.current[key as keyof Produto];
+
+      const hasChanged = JSON.stringify(newValue) !== JSON.stringify(oldValue);
+
+      if (hasChanged && newValue !== undefined) {
+        updatedFields[key as keyof Produto] = newValue as any;
+      }
+    }
+
+    if (Object.keys(updatedFields).length === 1) {
+      alert("Nenhuma alteração detectada.");
+      return;
+    }
+
     try {
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/produtos/atualizar`, data, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/produtos/atualizar`, updatedFields, {
         headers: { Authorization: `Bearer ${token}` }
       });
       onClose();
@@ -90,6 +113,8 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
+
+                {/* Nome */}
                 <FormField
                   control={methods.control}
                   name="nome"
@@ -97,13 +122,14 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input value={field.value ?? ""} onChange={field.onChange} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                {/* Status */}
                 <FormField
                   control={methods.control}
                   name="status"
@@ -114,7 +140,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                         <Combobox
                           data={statusOptions}
                           displayField="name"
-                          value={statusOptions.find((opt) => opt.id === field.value) ?? null}
+                          value={statusOptions.find(opt => opt.id === field.value) ?? null}
                           onChange={(selected) => field.onChange(selected?.id ?? 1)}
                           searchFields={["name"]}
                         />
@@ -124,6 +150,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
+                {/* Idade Mínima */}
                 <FormField
                   control={methods.control}
                   name="idade_minima"
@@ -131,9 +158,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Idade Mínima</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
+                        <Input
+                          type="number"
+                          value={field.value ?? 0}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
@@ -142,6 +169,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
+                {/* Idade Máxima */}
                 <FormField
                   control={methods.control}
                   name="idade_maxima"
@@ -149,9 +177,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Idade Máxima</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
+                        <Input
+                          type="number"
+                          value={field.value ?? 0}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
@@ -160,6 +188,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
+                {/* Prazo Mínimo */}
                 <FormField
                   control={methods.control}
                   name="prazo_minimo"
@@ -167,9 +196,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Prazo Mínimo</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
+                        <Input
+                          type="number"
+                          value={field.value ?? 0}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
@@ -178,6 +207,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
+                {/* Prazo Máximo */}
                 <FormField
                   control={methods.control}
                   name="prazo_maximo"
@@ -185,9 +215,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Prazo Máximo</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
+                        <Input
+                          type="number"
+                          value={field.value ?? 0}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
@@ -196,6 +226,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
+                {/* Cor do Gráfico */}
                 <FormField
                   control={methods.control}
                   name="cor_grafico"
@@ -203,10 +234,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                     <FormItem>
                       <FormLabel>Cor do Gráfico</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field}
-                          value={field.value || ""} // Garante que não será null
-                        />
+                        <Input value={field.value ?? ""} onChange={field.onChange} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

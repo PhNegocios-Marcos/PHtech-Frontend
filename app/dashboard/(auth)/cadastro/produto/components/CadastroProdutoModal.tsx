@@ -55,7 +55,7 @@ export default function CadastroProdutoModal({
       idade_maxima: 0,
       prazo_minimo: 1,
       prazo_maximo: 1,
-      id_uy3: "",
+      id_uy3: "809ebc8f-a1b4-4202-9a4e-da2b7f388cc6",
       cor_grafico: ""
     },
   });
