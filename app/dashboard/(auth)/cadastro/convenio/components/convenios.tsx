@@ -34,33 +34,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil } from "lucide-react";
-import { SubprodutoEdit } from "./editSubproduto";
+import { ConvenioEdit } from "./editConvenio";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type Subproduto = {
-  produtos_subprodutos_id: string;
-  produtos_subprodutos_nome: string;
-  produtos_subprodutos_atividade: string;
-  produtos_subprodutos_status: number;
+type Convenio = {
+  convenio_nome: string;
+  convenio_grupo: string;
+  convenio_prefixo: number;
+  convenio_status: number;
+  convenio_hash: string;
+  convenio_averbador: string;
 };
 
-export function SubprodutosTable() {
-  const [subprodutos, setSubprodutos] = useState<Subproduto[]>([]);
+export function ConveniosTable() {
+  const [convenios, setConvenios] = useState<Convenio[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [selectedSubproduto, setSelectedSubproduto] = useState<Subproduto | null>(null);
+  const [selectedConvenio, setSelectedConvenio] = useState<Convenio | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useAuth();
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const columns: ColumnDef<Subproduto>[] = [
-    { accessorKey: "produtos_subprodutos_nome", header: "Nome" },
-    { accessorKey: "produtos_subprodutos_atividade", header: "Atividade" },
+  const columns: ColumnDef<Convenio>[] = [
+    { accessorKey: "convenio_nome", header: "Nome" },
+    { accessorKey: "convenio_prefixo", header: "Prefixo" },
+    { accessorKey: "convenio_grupo", header: "Grupo" },
+    { accessorKey: "convenio_averbador", header: "Averbador" },
     {
-      accessorKey: "produtos_subprodutos_status",
+      accessorKey: "convenio_status",
       header: "Status",
       cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
     },
@@ -71,8 +75,8 @@ export function SubprodutosTable() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSelectedSubproduto(row.original)}
-          title="Editar subproduto">
+          onClick={() => setSelectedConvenio(row.original)}
+          title="Editar convênio">
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -82,10 +86,10 @@ export function SubprodutosTable() {
   ];
 
   useEffect(() => {
-    async function fetchSubprodutos() {
+    async function fetchConvenios() {
       if (!token) return;
       try {
-        const response = await fetch(`${API_BASE_URL}/subprodutos/listar`, {
+        const response = await fetch(`${API_BASE_URL}/convenio`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -95,22 +99,21 @@ export function SubprodutosTable() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar subprodutos");
+          throw new Error(errorData?.detail || "Erro ao buscar convênios");
         }
 
         const data = await response.json();
-        // console.log("data: ", data)
-        setSubprodutos(data);
+        setConvenios(data);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
       }
     }
 
-    fetchSubprodutos();
+    fetchConvenios();
   }, [token, refreshKey]);
 
   const table = useReactTable({
-    data: subprodutos,
+    data: convenios,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -142,13 +145,13 @@ export function SubprodutosTable() {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Categoria</CardTitle>
+        <CardTitle>Convênios</CardTitle>
       </CardHeader>
       <CardContent>
-        {selectedSubproduto ? (
-          <SubprodutoEdit
-            subproduto={selectedSubproduto}
-            onClose={() => setSelectedSubproduto(null)}
+        {selectedConvenio ? (
+          <ConvenioEdit
+            convenio={selectedConvenio}
+            onClose={() => setSelectedConvenio(null)}
             onRefresh={handleRefresh}
           />
         ) : (

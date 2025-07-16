@@ -25,33 +25,33 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const subprodutoSchema = z.object({
-  produtos_subprodutos_id: z.string().optional(),
-  produtos_subprodutos_nome: z
-    .string()
-    .min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  produtos_subprodutos_atividade: z.string(),
-  produtos_subprodutos_status: z.number()
+const convenioSchema = z.object({
+  convenio_nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  convenio_prefixo: z.number().min(1, "Prefixo é obrigatório"),
+  convenio_grupo: z.string(),
+  convenio_averbador: z.string(),
+  convenio_status: z.number(),
+  convenio_hash: z.string().optional()
 });
 
-type Subproduto = z.infer<typeof subprodutoSchema>;
+type Convenio = z.infer<typeof convenioSchema>;
 
-type SubprodutoDrawerProps = {
-  subproduto: Subproduto;
+type ConvenioDrawerProps = {
+  convenio: Convenio;
   onClose: () => void;
   onRefresh: () => void;
 };
 
-export function SubprodutoEdit({
-  subproduto,
+export function ConvenioEdit({
+  convenio,
   onClose,
   onRefresh
-}: SubprodutoDrawerProps) {
-  const methods = useForm<Subproduto>({
-    resolver: zodResolver(subprodutoSchema),
+}: ConvenioDrawerProps) {
+  const methods = useForm<Convenio>({
+    resolver: zodResolver(convenioSchema),
     defaultValues: {
-      ...subproduto,
-      produtos_subprodutos_status: subproduto.produtos_subprodutos_status ?? 1
+      ...convenio,
+      convenio_status: convenio.convenio_status ?? 1
     }
   });
 
@@ -59,41 +59,39 @@ export function SubprodutoEdit({
 
   useEffect(() => {
     methods.reset({
-      ...subproduto,
-      produtos_subprodutos_status: subproduto.produtos_subprodutos_status ?? 1
+      ...convenio,
+      convenio_status: convenio.convenio_status ?? 1
     });
-  }, [subproduto, methods]);
+  }, [convenio, methods]);
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: Subproduto) => {
-    // console.log("subpro: ", data);
-
+  const onSubmit = async (data: Convenio) => {
     if (!token) {
       console.error("Token global não definido!");
       return;
     }
 
     const payload = {
-      id: data.produtos_subprodutos_id,
-      nome: data.produtos_subprodutos_nome,
-      atividade: data.produtos_subprodutos_atividade,
-      status: data.produtos_subprodutos_status
+      convenio_nome: data.convenio_nome,
+      convenio_prefixo: data.convenio_prefixo,
+      convenio_grupo: data.convenio_grupo,
+      convenio_averbador: data.convenio_averbador,
+      convenio_status: data.convenio_status,
+      convenio_hash: data.convenio_hash
     };
 
-    // console.log("payload", payload);
-
     try {
-      await axios.put(`${API_BASE_URL}/subprodutos/atualizar`, payload, {
+      await axios.put(`${API_BASE_URL}/convenio/${data.convenio_hash}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       onClose();
       onRefresh();
     } catch (error: any) {
-      console.error("Erro ao atualizar subproduto:", error.response?.data || error.message);
+      console.error("Erro ao atualizar convênio:", error.response?.data || error.message);
       alert(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
@@ -108,13 +106,13 @@ export function SubprodutoEdit({
       >
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Editar Categoria</CardTitle>
+            <CardTitle>Editar Convênio</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={methods.control}
-                name="produtos_subprodutos_nome"
+                name="convenio_nome"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
@@ -128,10 +126,28 @@ export function SubprodutoEdit({
 
               <FormField
                 control={methods.control}
-                name="produtos_subprodutos_atividade"
+                name="convenio_prefixo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Atividade</FormLabel>
+                    <FormLabel>Prefixo</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={methods.control}
+                name="convenio_grupo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Grupo</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -142,7 +158,21 @@ export function SubprodutoEdit({
 
               <FormField
                 control={methods.control}
-                name="produtos_subprodutos_status"
+                name="convenio_averbador"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Averbador</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={methods.control}
+                name="convenio_status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
