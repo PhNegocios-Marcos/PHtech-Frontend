@@ -36,18 +36,24 @@ export const page_routes: PageRoutesType[] = [
         id: "Cadastro_ver",
         title: "Cadastro",
         href: "/dashboard/cadastro",
-        icon: "House",
+        icon: "Package",
         items: [
           {
-            id: "Promotora",
-            title: "Promotora",
-            href: "/dashboard/cadastro/promotora",
+            id: "Convenio_Ver",
+            title: "Convenio",
+            href: "/dashboard/cadastro/convenio"
             // icon: "ChartPie"
           },
           {
-            id: "Usuario",
-            title: "Usuario",
-            href: "/dashboard/cadastro/usuario",
+            id: "Produto_Ver",
+            title: "Produto",
+            href: "/dashboard/cadastro/produto"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Categoria_Ver",
+            title: "Categoria",
+            href: "/dashboard/cadastro/categoria"
             // icon: "ChartPie"
           }
         ]
@@ -67,13 +73,13 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Credito_Operações",
             title: "Operações",
-            href: "/dashboard/credito/operacoes",
+            href: "/dashboard/credito/operacoes"
             // icon: "Handshake"
           },
           {
             id: "Simular_ver",
             title: "Simular",
-            href: "/dashboard/credito/simular",
+            href: "/dashboard/credito/simular"
             // icon: "BetweenHorizontalStart"
           }
         ]
@@ -99,43 +105,43 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Alcadas_ver",
             title: "Alçadas",
-            href: "/dashboard/gestao/alcadas",
+            href: "/dashboard/gestao/alcadas"
             // icon: "DoorClosedLocked"
           },
           {
             id: "Promotoras_ver",
             title: "Promotoras",
-            href: "/dashboard/gestao/promotoras",
+            href: "/dashboard/gestao/promotoras"
             // icon: "Building"
           },
           {
             id: "Usuarios_ver",
             title: "Usuarios",
-            href: "/dashboard/gestao/usuarios",
+            href: "/dashboard/gestao/usuarios"
             // icon: "User"
           },
           {
             id: "Equipes_ver",
             title: "Equipes",
-            href: "/dashboard/gestao/equipes",
+            href: "/dashboard/gestao/equipes"
             // icon: "Users"
           },
           {
             id: "Perfis_ver",
             title: "Perfis",
-            href: "/dashboard/gestao/perfis",
+            href: "/dashboard/gestao/perfis"
             // icon: "IdCard"
           },
           {
             id: "Gestão_Cadastro_Promotora",
             title: "Cadastro Promotora",
-            href: "/dashboard/gestao/promotora",
+            href: "/dashboard/gestao/promotora"
             // icon: "ChartPie"
           },
           {
             id: "Gestão_Cadastro_Usuario",
             title: "Cadastro Usuario",
-            href: "/dashboard/gestao/usuario",
+            href: "/dashboard/gestao/usuario"
             // icon: "ChartPie"
           }
         ]

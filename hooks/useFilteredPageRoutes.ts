@@ -63,7 +63,11 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Credito_Excluidos",
       "Credito_Operações",
       "Credito_Simular",
-      "Simular_ver"
+      "Simular_ver",
+      "Cadastro_ver",
+      "Categoria_Ver",
+      "Produto_Ver",
+      "Convenio_Ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
