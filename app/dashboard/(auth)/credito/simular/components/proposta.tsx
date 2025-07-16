@@ -102,7 +102,7 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
 
-  console.log("cliente", cliente);
+  // console.log("cliente", cliente);
 
   // console.log("promotoras: ", selectedPromotoraId)
   // console.log("id: ", (userData as any)?.id ?? "Usuário")

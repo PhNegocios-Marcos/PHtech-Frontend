@@ -113,13 +113,13 @@ export function EquipesTable() {
     },
   });
 
-  if (selectedEquipe) {
-    // renderiza o detalhe substituindo a tabela
-    return (
-      // <EquipeDetalhes equipe={selectedEquipe} onBack={() => setSelectedEquipe(null)} />
-      console.log("ta faltando algo paizão")
-    );
-  }
+  // if (selectedEquipe) {
+  //   // renderiza o detalhe substituindo a tabela
+  //   return (
+  //     // <EquipeDetalhes equipe={selectedEquipe} onBack={() => setSelectedEquipe(null)} />
+  //     console.log("ta faltando algo paizão")
+  //   );
+  // }
 
   // renderiza a listagem enquanto não há seleção
   return (

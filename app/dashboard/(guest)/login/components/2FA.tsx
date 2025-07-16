@@ -90,7 +90,7 @@ export default function FA({ onNext, onClose }: FAProps) {
         return;
       }
 
-      console.log("SMS enviado com sucesso:", data);
+      // console.log("SMS enviado com sucesso:", data);
       setSmsModal("sms");
     } catch (error: any) {
       console.error("Erro ao solicitar SMS:", error);

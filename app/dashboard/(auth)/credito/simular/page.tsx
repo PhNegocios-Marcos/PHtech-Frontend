@@ -163,15 +163,14 @@ export default function CreditSimular() {
                   searchFields={["name"]}
                 />
               )}
-
-              {selectedCategoria && (
-                <SimuladorFgts
-                  produtoHash={selectedCategoria.hash}
-                  onCadastrarCliente={handleAbrirCadastro}
-                  proutoName={selectedCategoria.name.toLowerCase()}
-                />
-              )}
             </div>
+            {selectedCategoria && selectedProduto && (
+              <SimuladorFgts
+                produtoHash={selectedCategoria.hash}
+                onCadastrarCliente={handleAbrirCadastro}
+                proutoName={selectedProduto.name.toLowerCase()}
+              />
+            )}
           </>
         ) : (
           simulacao && <Proposta cpf={cpfProposta} simulacao={simulacao} />
