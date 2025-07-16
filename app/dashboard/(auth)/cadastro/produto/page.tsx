@@ -82,63 +82,65 @@ export default function CadastroProdutoPage() {
   };
 
   return (
-        <ProtectedRoute requiredPermission="Cadastro_ver">
-    
-    <div className="space-y-4">
+    <ProtectedRoute requiredPermission="Cadastro_ver">
       <CampoBoasVindas />
 
-      <h1 className="mb-6 text-2xl font-bold">Cadastrar Novo Produto</h1>
+      <div className="mt-10 space-y-4">
+        <h1 className="mb-6 text-2xl font-bold">Cadastrar Novo Produto</h1>
 
-      <FormProvider {...methods}>
-        <Form {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações do Produto</CardTitle>
-              </CardHeader>
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Informações do Produto</CardTitle>
+                </CardHeader>
 
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {[
-                    { name: "nome", label: "Nome", type: "text" },
-                    { name: "prefixo", label: "Prefixo", type: "text" },
-                    { name: "idade_minima", label: "Idade Mínima", type: "number" },
-                    { name: "idade_maxima", label: "Idade Máxima", type: "number" },
-                    { name: "prazo_minimo", label: "Prazo Mínimo", type: "number" },
-                    { name: "prazo_maximo", label: "Prazo Máximo", type: "number" },
-                    { name: "id_uy3", label: "ID UY3 (UUID)", type: "text" },
-                    { name: "cor_grafico", label: "Cor do Gráfico (ex: var(--cor))", type: "text" }
-                  ].map(({ name, label, type }) => (
-                    <FormField
-                      key={name}
-                      control={methods.control}
-                      name={name as keyof FormData}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{label}</FormLabel>
-                          <FormControl>
-                            <Input type={type} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {[
+                      { name: "nome", label: "Nome", type: "text" },
+                      { name: "prefixo", label: "Prefixo", type: "text" },
+                      { name: "idade_minima", label: "Idade Mínima", type: "number" },
+                      { name: "idade_maxima", label: "Idade Máxima", type: "number" },
+                      { name: "prazo_minimo", label: "Prazo Mínimo", type: "number" },
+                      { name: "prazo_maximo", label: "Prazo Máximo", type: "number" },
+                      { name: "id_uy3", label: "ID UY3 (UUID)", type: "text" },
+                      {
+                        name: "cor_grafico",
+                        label: "Cor do Gráfico (ex: var(--cor))",
+                        type: "text"
+                      }
+                    ].map(({ name, label, type }) => (
+                      <FormField
+                        key={name}
+                        control={methods.control}
+                        name={name as keyof FormData}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{label}</FormLabel>
+                            <FormControl>
+                              <Input type={type} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-            <div className="flex justify-end gap-4">
-              <Button type="reset" variant="outline" onClick={() => methods.reset()}>
-                Limpar
-              </Button>
-              <Button type="submit">Cadastrar Produto</Button>
-            </div>
-          </form>
-        </Form>
-      </FormProvider>
-    </div>
-        </ProtectedRoute>
-    
+              <div className="flex justify-end gap-4">
+                <Button type="reset" variant="outline" onClick={() => methods.reset()}>
+                  Limpar
+                </Button>
+                <Button type="submit">Cadastrar Produto</Button>
+              </div>
+            </form>
+          </Form>
+        </FormProvider>
+      </div>
+    </ProtectedRoute>
   );
 }
