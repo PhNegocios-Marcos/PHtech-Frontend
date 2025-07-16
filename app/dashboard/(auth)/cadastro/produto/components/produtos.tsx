@@ -34,11 +34,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil } from "lucide-react";
-import { ProdutoEdit } from "./editProduto";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-type Produto = {
+export type Produto = {
   id: string;
   nome: string;
   status: number;
@@ -50,20 +47,24 @@ type Produto = {
   cor_grafico: string | null;
 };
 
-export function ProdutosTable() {
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type ProdutosTableProps = {
+  onSelectProduto: (produto: Produto) => void;
+};
+
+export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useAuth();
 
   const columns: ColumnDef<Produto>[] = [
     { accessorKey: "nome", header: "Nome" },
-    { 
-      accessorKey: "status", 
+    {
+      accessorKey: "status",
       header: "Status",
       cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
     },
@@ -78,8 +79,9 @@ export function ProdutosTable() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSelectedProduto(row.original)}
-          title="Editar produto">
+          onClick={() => onSelectProduto(row.original)}
+          title="Editar produto"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -113,7 +115,7 @@ export function ProdutosTable() {
     }
 
     fetchProdutos();
-  }, [token, refreshKey]);
+  }, [token]);
 
   const table = useReactTable({
     data: produtos,
@@ -134,86 +136,86 @@ export function ProdutosTable() {
     }
   });
 
-  const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
-  };
-
   return (
     <Card className="col-span-2">
       <CardHeader>
         <CardTitle>Produtos</CardTitle>
       </CardHeader>
       <CardContent>
-        {selectedProduto ? (
-          <ProdutoEdit 
-            produto={selectedProduto} 
-            onClose={() => setSelectedProduto(null)} 
-            onRefresh={handleRefresh} 
+        <div className="mb-4 flex items-center gap-2">
+          <Input
+            placeholder="Filtrar por nome..."
+            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("nome")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
           />
-        ) : (
-          <>
-            <div className="mb-4 flex items-center gap-2">
-              <Input
-                placeholder="Filtrar por nome..."
-                value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
-                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      ))}
-                    </TableRow>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </TableHead>
                   ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <CarregandoTable />
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        )}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="hover:bg-muted cursor-pointer"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <CarregandoTable />
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
