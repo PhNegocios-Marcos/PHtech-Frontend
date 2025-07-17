@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +29,7 @@ export const Telefones = forwardRef(
   ) => {
     const {
       register,
-      setValue,
+      watch,
       formState: { errors },
       trigger
     } = useForm<ContatoFormData>({
@@ -43,9 +43,34 @@ export const Telefones = forwardRef(
       }
     });
 
+    // Observa os valores e sincroniza com onChange externo
+    const watchedValues = watch();
+
+    useEffect(() => {
+      onChange("telefones.0.ddd", watchedValues.ddd1);
+    }, [watchedValues.ddd1]);
+
+    useEffect(() => {
+      onChange("telefones.0.numero", watchedValues.numero1);
+    }, [watchedValues.numero1]);
+
+    useEffect(() => {
+      onChange("telefones.1.ddd", watchedValues.ddd2);
+    }, [watchedValues.ddd2]);
+
+    useEffect(() => {
+      onChange("telefones.1.numero", watchedValues.numero2);
+    }, [watchedValues.numero2]);
+
+    useEffect(() => {
+      onChange("emails.0.email", watchedValues.email);
+    }, [watchedValues.email]);
+
     useImperativeHandle(ref, () => ({
       validate: () => trigger()
     }));
+
+    // console.log(watchedValues.email)
 
     return (
       <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
@@ -56,10 +81,6 @@ export const Telefones = forwardRef(
               {...register("ddd1")}
               placeholder="DDD"
               className="mt-1"
-              onChange={(e) => {
-                setValue("ddd1", e.target.value);
-                onChange("telefones.0.ddd", e.target.value);
-              }}
             />
             {errors.ddd1 && <p className="text-sm text-red-600">{errors.ddd1.message}</p>}
           </div>
@@ -70,10 +91,6 @@ export const Telefones = forwardRef(
               {...register("numero1")}
               placeholder="Número"
               className="mt-1"
-              onChange={(e) => {
-                setValue("numero1", e.target.value);
-                onChange("telefones.0.numero", e.target.value);
-              }}
             />
             {errors.numero1 && <p className="text-sm text-red-600">{errors.numero1.message}</p>}
           </div>
@@ -86,10 +103,6 @@ export const Telefones = forwardRef(
               {...register("ddd2")}
               placeholder="DDD"
               className="mt-1"
-              onChange={(e) => {
-                setValue("ddd2", e.target.value);
-                onChange("telefones.1.ddd", e.target.value);
-              }}
             />
             {errors.ddd2 && <p className="text-sm text-red-600">{errors.ddd2.message}</p>}
           </div>
@@ -100,10 +113,6 @@ export const Telefones = forwardRef(
               {...register("numero2")}
               placeholder="Número"
               className="mt-1"
-              onChange={(e) => {
-                setValue("numero2", e.target.value);
-                onChange("telefones.1.numero", e.target.value);
-              }}
             />
             {errors.numero2 && <p className="text-sm text-red-600">{errors.numero2.message}</p>}
           </div>
@@ -112,15 +121,10 @@ export const Telefones = forwardRef(
         <div>
           <span>E-mail</span>
           <Input
-            {...register("email", {
-              onChange: (e) => {
-                onChange("emails.0.email", e.target.value);
-              }
-            })}
+            {...register("email")}
             placeholder="E-mail"
             className="full"
           />
-
           {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
         </div>
       </form>

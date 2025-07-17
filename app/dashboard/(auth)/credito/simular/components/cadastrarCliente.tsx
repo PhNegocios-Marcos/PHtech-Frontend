@@ -109,21 +109,35 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
   };
 
-  const sanitize = (value: any): any => {
-    if (typeof value === "string") {
-      return value.replace(/[.\-]/g, "");
-    }
-    if (Array.isArray(value)) {
-      return value.map(sanitize);
-    }
-    if (typeof value === "object" && value !== null) {
-      const result: any = {};
-      for (const key in value) {
-        result[key] = sanitize(value[key]);
+  // Função sanitiza só os campos necessários, preservando email com pontos
+  const sanitizeFormData = (data: any): any => {
+    const clone = structuredClone(data);
+
+    const limparCampos = [
+      "cpf",
+      "numero_documento",
+      "telefones.0.ddd",
+      "telefones.0.numero",
+      "telefones.1.ddd",
+      "telefones.1.numero",
+      "enderecos.0.cep"
+      // Adicione outros campos que precisar limpar
+    ];
+
+    limparCampos.forEach((path) => {
+      const keys = path.split(".");
+      let obj = clone;
+      for (let i = 0; i < keys.length - 1; i++) {
+        obj = obj?.[keys[i]];
+        if (!obj) return;
       }
-      return result;
-    }
-    return value;
+      const lastKey = keys[keys.length - 1];
+      if (obj && typeof obj[lastKey] === "string") {
+        obj[lastKey] = obj[lastKey].replace(/[.\-]/g, "");
+      }
+    });
+
+    return clone;
   };
 
   const handleSubmit = async () => {
@@ -139,7 +153,7 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
 
     try {
-      const sanitizedData = sanitize(formData);
+      const sanitizedData = sanitizeFormData(formData);
 
       const resPost = await fetch(`${API_BASE_URL}/cliente`, {
         method: "POST",
