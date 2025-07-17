@@ -65,7 +65,7 @@ export default function SimuladorFgts({
 
   const { token } = useAuth();
 
-  console.log(proutoName);
+  // console.log(proutoName);
 
   // Função para carregar os campos da API na montagem do componente
   useEffect(() => {

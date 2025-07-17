@@ -104,7 +104,7 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
 
   // console.log("cliente", cliente);
 
-  // console.log("promotoras: ", selectedPromotoraId)
+  console.log("promotoras: ", selectedPromotoraId)
   // console.log("id: ", (userData as any)?.id ?? "Usuário")
 
   const idUser = (userData as any)?.id ?? "null";
@@ -130,13 +130,16 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
 
   const mask = getMask();
 
+  const cleanCPF = cpf.replace(/\D/g, ""); // Remove tudo que não for número
+
+
   useEffect(() => {
     async function fetchCliente() {
       setLoading(true);
       setError(null);
       // console.log("cpf: ", cpf);
       try {
-        const res = await fetch(`${API_BASE_URL}/cliente/${cpf}`, {
+        const res = await fetch(`${API_BASE_URL}/cliente/${cleanCPF}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
