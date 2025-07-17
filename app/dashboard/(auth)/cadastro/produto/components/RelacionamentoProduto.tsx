@@ -6,25 +6,35 @@ import { Combobox } from "./Combobox"; // ajuste se necessário
 import { Button } from "@/components/ui/button";
 import { FormLabel } from "@/components/ui/form"; // ✅ import do shadcn/ui
 import { useAuth } from "@/contexts/AuthContext";
+import { Produto } from "./produtos";
 
 type Option = {
   id: string;
   name: string;
 };
 
+type Props = {
+  produto: Produto;
+  onClose: () => void;
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function RelacaoProdutoConvenio() {
+export default function RelacaoProdutoConvenio({ produto }: Props) {
   const [convenios, setConvenios] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
 
   const [selectedConvenio, setSelectedConvenio] = useState<Option | null>(null);
-  const [selectedProduto, setSelectedProduto] = useState<Option | null>(null);
+  const [selectedSubProduto, setSelectedSubProduto] = useState<Option | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const { token } = useAuth();
+
+  console.log("produto: ", produto)
+//   console.log("selectedConvenio: ", selectedConvenio)
+//   console.log("selectedSubProduto: ", selectedSubProduto)
 
   useEffect(() => {
     async function fetchConvenios() {
@@ -51,15 +61,15 @@ export default function RelacaoProdutoConvenio() {
   useEffect(() => {
     async function fetchProdutos() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/produtos/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           }
         });
         const data = res.data.map((p: any) => ({
-          id: p.id,
-          name: p.nome
+          id: p.produtos_subprodutos_id,
+          name: p.produtos_subprodutos_nome
         }));
         setProdutos(data);
       } catch (error) {
@@ -71,7 +81,7 @@ export default function RelacaoProdutoConvenio() {
   }, [token]);
 
   async function handleRelacionar() {
-    if (!selectedConvenio || !selectedProduto) {
+    if (!selectedConvenio || !selectedSubProduto) {
       setMessage("Selecione convênio e produto");
       return;
     }
@@ -83,8 +93,8 @@ export default function RelacaoProdutoConvenio() {
       await axios.post(
         `${API_BASE_URL}/rel_produto_convenio/criar`,
         {
-          convenio_id: selectedConvenio.id,
-          produto_id: selectedProduto.id
+          convenio_hash: selectedConvenio.id,
+          produto_hash: produto.id
         },
         {
           headers: {
@@ -117,12 +127,12 @@ export default function RelacaoProdutoConvenio() {
         </div>
 
         <div className="max-w-[400px] space-y-1">
-          <span className="text-muted-foreground text-sm">Produto</span>
+          <span className="text-muted-foreground text-sm">Categoria</span>
           <Combobox
             data={produtos}
             displayField="name"
-            value={selectedProduto}
-            onChange={setSelectedProduto}
+            value={selectedSubProduto}
+            onChange={setSelectedSubProduto}
             searchFields={["name"]}
             placeholder="Selecione um produto"
           />

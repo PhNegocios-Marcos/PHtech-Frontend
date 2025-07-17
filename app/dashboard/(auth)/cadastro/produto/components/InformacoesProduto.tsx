@@ -40,6 +40,9 @@ type ProdutoDrawerProps = {
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
+
+    // console.log(produto)
+
   const methods = useForm<Produto>({
     resolver: zodResolver(produtoSchema),
     defaultValues: {

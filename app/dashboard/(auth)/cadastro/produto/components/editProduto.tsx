@@ -38,7 +38,7 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
         </TabsContent>
 
         <TabsContent value="relacionamento">
-          <RelacionamentoProduto  />
+          <RelacionamentoProduto produto={produto} onClose={() => console.log("Fechar aba")} />
         </TabsContent>
       </Tabs>
     </div>
