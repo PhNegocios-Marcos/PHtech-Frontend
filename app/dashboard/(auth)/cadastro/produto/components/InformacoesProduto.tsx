@@ -40,9 +40,6 @@ type ProdutoDrawerProps = {
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
-
-    // console.log(produto)
-
   const methods = useForm<Produto>({
     resolver: zodResolver(produtoSchema),
     defaultValues: {
@@ -52,7 +49,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   });
 
   const { token } = useAuth();
-
   const originalData = useRef<Produto>({ ...produto, cor_grafico: produto.cor_grafico || "" });
 
   useEffect(() => {
@@ -78,12 +74,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
     for (const key in data) {
       if (key === "id") continue;
-
       const newValue = data[key as keyof Produto];
       const oldValue = originalData.current[key as keyof Produto];
-
       const hasChanged = JSON.stringify(newValue) !== JSON.stringify(oldValue);
-
       if (hasChanged && newValue !== undefined) {
         updatedFields[key as keyof Produto] = newValue as any;
       }
@@ -109,14 +102,13 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
-          <Card className="col-span-2">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6 p-6">
+          <Card>
             <CardHeader>
               <CardTitle>Editar Produto</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                {/* Nome */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={methods.control}
                   name="nome"
@@ -131,7 +123,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Status */}
                 <FormField
                   control={methods.control}
                   name="status"
@@ -152,7 +143,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Idade Mínima */}
                 <FormField
                   control={methods.control}
                   name="idade_minima"
@@ -171,7 +161,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Idade Máxima */}
                 <FormField
                   control={methods.control}
                   name="idade_maxima"
@@ -190,7 +179,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Prazo Mínimo */}
                 <FormField
                   control={methods.control}
                   name="prazo_minimo"
@@ -209,7 +197,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Prazo Máximo */}
                 <FormField
                   control={methods.control}
                   name="prazo_maximo"
@@ -228,7 +215,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   )}
                 />
 
-                {/* Cor do Gráfico */}
                 <FormField
                   control={methods.control}
                   name="cor_grafico"
@@ -246,7 +232,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
             </CardContent>
           </Card>
 
-          <div className="col-span-2 flex justify-end gap-2">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>

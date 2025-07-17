@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Produto } from "./produtos";
 
@@ -33,8 +34,6 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   const { token } = useAuth();
-
-  console.log("produto: ", produto);
 
   useEffect(() => {
     async function fetchConvenios() {
@@ -151,58 +150,65 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <div className="w-full max-w-[400px] space-y-1">
-          <span className="text-muted-foreground text-sm">Convênio</span>
-          <Combobox
-            data={convenios}
-            displayField="name"
-            value={selectedConvenio}
-            onChange={setSelectedConvenio}
-            searchFields={["name"]}
-            placeholder="Selecione um convênio"
-          />
-          <Button
-            onClick={handleRelacionarConvenio}
-            disabled={loading}
-            className="mt-4 w-45"
-          >
-            {loading ? "Salvando..." : "Relacionar Convênio"}
-          </Button>
-        </div>
-      </div>
+    <Card className="mx-auto max-w-4xl p-4">
+      <CardHeader>
+        <CardTitle>Relacionar Produto</CardTitle>
+      </CardHeader>
 
-      <div>
-        <div className="w-full max-w-[400px] space-y-1">
-          <span className="text-muted-foreground text-sm">Categoria</span>
-          <Combobox
-            data={produtos}
-            displayField="name"
-            value={selectedSubProduto}
-            onChange={setSelectedSubProduto}
-            searchFields={["name"]}
-            placeholder="Selecione uma categoria"
-          />
-          <Button
-            onClick={handleRelacionarCategoria}
-            disabled={loading02}
-            className="mt-4 w-45"
-          >
-            {loading02 ? "Salvando..." : "Relacionar Categoria"}
-          </Button>
-        </div>
-      </div>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5 mb-5">
+          {/* Coluna 1 - Convênio */}
+          <div className="space-y-2">
+            <span className="text-muted-foreground text-sm">Convênio</span>
+            <Combobox
+              data={convenios}
+              displayField="name"
+              value={selectedConvenio}
+              onChange={setSelectedConvenio}
+              searchFields={["name"]}
+              placeholder="Selecione um convênio"
+            />
+            <Button
+              onClick={handleRelacionarConvenio}
+              disabled={loading}
+              className="mt-2"
+            >
+              {loading ? "Salvando..." : "Relacionar Convênio"}
+            </Button>
+          </div>
 
-      {message && (
-        <p
-          className={`col-span-2 mt-4 text-sm ${
-            messageType === "success" ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {message}
-        </p>
-      )}
-    </div>
+          {/* Coluna 2 - Categoria */}
+          <div className="space-y-2">
+            <span className="text-muted-foreground text-sm">Categoria</span>
+            <Combobox
+              data={produtos}
+              displayField="name"
+              value={selectedSubProduto}
+              onChange={setSelectedSubProduto}
+              searchFields={["name"]}
+              placeholder="Selecione uma categoria"
+            />
+            <Button
+              onClick={handleRelacionarCategoria}
+              disabled={loading02}
+              className="mt-2"
+            >
+              {loading02 ? "Salvando..." : "Relacionar Categoria"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mensagem de sucesso ou erro */}
+        {message && (
+          <p
+            className={`mt-4 text-sm ${
+              messageType === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
