@@ -11,7 +11,7 @@ const contatoSchema = z.object({
   numero1: z.string().min(8, "Número obrigatório"),
   ddd2: z.string().min(2, "DDD obrigatório"),
   numero2: z.string().min(8, "Número obrigatório"),
-  email: z.string().email("Email inválido"),
+  email: z.string().email("Email inválido")
 });
 
 type ContatoFormData = z.infer<typeof contatoSchema>;
@@ -20,7 +20,7 @@ export const Telefones = forwardRef(
   (
     {
       formData,
-      onChange,
+      onChange
     }: {
       formData: any;
       onChange: (path: string, value: any) => void;
@@ -31,7 +31,7 @@ export const Telefones = forwardRef(
       register,
       setValue,
       formState: { errors },
-      trigger,
+      trigger
     } = useForm<ContatoFormData>({
       resolver: zodResolver(contatoSchema),
       defaultValues: {
@@ -39,12 +39,12 @@ export const Telefones = forwardRef(
         numero1: formData.telefones[0].numero,
         ddd2: formData.telefones[1].ddd,
         numero2: formData.telefones[1].numero,
-        email: formData.emails[0].email,
-      },
+        email: formData.emails[0].email
+      }
     });
 
     useImperativeHandle(ref, () => ({
-      validate: () => trigger(),
+      validate: () => trigger()
     }));
 
     return (
@@ -112,14 +112,15 @@ export const Telefones = forwardRef(
         <div>
           <span>E-mail</span>
           <Input
-            {...register("email")}
+            {...register("email", {
+              onChange: (e) => {
+                onChange("emails.0.email", e.target.value);
+              }
+            })}
             placeholder="E-mail"
             className="full"
-            onChange={(e) => {
-              setValue("email", e.target.value);
-              onChange("emails.0.email", e.target.value);
-            }}
           />
+
           {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
         </div>
       </form>
