@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Combobox } from "./Combobox"; // ajuste se necessário
+import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
-import { FormLabel } from "@/components/ui/form"; // ✅ import do shadcn/ui
 import { useAuth } from "@/contexts/AuthContext";
 import { Produto } from "./produtos";
 
@@ -28,13 +27,14 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
   const [selectedSubProduto, setSelectedSubProduto] = useState<Option | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [loading02, setLoading02] = useState(false);
+
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   const { token } = useAuth();
 
-  console.log("produto: ", produto)
-//   console.log("selectedConvenio: ", selectedConvenio)
-//   console.log("selectedSubProduto: ", selectedSubProduto)
+  console.log("produto: ", produto);
 
   useEffect(() => {
     async function fetchConvenios() {
@@ -42,12 +42,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         const res = await axios.get(`${API_BASE_URL}/convenio`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         const data = res.data.map((c: any) => ({
           id: c.convenio_hash,
-          name: c.convenio_nome
+          name: c.convenio_nome,
         }));
         setConvenios(data);
       } catch (error) {
@@ -64,12 +64,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         const res = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         const data = res.data.map((p: any) => ({
           id: p.produtos_subprodutos_id,
-          name: p.produtos_subprodutos_nome
+          name: p.produtos_subprodutos_nome,
         }));
         setProdutos(data);
       } catch (error) {
@@ -80,41 +80,80 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
     fetchProdutos();
   }, [token]);
 
-  async function handleRelacionar() {
-    if (!selectedConvenio || !selectedSubProduto) {
-      setMessage("Selecione convênio e produto");
+  async function handleRelacionarConvenio() {
+    if (!selectedConvenio) {
+      setMessage("Selecione convênio");
+      setMessageType("error");
       return;
     }
 
     setLoading(true);
     setMessage("");
+    setMessageType("");
 
     try {
       await axios.post(
         `${API_BASE_URL}/rel_produto_convenio/criar`,
         {
           convenio_hash: selectedConvenio.id,
-          produto_hash: produto.id
+          produto_hash: produto.id,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      setMessage("Relação criada com sucesso!");
+      setMessage("Relação com convênio criada com sucesso!");
+      setMessageType("success");
     } catch (error) {
       console.error(error);
-      setMessage("Erro ao criar relação");
+      setMessage("Erro ao criar relação com convênio");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleRelacionarCategoria() {
+    if (!selectedSubProduto) {
+      setMessage("Selecione uma categoria");
+      setMessageType("error");
+      return;
+    }
+
+    setLoading02(true);
+    setMessage("");
+    setMessageType("");
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/rel-produto-sub-produto/criar`,
+        {
+          sub_produto_hash: selectedSubProduto.id,
+          produto_hash: produto.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMessage("Relação com categoria criada com sucesso!");
+      setMessageType("success");
+    } catch (error) {
+      console.error(error);
+      setMessage("Erro ao criar relação com categoria");
+      setMessageType("error");
+    } finally {
+      setLoading02(false);
+    }
+  }
+
   return (
-    <div className="mx-auto max-w-4xl p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="max-w-[400px] space-y-1">
+    <div className="mx-auto max-w-4xl p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <div className="w-full max-w-[400px] space-y-1">
           <span className="text-muted-foreground text-sm">Convênio</span>
           <Combobox
             data={convenios}
@@ -124,9 +163,18 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
             searchFields={["name"]}
             placeholder="Selecione um convênio"
           />
+          <Button
+            onClick={handleRelacionarConvenio}
+            disabled={loading}
+            className="mt-4 w-45"
+          >
+            {loading ? "Salvando..." : "Relacionar Convênio"}
+          </Button>
         </div>
+      </div>
 
-        <div className="max-w-[400px] space-y-1">
+      <div>
+        <div className="w-full max-w-[400px] space-y-1">
           <span className="text-muted-foreground text-sm">Categoria</span>
           <Combobox
             data={produtos}
@@ -134,16 +182,27 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
             value={selectedSubProduto}
             onChange={setSelectedSubProduto}
             searchFields={["name"]}
-            placeholder="Selecione um produto"
+            placeholder="Selecione uma categoria"
           />
+          <Button
+            onClick={handleRelacionarCategoria}
+            disabled={loading02}
+            className="mt-4 w-45"
+          >
+            {loading02 ? "Salvando..." : "Relacionar Categoria"}
+          </Button>
         </div>
       </div>
 
-      <Button onClick={handleRelacionar} disabled={loading} className="mt-6">
-        {loading ? "Salvando..." : "Relacionar"}
-      </Button>
-
-      {message && <p className="text-muted-foreground mt-4 text-sm">{message}</p>}
+      {message && (
+        <p
+          className={`col-span-2 mt-4 text-sm ${
+            messageType === "success" ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 }
