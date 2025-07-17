@@ -92,7 +92,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
   // Opções fixas
   const tipoDocumentoOptions = [
     { label: "RG", value: "1" },
-    { label: "CNPJ", value: "2" }
+    { label: "CNH", value: "2" }
   ];
 
   const optionsSexo = [

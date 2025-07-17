@@ -179,7 +179,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
 
           {/* Coluna 2 - Categoria */}
           <div className="space-y-2">
-            <span className="text-muted-foreground text-sm">Categoria</span>
+            <span className="text-muted-foreground text-sm">Tipo de operação</span>
             <Combobox
               data={produtos}
               displayField="name"
