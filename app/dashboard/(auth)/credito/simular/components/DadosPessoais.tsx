@@ -1,10 +1,12 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Cleave from "cleave.js/react";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "./Combobox"; // seu componente Combobox
 
 const dadosPessoaisSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -52,10 +54,71 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
     validate: () => trigger()
   }));
 
+  // Estados locais
+  const [tipoDoc, setTipoDoc] = useState(formData.tipo_documento);
+  const [numeroDoc, setNumeroDoc] = useState(formData.numero_documento);
+
+  // Lista manual dos 27 estados brasileiros para Naturalidade
+  const optionsNaturalidade = [
+    { label: "Acre - AC", value: "ac" },
+    { label: "Alagoas - AL", value: "al" },
+    { label: "Amapá - AP", value: "ap" },
+    { label: "Amazonas - AM", value: "am" },
+    { label: "Bahia - BA", value: "ba" },
+    { label: "Ceará - CE", value: "ce" },
+    { label: "Distrito Federal - DF", value: "df" },
+    { label: "Espírito Santo - ES", value: "es" },
+    { label: "Goiás - GO", value: "go" },
+    { label: "Maranhão - MA", value: "ma" },
+    { label: "Mato Grosso - MT", value: "mt" },
+    { label: "Mato Grosso do Sul - MS", value: "ms" },
+    { label: "Minas Gerais - MG", value: "mg" },
+    { label: "Pará - PA", value: "pa" },
+    { label: "Paraíba - PB", value: "pb" },
+    { label: "Paraná - PR", value: "pr" },
+    { label: "Pernambuco - PE", value: "pe" },
+    { label: "Piauí - PI", value: "pi" },
+    { label: "Rio de Janeiro - RJ", value: "rj" },
+    { label: "Rio Grande do Norte - RN", value: "rn" },
+    { label: "Rio Grande do Sul - RS", value: "rs" },
+    { label: "Rondônia - RO", value: "ro" },
+    { label: "Roraima - RR", value: "rr" },
+    { label: "Santa Catarina - SC", value: "sc" },
+    { label: "São Paulo - SP", value: "sp" },
+    { label: "Sergipe - SE", value: "se" },
+    { label: "Tocantins - TO", value: "to" }
+  ];
+
+  // Opções fixas
+  const tipoDocumentoOptions = [
+    { label: "RG", value: "1" },
+    { label: "CNPJ", value: "2" }
+  ];
+
+  const optionsSexo = [
+    { label: "Masculino", value: "M" },
+    { label: "Feminino", value: "F" },
+    { label: "Outro", value: "O" }
+  ];
+
+  const optionsNacionalidade = [
+    { label: "Brasileiro(a)", value: "brasileiro" },
+    { label: "Estrangeiro(a)", value: "estrangeiro" },
+    { label: "Outro", value: "outro" }
+  ];
+
+  const optionEstadoCivil = [
+    { label: "Solteiro", value: "Solteiro" },
+    { label: "Casado", value: "Casado" },
+    { label: "Divorciado", value: "Divorciado" },
+    { label: "Viúvo", value: "Viúvo" }
+  ];
+
   return (
     <form
       className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-2"
       onSubmit={(e) => e.preventDefault()}>
+      {/* Nome */}
       <div>
         <span>Nome</span>
         <Input
@@ -71,6 +134,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         {errors.nome?.message && <p className="text-sm text-red-600">{errors.nome.message}</p>}
       </div>
 
+      {/* Nome do Pai */}
       <div>
         <span>Nome do Pai</span>
         <Input
@@ -88,6 +152,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         )}
       </div>
 
+      {/* Nome da Mãe */}
       <div>
         <span>Nome da Mãe</span>
         <Input
@@ -100,19 +165,23 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
           value={formData.nome_mae}
           className="mt-1"
         />
-        {errors.nome_mae?.message && <p className="text-sm text-red-600">{errors.nome_mae.message}</p>}
+        {errors.nome_mae?.message && (
+          <p className="text-sm text-red-600">{errors.nome_mae.message}</p>
+        )}
       </div>
 
+      {/* Tipo do Documento */}
       <div>
         <span>Tipo do Documento</span>
-        <Input
-          {...register("tipo_documento")}
-          placeholder="Tipo Documento"
-          onChange={(e) => {
-            setValue("tipo_documento", e.target.value);
-            onChange("tipo_documento", e.target.value);
+        <Combobox
+          value={tipoDocumentoOptions.find((opt) => opt.value === formData.tipo_documento) || null}
+          onChange={(selected) => {
+            setValue("tipo_documento", selected.value);
+            onChange("tipo_documento", selected.value);
           }}
-          value={formData.tipo_documento}
+          data={tipoDocumentoOptions}
+          displayField="label"
+          placeholder="Tipo Documento"
           className="mt-1"
         />
         {errors.tipo_documento?.message && (
@@ -120,38 +189,47 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         )}
       </div>
 
+      {/* Número do Documento */}
       <div>
         <span>Número do Documento</span>
-        <Input
-          {...register("numero_documento")}
+        <Cleave
+          value={numeroDoc}
+          options={
+            tipoDoc === "CNPJ"
+              ? { delimiters: [".", ".", "/", "-"], blocks: [2, 3, 3, 4, 2], numericOnly: true }
+              : { delimiters: [".", ".", "-"], blocks: [2, 3, 3, 1], numericOnly: true }
+          }
           placeholder="Número Documento"
+          className="mt-1 w-full rounded-md border px-2 py-1 text-sm"
           onChange={(e) => {
+            setNumeroDoc(e.target.value);
             setValue("numero_documento", e.target.value);
             onChange("numero_documento", e.target.value);
           }}
-          value={formData.numero_documento}
-          className="mt-1"
         />
         {errors.numero_documento?.message && (
           <p className="text-sm text-red-600">{errors.numero_documento.message}</p>
         )}
       </div>
 
+      {/* Sexo */}
       <div>
         <span>Sexo</span>
-        <Input
-          {...register("sexo")}
-          placeholder="Sexo"
-          onChange={(e) => {
-            setValue("sexo", e.target.value);
-            onChange("sexo", e.target.value);
+        <Combobox
+          value={optionsSexo.find((o) => o.value === formData.sexo) || null}
+          data={optionsSexo}
+          onChange={(selected) => {
+            setValue("sexo", selected.value);
+            onChange("sexo", selected.value);
           }}
-          value={formData.sexo}
+          displayField="label"
+          placeholder="Sexo"
           className="mt-1"
         />
         {errors.sexo?.message && <p className="text-sm text-red-600">{errors.sexo.message}</p>}
       </div>
 
+      {/* Data de Nascimento */}
       <div>
         <span>Data de Nascimento</span>
         <Input
@@ -169,16 +247,18 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         )}
       </div>
 
+      {/* Estado Civil */}
       <div>
         <span>Estado Civil</span>
-        <Input
-          {...register("estado_civil")}
-          placeholder="Estado Civil"
-          onChange={(e) => {
-            setValue("estado_civil", e.target.value);
-            onChange("estado_civil", e.target.value);
+        <Combobox
+          value={optionEstadoCivil.find((o) => o.value === formData.estado_civil) || null}
+          data={optionEstadoCivil}
+          onChange={(selected) => {
+            setValue("estado_civil", selected.value);
+            onChange("estado_civil", selected.value);
           }}
-          value={formData.estado_civil}
+          displayField="label"
+          placeholder="Estado Civil"
           className="mt-1"
         />
         {errors.estado_civil?.message && (
@@ -186,33 +266,39 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         )}
       </div>
 
+      {/* Naturalidade */}
       <div>
-        <span>Naturalidade</span>
-        <Input
-          {...register("naturalidade")}
-          placeholder="Naturalidade"
-          onChange={(e) => {
-            setValue("naturalidade", e.target.value);
-            onChange("naturalidade", e.target.value);
+        <span className="text-muted-foreground text-sm">Naturalidade</span>
+        <Combobox
+          value={optionsNaturalidade.find((o) => o.value === formData.naturalidade) || null}
+          data={optionsNaturalidade}
+          displayField="label"
+          onChange={(selected) => {
+            setValue("naturalidade", selected.value);
+            onChange("naturalidade", selected.value);
           }}
-          value={formData.naturalidade}
+          placeholder="Naturalidade"
           className="mt-1"
+          dropdownClassName="max-h-60 overflow-y-auto" // ou popoverClassName dependendo da lib
         />
+
         {errors.naturalidade?.message && (
           <p className="text-sm text-red-600">{errors.naturalidade.message}</p>
         )}
       </div>
 
+      {/* Nacionalidade */}
       <div>
         <span>Nacionalidade</span>
-        <Input
-          {...register("nacionalidade")}
-          placeholder="Nacionalidade"
-          onChange={(e) => {
-            setValue("nacionalidade", e.target.value);
-            onChange("nacionalidade", e.target.value);
+        <Combobox
+          value={optionsNacionalidade.find((o) => o.value === formData.nacionalidade) || null}
+          data={optionsNacionalidade}
+          displayField="label"
+          onChange={(selected) => {
+            setValue("nacionalidade", selected.value);
+            onChange("nacionalidade", selected.value);
           }}
-          value={formData.nacionalidade}
+          placeholder="Nacionalidade"
           className="mt-1"
         />
         {errors.nacionalidade?.message && (
@@ -220,6 +306,7 @@ export const DadosPessoais = forwardRef(({ formData, onChange }: DadosPessoaisPr
         )}
       </div>
 
+      {/* CPF */}
       <div>
         <span>CPF</span>
         <Input

@@ -92,7 +92,7 @@ export default function Page() {
   return (
     <div className="flex flex-col bg-gradient-to-tr from-[#c91212] to-[#6d2516] items-center justify-center py-4 lg:h-screen">
       {currentModal === "none" && promotorasModal === "none" && (
-        <Card className="mx-auto w-[40%]">
+        <Card className="mx-auto w-[95%] md:w-[40%]">
           <Image
             src="/logo.png" // caminho da imagem (pública ou importada)
             alt="Descrição da imagem"

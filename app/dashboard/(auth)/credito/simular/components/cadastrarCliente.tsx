@@ -19,11 +19,7 @@ interface CadastrarProps {
   onClienteExiste?: (cpf: string) => void;
 }
 
-export default function Cadastrar({
-  cpf,
-  simulacao,
-  onCadastrado,
-}: CadastrarProps) {
+export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarProps) {
   const { token } = useAuth();
 
   const [activeTab, setActiveTab] = useState("DadosPessoais");
@@ -38,7 +34,7 @@ export default function Cadastrar({
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
     Enderecos: enderecosRef,
-    DadosBancarios: bancariosRef,
+    DadosBancarios: bancariosRef
   };
 
   const [formData, setFormData] = useState({
@@ -66,14 +62,14 @@ export default function Cadastrar({
         bairro: "",
         cidade: "",
         estado: "",
-        uf: "",
-      },
+        uf: ""
+      }
     },
     emails: {
       0: {
         email: "",
-        status: 1,
-      },
+        status: 1
+      }
     },
     dados_bancarios: {
       0: {
@@ -82,9 +78,9 @@ export default function Cadastrar({
         conta: "",
         status: 1,
         tipo_pix: "",
-        pix: "",
-      },
-    },
+        pix: ""
+      }
+    }
   });
 
   const handleChange = (path: string, value: any) => {
@@ -113,6 +109,23 @@ export default function Cadastrar({
     }
   };
 
+  const sanitize = (value: any): any => {
+    if (typeof value === "string") {
+      return value.replace(/[.\-]/g, "");
+    }
+    if (Array.isArray(value)) {
+      return value.map(sanitize);
+    }
+    if (typeof value === "object" && value !== null) {
+      const result: any = {};
+      for (const key in value) {
+        result[key] = sanitize(value[key]);
+      }
+      return result;
+    }
+    return value;
+  };
+
   const handleSubmit = async () => {
     for (const tab of tabOrder) {
       const ref = tabRefs[tab];
@@ -126,13 +139,15 @@ export default function Cadastrar({
     }
 
     try {
+      const sanitizedData = sanitize(formData);
+
       const resPost = await fetch(`${API_BASE_URL}/cliente`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(sanitizedData)
       });
 
       if (resPost.ok) {
@@ -144,7 +159,7 @@ export default function Cadastrar({
         alert("Erro ao cadastrar cliente.");
       }
     } catch (err) {
-      console.error("Erro:", err);
+      console.error("Erro ao cadastrar cliente:", err);
       alert("Erro inesperado.");
     }
   };
