@@ -34,11 +34,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil } from "lucide-react";
-import { ConvenioEdit } from "./editConvenio";
+import ConvenioEdit from "./editConvenio";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type Convenio = {
+export type Convenio = {
   convenio_nome: string;
   convenio_grupo: string;
   convenio_prefixo: number;
