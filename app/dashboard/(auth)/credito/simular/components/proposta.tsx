@@ -102,9 +102,11 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
 
+  console.log("produto 1: ", produtoHash);
+
   // console.log("cliente", cliente);
 
-  console.log("promotoras: ", selectedPromotoraId)
+  // console.log("promotoras: ", selectedPromotoraId)
   // console.log("id: ", (userData as any)?.id ?? "Usuário")
 
   const idUser = (userData as any)?.id ?? "null";
@@ -131,7 +133,6 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
   const mask = getMask();
 
   const cleanCPF = cpf.replace(/\D/g, ""); // Remove tudo que não for número
-
 
   useEffect(() => {
     async function fetchCliente() {
@@ -183,6 +184,8 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
     .filter((t) => t.status_telefone === 1)
     .slice(0, 2);
   const endereco = Object.values(cliente.enderecos || {})[0];
+
+  console.log("produto 2: ", produtoHash);
 
   const gerarProposta = async () => {
     try {

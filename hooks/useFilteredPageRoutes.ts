@@ -65,9 +65,11 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Credito_Simular",
       "Simular_ver",
       "Cadastro_ver",
-      "Categoria_Ver",
+      "TipoOperacao_Ver",
       "Produto_Ver",
-      "Convenio_Ver"
+      "Convenio_Ver",
+      "Averbador_Ver",
+      "Orgao_Ver",
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

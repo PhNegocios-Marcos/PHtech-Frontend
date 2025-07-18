@@ -51,9 +51,21 @@ export const page_routes: PageRoutesType[] = [
             // icon: "ChartPie"
           },
           {
-            id: "Categoria_Ver",
-            title: "Categoria",
-            href: "/dashboard/cadastro/categoria"
+            id: "TipoOperacao_Ver",
+            title: "Tipo de Operação",
+            href: "/dashboard/cadastro/tipo_operacao"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Orgao_Ver",
+            title: "Orgão",
+            href: "/dashboard/cadastro/orgao"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Averbador_Ver",
+            title: "Averbador",
+            href: "/dashboard/cadastro/averbador"
             // icon: "ChartPie"
           }
         ]

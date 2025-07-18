@@ -23,7 +23,7 @@ export default function Page() {
           <div className="mb-4 flex items-center justify-end space-x-2">
             {podeCriar && (
               <Button id="Subprodutos_criar" onClick={() => setIsCadastroOpen(true)}>
-                Novo Categoria
+                Novo Tipo de Operacao
               </Button>
             )}
           </div>

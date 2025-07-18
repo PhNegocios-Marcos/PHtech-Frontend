@@ -116,7 +116,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
 
   async function handleRelacionarCategoria() {
     if (!selectedSubProduto) {
-      setMessage("Selecione uma categoria");
+      setMessage("Selecione um Tipo de Operacao");
       setMessageType("error");
       return;
     }
@@ -138,11 +138,11 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
           },
         }
       );
-      setMessage("Relação com categoria criada com sucesso!");
+      setMessage("Relação com Tipo de Operacao criada com sucesso!");
       setMessageType("success");
     } catch (error) {
       console.error(error);
-      setMessage("Erro ao criar relação com categoria");
+      setMessage("Erro ao criar relação com Tipo de Operacao");
       setMessageType("error");
     } finally {
       setLoading02(false);
@@ -186,14 +186,14 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
               value={selectedSubProduto}
               onChange={setSelectedSubProduto}
               searchFields={["name"]}
-              placeholder="Selecione uma categoria"
+              placeholder="Selecione um Tipo de Operacao"
             />
             <Button
               onClick={handleRelacionarCategoria}
               disabled={loading02}
               className="mt-2"
             >
-              {loading02 ? "Salvando..." : "Relacionar Categoria"}
+              {loading02 ? "Salvando..." : "Relacionar Tipo de Operacao"}
             </Button>
           </div>
         </div>

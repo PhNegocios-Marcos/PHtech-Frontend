@@ -142,7 +142,7 @@ export function SubprodutosTable() {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Categoria</CardTitle>
+        <CardTitle>Tipo de Operacao</CardTitle>
       </CardHeader>
       <CardContent>
         {selectedSubproduto ? (
