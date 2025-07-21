@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,6 +99,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const [files, setFiles] = useState<any[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [master, setMaster] = useState<any[]>([]);
+  const [masterSelecionado, setMasterSelecionado] = useState<any | null>(null);
 
   const onDrop = (acceptedFiles: File[]) => {
     const imageFiles = acceptedFiles.map((file) => ({
@@ -109,13 +111,10 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     setFiles((prev) => [...prev, ...imageFiles].slice(0, 5));
   };
 
-  const {
-    getInputProps,
-    open: openFileDialog
-  } = useDropzone({
+  const { getInputProps, open: openFileDialog } = useDropzone({
     onDrop,
     noClick: true,
-    accept: { 'image/*': [] },
+    accept: { "image/*": [] },
     maxSize: 5 * 1024 * 1024
   });
 
@@ -130,6 +129,31 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
+
+  useEffect(() => {
+    async function fetchConvenios() {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/promotora/listar`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = res.data.map((c: any) => ({
+          id: c.id,
+          nome: c.nome
+        }));
+
+        console.log("data: ", data);
+        setMaster(data);
+      } catch (error) {
+        console.error("Erro ao carregar convênios", error);
+      }
+    }
+
+    fetchConvenios();
+  }, [token]);
 
   if (!isOpen) return null;
 
@@ -146,7 +170,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       master: Number(data.master),
       rateio_master: data.rateio_master,
       ...(data.master === "0" && {
-        master_id: data.master_id,
+        master_id: masterSelecionado?.id,
         rateio_sub: data.rateio_sub
       })
     };
@@ -174,19 +198,17 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-white shadow-lg overflow-auto p-6"
-      >
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar Nova Promotora</h2>
                 <button
                   type="button"
                   onClick={onClose}
                   className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
+                  aria-label="Fechar">
                   ×
                 </button>
               </div>
@@ -196,7 +218,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                   <CardTitle>Dados da Promotora</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={methods.control}
                       name="nome"
@@ -295,44 +317,49 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                       )}
                     />
 
-                    {masterValue === "0" && (
-                      <>
-                        <FormField
-                          control={methods.control}
-                          name="master_id"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Master ID (UUID)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="UUID do master" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                    <FormField
+                      control={methods.control}
+                      name="master_id"
+                      render={({ field }) => (
+                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
+                          <FormLabel>Master ID (UUID)</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={master}
+                              displayField="nome"
+                              value={master.find((item) => item.id === field.value) ?? null}
+                              onChange={(selected) => {
+                                field.onChange(selected?.id);
+                              }}
+                              searchFields={["nome"]}
+                              placeholder="Selecione uma promotora"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                        <FormField
-                          control={methods.control}
-                          name="rateio_sub"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Rateio Sub (%)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  max={100}
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
+                    <FormField
+                      control={methods.control}
+                      name="rateio_sub"
+                      render={({ field }) => (
+                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
+                          <FormLabel>Rateio Sub (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              max={100}
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* Upload de imagens */}
@@ -343,13 +370,18 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                       onDragLeave={handleDragLeave}
                       onDragOver={handleDragOver}
                       onDrop={handleDrop}
-                      className="border-input data-[dragging=true]:bg-accent/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors justify-center"
-                    >
-                      <input {...getInputProps()} className="sr-only" aria-label="Upload image file" />
+                      className="border-input data-[dragging=true]:bg-accent/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors">
+                      <input
+                        {...getInputProps()}
+                        className="sr-only"
+                        aria-label="Upload image file"
+                      />
                       {files.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                        <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-4">
                           {files.map((file) => (
-                            <div key={file.id} className="bg-accent relative aspect-square rounded-md border">
+                            <div
+                              key={file.id}
+                              className="bg-accent relative aspect-square rounded-md border">
                               <img
                                 src={file.preview}
                                 alt={file.file.name}
@@ -359,8 +391,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                                 type="button"
                                 onClick={() => removeFile(file.id)}
                                 size="icon"
-                                className="absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none"
-                              >
+                                className="absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none">
                                 <XIcon className="size-3.5" />
                               </Button>
                             </div>
@@ -373,7 +404,11 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                           </div>
                           <p className="mb-1.5 text-sm font-medium">Solte imagens aqui</p>
                           <p className="text-muted-foreground text-xs">PNG ou JPG (max. 5MB)</p>
-                          <Button type="button" variant="outline" className="mt-4" onClick={openFileDialog}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="mt-4"
+                            onClick={openFileDialog}>
                             <UploadIcon className="-ms-1 opacity-60" aria-hidden="true" />
                             Selecionar imagens
                           </Button>
@@ -397,6 +432,5 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     </>
   );
 }
-
 
 CadastroPromotoraModal.displayName = "CadastroPromotoraModal";

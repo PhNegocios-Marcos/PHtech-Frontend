@@ -12,7 +12,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Subproduto } from "./subprodutos";
-import { CarregandoTable } from "./leads_carregando";
+import { CarregandoTable } from "./tabela_carregando";
 import {
   Form,
   FormControl,
