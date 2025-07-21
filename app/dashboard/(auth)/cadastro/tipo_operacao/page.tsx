@@ -18,7 +18,6 @@ export default function Page() {
     <ProtectedRoute requiredPermission="Subprodutos_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
-        <div className="mb-4 flex items-center justify-end space-x-2">
           {podeCriar && (
             <Button id="Subprodutos_criar" onClick={() => setIsCadastroOpen(true)}>
               Novo Tipo de Operacao
@@ -29,7 +28,6 @@ export default function Page() {
         {!isCadastroOpen && <SubprodutosTable />}
 
         <CadastroSubprodutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
-      </div>
     </ProtectedRoute>
   );
 }
