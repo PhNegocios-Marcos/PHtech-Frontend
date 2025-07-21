@@ -16,22 +16,19 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Subprodutos_ver">
-      <CampoBoasVindas /> 
-
-      <div className="space-y-4">
-        <div className="flex flex-col justify-between">
-          <div className="mb-4 flex items-center justify-end space-x-2">
-            {podeCriar && (
-              <Button id="Subprodutos_criar" onClick={() => setIsCadastroOpen(true)}>
-                Novo Tipo de Operacao
-              </Button>
-            )}
-          </div>
-
-          {!isCadastroOpen && <SubprodutosTable />}
-
-          <CadastroSubprodutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <div className="mb-4 flex justify-between space-y-4">
+        <CampoBoasVindas />
+        <div className="mb-4 flex items-center justify-end space-x-2">
+          {podeCriar && (
+            <Button id="Subprodutos_criar" onClick={() => setIsCadastroOpen(true)}>
+              Novo Tipo de Operacao
+            </Button>
+          )}
         </div>
+
+        {!isCadastroOpen && <SubprodutosTable />}
+
+        <CadastroSubprodutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
       </div>
     </ProtectedRoute>
   );
