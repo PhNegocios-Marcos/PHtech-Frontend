@@ -23,7 +23,6 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-        <div className="mb-4 flex items-center justify-end space-x-2">
           {/* <CustomDateRangePicker /> */}
 
           {podeCriar && (
@@ -34,7 +33,6 @@ export default function Page() {
         </div>
 
         {!isCadastroOpen && <OperacoesTable />}
-      </div>
     </ProtectedRoute>
   );
 }
