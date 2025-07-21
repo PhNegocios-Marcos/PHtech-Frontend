@@ -14,30 +14,26 @@ export default function Page() {
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
-   const irParaOutraPagina = () => {
-    router.push('simular'); // redireciona para /dashboard
+  const irParaOutraPagina = () => {
+    router.push("simular"); // redireciona para /dashboard
   };
 
   return (
     <ProtectedRoute requiredPermission="Operacoes_ver">
-      <div className="space-y-4">
-        <div className="flex flex-col justify-between">
-          <CampoBoasVindas />
+      <div className="mb-4 flex justify-between space-y-4">
+        <CampoBoasVindas />
 
-          <div className="mb-4 flex items-center justify-end space-x-2">
-            {/* <CustomDateRangePicker /> */}
+        <div className="mb-4 flex items-center justify-end space-x-2">
+          {/* <CustomDateRangePicker /> */}
 
-            {podeCriar && (
-              <Button id="Operacoes_criar" onClick={irParaOutraPagina}>
-                Nova Simulação
-              </Button>
-            )}
-          </div>
-
-
-          {!isCadastroOpen && <OperacoesTable />}
-
+          {podeCriar && (
+            <Button id="Operacoes_criar" onClick={irParaOutraPagina}>
+              Nova Simulação
+            </Button>
+          )}
         </div>
+
+        {!isCadastroOpen && <OperacoesTable />}
       </div>
     </ProtectedRoute>
   );

@@ -16,7 +16,7 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Subprodutos_ver">
-      <CampoBoasVindas />
+      <CampoBoasVindas /> 
 
       <div className="space-y-4">
         <div className="flex flex-col justify-between">

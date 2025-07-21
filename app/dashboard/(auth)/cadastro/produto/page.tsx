@@ -19,33 +19,31 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Produtos_ver">
-      <div className="space-y-4">
+      <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-        <div className="flex items-center justify-end">
-          {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
-              Novo Produto
-            </Button>
-          )}
-        </div>
-
-        {/* Exibe a tabela somente se modal de cadastro e detalhe não estiverem abertos */}
-        {!isCadastroOpen && !produtoSelecionado && (
-          <ProdutosTable onSelectProduto={(produto) => setProdutoSelecionado(produto)} />
+        {podeCriar && (
+          <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
+            Novo Produto
+          </Button>
         )}
-
-        {/* Exibe as tabs de detalhe quando um produto é selecionado */}
-        {produtoSelecionado && (
-          <ProdutoDetalhesTabs
-            produto={produtoSelecionado}
-            onClose={() => setProdutoSelecionado(null)}
-          />
-        )}
-
-        {/* Modal de cadastro */}
-        <CadastroProdutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
       </div>
+
+      {/* Exibe a tabela somente se modal de cadastro e detalhe não estiverem abertos */}
+      {!isCadastroOpen && !produtoSelecionado && (
+        <ProdutosTable onSelectProduto={(produto) => setProdutoSelecionado(produto)} />
+      )}
+
+      {/* Exibe as tabs de detalhe quando um produto é selecionado */}
+      {produtoSelecionado && (
+        <ProdutoDetalhesTabs
+          produto={produtoSelecionado}
+          onClose={() => setProdutoSelecionado(null)}
+        />
+      )}
+
+      {/* Modal de cadastro */}
+      <CadastroProdutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }

@@ -20,32 +20,30 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Promotora_ver">
-      <div className="space-y-4">
-        <div className="flex flex-col justify-between">
-          <CampoBoasVindas />
-          <div className="mb-4 flex items-center justify-end space-x-2">
-            <Button onClick={() => setIsCadastroOpen(true)}>Nova Promotora</Button>
-          </div>
-          {!selectedPromotora && !isCadastroOpen && (
-            <>
-              <PromotorasTable onSelectPromotora={setSelectedPromotora} />
-            </>
-          )}
-
-          {selectedPromotora && (
-            <>
-              <div className="mb-4"></div>
-              <PromotoraDrawer
-                isOpen={true}
-                onClose={handleCloseDrawer}
-                promotora={selectedPromotora}
-              />
-            </>
-          )}
-
-          {/* Modal de cadastro nova promotora */}
-          <CadastroPromotoraModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <div className="mb-4 flex justify-between space-y-4">
+        <CampoBoasVindas />
+        <div className="mb-4 flex items-center justify-end space-x-2">
+          <Button onClick={() => setIsCadastroOpen(true)}>Nova Promotora</Button>
         </div>
+        {!selectedPromotora && !isCadastroOpen && (
+          <>
+            <PromotorasTable onSelectPromotora={setSelectedPromotora} />
+          </>
+        )}
+
+        {selectedPromotora && (
+          <>
+            <div className="mb-4"></div>
+            <PromotoraDrawer
+              isOpen={true}
+              onClose={handleCloseDrawer}
+              promotora={selectedPromotora}
+            />
+          </>
+        )}
+
+        {/* Modal de cadastro nova promotora */}
+        <CadastroPromotoraModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
       </div>
     </ProtectedRoute>
   );

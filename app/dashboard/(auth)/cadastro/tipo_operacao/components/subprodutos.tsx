@@ -34,7 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil } from "lucide-react";
-import  ProdutoDetalhesTabs from "./editSubproduto";
+import ProdutoDetalhesTabs from "./editSubproduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -140,19 +140,19 @@ export function SubprodutosTable() {
   };
 
   return (
-    <Card className="col-span-2">
-      <CardHeader>
-        <CardTitle>Tipo de Operacao</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {selectedSubproduto ? (
-          <ProdutoDetalhesTabs
-            subproduto={selectedSubproduto}
-            onClose={() => setSelectedSubproduto(null)}
-            onRefresh={handleRefresh}
-          />
-        ) : (
-          <>
+    <>
+      {selectedSubproduto ? (
+        <ProdutoDetalhesTabs
+          subproduto={selectedSubproduto}
+          onClose={() => setSelectedSubproduto(null)}
+          onRefresh={handleRefresh}
+        />
+      ) : (
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Tipo de Operação</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="mb-4 flex items-center gap-2">
               <Input
                 placeholder="Filtrar por qualquer campo..."
@@ -213,9 +213,9 @@ export function SubprodutosTable() {
                 </TableBody>
               </Table>
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 }

@@ -20,25 +20,23 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Perfis_ver">
-      <div className="space-y-4">
-        <div className="flex flex-col justify-between">
-          <CampoBoasVindas />
+      <div className="mb-4 flex justify-between space-y-4">
+        <CampoBoasVindas />
 
-          <div className="mb-4 flex items-center justify-end space-x-2">
-            {/* <CustomDateRangePicker /> */}
+        <div className="mb-4 flex items-center justify-end space-x-2">
+          {/* <CustomDateRangePicker /> */}
 
-            {podeCriar && (
-              <Button id="Perfis_criar" onClick={() => setIsCadastroOpen(true)}>
-                Novo Perfil
-              </Button>
-            )}
-          </div>
-
-          {!isCadastroOpen && <EquipesTable />}
-
-          {/* Modal de cadastro novo usuário */}
-          <CadastroUsuarioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+          {podeCriar && (
+            <Button id="Perfis_criar" onClick={() => setIsCadastroOpen(true)}>
+              Novo Perfil
+            </Button>
+          )}
         </div>
+
+        {!isCadastroOpen && <EquipesTable />}
+
+        {/* Modal de cadastro novo usuário */}
+        <CadastroUsuarioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
       </div>
     </ProtectedRoute>
   );

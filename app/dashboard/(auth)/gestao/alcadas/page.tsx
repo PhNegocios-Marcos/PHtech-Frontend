@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <ProtectedRoute requiredPermission="Alcadas_ver">
       <div className="space-y-4">
-        <div className="flex flex-col justify-between">
+        <div className="mb-4 flex justify-between space-y-4">
           <CampoBoasVindas />
           <div className="mb-4 flex items-center justify-end space-x-2">
             <CustomDateRangePicker />

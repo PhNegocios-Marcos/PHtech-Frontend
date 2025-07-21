@@ -93,7 +93,7 @@ export default function TabelaProduto({ subproduto }: Props) {
   const columns: ColumnDef<Subproduto>[] = [
     { accessorKey: "Tabela_nome", header: "Nome" },
     { accessorKey: "Tabela_mensal", header: "Tabela Mensal" },
-    
+
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
     { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
     { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
@@ -213,9 +213,12 @@ export default function TabelaProduto({ subproduto }: Props) {
   return (
     <div className="space-y-6 p-6">
       <Card className="">
-        <CardHeader>
-          <CardTitle>Tabela do Produto</CardTitle>
-        </CardHeader>
+        <div className="flex flex-row justify-between mx-10">
+          <CardHeader className="w-full">
+            <CardTitle>Tabela do Produto</CardTitle>
+          </CardHeader>
+          <Button>Criar nova tabela</Button>
+        </div>
 
         <CardContent>
           <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-3">

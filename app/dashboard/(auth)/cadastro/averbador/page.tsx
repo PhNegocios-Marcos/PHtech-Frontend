@@ -15,16 +15,14 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Averbador_Ver">
-      <div className="space-y-4">
+      <div className="space-y-4 flex justify-between">
         <CampoBoasVindas />
 
-        <div className="flex items-center justify-end">
-          {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
-              Novo Averbador
-            </Button>
-          )}
-        </div>
+        {podeCriar && (
+          <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
+            Novo Averbador
+          </Button>
+        )}
       </div>
     </ProtectedRoute>
   );

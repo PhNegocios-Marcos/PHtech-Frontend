@@ -16,23 +16,19 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Convenios_ver">
-      <CampoBoasVindas />
+      <div className="flex justify-between space-y-4 mb-4">
+        <CampoBoasVindas />
 
-      <div className="space-y-4">
-        <div className="flex flex-col justify-between">
-          <div className="mb-4 flex items-center justify-end space-x-2">
-            {podeCriar && (
-              <Button id="Convenios_criar" onClick={() => setIsCadastroOpen(true)}>
-                Novo Convênio
-              </Button>
-            )}
-          </div>
-
-          {!isCadastroOpen && <ConveniosTable />}
-
-          <CadastroConvenioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
-        </div>
+        {podeCriar && (
+          <Button id="Convenios_criar" onClick={() => setIsCadastroOpen(true)}>
+            Novo Convênio
+          </Button>
+        )}
       </div>
+
+      {!isCadastroOpen && <ConveniosTable />}
+
+      <CadastroConvenioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }
