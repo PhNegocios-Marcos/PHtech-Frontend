@@ -6,6 +6,7 @@ import { Produto } from "./produtos";
 import { ProdutoEdit } from "./InformacoesProduto";
 import RelacionamentoProduto from "./RelacionamentoProduto";
 import { Button } from "@/components/ui/button";
+import TaxaProduto from "./taxa"
 
 type Props = {
   produto: Produto;
@@ -27,6 +28,7 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
         <TabsList>
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="relacionamento">Relacionamento</TabsTrigger>
+          <TabsTrigger value="taxa">Taxa</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -39,6 +41,10 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
 
         <TabsContent value="relacionamento">
           <RelacionamentoProduto produto={produto} onClose={() => console.log("Fechar aba")} />
+        </TabsContent>
+
+        <TabsContent value="taxa">
+          <TaxaProduto produto={produto} onClose={() => console.log("Fechar aba")}/>
         </TabsContent>
       </Tabs>
     </div>
