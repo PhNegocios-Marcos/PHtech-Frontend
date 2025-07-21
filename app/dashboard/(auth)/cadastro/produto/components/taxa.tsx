@@ -92,15 +92,17 @@ export default function TaxaProduto({ produto }: Props) {
 
   const columns: ColumnDef<Produto>[] = [
     { accessorKey: "taxa_nome", header: "Nome" },
+    { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
+    
+    { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
+    { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
+    { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
+    { accessorKey: "vigencia_prazo", header: "Prazo Máximo" },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-    },
-    { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
-    { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
-    { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
-    { accessorKey: "vigencia_prazo", header: "Prazo Máximo" }
+    }
     // {
     //   id: "editar",
     //   header: "Editar",
