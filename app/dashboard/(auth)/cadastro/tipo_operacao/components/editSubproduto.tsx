@@ -2,23 +2,23 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Produto } from "./produtos";
-import { ProdutoEdit } from "./InformacoesProduto";
-import RelacionamentoProduto from "./RelacionamentoProduto";
+// import { Produto } from "./produtos";
+import { SubprodutoEdit } from "./informacoes";
+import { Subproduto } from "./subprodutos"
 import { Button } from "@/components/ui/button";
-import TabelaProduto from "./taxa"
+import TabelaProduto from "./tabela"
 
 type Props = {
-  produto: Produto;
+  subproduto: Subproduto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };
 
-export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Props) {
+export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: Props) {
   return (
     <div className="space-y-4 rounded-md border p-4 shadow-sm">
       <div className="flex items-center justify-between border-b pb-2">
-        <h2 className="text-lg font-semibold">{produto.nome}</h2>
+        <h2 className="text-lg font-semibold">{subproduto.produtos_subprodutos_nome}</h2>
         <Button onClick={onClose} variant="outline">
           Voltar
         </Button>
@@ -27,24 +27,19 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
       <Tabs defaultValue="info" className="w-full">
         <TabsList>
           <TabsTrigger value="info">Informações</TabsTrigger>
-          <TabsTrigger value="relacionamento">Relacionamento</TabsTrigger>
           <TabsTrigger value="Tabela">Tabela</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
-          <ProdutoEdit
-            produto={produto}
+          <SubprodutoEdit
+            subproduto={subproduto}
             onClose={onClose}
             onRefresh={onRefresh ?? (() => {})} // caso onRefresh não exista, passa uma função vazia
           />
         </TabsContent>
 
-        <TabsContent value="relacionamento">
-          <RelacionamentoProduto produto={produto} onClose={() => console.log("Fechar aba")} />
-        </TabsContent>
-
         <TabsContent value="Tabela">
-          <TabelaProduto produto={produto} onClose={() => console.log("Fechar aba")}/>
+          <TabelaProduto subproduto={subproduto} onClose={() => console.log("Fechar aba")}/>
         </TabsContent>
       </Tabs>
     </div>

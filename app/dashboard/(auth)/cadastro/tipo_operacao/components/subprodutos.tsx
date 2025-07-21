@@ -34,11 +34,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil } from "lucide-react";
-import { SubprodutoEdit } from "./editSubproduto";
+import  ProdutoDetalhesTabs from "./editSubproduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type Subproduto = {
+export type Subproduto = {
   produtos_subprodutos_id: string;
   produtos_subprodutos_nome: string;
   produtos_subprodutos_atividade: string;
@@ -146,7 +146,7 @@ export function SubprodutosTable() {
       </CardHeader>
       <CardContent>
         {selectedSubproduto ? (
-          <SubprodutoEdit
+          <ProdutoDetalhesTabs
             subproduto={selectedSubproduto}
             onClose={() => setSelectedSubproduto(null)}
             onRefresh={handleRefresh}

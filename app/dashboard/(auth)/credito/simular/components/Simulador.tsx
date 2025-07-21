@@ -36,7 +36,7 @@ interface ResultadoSimulacao {
   mensagem: {
     parcelas: Parcela[];
     iof: number;
-    taxaCadastro: number;
+    TabelaCadastro: number;
     valorCliente: number;
     CET: number;
   };
@@ -112,7 +112,7 @@ export default function SimuladorFgts({
     const fields = sections[0].fields; // assumindo 1 seção (igual antes)
     const body: Record<string, any> = {
       produto_hash: produtoHash,
-      taxa_banco: "20"
+      Tabela_banco: "20"
     };
 
     fields.forEach(({ key, type }) => {
@@ -305,7 +305,7 @@ export default function SimuladorFgts({
                 <strong>IOF:</strong> R$ {resultado.mensagem.iof}
               </p>
               <p>
-                <strong>Taxa de Cadastro:</strong> R$ {resultado.mensagem.taxaCadastro}
+                <strong>Tabela de Cadastro:</strong> R$ {resultado.mensagem.TabelaCadastro}
               </p>
               <p>
                 <strong>Valor Cliente:</strong> R$ {resultado.mensagem.valorCliente}

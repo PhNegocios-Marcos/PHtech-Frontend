@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Produto } from "./produtos";
+import { Subproduto } from "./subprodutos";
 import { CarregandoTable } from "./leads_carregando";
 import {
   Form,
@@ -52,7 +52,7 @@ type Option = {
 };
 
 type Props = {
-  produto: Produto;
+  subproduto: Subproduto;
   onClose: () => void;
 };
 
@@ -70,7 +70,7 @@ export type Tabela = {
   vigencia_prazo: string;
 };
 
-export default function TabelaProduto({ produto }: Props) {
+export default function TabelaProduto({ subproduto }: Props) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [Tabela, setTabela] = useState<Option[]>([]);
@@ -81,7 +81,7 @@ export default function TabelaProduto({ produto }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [produtosRelacionados, setProdutosRelacionados] = useState<Produto[]>([]);
+  const [produtosRelacionados, setProdutosRelacionados] = useState<Subproduto[]>([]);
 
   const form = useForm({
     defaultValues: {
@@ -90,7 +90,7 @@ export default function TabelaProduto({ produto }: Props) {
     }
   });
 
-  const columns: ColumnDef<Produto>[] = [
+  const columns: ColumnDef<Subproduto>[] = [
     { accessorKey: "Tabela_nome", header: "Nome" },
     { accessorKey: "Tabela_mensal", header: "Tabela Mensal" },
     
@@ -151,7 +151,7 @@ export default function TabelaProduto({ produto }: Props) {
         `${API_BASE_URL}/rel-produto-Tabela/criar`,
         {
           Tabela_prazo_hash: TabelaSelecionado?.id,
-          produto_hash: produto.id,
+          produto_hash: subproduto.produtos_subprodutos_id,
           vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
           vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
         },

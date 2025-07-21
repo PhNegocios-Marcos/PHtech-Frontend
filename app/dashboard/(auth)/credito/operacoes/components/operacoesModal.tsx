@@ -24,7 +24,7 @@ type Proposta = {
   Data: string;
   status: number;
   roteiro: string;
-  Taxa: string;
+  Tabela: string;
 };
 
 type Equipe = {

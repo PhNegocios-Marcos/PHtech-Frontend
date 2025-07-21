@@ -28,7 +28,7 @@ interface Parcela {
 interface Simulacao {
   parcelas: Parcela[];
   iof: number;
-  taxaCadastro: number;
+  TabelaCadastro: number;
   valorCliente: number;
   CET: number;
 }
@@ -358,7 +358,7 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
                 <strong>IOF:</strong> R$ {simulacao.iof.toFixed(2)}
               </p>
               <p>
-                <strong>Taxa de Cadastro:</strong> R$ {simulacao.taxaCadastro.toFixed(2)}
+                <strong>Tabela de Cadastro:</strong> R$ {simulacao.TabelaCadastro.toFixed(2)}
               </p>
               <p>
                 <strong>Valor Cliente:</strong> R$ {simulacao.valorCliente.toFixed(2)}

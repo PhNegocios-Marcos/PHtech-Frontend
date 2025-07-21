@@ -50,7 +50,7 @@ type Proposta = {
   Data: string;
   status: number;
   roteiro: string;
-  Taxa: string;
+  Tabela: string;
 };
 
 export function OperacoesTable() {
@@ -81,7 +81,7 @@ export function OperacoesTable() {
       }
     },
     { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
-    { accessorKey: "Taxa", header: "Taxa" },
+    { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",
       header: "Editar",
@@ -128,7 +128,7 @@ export function OperacoesTable() {
           Data: proposta.data,
           status: proposta.status,
           roteiro: proposta.roteiro,
-          Taxa: proposta.taxa
+          Tabela: proposta.Tabela
         }));
 
         setEquipes(operacoesArray);
