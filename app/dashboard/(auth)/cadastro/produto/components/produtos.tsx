@@ -33,7 +33,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
-import { Pencil } from "lucide-react";
+import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type Produto = {
   id: string;
@@ -80,8 +80,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
           variant="ghost"
           size="icon"
           onClick={() => onSelectProduto(row.original)}
-          title="Editar produto"
-        >
+          title="Editar produto">
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -146,9 +145,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
           <Input
             placeholder="Filtrar por nome..."
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("nome")?.setFilterValue(event.target.value)
-            }
+            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -166,10 +163,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}>
                     {column.id}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -184,10 +178,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -196,16 +187,10 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="hover:bg-muted cursor-pointer"
-                  >
+                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -215,6 +200,28 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
               )}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 pt-4">
+          <div className="text-muted-foreground flex-1 text-sm">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}>
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}>
+              <ChevronRight />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

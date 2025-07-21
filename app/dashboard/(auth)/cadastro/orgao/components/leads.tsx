@@ -33,7 +33,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
-import { Pencil } from "lucide-react";
+import { Pencil, ChevronLeft, ChevronRight  } from "lucide-react";
 
 export type Orgao = {
   orgao_nome: string;
@@ -197,6 +197,28 @@ export function Orgao({ onSelectProduto }: ProdutosTableProps) {
               )}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 pt-4">
+          <div className="text-muted-foreground flex-1 text-sm">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}>
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}>
+              <ChevronRight />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
