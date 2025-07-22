@@ -67,6 +67,12 @@ export const page_routes: PageRoutesType[] = [
             title: "Averbador",
             href: "/dashboard/cadastro/averbador"
             // icon: "ChartPie"
+          },
+          {
+            id: "Taxa_Ver",
+            title: "Tabela Taxa",
+            href: "/dashboard/cadastro/table_taxa"
+            // icon: "ChartPie"
           }
         ]
       },

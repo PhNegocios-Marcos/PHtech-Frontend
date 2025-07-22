@@ -18,7 +18,7 @@ export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: 
   return (
     <div className="space-y-4 rounded-md border p-4 shadow-sm">
       <div className="flex items-center justify-between border-b pb-2">
-        <h2 className="text-lg font-semibold">{subproduto.produtos_subprodutos_nome}</h2>
+        <h2 className="text-lg font-semibold">{subproduto.nome_tabela}</h2>
         <Button onClick={onClose} variant="outline">
           Voltar
         </Button>
@@ -39,7 +39,7 @@ export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: 
         </TabsContent>
 
         {/* <TabsContent value="Tabela">
-          <TabelaProduto subproduto={subproduto} onClose={() => console.log("Fechar aba")}/>
+          <TabelaProduto onClose={() => console.log("Fechar aba")}/>
         </TabsContent> */}
       </Tabs>
     </div>

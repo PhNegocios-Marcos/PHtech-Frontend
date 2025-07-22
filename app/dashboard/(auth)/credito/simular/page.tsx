@@ -66,7 +66,7 @@ export default function CreditSimular() {
           }
         );
 
-        console.log("Resposta de produtos:", response.data);
+        // console.log("Resposta de produtos:", response.data);
 
         const produtosArray = response.data.mensagem ?? [];
 
