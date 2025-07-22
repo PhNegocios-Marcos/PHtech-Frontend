@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Subproduto } from "./subprodutos";
 import { CarregandoTable } from "./tabela_carregando";
+import CadastroTabelaModal from "./cadastroTabela";
 import {
   Form,
   FormControl,
@@ -56,12 +57,12 @@ type Props = {
   onClose: () => void;
 };
 
-export type Tabela = {
-  Tabela_prazo_hash: string;
-  Tabela_nome: string;
+export type Taxa = {
+  taxa_prazo_hash: string;
+  taxa_nome: string;
   status: number;
   prazo_minimo: number;
-  Tabela_mensal: number;
+  taxa_mensal: number;
   prazo_maximo: number;
   id_uy3: string | null;
   cor_grafico: string | null;
@@ -70,11 +71,11 @@ export type Tabela = {
   vigencia_prazo: string;
 };
 
-export default function TabelaProduto({ subproduto }: Props) {
+export default function TaxaProduto({ subproduto }: Props) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [Tabela, setTabela] = useState<Option[]>([]);
-  const [TabelaSelecionado, setTabelaSelecionado] = useState<Option | null>(null);
+  const [taxa, setTaxa] = useState<Option[]>([]);
+  const [taxaSelecionado, setTaxaSelecionado] = useState<Option | null>(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -82,6 +83,9 @@ export default function TabelaProduto({ subproduto }: Props) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [produtosRelacionados, setProdutosRelacionados] = useState<Subproduto[]>([]);
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   const form = useForm({
     defaultValues: {
@@ -91,9 +95,8 @@ export default function TabelaProduto({ subproduto }: Props) {
   });
 
   const columns: ColumnDef<Subproduto>[] = [
-    { accessorKey: "Tabela_nome", header: "Nome" },
-    { accessorKey: "Tabela_mensal", header: "Tabela Mensal" },
-
+    { accessorKey: "taxa_nome", header: "Nome" },
+    { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
     { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
     { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
@@ -125,7 +128,7 @@ export default function TabelaProduto({ subproduto }: Props) {
   useEffect(() => {
     async function fetchConvenios() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/config_Tabelas_prazos/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/config_taxas_prazos/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
@@ -133,10 +136,10 @@ export default function TabelaProduto({ subproduto }: Props) {
         });
 
         const data = res.data.map((c: any) => ({
-          id: c.produtos_config_Tabela_prazo_id,
-          nome: c.produtos_config_Tabela_prazo_nome
+          id: c.produtos_config_taxa_prazo_id,
+          nome: c.produtos_config_taxa_prazo_nome
         }));
-        setTabela(data);
+        setTaxa(data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
       }
@@ -145,15 +148,15 @@ export default function TabelaProduto({ subproduto }: Props) {
     fetchConvenios();
   }, [token]);
 
-  async function salvarTabela() {
+  async function salvarTaxa() {
     try {
       await axios.post(
-        `${API_BASE_URL}/rel-produto-Tabela/criar`,
+        `${API_BASE_URL}/produtos-config-tabelas/criar`,
         {
-          Tabela_prazo_hash: TabelaSelecionado?.id,
-          produto_hash: subproduto.produtos_subprodutos_id,
-          vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
-          vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
+          tabela_hash: taxaSelecionado?.id,
+          produto_hash: subproduto.produtos_subprodutos_id
+          // vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
+          // vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
         },
         {
           headers: {
@@ -175,7 +178,7 @@ export default function TabelaProduto({ subproduto }: Props) {
   useEffect(() => {
     async function fetchRelacionamentos() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/rel-produto-Tabela/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/rel-produto-taxa/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
@@ -213,22 +216,24 @@ export default function TabelaProduto({ subproduto }: Props) {
   return (
     <div className="space-y-6 p-6">
       <Card className="">
-        <div className="flex flex-row justify-between mx-10">
-          <CardHeader className="w-full">
+        <CardHeader>
+          <div className="flex flex-row justify-between">
             <CardTitle>Tabela do Produto</CardTitle>
-          </CardHeader>
-          <Button>Criar nova tabela</Button>
-        </div>
+            <Button id="" onClick={() => setIsCadastroOpen(true)}>
+              Nova Tabela
+            </Button>
+          </div>
+        </CardHeader>
 
         <CardContent>
           <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="max-w-[400px] space-y-2">
               <span className="text-muted-foreground text-sm">Tabela</span>
               <Combobox
-                data={Tabela}
+                data={taxa}
                 displayField="nome"
-                value={TabelaSelecionado}
-                onChange={setTabelaSelecionado}
+                value={taxaSelecionado}
+                onChange={setTaxaSelecionado}
                 searchFields={["nome"]}
                 placeholder="Selecione um convênio"
               />
@@ -329,7 +334,7 @@ export default function TabelaProduto({ subproduto }: Props) {
             </div>
           </div>
           <div className="flex items-center justify-end">
-            <Button onClick={salvarTabela}>Salvar</Button>
+            <Button onClick={salvarTaxa}>Salvar</Button>
           </div>
 
           <div className="mt-10 rounded-md border">
@@ -364,6 +369,7 @@ export default function TabelaProduto({ subproduto }: Props) {
           </div>
         </CardContent>
       </Card>
+      <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
           {podeCriar && (
-            <Button id="Subprodutos_criar" onClick={() => setIsCadastroOpen(true)}>
+            <Button id="" onClick={() => setIsCadastroOpen(true)}>
               Novo Tipo de Operacao
             </Button>
           )}
