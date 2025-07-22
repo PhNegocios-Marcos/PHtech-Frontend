@@ -96,6 +96,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
       vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
     };
 
+
     try {
       const response = await fetch(`${API_BASE_URL}/produtos-config-tabelas/criar`, {
         method: "POST",
@@ -105,6 +106,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         },
         body: JSON.stringify(payload)
       });
+
 
       if (!response.ok) {
         const err = await response.json();

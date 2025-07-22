@@ -26,8 +26,8 @@ export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: 
 
       <Tabs defaultValue="info" className="w-full">
         <TabsList>
-          {/* <TabsTrigger value="info">Informações</TabsTrigger> */}
-          {/* <TabsTrigger value="Tabela">Tabela</TabsTrigger> */}
+          <TabsTrigger value="info">Informações</TabsTrigger>
+          <TabsTrigger value="Tabela">Tabela</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -38,9 +38,9 @@ export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: 
           />
         </TabsContent>
 
-        {/* <TabsContent value="Tabela">
+        <TabsContent value="Tabela">
           <TabelaProduto onClose={() => console.log("Fechar aba")}/>
-        </TabsContent> */}
+        </TabsContent>
       </Tabs>
     </div>
   );

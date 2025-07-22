@@ -35,7 +35,7 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Option = {
-  id: string;
+  id?: string;
   nome: string;
   hash?: string; // opcional
 };
@@ -175,8 +175,6 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
           }
         );
 
-        // console.log("Resposta de produtos:", response.data);
-
         const produtosArray = response.data.mensagem ?? [];
 
         const formatado = produtosArray.map((item: any) => ({
@@ -198,16 +196,18 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
 
   // Carrega categorias ao selecionar produto
   useEffect(() => {
-    if (!selectedProduto) return;
+    if (!selectedProduto || !selectedConvenio) return;
 
     const fetchCategorias = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/rel-produto-sub-produto/${selectedProduto.id}`,
+          `${API_BASE_URL}/listarSubprodutos/${selectedProduto.id}/convenio/${selectedConvenio.id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
+
+        console.log("Resposta de produtos:", response.data);
 
         const subprodutos = Array.isArray(response.data) ? response.data : [response.data];
 
@@ -217,6 +217,7 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
         }));
 
         setCategorias(formatado);
+
         setSelectedCategoria(null);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
@@ -231,13 +232,13 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
       await axios.post(
         `${API_BASE_URL}/rel-produto-tabela-config-sub-produto-convenio/criar`,
         {
-          tabela_hash: taxaSelecionado?.id,
-          // produto_hash: subproduto.produtos_subprodutos_id,
-          tipo_operacao_hash: taxaSelecionado?.id
+          tipo_operacao_hash: selectedCategoria?.id,
+          tabela_hash: taxaSelecionado?.id
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
           }
         }
       );
