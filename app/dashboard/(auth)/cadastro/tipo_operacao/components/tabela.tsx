@@ -6,23 +6,10 @@ import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Subproduto } from "./subprodutos";
 import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroTabela";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,7 +30,6 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { useForm, FormProvider } from "react-hook-form";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -87,20 +73,15 @@ export default function TaxaProduto({ subproduto }: Props) {
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
-  const form = useForm({
-    defaultValues: {
-      inicio: undefined,
-      fim: undefined
-    }
-  });
-
   const columns: ColumnDef<Subproduto>[] = [
-    { accessorKey: "taxa_nome", header: "Nome" },
+    { accessorKey: "nome_tabela", header: "Nome" },
     { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
     { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
     { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
-    { accessorKey: "vigencia_prazo", header: "Prazo Máximo" },
+    { accessorKey: "vigencia_fim", header: "Vigencia Fim" },
+    { accessorKey: "incrementador", header: "incrementador" },
+    { accessorKey: "periodicidade", header: "periodicidade" },
     {
       accessorKey: "status",
       header: "Status",
@@ -123,12 +104,10 @@ export default function TaxaProduto({ subproduto }: Props) {
     // }
   ];
 
-  const { inicio, fim } = form.getValues();
-
   useEffect(() => {
     async function fetchConvenios() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/config_taxas_prazos/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/produtos-config-tabelas/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
@@ -137,7 +116,7 @@ export default function TaxaProduto({ subproduto }: Props) {
 
         const data = res.data.map((c: any) => ({
           id: c.produtos_config_taxa_prazo_id,
-          nome: c.produtos_config_taxa_prazo_nome
+          nome: c.nome_tabela
         }));
         setTaxa(data);
       } catch (error) {
@@ -151,12 +130,11 @@ export default function TaxaProduto({ subproduto }: Props) {
   async function salvarTaxa() {
     try {
       await axios.post(
-        `${API_BASE_URL}/produtos-config-tabelas/criar`,
+        `${API_BASE_URL}/rel-produto-tabela-config-sub-produto-convenio/criar`,
         {
           tabela_hash: taxaSelecionado?.id,
-          produto_hash: subproduto.produtos_subprodutos_id
-          // vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
-          // vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
+          // produto_hash: subproduto.produtos_subprodutos_id,
+          tipo_operacao_hash: taxaSelecionado?.nome
         },
         {
           headers: {
@@ -178,13 +156,13 @@ export default function TaxaProduto({ subproduto }: Props) {
   useEffect(() => {
     async function fetchRelacionamentos() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/rel-produto-taxa/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/produtos-config-tabelas/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           }
         });
-        console.log("data: ", res.data);
+        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
@@ -235,102 +213,8 @@ export default function TaxaProduto({ subproduto }: Props) {
                 value={taxaSelecionado}
                 onChange={setTaxaSelecionado}
                 searchFields={["nome"]}
-                placeholder="Selecione um convênio"
+                placeholder="Selecione uma Taxa"
               />
-            </div>
-            <div>
-              {/* ✅ Formulário com contexto */}
-              <FormProvider {...form}>
-                <Form {...form}>
-                  <form className="space-y-8">
-                    <FormField
-                      control={form.control}
-                      name="inicio"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Inicio da vigência</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}>
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </FormProvider>
-            </div>
-            <div>
-              {/* ✅ Formulário com contexto */}
-              <FormProvider {...form}>
-                <Form {...form}>
-                  <form className="space-y-8">
-                    <FormField
-                      control={form.control}
-                      name="fim"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Fim da vigência</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}>
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </FormProvider>
             </div>
           </div>
           <div className="flex items-center justify-end">
@@ -367,6 +251,28 @@ export default function TaxaProduto({ subproduto }: Props) {
               </TableBody>
             </Table>
           </div>
+          <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
+              </div>
+            </div>
         </CardContent>
       </Card>
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
