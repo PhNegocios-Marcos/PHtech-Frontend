@@ -210,7 +210,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
         </div>
 
         <div className="rounded-md border">
-          <Table className="w-full table-fixed">
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
