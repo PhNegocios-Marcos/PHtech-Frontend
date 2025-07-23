@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Form,
   FormField,
@@ -31,57 +31,50 @@ const schema = z.object({
   prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
   prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
   taxa_mensal: z.string().min(1, "Taxa mensal é obrigatório"),
-  incrementador: z.string().min(1, "Taxa mensal é obrigatório"),
-  periodiciade: z.string().min(1, "Taxa mensal é obrigatório")
+  incrementador: z.string().min(1, "Incrementador é obrigatório"),
+  periodiciade: z.string().min(1, "Periodicidade é obrigatória"),
+  tabela_hash: z.string().optional(),
+  inicio: z.date().optional(),
+  fim: z.date().optional()
 });
 
 type Subproduto = z.infer<typeof schema>;
 
 type SubprodutoDrawerProps = {
-  subproduto: Subproduto;
+  subproduto: Partial<Subproduto>;
   onClose: () => void;
   onRefresh: () => void;
 };
 
 export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDrawerProps) {
+  const { token, userData } = useAuth();
+
   const methods = useForm<Subproduto>({
     resolver: zodResolver(schema),
     defaultValues: {
-      // ...subproduto,
-      // produtos_subprodutos_status: subproduto.produtos_subprodutos_status ?? 1,
+      nome_tabela: "",
       prazo_minimo: "",
       prazo_maximo: "",
       taxa_mensal: "",
       incrementador: "",
       periodiciade: "",
-      nome_tabela: "",
-    }
-  });
-
-  const { token, userData } = useAuth();
-
-  useEffect(() => {
-    methods.reset({
-      ...subproduto
-      // produtos_subprodutos_status: subproduto.produtos_subprodutos_status ?? 1
-    });
-  }, [subproduto, methods]);
-
-
-  const form = useForm({
-    defaultValues: {
+      tabela_hash: "",
       inicio: undefined,
       fim: undefined
     }
   });
 
-  const { inicio, fim } = form.getValues();
+  useEffect(() => {
+    methods.reset({
+      ...subproduto,
+      inicio: subproduto.inicio ? parseISO(subproduto.inicio.toString()) : undefined,
+      fim: subproduto.fim ? parseISO(subproduto.fim.toString()) : undefined
+    });
+  }, [subproduto, methods]);
 
   const statusOptions = [{ id: "PERSONALIZADO", name: "PERSONALIZADO" }];
 
   const onSubmit = async (data: Subproduto) => {
-    // console.log("subpro: ", data);
-
     if (!token) {
       console.error("Token global não definido!");
       return;
@@ -89,17 +82,18 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
 
     const payload = {
       nome_tabela: data.nome_tabela,
+      config_tabela_hash: data.tabela_hash,
       prazo_minimo: data.prazo_minimo,
       prazo_maximo: data.prazo_maximo,
       taxa_mensal: data.taxa_mensal,
-      usuario_criacao_hash: (userData as any)?.id ?? "id_user",
+      usuario_atualizacao: (userData as any)?.id ?? "id_user",
       incrementador: data.incrementador,
       periodicidade: data.periodiciade,
-      vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
-      vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
+      vigencia_inicio: format(data.inicio ?? new Date(), "yyyy-MM-dd"),
+      vigencia_fim: format(data.fim ?? new Date(), "yyyy-MM-dd")
     };
 
-    // console.log("payload", payload);
+    console.log("payload", payload)
 
     try {
       await axios.put(`${API_BASE_URL}/produtos-config-tabelas/atualizar`, payload, {
@@ -116,10 +110,9 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={methods.handleSubmit(onSubmit, (errors) => {
-          console.warn("Erros de validação:", errors);
-        })}
-        className="grid grid-cols-2 gap-4 p-6">
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4 p-6"
+      >
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>Editar Categoria</CardTitle>
@@ -139,21 +132,19 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={methods.control}
                 name="prazo_minimo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prozo mínimo</FormLabel>
+                    <FormLabel>Prazo mínimo</FormLabel>
                     <FormControl>
-                      <Input placeholder="12" {...field} />
+                      <Input {...field} placeholder="12" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={methods.control}
                 name="prazo_maximo"
@@ -161,13 +152,12 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                   <FormItem>
                     <FormLabel>Prazo máximo</FormLabel>
                     <FormControl>
-                      <Input placeholder="64" {...field} />
+                      <Input {...field} placeholder="64" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={methods.control}
                 name="taxa_mensal"
@@ -175,13 +165,12 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                   <FormItem>
                     <FormLabel>Taxa mensal</FormLabel>
                     <FormControl>
-                      <Input placeholder="1.6" {...field} />
+                      <Input {...field} placeholder="1.6" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={methods.control}
                 name="incrementador"
@@ -193,7 +182,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                         data={statusOptions}
                         displayField="name"
                         value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                        onChange={(selected) => field.onChange(selected?.id ?? 1)}
+                        onChange={(selected) => field.onChange(selected?.id ?? "")}
                         searchFields={["name"]}
                       />
                     </FormControl>
@@ -201,112 +190,89 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={methods.control}
                 name="periodiciade"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Periodiciade</FormLabel>
+                    <FormLabel>Periodicidade</FormLabel>
                     <FormControl>
-                      <Input placeholder="12" {...field} />
+                      <Input {...field} placeholder="12" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div>
-                <FormProvider {...form}>
-                  <Form {...form}>
-                    <div className="space-y-8">
-                      <FormField
-                        control={form.control}
-                        name="inicio"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>Inicio da vigência</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-[240px] pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}>
-                                    {field.value ? (
-                                      format(field.value, "PP")
-                                    ) : (
-                                      <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) => date < new Date()}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </Form>
-                </FormProvider>
-              </div>
-              <div>
-                <FormProvider {...form}>
-                  <Form {...form}>
-                    <div className="space-y-8">
-                      <FormField
-                        control={form.control}
-                        name="fim"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>Fim da vigência</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-[240px] pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}>
-                                    {field.value ? (
-                                      format(field.value, "PPP")
-                                    ) : (
-                                      <span>Selecione uma data</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) => date < new Date()}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </Form>
-                </FormProvider>
-              </div>
+              <FormField
+                control={methods.control}
+                name="inicio"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Início da vigência</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? format(field.value, "PPP") : <span>Selecione uma data</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={methods.control}
+                name="fim"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Fim da vigência</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? format(field.value, "PPP") : <span>Selecione uma data</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
         </Card>

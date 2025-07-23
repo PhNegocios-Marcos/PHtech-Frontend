@@ -53,6 +53,7 @@ export type Subproduto = {
   taxa_mensal: string;
   incrementador: string;
   periodiciade: string;
+  tabela_hash: string;
 };
 
 export function SubprodutosTable() {

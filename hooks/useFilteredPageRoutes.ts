@@ -70,7 +70,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Convenio_Ver",
       "Averbador_Ver",
       "Orgao_Ver",
-      "Taxa_Ver"
+      "Taxa_Ver",
+      "Averbador_criar"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
