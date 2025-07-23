@@ -21,10 +21,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const schema = z.object({
-  convenio_nome: z.string().min(1, "Nome é obrigatório"),
-  convenio_prefixo: z.number().min(1, "Prefixo é obrigatório"),
-  convenio_grupo: z.string().min(1, "Grupo é obrigatório"),
-  convenio_averbador: z.string().min(1, "Averbador é obrigatório")
+  averbador_nome: z.string().min(1, "Nome é obrigatório")
 });
 
 type FormData = z.infer<typeof schema>;
@@ -38,7 +35,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      convenio_nome: ""
+      averbador_nome: ""
     }
   });
 
@@ -106,7 +103,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={methods.control}
-                      name="convenio_nome"
+                      name="averbador_nome"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nome</FormLabel>

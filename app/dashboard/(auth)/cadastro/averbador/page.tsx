@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-// import { ConveniosTable } from "./components/convenios";
+import { AverbadorTable } from "./components/leads";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroAverbadorModal from "./components/CadastroAverbadorModal";
@@ -26,7 +26,7 @@ export default function Page() {
         )}
       </div>
 
-      {/* {!isCadastroOpen && <ConveniosTable />} */}
+      {!isCadastroOpen && <AverbadorTable />}
 
       <CadastroAverbadorModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
