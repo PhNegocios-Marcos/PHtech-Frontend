@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import CampoBoasVindas from "@/components/boasvindas";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
-import { Orgao } from "./components/leads";
+import { OrgaoModal } from "./components/leads";
 import CadastroOrgao from "./components/cadastroOrgao";
 
 export default function Page() {
-  const podeCriar = useHasPermission("Produtos_criar");
+  const podeCriar = useHasPermission("Orgaos_criar");
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
-  const [produtoSelecionado, setProdutoSelecionado] = useState<Orgao | null>(null);
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
@@ -21,15 +20,13 @@ export default function Page() {
         <CampoBoasVindas />
 
         {podeCriar && (
-          <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
+          <Button onClick={() => setIsCadastroOpen(true)} id="Orgaos_criar">
             Novo Orgão
           </Button>
         )}
       </div>
 
-      {!isCadastroOpen && !produtoSelecionado && (
-        <Orgao onSelectProduto={(produto) => setProdutoSelecionado(produto)} />
-      )}
+      {!isCadastroOpen && <OrgaoModal />}
 
       <CadastroOrgao isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

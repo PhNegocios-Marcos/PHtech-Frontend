@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Orgao } from "./leads";
 import {
   Form,
   FormControl,
@@ -19,58 +20,70 @@ import {
   FormMessage
 } from "@/components/ui/form";
 
+// Schema com coerção para number
 const usuarioSchema = z.object({
-  id: z.string(),
-  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  telefone: z.string(),
-  endereco: z.string(),
-  status: z.number()
+  orgao_orgao_nomehash: z.string().optional(),
+  orgao_hash: z.string(),
+  orgao_data_corte: z.coerce.number(),
+  orgao_prefixo: z.coerce.number(),
+  orgao_status: z.coerce.number(),
+  orgao_nome: z.string()
 });
 
-type Usuario = z.infer<typeof usuarioSchema> & {
-  cpf?: string;
-  email?: string;
-  tipo_acesso?: string;
-  cnpj?: string;
-};
-
-type UsuarioDrawerProps = {
-  usuario: Usuario;
+type OrgaoDrawerProps = {
+  orgao: Orgao;
   onClose: () => void;
   onRefresh: () => void;
 };
 
-export function OrgaoEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
-  const methods = useForm<Usuario>({
+export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
+  const methods = useForm<Orgao>({
     resolver: zodResolver(usuarioSchema),
-    defaultValues: usuario
+    defaultValues: orgao
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
-    methods.reset(usuario);
-  }, [usuario, methods]);
+    methods.reset(orgao);
+  }, [orgao, methods]);
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: Usuario) => {
+  function getModifiedFields<T extends object>(original: T, updated: T): Partial<T> {
+    const modified: Partial<T> = {};
+    (Object.keys(updated) as (keyof T)[]).forEach((key) => {
+      if (updated[key] !== original[key]) {
+        modified[key] = updated[key];
+      }
+    });
+    return modified;
+  }
+
+  const onSubmit = async (data: Orgao) => {
     if (!token) {
       console.error("Token global não definido!");
       return;
     }
 
+    const payload = getModifiedFields(orgao, data);
+
+    if (Object.keys(payload).length === 0) {
+      alert("Nenhuma alteração detectada.");
+      return;
+    }
+
     try {
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/usuario/atualizar`, data, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/orgaos/${orgao.orgao_hash}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       onClose();
       onRefresh();
     } catch (error: any) {
-      console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
+      console.error("Erro ao atualizar órgão:", error.response?.data || error.message);
       alert(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
@@ -81,13 +94,13 @@ export function OrgaoEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
         <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Editar Usuário</CardTitle>
+              <CardTitle>Editar Órgão</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={methods.control}
-                  name="nome"
+                  name="orgao_nome"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
@@ -98,66 +111,43 @@ export function OrgaoEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={methods.control}
-                  name="cpf"
+                  name="orgao_prefixo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CPF</FormLabel>
+                      <FormLabel>Prefixo</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-gray-100" />
+                        <Input
+                          {...field}
+                          type="number"
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={methods.control}
-                  name="email"
+                  name="orgao_data_corte"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Data Corte</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-gray-100" />
+                        <Input
+                          {...field}
+                          type="number"
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={methods.control}
-                  name="telefone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telefone</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="endereco"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="status"
+                  name="orgao_status"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
@@ -165,7 +155,9 @@ export function OrgaoEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
                         <Combobox
                           data={statusOptions}
                           displayField="name"
-                          value={statusOptions.find((opt) => opt.id === field.value) ?? null}
+                          value={
+                            statusOptions.find((opt) => opt.id === field.value) ?? statusOptions[0]
+                          }
                           onChange={(selected) => field.onChange(selected?.id ?? 1)}
                           searchFields={["name"]}
                         />
