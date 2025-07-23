@@ -256,8 +256,8 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
       setMessageType("success");
     } catch (error) {
       console.error(error);
-      //   setMessage("Erro ao criar relação com convênio");
-      //   setMessageType("error");
+        setMessage("Erro ao criar relação com convênio");
+        setMessageType("error");
     } finally {
       setLoading(false);
     }

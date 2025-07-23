@@ -102,7 +102,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
     // console.log("payload", payload);
 
     try {
-      await axios.put(`${API_BASE_URL}/produtos-config-tabelas/listar`, payload, {
+      await axios.put(`${API_BASE_URL}/produtos-config-tabelas/atualizar`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       onClose();
@@ -235,7 +235,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
                                       !field.value && "text-muted-foreground"
                                     )}>
                                     {field.value ? (
-                                      format(field.value, "PPP")
+                                      format(field.value, "PP")
                                     ) : (
                                       <span>Selecione uma data</span>
                                     )}
