@@ -128,7 +128,7 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
         });
 
         const data = res.data.map((c: any) => ({
-          id: c.produtos_config_taxa_prazo_id,
+          id: c.tabela_hash,
           nome: c.nome_tabela
         }));
         setTaxa(data);
@@ -201,23 +201,29 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
     const fetchCategorias = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/listarSubprodutos/${selectedProduto.id}/convenio/${selectedConvenio.id}`,
+          `${API_BASE_URL}/listarSubprodutos/${selectedProduto.id}/convenio/${selectedConvenio.hash}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
 
         console.log("Resposta de produtos:", response.data);
+        console.log("selectedProduto.id: ", selectedProduto.id);
+        console.log("selectedConvenio.id: ", selectedConvenio.id);
 
-        const subprodutos = Array.isArray(response.data) ? response.data : [response.data];
+        // Extrair categoriasHash
+        const categoriasHash = response.data?.mensagem?.categoriasHash ?? [];
 
-        const formatado: Option[] = subprodutos.map((item: any) => ({
-          id: item.produtos_subprodutos_id,
-          nome: item.get_subprodutos?.[0]?.produtos_subprodutos_nome ?? "Sem nome"
-        }));
+        // Mapear para o formato esperado
+        const formatado: Option[] = categoriasHash.map((obj: any) => {
+          const id = Object.keys(obj)[0];
+          const nome = obj[id] ?? "Sem nome";
 
+          return { id, nome };
+        });
+
+        // Atualizar o estado
         setCategorias(formatado);
-
         setSelectedCategoria(null);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
@@ -228,13 +234,17 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
   }, [selectedProduto]);
 
   async function salvarTaxa() {
+    console.log("taxaSelecionado: ", taxa);
+
     try {
       await axios.post(
         `${API_BASE_URL}/rel-produto-tabela-config-sub-produto-convenio/criar`,
-        {
-          tipo_operacao_hash: selectedCategoria?.id,
-          tabela_hash: taxaSelecionado?.id
-        },
+        [
+          {
+            tipo_operacao_hash: selectedCategoria?.id,
+            tabela_hash: taxaSelecionado?.id
+          }
+        ],
         {
           headers: {
             Authorization: `Bearer ${token}`,
