@@ -72,14 +72,7 @@ export function OperacoesTable() {
     { accessorKey: "CPF", header: "CPF/CNPJ" },
     { accessorKey: "Valor", header: "Valor principal" },
     { accessorKey: "Data", header: "Data de início" },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ getValue }) => {
-        const valor = getValue<number>();
-        return valor === 1 ? "Ativo" : "Inativo";
-      }
-    },
+    { accessorKey: "status", header: "Status" },
     { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
     { accessorKey: "Tabela", header: "Tabela" },
     {
