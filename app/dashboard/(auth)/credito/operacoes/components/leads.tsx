@@ -74,7 +74,7 @@ export function OperacoesTable() {
     { accessorKey: "Data", header: "Data de início" },
     { accessorKey: "status", header: "Status" },
     { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
-    { accessorKey: "Tabela", header: "Tabela" },
+    // { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",
       header: "Editar",
