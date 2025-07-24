@@ -25,8 +25,8 @@ interface Parcela {
   valor_juros: number;
 }
 
-interface Simulacao {
-  parcelas: Parcela[];
+export interface Simulacao {
+  parcelas: Parcela[] ;
   iof: number;
   TabelaCadastro: number;
   valorCliente: number;
@@ -85,7 +85,7 @@ interface ClienteApiResponse {
 
 interface PropostaClienteProps {
   cpf: string;
-  simulacao?: Simulacao;
+  simulacao?: Simulacao | undefined;
   produtoHash: string;
 }
 

@@ -17,29 +17,18 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 
-import PropostaCliente from "./proposta";
+import PropostaCliente, { Simulacao } from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
 
 interface SimuladorFgtsProps {
-  produtoHash: string;
+  produtoHash: any;
   onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void; // aceita dois parâmetros
   proutoName: string;
 }
 
-interface Parcela {
-  valor_parcela: number;
-  valor_juros: number;
-}
-
 interface ResultadoSimulacao {
-  mensagem: {
-    parcelas: Parcela[];
-    iof: number;
-    TabelaCadastro: number;
-    valorCliente: number;
-    CET: number;
-  };
+  mensagem: Record<string, Simulacao>;
 }
 
 interface Section {
@@ -61,13 +50,14 @@ export default function SimuladorFgts({
   const [loading, setLoading] = useState(false);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [abrirCadastro, setAbrirCadastro] = useState(false);
-  const [sections, setSections] = useState<Section[]>([]); // novo estado para sections dinâmicas
+  const [sections, setSections] = useState<Section[]>([]);
+
+  const [simulacaoSelecionadaKey, setSimulacaoSelecionadaKey] = useState<string | null>(null);
 
   const { token } = useAuth();
 
-  // console.log(proutoName);
+  // console.log("produtoHash", produtoHash)
 
-  // Função para carregar os campos da API na montagem do componente
   useEffect(() => {
     async function fetchSections() {
       try {
@@ -77,13 +67,11 @@ export default function SimuladorFgts({
             Authorization: `Bearer ${token}`
           },
           params: {
-            simulacao_campos_produtos_rel_produto_sub_produto_id: produtoHash
+            simulacao_campos_produtos_produto_id: produtoHash
           }
         });
 
         const data = response.data;
-
-        // Se vier um array, mapeia todos, senão trata um único objeto
         const arrData = Array.isArray(data) ? data : [data];
 
         const parsedSections: Section[] = arrData.map((item: any) => ({
@@ -100,7 +88,7 @@ export default function SimuladorFgts({
     }
 
     fetchSections();
-  }, [produtoHash]);
+  }, [produtoHash, token]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -109,10 +97,10 @@ export default function SimuladorFgts({
   const buildRequestBody = () => {
     if (!sections.length) return {};
 
-    const fields = sections[0].fields; // assumindo 1 seção (igual antes)
+    const fields = sections[0].fields;
     const body: Record<string, any> = {
       produto_hash: produtoHash,
-      Tabela_banco: "20"
+      taxa_banco: "20"
     };
 
     fields.forEach(({ key, type }) => {
@@ -125,7 +113,6 @@ export default function SimuladorFgts({
       }
 
       if (type === "date") {
-        // se valor no formato dd/mm/yyyy converte para yyyy-mm-dd
         const parts = value.split("/");
         if (parts.length === 3) {
           value = `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -155,6 +142,7 @@ export default function SimuladorFgts({
       });
       const data = await response.json();
       setResultado(data);
+      setSimulacaoSelecionadaKey(null); // resetar seleção a cada simulação nova
     } catch (err) {
       console.error("Erro na simulação FGTS:", err);
     } finally {
@@ -197,7 +185,6 @@ export default function SimuladorFgts({
         return;
       }
 
-      // Cliente não existe, abre cadastro
       setAbrirCadastro(true);
     } catch (error) {
       console.error("Erro ao verificar cliente:", error);
@@ -235,7 +222,7 @@ export default function SimuladorFgts({
     );
   };
 
-  // Se cadastro estiver aberto, renderiza componente Cadastrar
+  // Cadastro aberto
   if (abrirCadastro && formValues.cpf) {
     return (
       <Cadastrar
@@ -254,12 +241,14 @@ export default function SimuladorFgts({
     );
   }
 
-  // Se cpfProposta definido, mostra proposta
-  if (cpfProposta) {
-    return <PropostaCliente cpf={cpfProposta} produtoHash={produtoHash} simulacao={resultado?.mensagem} />;
+  // Quando há cpfProposta e simulação selecionada, abre PropostaCliente só com aquela simulação
+  if (cpfProposta && simulacaoSelecionadaKey && resultado?.mensagem) {
+    const simulacaoEscolhida = resultado.mensagem[simulacaoSelecionadaKey];
+    return (
+      <PropostaCliente cpf={cpfProposta} produtoHash={produtoHash} simulacao={simulacaoEscolhida} />
+    );
   }
 
-  // Renderiza formulário e botões normais
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-4">
@@ -277,45 +266,68 @@ export default function SimuladorFgts({
         ))}
 
       {resultado?.mensagem && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resultado da Simulação</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Parcela</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Juros</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {resultado.mensagem.parcelas.map((p, i) => (
-                  <TableRow key={i}>
-                    <TableCell>{i + 1}</TableCell>
-                    <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
-                    <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex flex-wrap justify-around gap-4">
-              <p>
-                <strong>IOF:</strong> R$ {resultado.mensagem.iof}
-              </p>
-              <p>
-                <strong>Tabela de Cadastro:</strong> R$ {resultado.mensagem.TabelaCadastro}
-              </p>
-              <p>
-                <strong>Valor Cliente:</strong> R$ {resultado.mensagem.valorCliente}
-              </p>
-              <p>
-                <strong>CET:</strong> {resultado.mensagem.CET}%
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          {resultado?.mensagem && Object.keys(resultado.mensagem).length > 0 ? (
+            Object.entries(resultado.mensagem).map(([chave, simulacao]) => (
+              <Card
+                key={chave}
+                className={`mb-6 cursor-pointer border ${
+                  simulacaoSelecionadaKey === chave
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+                onClick={() => {
+                  setSimulacaoSelecionadaKey(chave);
+                  if (!cpfProposta && formValues.cpf) {
+                    setCpfProposta(formValues.cpf);
+                  }
+                }}>
+                <CardHeader>
+                  <CardTitle>Simulação: {chave}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parcela</TableHead>
+                        <TableHead>Valor</TableHead>
+                        <TableHead>Juros</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Array.isArray(simulacao.parcelas) &&
+                        simulacao.parcelas.map((p, i) => (
+                          <TableRow key={i}>
+                            <TableCell>{i + 1}</TableCell>
+                            <TableCell>R$ {(p.valor_parcela ?? 0).toFixed(2)}</TableCell>
+                            <TableCell>R$ {(p.valor_juros ?? 0).toFixed(2)}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+
+                  <div className="flex flex-wrap justify-around gap-4">
+                    <p>
+                      <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Tabela de Cadastro:</strong> R${" "}
+                      {(simulacao.TabelaCadastro ?? 0).toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>CET:</strong> {(simulacao.CET ?? 0).toFixed(2)}%
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p>Nenhuma simulação encontrada.</p>
+          )}
+        </div>
       )}
     </div>
   );
