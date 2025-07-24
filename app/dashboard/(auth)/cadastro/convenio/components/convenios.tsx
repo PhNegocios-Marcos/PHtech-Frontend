@@ -46,7 +46,6 @@ export type Convenio = {
   convenio_status: number;
   convenio_hash: string;
   convenio_averbador: string;
-  status: number;
 };
 
 export function ConveniosTable() {
@@ -69,7 +68,7 @@ export function ConveniosTable() {
       id: "status",
       header: "Status",
       cell: ({ row }) => {
-        const ativo = row.original.status === 1;
+        const ativo = row.original.convenio_status === 1;
         return (
           <Badge
             className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}

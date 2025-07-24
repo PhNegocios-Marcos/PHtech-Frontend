@@ -45,7 +45,6 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Option = {
