@@ -1,25 +1,28 @@
 "use client";
 
-import CustomDateRangePicker from "@/components/custom-date-range-picker";
 import { Button } from "@/components/ui/button";
 import { ModulosTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
-import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useState } from "react";
+import CadastroModulosModal from "./components/CadastroModulosModal";
+
 
 export default function Page() {
-  const router = useRouter();
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
     <ProtectedRoute requiredPermission="Gestão_Permissões">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
-        <div className="mb-4 flex items-center justify-end space-x-2">
-          <CustomDateRangePicker />
-          <Button onClick={() => router.push("/dashboard/cadastro/usuario")}>Novo Usuario</Button>
-        </div>
-        <ModulosTable />
+        <Button onClick={() => setIsCadastroOpen(true)}>Novo Módulo</Button>
       </div>
+
+      <ModulosTable />
+
+      <CadastroModulosModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }

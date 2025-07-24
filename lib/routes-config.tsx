@@ -114,12 +114,12 @@ export const page_routes: PageRoutesType[] = [
             href: "/dashboard/gestao/permissoes",
             // icon: "FileKey2"
           },
-          // {
-          //   id: "Gestão_Modulos",
-          //   title: "Modulos",
-          //   href: "/dashboard/gestao/modulos",
-          //   // icon: "Package"
-          // },
+          {
+            id: "Gestão_Modulos",
+            title: "Modulos",
+            href: "/dashboard/gestao/modulos",
+            // icon: "Package"
+          },
           {
             id: "Alcadas_ver",
             title: "Alçadas",

@@ -18,51 +18,50 @@ import {
   FormMessage
 } from "@/components/ui/form";
 
-const permissoesSchema = z.object({
+const equipeSchema = z.object({
   id: z.string(),
   nome: z.string().optional(),
   status: z.number()
 });
 
-type EquipeFormValues = z.infer<typeof permissoesSchema> & {
+type ModulosFormValues = z.infer<typeof equipeSchema> & {
   nome?: string;
-  modulo?: string;
 };
 
-type EquipeEditProps = {
-  permissoes: EquipeFormValues;
+type ModulosEditProps = {
+  modulos: ModulosFormValues;
   onClose: () => void;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
-  const methods = useForm<EquipeFormValues>({
-    resolver: zodResolver(permissoesSchema),
-    defaultValues: permissoes
+export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
+  const methods = useForm<ModulosFormValues>({
+    resolver: zodResolver(equipeSchema),
+    defaultValues: modulos
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
-    methods.reset(permissoes);
-  }, [permissoes, methods]);
+    methods.reset(modulos);
+  }, [modulos, methods]);
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: EquipeFormValues) => {
+  const onSubmit = async (data: ModulosFormValues) => {
     try {
-      // Remove o campo nome se ele não foi alterado
-      const payload: Partial<EquipeFormValues> = { id: data.id, status: data.status };
+      const payload = { ...data };
 
-      if (data.nome && data.nome !== permissoes.nome) {
-        payload.nome = data.nome;
+      // Se o nome for igual ao original ou estiver vazio, não enviar no payload
+      if (data.nome === modulos.nome || !data.nome?.trim()) {
+        delete payload.nome;
       }
 
-      await axios.put(`${API_BASE_URL}/permissoes/atualizar`, payload, {
+      await axios.put(`${API_BASE_URL}/modulo/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
