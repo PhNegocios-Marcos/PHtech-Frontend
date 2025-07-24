@@ -1,32 +1,34 @@
 "use client";
 
-import CustomDateRangePicker from "@/components/custom-date-range-picker";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PermissoesTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
-import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+import CadastroPermissoesModal from "./components/cadastroPermissoesModal";
 
 export default function Page() {
-  const router = useRouter();
   const podeCriar = useHasPermission("Usuarios_criar");
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
     <ProtectedRoute requiredPermission="Gestão_Permissões">
-      <div className="mb-4 flex justify-between space-y-4">
+      <div className="mb-4 flex flex-col justify-between space-y-4 md:flex-row">
         <CampoBoasVindas />
-        <div className="mb-4 flex items-center justify-end space-x-2">
-          <CustomDateRangePicker />
 
-          {podeCriar && (
-            <Button onClick={() => router.push("/dashboard/cadastro/promotora")}>
-              Nova Promotora
-            </Button>
-          )}
-        </div>
-        <PermissoesTable />
+        {podeCriar && (
+          <Button onClick={() => setIsCadastroOpen(true)}>
+            Nova Permissão
+          </Button>
+        )}
       </div>
+
+      <PermissoesTable />
+
+      <CadastroPermissoesModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }

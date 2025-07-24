@@ -4,6 +4,8 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { CarregandoTable } from "./leads_carregando";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 import {
   Table,
   TableBody,
@@ -14,8 +16,15 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge"; // substituto visual para Switch
-import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
-
+import { ChevronLeft, ChevronRight, Ellipsis, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { PermissoesDrawer } from "./PermissoesModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -30,6 +39,9 @@ export function PermissoesTable() {
   const { token } = useAuth();
   const [permissoes, setPermissoes] = React.useState<PermissaoLinha[]>([]);
   const [filtro, setFiltro] = React.useState("");
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [selectedEquipe, setSelectedEquipe] = React.useState<PermissaoLinha | null>(null);
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
   React.useEffect(() => {
     async function fetchPermissoes() {
@@ -58,6 +70,8 @@ export function PermissoesTable() {
           }
         }
 
+        // console.log("arr leads: ", arr);
+
         setPermissoes(arr);
       } catch (error) {
         console.error("Erro ao carregar permissões:", error);
@@ -65,7 +79,7 @@ export function PermissoesTable() {
     }
 
     fetchPermissoes();
-  }, [token]);
+  }, [token, refreshKey]);
 
   const filteredPermissoes = React.useMemo(() => {
     const filtroLower = filtro.toLowerCase();
@@ -99,14 +113,50 @@ export function PermissoesTable() {
           </Badge>
         );
       }
+    },
+    {
+      id: "editar",
+      header: "Editar",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleRowDoubleClick(row.original)}
+          title="Editar usuário">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
     }
   ];
 
   const table = useReactTable({
     data: filteredPermissoes,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
+    state: {
+      globalFilter
+    }
   });
+
+  const handleRowDoubleClick = (equipe: PermissaoLinha) => {
+    setSelectedEquipe(equipe);
+  };
+
+  const handleCloseDrawer = () => {
+    setSelectedEquipe(null);
+  };
+
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   function renderHeader(header: any): React.ReactNode {
     if (typeof header.column.columnDef.header === "function") {
@@ -116,52 +166,93 @@ export function PermissoesTable() {
   }
 
   return (
-    <div>
-      <Input
-        placeholder="Filtrar permissões..."
-        value={filtro}
-        onChange={(e) => setFiltro(e.target.value)}
-        className="mb-4 max-w-sm"
-      />
+    <Card className="col-span-2">
+      <CardHeader className="flex flex-col justify-between">
+        <CardTitle>Permissões</CardTitle>
+      </CardHeader>
 
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {!header.isPlaceholder &&
-                    (typeof header.column.columnDef.header === "function"
-                      ? header.column.columnDef.header(header.getContext() as any)
-                      : String(header.column.columnDef.header))}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+      {!selectedEquipe ? (
+        <CardContent>
+          <div className="mb-4 flex items-center gap-2">
+            <Input
+              placeholder="Filtrar por qualquer campo..."
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-        <TableBody>
-          {table.getRowModel().rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={3} className="p-4 text-center">
-                <CarregandoTable />
-              </TableCell>
-            </TableRow>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {!header.isPlaceholder &&
+                          (typeof header.column.columnDef.header === "function"
+                            ? header.column.columnDef.header(header.getContext() as any)
+                            : String(header.column.columnDef.header))}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
-    
-    
+              </TableHeader>
+
+              <TableBody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="p-4 text-center">
+                      <CarregandoTable />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      ) : (
+        <PermissoesDrawer
+          isOpen={!!selectedEquipe} // ou true/false conforme sua lógica
+          permissao={selectedEquipe}
+          onClose={() => {
+            handleCloseDrawer();
+            handleRefresh();
+          }}
+          onRefresh={handleRefresh}
+        />
+      )}
+    </Card>
   );
 }
