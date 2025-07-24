@@ -43,6 +43,8 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { useForm, FormProvider } from "react-hook-form";
+import { Badge } from "@/components/ui/badge";
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -99,10 +101,19 @@ export default function TabelaProduto({ produto }: Props) {
     { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
     { accessorKey: "vigencia_prazo", header: "Prazo Máximo" },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-    }
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+        return (
+          <Badge
+            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
+    },
     // {
     //   id: "editar",
     //   header: "Editar",

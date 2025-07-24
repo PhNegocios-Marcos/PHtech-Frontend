@@ -43,6 +43,7 @@ export type Subproduto = {
   produtos_subprodutos_nome: string;
   produtos_subprodutos_atividade: string;
   produtos_subprodutos_status: number;
+  status: number;
 };
 
 export function SubprodutosTable() {

@@ -54,6 +54,7 @@ export type Subproduto = {
   incrementador: string;
   periodiciade: string;
   tabela_hash: string;
+  status: number;
 };
 
 export function SubprodutosTable() {

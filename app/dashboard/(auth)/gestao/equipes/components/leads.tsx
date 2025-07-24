@@ -37,6 +37,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { EquipeDrawer } from "./EquipeModal";
+import { Badge } from "@/components/ui/badge";
 
 type Equipe = {
   id: string;
@@ -79,9 +80,18 @@ export function EquipesTable() {
       }
     },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+        return (
+          <Badge
+            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
     },
     {
       id: "editar",

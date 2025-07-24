@@ -33,6 +33,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { UsuarioPerfil } from "./UsuarioModal";
+import { Badge } from "@/components/ui/badge";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Usuario = {
@@ -68,9 +70,18 @@ export function UsuariosTable() {
       { accessorKey: "endereco", header: "Endereço" },
       { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
       {
-        accessorKey: "status",
+        id: "status",
         header: "Status",
-        cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+        cell: ({ row }) => {
+          const ativo = row.original.status === 1;
+          return (
+            <Badge
+              className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+              variant={ativo ? "default" : "outline"}>
+              {ativo ? "Ativo" : "Inativo"}
+            </Badge>
+          );
+        }
       },
       {
         id: "editar",

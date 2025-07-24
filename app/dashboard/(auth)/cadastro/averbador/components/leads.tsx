@@ -33,12 +33,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { AverbadorPerfil } from "./averbadorModal";
+import { Badge } from "@/components/ui/badge";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Averbador = {
   averbador_hash: string;
   averbador_nome: string;
   averbador_status: number;
+  status: number;
 };
 
 export function AverbadorTable() {
@@ -57,9 +59,18 @@ export function AverbadorTable() {
     () => [
       { accessorKey: "averbador_nome", header: "Nome" },
       {
-        accessorKey: "averbador_status",
+        id: "status",
         header: "Status",
-        cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+        cell: ({ row }) => {
+          const ativo = row.original.status === 1;
+          return (
+            <Badge
+              className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+              variant={ativo ? "default" : "outline"}>
+              {ativo ? "Ativo" : "Inativo"}
+            </Badge>
+          );
+        }
       },
       {
         id: "editar",

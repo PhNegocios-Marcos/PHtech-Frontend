@@ -30,6 +30,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -83,10 +84,19 @@ export default function TaxaProduto({ subproduto }: Props) {
     { accessorKey: "incrementador", header: "incrementador" },
     { accessorKey: "periodicidade", header: "periodicidade" },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-    }
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+        return (
+          <Badge
+            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
+    },
     // {
     //   id: "editar",
     //   header: "Editar",

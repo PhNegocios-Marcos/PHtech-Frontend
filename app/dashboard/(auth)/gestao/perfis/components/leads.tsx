@@ -38,6 +38,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { PerfilDrawer } from "./PerfilModal";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
 
 type Equipe = {
   id: string;
@@ -61,11 +63,17 @@ export function EquipesTable() {
     { accessorKey: "nome", header: "Nome da Equipe" },
     { accessorKey: "descricao", header: "Descrição" },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => {
-        const valor = getValue<number>();
-        return valor === 1 ? "Ativo" : "Inativo";
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+        return (
+          <Badge
+            className={ativo ? "w-30" : "w-30 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
       }
     },
     {

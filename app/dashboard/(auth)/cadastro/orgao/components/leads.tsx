@@ -35,6 +35,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { OrgaoEdit } from "./editarOrgao";
+import { Badge } from "@/components/ui/badge";
 
 export type Orgao = {
   orgao_nome: string;
@@ -42,6 +43,7 @@ export type Orgao = {
   orgao_hash: number;
   orgao_prefixo: number;
   orgao_data_corte: number;
+  status: number;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -64,9 +66,18 @@ export function OrgaoModal() {
     { accessorKey: "orgao_prefixo", header: "Prefixo" },
     { accessorKey: "orgao_data_corte", header: "Data Corte" },
     {
-      accessorKey: "orgao_status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+        return (
+          <Badge
+            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
     },
     {
       id: "editar",
