@@ -9,11 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import FA from "./components/2FA";
 import Promotoras from "./components/promotoras";
+import Login from "./components/login";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-type ModalType = "none" | "2FA" | "modal2" | "promotoras";
+type ModalType = "none" | "2FA" | "modal2" | "promotoras" | "usa_2fa";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -22,13 +24,25 @@ const loginSchema = z.object({
 
 export default function Page() {
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
+  const [usa2faModal, setUsa2faModal] = useState<ModalType>("none");
   const [promotorasModal, setPromotorasModal] = useState<ModalType>("none");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loginError, setLoginError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const { setMail, setSenha, setPromotoras, setId, id } = useAuth();
+  const {
+    setMail,
+    setSenha,
+    setPromotoras,
+    setId,
+    setTokenExpiraEm,
+    setToken,
+    setUserData,
+    id,
+    senha
+  } = useAuth();
 
   const handleLogin = async () => {
     const result = loginSchema.safeParse({ email, password });
@@ -78,7 +92,11 @@ export default function Page() {
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");
       } else {
-        setCurrentModal("2FA");
+        if (data.usa_2fa === 1) {
+          setUsa2faModal("usa_2fa");
+        } else {
+          setCurrentModal("2FA");
+        }
       }
     } catch (error: any) {
       setLoginError("Erro na conexão com o servidor.");
@@ -90,7 +108,7 @@ export default function Page() {
   const closeModalPromotoras = () => setPromotorasModal("none");
 
   return (
-    <div className="flex flex-col bg-gradient-to-tr from-[#c91212] to-[#6d2516] items-center justify-center py-4 lg:h-screen">
+    <div className="flex flex-col items-center justify-center bg-gradient-to-tr from-[#c91212] to-[#6d2516] py-4 lg:h-screen">
       {currentModal === "none" && promotorasModal === "none" && (
         <Card className="mx-auto w-[95%] md:w-[40%]">
           <Image
@@ -151,6 +169,8 @@ export default function Page() {
         <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
       ) : promotorasModal === "promotoras" ? (
         <Promotoras onNext={() => setCurrentModal("modal2")} onClose={closeModalPromotoras} />
+      ) : usa2faModal === "usa_2fa" ? (
+        <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
       ) : null}
     </div>
   );
