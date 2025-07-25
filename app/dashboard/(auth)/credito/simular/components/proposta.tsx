@@ -20,7 +20,7 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-interface Parcela {
+export interface Parcela {
   valor_parcela: number;
   valor_juros: number;
 }
@@ -31,6 +31,8 @@ export interface Simulacao {
   TabelaCadastro: number;
   valorCliente: number;
   CET: number;
+  taxaCadastro: number;
+  toFixed: any;
 }
 
 interface Telefone {

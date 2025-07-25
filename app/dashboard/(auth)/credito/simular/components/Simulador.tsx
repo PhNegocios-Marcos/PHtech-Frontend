@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
 
-import PropostaCliente, { Simulacao } from "./proposta";
+import PropostaCliente, { Simulacao, Parcela } from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
 
@@ -267,65 +267,119 @@ export default function SimuladorFgts({
 
       {resultado?.mensagem && (
         <div className="space-y-6">
-          {resultado?.mensagem && Object.keys(resultado.mensagem).length > 0 ? (
-            Object.entries(resultado.mensagem).map(([chave, simulacao]) => (
-              <Card
-                key={chave}
-                className={`mb-6 cursor-pointer border ${
-                  simulacaoSelecionadaKey === chave
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-300"
-                }`}
-                onClick={() => {
-                  setSimulacaoSelecionadaKey(chave);
-                  if (!cpfProposta && formValues.cpf) {
-                    setCpfProposta(formValues.cpf);
-                  }
-                }}>
-                <CardHeader>
-                  <CardTitle>Simulação: {chave}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Parcela</TableHead>
-                        <TableHead>Valor</TableHead>
-                        <TableHead>Juros</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {Array.isArray(simulacao.parcelas) &&
-                        simulacao.parcelas.map((p, i) => (
-                          <TableRow key={i}>
-                            <TableCell>{i + 1}</TableCell>
-                            <TableCell>R$ {(p.valor_parcela ?? 0).toFixed(2)}</TableCell>
-                            <TableCell>R$ {(p.valor_juros ?? 0).toFixed(2)}</TableCell>
+          {Array.isArray(resultado.mensagem) ? (
+            resultado.mensagem.length > 0 ? (
+              resultado.mensagem.map((simulacao, i) => (
+                <Card
+                  key={i}
+                  className={`mb-6 cursor-pointer border ${
+                    simulacaoSelecionadaKey === i.toString()
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-300"
+                  }`}
+                  onClick={() => {
+                    setSimulacaoSelecionadaKey(i.toString());
+                    if (!cpfProposta && formValues.cpf) {
+                      setCpfProposta(formValues.cpf);
+                    }
+                  }}>
+                  <CardHeader>
+                    <CardTitle>Simulação {i + 1}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="mt-10 rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Parcela</TableHead>
+                            <TableHead>Valor</TableHead>
+                            <TableHead>Juros</TableHead>
                           </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {Array.isArray(simulacao.parcelas) &&
+                            simulacao.parcelas.map((p: Parcela, idx: number) => (
+                              <TableRow key={idx}>
+                                <TableCell>{idx + 1}</TableCell>
+                                <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
+                                <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </div>
 
-                  <div className="flex flex-wrap justify-around gap-4">
-                    <p>
-                      <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
-                    </p>
-                    <p>
-                      <strong>Tabela de Cadastro:</strong> R${" "}
-                      {(simulacao.TabelaCadastro ?? 0).toFixed(2)}
-                    </p>
-                    <p>
-                      <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}
-                    </p>
-                    <p>
-                      <strong>CET:</strong> {(simulacao.CET ?? 0).toFixed(2)}%
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    <div className="flex flex-wrap justify-around gap-4">
+                      <p>
+                        <strong>IOF:</strong> R$ {simulacao.iof.toFixed(2)}
+                      </p>
+                      <p>
+                        <strong>Taxa Cadastro:</strong> R$ {simulacao.taxaCadastro.toFixed(2)}
+                      </p>
+                      <p>
+                        <strong>Valor Cliente:</strong> R$ {simulacao.valorCliente.toFixed(2)}
+                      </p>
+                      <p>
+                        <strong>CET:</strong> {simulacao.CET.toFixed(2)}%
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p>Nenhuma simulação encontrada.</p>
+            )
           ) : (
-            <p>Nenhuma simulação encontrada.</p>
+            // Se mensagem for um único objeto
+            <Card
+              className={`mb-6 cursor-pointer border ${
+                simulacaoSelecionadaKey === "0" ? "border-blue-600 bg-blue-50" : "border-gray-300"
+              }`}
+              onClick={() => {
+                setSimulacaoSelecionadaKey("0");
+                if (!cpfProposta && formValues.cpf) {
+                  setCpfProposta(formValues.cpf);
+                }
+              }}>
+              <CardHeader>
+                <CardTitle>Simulação</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Parcela</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Juros</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.isArray(resultado.mensagem.parcelas) &&
+                      resultado.mensagem.parcelas.map((p, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
+                          <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+                <div className="flex flex-wrap justify-around gap-4">
+                  <p>
+                    <strong>IOF:</strong> R$ {resultado.mensagem.iof.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>Taxa Cadastro:</strong> R$ {resultado.mensagem.taxaCadastro.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>Valor Cliente:</strong> R$ {resultado.mensagem.valorCliente.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>CET:</strong> {resultado.mensagem.CET.toFixed(2)}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}

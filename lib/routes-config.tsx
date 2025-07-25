@@ -34,26 +34,20 @@ export const page_routes: PageRoutesType[] = [
       },
       {
         id: "Cadastro_ver",
-        title: "Cadastro",
+        title: "Config do Banco",
         href: "/dashboard/cadastro",
         icon: "Package",
         items: [
           {
-            id: "Convenio_Ver",
-            title: "Convenio",
-            href: "/dashboard/cadastro/convenio"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Produto_Ver",
-            title: "Produto",
-            href: "/dashboard/cadastro/produto"
-            // icon: "ChartPie"
-          },
-          {
             id: "TipoOperacao_Ver",
             title: "Tipo de Operação",
             href: "/dashboard/cadastro/tipo_operacao"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Averbador_Ver",
+            title: "Averbador",
+            href: "/dashboard/cadastro/averbador"
             // icon: "ChartPie"
           },
           {
@@ -63,9 +57,15 @@ export const page_routes: PageRoutesType[] = [
             // icon: "ChartPie"
           },
           {
-            id: "Averbador_Ver",
-            title: "Averbador",
-            href: "/dashboard/cadastro/averbador"
+            id: "Convenio_Ver",
+            title: "Convenio",
+            href: "/dashboard/cadastro/convenio"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Produto_Ver",
+            title: "Modalidade",
+            href: "/dashboard/cadastro/modalidade"
             // icon: "ChartPie"
           },
           {
@@ -111,13 +111,13 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Gestão_Permissões",
             title: "Permissões",
-            href: "/dashboard/gestao/permissoes",
+            href: "/dashboard/gestao/permissoes"
             // icon: "FileKey2"
           },
           {
             id: "Gestão_Modulos",
             title: "Modulos",
-            href: "/dashboard/gestao/modulos",
+            href: "/dashboard/gestao/modulos"
             // icon: "Package"
           },
           {
