@@ -10,6 +10,18 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { ThemeCustomizerPanel } from "../theme-customizer";
+import { DEFAULT_THEME, THEMES } from "@/lib/themes";
+import { useThemeConfig } from "@/components/active-theme";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
 import {
   Form,
   FormControl,
@@ -37,6 +49,7 @@ const schema = z
     razao_social: z.string().min(1, "Razão social é obrigatória"),
     cnpj: z.string().regex(cnpjRegex, "CNPJ inválido"),
     master: z.enum(["0", "1"]),
+    radius: z.string().optional(),
     master_id: z.string().uuid().optional(),
     rateio_master: z
       .number({
@@ -88,7 +101,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       master: "1",
       rateio_master: 100,
       rateio_sub: 0,
-      master_id: undefined
+      master_id: undefined,
+      radius: "md"
     }
   });
 
@@ -101,6 +115,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const [errors, setErrors] = useState<string[]>([]);
   const [master, setMaster] = useState<any[]>([]);
   const [masterSelecionado, setMasterSelecionado] = useState<any | null>(null);
+
+  const { theme, setTheme } = useThemeConfig();
 
   const onDrop = (acceptedFiles: File[]) => {
     const imageFiles = acceptedFiles.map((file) => ({
@@ -129,6 +145,12 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
+
+  const [selectedPreset, setSelectedPreset] = useState(theme.preset); // tema selecionado, mas não aplicado
+
+  function handlePreset(value: any) {
+    setSelectedPreset(value); // salva o valor sem aplicar
+  }
 
   useEffect(() => {
     async function fetchConvenios() {
@@ -176,9 +198,33 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     };
 
     try {
-      await axios.post(`${API_BASE_URL}/promotora/criar`, payload, {
+      const formData = new FormData();
+      formData.append("nome", data.nome);
+      formData.append("razao_social", data.razao_social);
+      formData.append("cnpj", data.cnpj.replace(/\D/g, ""));
+      formData.append("master", data.master);
+      formData.append("rateio_master", data.rateio_master.toString());
+
+      if (data.master === "0") {
+        formData.append("rateio_sub", (data.rateio_sub ?? 0).toString());
+        formData.append("master_id", data.master_id ?? "");
+      }
+
+      // Adiciona os campos do tema
+      formData.append("tema[preset]", theme.preset);
+      formData.append("tema[radius]", theme.radius);
+      formData.append("tema[scale]", theme.scale);
+      formData.append("tema[contentLayout]", theme.contentLayout);
+
+      // Adiciona a imagem (se houver)
+      if (files.length > 0 && files[0].file) {
+        formData.append("tema[image]", files[0].file);
+      }
+
+      await axios.post(`${API_BASE_URL}/promotora/criar`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
         }
       });
 
@@ -360,6 +406,52 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={methods.control}
+                      name="master_id"
+                      render={({ field }) => (
+                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
+                          <FormLabel>Master ID (UUID)</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={master}
+                              displayField="nome"
+                              value={master.find((item) => item.id === field.value) ?? null}
+                              onChange={(selected) => {
+                                field.onChange(selected?.id);
+                              }}
+                              searchFields={["nome"]}
+                              placeholder="Selecione uma promotora"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex flex-col gap-4">
+                      <Label>Theme preset:</Label>
+                      <Select value={selectedPreset} onValueChange={handlePreset}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a theme" />
+                        </SelectTrigger>
+                        <SelectContent align="end">
+                          {THEMES.map((theme) => (
+                            <SelectItem key={theme.name} value={theme.value}>
+                              <div className="flex shrink-0 gap-1">
+                                {theme.colors.map((color, key) => (
+                                  <span
+                                    key={key}
+                                    className="size-2 rounded-full"
+                                    style={{ backgroundColor: color }}></span>
+                                ))}
+                              </div>
+                              {theme.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   {/* Upload de imagens */}
