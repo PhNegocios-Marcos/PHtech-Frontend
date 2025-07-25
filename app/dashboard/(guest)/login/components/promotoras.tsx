@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
 import FA from "./2FA";
+import { ArrowLeftIcon } from "lucide-react";
+
 
 type ModalType = "none" | "2FA" | "modal2" | "promotoras";
 
@@ -82,9 +84,16 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
               searchFields={["nome"]}
             />
           </CardContent>
+          
           <Button className="mx-auto w-20" onClick={handleConfirm}>
             Confirmar
           </Button>
+          {onClose && (
+            <Button onClick={onClose} variant="ghost" className="w-full text-red-500">
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+          )}
         </Card>
       )}
 
