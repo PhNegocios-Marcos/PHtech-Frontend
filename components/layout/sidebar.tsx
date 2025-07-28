@@ -53,15 +53,14 @@ export default function Sidebar() {
     setOpen(!isTablet);
   }, [isTablet]);
 
-    const { selectedPromotoraNome } = useAuth();
-  
+  const { selectedPromotoraNome } = useAuth();
 
   return (
     <SidebarContainer collapsible="icon" variant="floating" className="bg-background">
-      <SidebarHeader className="items-center justify-center pt-3 transition-all group-data-[collapsible=icon]:pt-2">
+      <SidebarHeader className="items-center h-10 justify-center pt-3 transition-all group-data-[collapsible=icon]:pt-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="hover:text-foreground rounded-none group-data-[collapsible=icon]:px-0! hover:bg-[var(--primary)]/10">
                   <Logo />
@@ -79,7 +78,13 @@ export default function Sidebar() {
                   <span>Web Analiytics</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
+            <SidebarMenuButton className="hover:text-foreground rounded-none group-data-[collapsible=icon]:px-0! hover:bg-[var(--primary)]/10">
+              <Logo />
+              <div className="truncate font-semibold group-data-[collapsible=icon]:hidden">
+                {selectedPromotoraNome ?? "PH TECH"}
+              </div>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

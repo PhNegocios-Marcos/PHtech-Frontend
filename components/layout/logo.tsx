@@ -12,8 +12,8 @@ export default function Logo() {
   return (
     <Image
       src={logoSource}
-      width={60}
-      height={60}
+      width={600}
+      height={600}
       className="me-1 rounded-sm transition-all group-data-collapsible:size-7 group-data-[collapsible=icon]:size-8"
       alt="Logo da promotora"
       unoptimized
