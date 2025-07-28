@@ -16,8 +16,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   // console.log(token)
 
-  console.log("localStorage", localStorage);
-  console.log("sessionStorage", sessionStorage);
+  // console.log("localStorage", localStorage);
+  // console.log("sessionStorage", sessionStorage);
 
 
 
