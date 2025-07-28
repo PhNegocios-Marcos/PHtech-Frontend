@@ -23,7 +23,7 @@ type AuthContextType = {
   setMail: (email: string | null) => void;
   senha: string | null;
   setSenha: (senha: string | null) => void;
-  userData: UserData | null;
+  userData: UserData | any;
   setUserData: (data: UserData | null) => void;
   userPermissoes: userPermissoes | null;
   setUserPermissoes: (data: userPermissoes | null) => void;

@@ -45,6 +45,9 @@ export type Produto = {
   prazo_maximo: number;
   id_uy3: string | null;
   cor_grafico: string | null;
+  config_tabela_hash: string;
+  usuario_atualizacao: string;
+  tabela_hash: string;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;

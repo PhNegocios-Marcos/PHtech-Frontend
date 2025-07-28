@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Produto } from "./produtos";
 import { CarregandoTable } from "./leads_carregando";
+import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+
 import {
   Form,
   FormControl,
@@ -58,7 +60,7 @@ type Props = {
 };
 
 export type Tabela = {
-  Tabela_prazo_hash: string;
+  tabela_hash: string;
   Tabela_nome: string;
   status: number;
   prazo_minimo: number;
@@ -72,7 +74,7 @@ export type Tabela = {
 };
 
 export default function TabelaProduto({ produto }: Props) {
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [Tabela, setTabela] = useState<Option[]>([]);
   const [TabelaSelecionado, setTabelaSelecionado] = useState<Option | null>(null);
@@ -83,6 +85,7 @@ export default function TabelaProduto({ produto }: Props) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [produtosRelacionados, setProdutosRelacionados] = useState<Produto[]>([]);
+  const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -92,27 +95,62 @@ export default function TabelaProduto({ produto }: Props) {
   });
 
   const columns: ColumnDef<Produto>[] = [
-    { accessorKey: "Tabela_nome", header: "Nome" },
-    { accessorKey: "Tabela_mensal", header: "Tabela Mensal" },
-    
+    { accessorKey: "nome_tabela", header: "Nome" },
+    { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
     { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
     { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
-    { accessorKey: "vigencia_prazo", header: "Prazo Máximo" },
+    { accessorKey: "vigencia_fim", header: "Vigencia Fim" },
+    { accessorKey: "incrementador", header: "incrementador" },
+    { accessorKey: "periodicidade", header: "periodicidade" },
     {
-      id: "status",
+      id: "status_relacionamento",
       header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/produtos-config-tabelas/atualizar`,
+              {
+                config_tabela_hash: row.original.tabela_hash,
+                status: novoStatus,
+                usuario_atualizacao: userData.id
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setProdutosRelacionados((prev) =>
+              prev.map((item) => {
+                if (item.tabela_hash === row.original.tabela_hash) {
+                  return { ...item, status: novoStatus };
+                }
+                return item;
+              })
+            );
+          } catch (error) {
+            console.error("Erro ao atualizar status", error);
+          }
+        };
+
         return (
           <Badge
-            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
       }
-    },
+    }
     // {
     //   id: "editar",
     //   header: "Editar",
@@ -120,7 +158,7 @@ export default function TabelaProduto({ produto }: Props) {
     //     <Button
     //       variant="ghost"
     //       size="icon"
-    //       onClick={() => onSelectProduto(row.original)}
+    //       onClick={() => handleSelectTaxa(row.original)}
     //       title="Editar produto">
     //       <Pencil className="h-4 w-4" />
     //     </Button>
@@ -185,13 +223,13 @@ export default function TabelaProduto({ produto }: Props) {
   useEffect(() => {
     async function fetchRelacionamentos() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/rel-produto-Tabela/listar`, {
+        const res = await axios.get(`${API_BASE_URL}/produtos-config-tabelas/listar`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           }
         });
-        console.log("data: ", res.data);
+        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
@@ -228,117 +266,6 @@ export default function TabelaProduto({ produto }: Props) {
         </CardHeader>
 
         <CardContent>
-          <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="max-w-[400px] space-y-2">
-              <span className="text-muted-foreground text-sm">Tabela</span>
-              <Combobox
-                data={Tabela}
-                displayField="nome"
-                value={TabelaSelecionado}
-                onChange={setTabelaSelecionado}
-                searchFields={["nome"]}
-                placeholder="Selecione um convênio"
-              />
-            </div>
-            <div>
-              {/* ✅ Formulário com contexto */}
-              <FormProvider {...form}>
-                <Form {...form}>
-                  <form className="space-y-8">
-                    <FormField
-                      control={form.control}
-                      name="inicio"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Inicio da vigência</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}>
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </FormProvider>
-            </div>
-            <div>
-              {/* ✅ Formulário com contexto */}
-              <FormProvider {...form}>
-                <Form {...form}>
-                  <form className="space-y-8">
-                    <FormField
-                      control={form.control}
-                      name="fim"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Fim da vigência</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}>
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Selecione uma data</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-              </FormProvider>
-            </div>
-          </div>
-          <div className="flex items-center justify-end">
-            <Button onClick={salvarTabela}>Salvar</Button>
-          </div>
-
           <div className="mt-10 rounded-md border">
             <Table>
               <TableHeader>
