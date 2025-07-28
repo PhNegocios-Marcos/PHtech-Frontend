@@ -56,11 +56,23 @@ export function ActiveThemeProvider({
 
   // Aplica tema com base no tema da promotora
   useEffect(() => {
+    if (promotoraId !== "") {
+      console.log("não tem promotora");
+    }
+
     if (selectedPromotoraTemas) {
       const themeFromPromotora: ThemeType = {
-        preset: (selectedPromotoraTemas || "sunset-glow") as Preset,
-        radius: "default",
-        scale: "md",
+        preset: selectedPromotoraTemas as Preset,
+        radius: "md",
+        scale: "none",
+        contentLayout: "compact"
+      };
+      setTheme(themeFromPromotora);
+    } else {
+      const themeFromPromotora: ThemeType = {
+        preset: "sunset-glow" as Preset,
+        radius: "md",
+        scale: "none",
         contentLayout: "compact"
       };
       setTheme(themeFromPromotora);

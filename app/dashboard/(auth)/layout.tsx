@@ -16,6 +16,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   // console.log(token)
 
+  console.log("localStorage", localStorage);
+  console.log("sessionStorage", sessionStorage);
+
+
+
+
   const [defaultOpen, setDefaultOpen] = useState(true);
 
   useEffect(() => {
