@@ -92,7 +92,7 @@ export default function Page() {
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");
       } else {
-        if (data.usa_2fa === 1) {
+        if (data.usa_2fa === 0) {
           setUsa2faModal("usa_2fa");
         } else {
           setCurrentModal("2FA");
