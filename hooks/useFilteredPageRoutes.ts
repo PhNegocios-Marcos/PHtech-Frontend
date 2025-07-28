@@ -72,7 +72,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Orgao_Ver",
       "Taxa_Ver",
       "Averbador_criar",
-      "Orgaos_criar"
+      "Orgaos_criar",
+      "Produto_Ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

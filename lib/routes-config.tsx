@@ -73,6 +73,12 @@ export const page_routes: PageRoutesType[] = [
             title: "Tabela Taxa",
             href: "/dashboard/cadastro/table_taxa"
             // icon: "ChartPie"
+          },
+          {
+            id: "Produto_Ver",
+            title: "Produto",
+            href: "/dashboard/cadastro/produto"
+            // icon: "ChartPie"
           }
         ]
       },
