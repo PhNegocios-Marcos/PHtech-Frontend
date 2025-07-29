@@ -57,11 +57,12 @@ type Option = {
 //   tabela_hash: string;
 // };
 
-type Props = {
+export type Props = {
   produto: Produto;
   onClose: () => void;
   onSelectTaxa?: (subproduto: Subproduto) => void;
 };
+
 
 export type Taxa = {
   taxa_prazo_hash: string;

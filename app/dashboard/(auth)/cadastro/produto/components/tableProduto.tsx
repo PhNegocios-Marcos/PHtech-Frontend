@@ -54,18 +54,18 @@ type Option = {
 };
 
 export type Produto = {
-  id: string;
-  nome: string;
-  status: number;
-  idade_minima: number;
-  idade_maxima: number;
-  prazo_minimo: number;
-  prazo_maximo: number;
-  id_uy3: string | null;
-  cor_grafico: string | null;
-  config_tabela_hash: string;
-  usuario_atualizacao: string;
-  tabela_hash: string;
+  id?: string;
+  nome?: string;
+  status?: number;
+  idade_minima?: number;
+  idade_maxima?: number;
+  prazo_minimo?: number;
+  prazo_maximo?: number;
+  id_uy3?: string | null;
+  cor_grafico?: string | null;
+  config_tabela_hash?: string;
+  usuario_atualizacao?: string;
+  tabela_hash?: string;
 };
 
 type Props = {
