@@ -91,7 +91,7 @@ export type Taxa = {
 export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaModalProps) {
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
-  const [convenioSelecionado, setConvenioSelecionado] = useState<Option | null>(null);
+  const [convenioSelecionado, setConvenioSelecionado] = useState<any>(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -310,7 +310,13 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                       <Combobox
                         data={convenio}
                         displayField="nome"
-                        value={convenioSelecionado}
+                        value={{
+                          ...convenioSelecionado,
+                          nome:
+                            convenioSelecionado?.nome?.length > 20
+                              ? convenioSelecionado.nome.slice(0, 20) + "..."
+                              : convenioSelecionado?.nome
+                        }}
                         onChange={setConvenioSelecionado}
                         searchFields={["nome"]}
                         placeholder="Selecione uma Taxa"
@@ -349,8 +355,8 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                         value={{
                           ...selectedProduto,
                           name:
-                            selectedProduto?.name?.length > 35
-                              ? selectedProduto.name.slice(0, 35) + "..."
+                            selectedProduto?.name?.length > 20
+                              ? selectedProduto.name.slice(0, 20) + "..."
                               : selectedProduto?.name
                         }}
                         onChange={setSelectedProduto}
@@ -361,206 +367,12 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                     </div>
                   </div>
                 </div>
-
-                <div className="mx-5 flex items-center justify-end">
-                  <Button onClick={salvarProduto}>Salvar</Button>
-                </div>
               </Card>
-
-              <Card className="mt-5 flex-grow overflow-auto">
-                <h5 className="mx-5 text-xl font-semibold">Tabela Taxa</h5>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-                    <FormField
-                      control={methods.control}
-                      name="nome_taxa"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome Tabela</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite o nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_minimo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prozo mínimo</FormLabel>
-                          <FormControl>
-                            <Input placeholder="12" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_maximo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo máximo</FormLabel>
-                          <FormControl>
-                            <Input placeholder="64" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="taxa_mensal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Taxa mensal</FormLabel>
-                          <FormControl>
-                            <Input placeholder="1.6" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="incrementador"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Incrementador</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={statusOptions}
-                              displayField="name"
-                              value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                              onChange={(selected) => field.onChange(selected?.id ?? 1)}
-                              searchFields={["name"]}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="periodiciade"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Periodiciade</FormLabel>
-                          <FormControl>
-                            <Input placeholder="12" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div>
-                      <FormProvider {...form}>
-                        <Form {...form}>
-                          <div className="space-y-8">
-                            <FormField
-                              control={form.control}
-                              name="inicio"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Inicio da vigência</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                          )}>
-                                          {field.value ? (
-                                            format(field.value, "PPP")
-                                          ) : (
-                                            <span>Selecione data</span>
-                                          )}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        disabled={(date) => date < new Date()}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </Form>
-                      </FormProvider>
-                    </div>
-                    <div>
-                      <FormProvider {...form}>
-                        <Form {...form}>
-                          <div className="space-y-8">
-                            <FormField
-                              control={form.control}
-                              name="fim"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Fim da vigência</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                          )}>
-                                          {field.value ? (
-                                            format(field.value, "PPP")
-                                          ) : (
-                                            <span>Selecione data</span>
-                                          )}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        disabled={(date) => date < new Date()}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </Form>
-                      </FormProvider>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               <div className="mt-6 flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Cadastrar</Button>
+                <Button onClick={salvarProduto}>Cadastrar</Button>
               </div>
             </div>
           </Form>

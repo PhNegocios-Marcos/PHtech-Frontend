@@ -298,7 +298,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
           <Form {...methods}>
             <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Produto</h2>
+                <h2 className="text-xl font-semibold">Cadastrar Nova Tabela</h2>
                 <button
                   type="button"
                   onClick={onClose}
