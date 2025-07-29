@@ -254,7 +254,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                                         <Button
                                           variant={"outline"}
                                           className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
+                                            "pl-3 text-left font-normal",
                                             !field.value && "text-muted-foreground"
                                           )}>
                                           {field.value ? (
@@ -300,7 +300,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                                         <Button
                                           variant={"outline"}
                                           className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
+                                            "pl-3 text-left font-normal",
                                             !field.value && "text-muted-foreground"
                                           )}>
                                           {field.value ? (
