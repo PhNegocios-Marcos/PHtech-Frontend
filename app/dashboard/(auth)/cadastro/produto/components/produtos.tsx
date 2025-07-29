@@ -6,11 +6,10 @@ import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { Subproduto } from "./subprodutos";
 import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroTabela";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import ProdutoDetalhesTabs from "./editSubproduto";
+// import ProdutoDetalhesTabs from "./editSubproduto";
 import {
   Table,
   TableBody,
@@ -32,7 +31,6 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import Props from "./editSubproduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -55,6 +53,8 @@ export type Produto = {
   config_tabela_hash: string;
   usuario_atualizacao: string;
   tabela_hash: string;
+  status_relacionamento: any;
+  relacionamento_hash: any
 };
 
 export type Taxa = {
@@ -73,7 +73,6 @@ export type Taxa = {
 };
 
 export type Props = {
-  // subproduto: Subproduto;
   produto?: Produto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
@@ -90,23 +89,23 @@ export default function Produto({ produto }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [produtosRelacionados, setProdutosRelacionados] = useState<Subproduto[]>([]);
+  const [produtosRelacionados, setProdutosRelacionados] = useState<Produto[]>([]);
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
-  const [selectedProduto, setSelectedProduto] = useState<Subproduto | null>(null);
-  const [produtos, setProdutos] = useState<Subproduto[]>([]);
+  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [selectedCategoria, setSelectedCategoria] = useState<Option | null>(null);
-  const [modalidadeSelected, setModalidadeSelected] = useState<Subproduto | null>(null);
-  const [modalidade, setModalidade] = useState<Subproduto[]>([]);
+  const [modalidadeSelected, setModalidadeSelected] = useState<Produto | null>(null);
+  const [modalidade, setModalidade] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Option[]>([]);
-  const [selectedTaxa, setSelectedTaxa] = useState<Subproduto | null>(null);
+  const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
-  const handleSelectTaxa = (taxa: Subproduto) => {
+  const handleSelectTaxa = (taxa: Produto) => {
     setSelectedTaxa(taxa);
   };
 
-  const columns: ColumnDef<Subproduto>[] = [
+  const columns: ColumnDef<Produto>[] = [
     { accessorKey: "tipo_operacao_nome", header: "Nome" },
     { accessorKey: "tipo_operacao_prefixo", header: "Prefixo" },
     { accessorKey: "convenio_nome", header: "Convenio" },
@@ -213,9 +212,6 @@ export default function Produto({ produto }: Props) {
 
   return (
     <div className="space-y-6">
-      {selectedTaxa ? (
-        <ProdutoDetalhesTabs produto={produto} onClose={() => setSelectedTaxa(null)} />
-      ) : (
         <Card className="">
           <CardHeader>
             <CardTitle>Produtos</CardTitle>
@@ -277,7 +273,6 @@ export default function Produto({ produto }: Props) {
             </>
           </CardContent>
         </Card>
-      )}
 
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </div>

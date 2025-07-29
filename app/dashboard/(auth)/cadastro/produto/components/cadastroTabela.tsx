@@ -16,7 +16,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Subproduto } from "./subprodutos";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -74,11 +73,6 @@ type Option = {
   hash?: string; // opcional
 };
 
-type Props = {
-  onClose: () => void;
-  onSelectTaxa?: (subproduto: Subproduto) => void;
-};
-
 export type Taxa = {
   taxa_prazo_hash: string;
   taxa_nome: string;
@@ -104,17 +98,17 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [produtosRelacionados, setProdutosRelacionados] = useState<Subproduto[]>([]);
+  const [produtosRelacionados, setProdutosRelacionados] = useState<Taxa[]>([]);
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const [selectedProduto, setSelectedProduto] = useState<any>(null);
-  const [produtos, setProdutos] = useState<Subproduto[]>([]);
+  const [produtos, setProdutos] = useState<Taxa[]>([]);
   const [selectedCategoria, setSelectedCategoria] = useState<Option | null>(null);
   const [modalidadeSelected, setModalidadeSelected] = useState<any>(null);
   const [idProduto, setIdProduto] = useState<any>(null);
 
-  const [modalidade, setModalidade] = useState<Subproduto[]>([]);
+  const [modalidade, setModalidade] = useState<Taxa[]>([]);
   const [categorias, setCategorias] = useState<Option[]>([]);
-  const [selectedTaxa, setSelectedTaxa] = useState<Subproduto | null>(null);
+  const [selectedTaxa, setSelectedTaxa] = useState<Taxa | null>(null);
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
