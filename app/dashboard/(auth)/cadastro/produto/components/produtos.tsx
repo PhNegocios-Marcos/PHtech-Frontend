@@ -33,6 +33,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { Props } from "./editSubproduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -40,12 +41,6 @@ type Option = {
   id?: string;
   nome: string;
   hash?: string; // opcional
-};
-
-export type Props = {
-  produto: Produto;
-  onClose: () => void;
-  onSelectTaxa?: (subproduto: Subproduto) => void;
 };
 
 
@@ -64,7 +59,7 @@ export type Taxa = {
   tipo_operacao_nome: string;
 };
 
-export default function Produto({ onSelectTaxa, produto }: Props) {
+export default function Produto({ produto }: Props) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
@@ -199,7 +194,7 @@ export default function Produto({ onSelectTaxa, produto }: Props) {
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <ProdutoDetalhesTabs produto={produto} subproduto={selectedTaxa} onClose={() => setSelectedTaxa(null)} />
+        <ProdutoDetalhesTabs produto={produto} onClose={() => setSelectedTaxa(null)} />
       ) : (
         <Card className="">
           <CardHeader>

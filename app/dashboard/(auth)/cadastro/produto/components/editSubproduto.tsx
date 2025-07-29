@@ -10,20 +10,20 @@ import TabelaProduto, { Produto } from "./tableProduto";
 import CadastroTaxaModal from "./modalNovaTable";
 
 export type Props = {
-  subproduto: Subproduto;
+  // subproduto: Subproduto;
   produto: Produto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };
 
-export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh, produto }: Props) {
+export default function ProdutoDetalhesTabs({  onClose, onRefresh, produto }: Props) {
   const [isCadastroTableOpen, setIsCadastroTableOpen] = useState(false);
   const handleCloseCadastroTable = () => setIsCadastroTableOpen(false);
 
   return (
     <div className="space-y-4 rounded-md border p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{subproduto.nome_tabela}</h2>
+        {/* <h2 className="text-lg font-semibold">{subproduto.nome_tabela}</h2> */}
         <Button onClick={onClose} variant="outline">
           Voltar
         </Button>

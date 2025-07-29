@@ -68,7 +68,7 @@ export type Produto = {
   tabela_hash?: string;
 };
 
-type Props = {
+export type Props = {
   produto: Produto;
   onClose: () => void;
 };
