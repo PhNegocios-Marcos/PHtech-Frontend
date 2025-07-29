@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import TaxaProduto from "./components/produtos";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
-import CadastroTabelaModal from "./components/cadastroTabela";
+import CadastroTabelaModal from "./components/cadastroNovoProduto";
 import CampoBoasVindas from "@/components/boasvindas";
 
 

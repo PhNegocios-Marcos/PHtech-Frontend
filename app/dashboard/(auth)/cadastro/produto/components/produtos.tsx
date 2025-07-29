@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./tabela_carregando";
-import CadastroTabelaModal from "./cadastroTabela";
+import CadastroTabelaModal from "./cadastroNovoProduto";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-// import ProdutoDetalhesTabs from "./editSubproduto";
+import TabelaProduto from "./tableProduto"
 import {
   Table,
   TableBody,
@@ -212,6 +212,9 @@ export default function Produto({ produto }: Props) {
 
   return (
     <div className="space-y-6">
+      {selectedTaxa ? (
+              <TabelaProduto onClose={() => setSelectedTaxa(null)} />
+            ) : (
         <Card className="">
           <CardHeader>
             <CardTitle>Produtos</CardTitle>
@@ -273,6 +276,7 @@ export default function Produto({ produto }: Props) {
             </>
           </CardContent>
         </Card>
+      )}
 
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </div>

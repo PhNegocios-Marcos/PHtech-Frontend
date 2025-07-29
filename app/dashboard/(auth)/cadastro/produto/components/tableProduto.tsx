@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CarregandoTable } from "./leads_carregando";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import CadastroTabelaModal from "./modalNovaTable";
 
 import {
   Form,
@@ -66,6 +67,7 @@ export type Produto = {
   config_tabela_hash?: string;
   usuario_atualizacao?: string;
   tabela_hash?: string;
+  selectedCategoria?: string;
 };
 
 export type Props = {
@@ -99,7 +101,18 @@ export default function TabelaProduto({ produto }: Props) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [produtosRelacionados, setProdutosRelacionados] = useState<Produto[]>([]);
+  const [selectedCategoria, setSelectedCategoria] = useState<Option | null>(null);
+
   const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+  const [taxa, setTaxa] = useState<Option[]>([]);
+  const [taxaSelecionado, setTaxaSelecionado] = useState<Option | null>(null);
+
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
+
+  const handleSelectTaxa = (taxa: Produto) => {
+    setSelectedTaxa(taxa);
+  };
 
   const form = useForm({
     defaultValues: {
@@ -253,6 +266,36 @@ export default function TabelaProduto({ produto }: Props) {
     fetchRelacionamentos();
   }, [token]);
 
+  async function salvarTaxa() {
+    console.log("taxaSelecionado: ", taxa);
+
+    try {
+      await axios.post(
+        `${API_BASE_URL}/rel-produto-tabela-config-sub-produto-convenio/criar`,
+        [
+          {
+            tipo_operacao_hash: selectedCategoria?.id,
+            tabela_hash: taxaSelecionado?.id
+          }
+        ],
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      setMessage("Relação com convênio criada com sucesso!");
+      setMessageType("success");
+    } catch (error) {
+      console.error(error);
+      setMessage("Erro ao criar relação com convênio");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const table = useReactTable({
     data: produtosRelacionados,
     columns,
@@ -273,10 +316,15 @@ export default function TabelaProduto({ produto }: Props) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <Card className="">
         <CardHeader>
-          <CardTitle>Tabela do Produto</CardTitle>
+          <div className="flex flex-row justify-between">
+            <CardTitle>Tabela do Produto</CardTitle>
+            <Button id="" onClick={() => setIsCadastroOpen(true)}>
+              Nova Tabela
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -310,8 +358,31 @@ export default function TabelaProduto({ produto }: Props) {
               </TableBody>
             </Table>
           </div>
+          <div className="flex items-center justify-end space-x-2 pt-4">
+            <div className="text-muted-foreground flex-1 text-sm">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}>
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}>
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
+      <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </div>
   );
 }
