@@ -108,7 +108,7 @@ export default function Page() {
   const closeModalPromotoras = () => setPromotorasModal("none");
 
   const imageList = [
-    "/login01.png"
+    "/login01.jpg"
   ];
 
   const randomImage = useMemo(() => {
