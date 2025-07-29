@@ -7,9 +7,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroTabelaModal from "./components/cadastroTabela";
 import CampoBoasVindas from "@/components/boasvindas";
-import { Props } from "./components/editSubproduto";
 
-export default function Page({produto}: Props) {
+export default function Page({produto}: any) {
   const podeCriar = useHasPermission("Subprodutos_criar");
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
