@@ -8,13 +8,9 @@ import { Subproduto } from "./subprodutos";
 import { Button } from "@/components/ui/button";
 import TabelaProduto, { Produto } from "./tableProduto";
 import CadastroTaxaModal from "./modalNovaTable";
+import { Props } from "./produtos";
 
-export type Props = {
-  // subproduto: Subproduto;
-  produto: Produto;
-  onClose: () => void;
-  onRefresh?: () => void; // pode ser opcional
-};
+
 
 export default function ProdutoDetalhesTabs({  onClose, onRefresh, produto }: Props) {
   const [isCadastroTableOpen, setIsCadastroTableOpen] = useState(false);

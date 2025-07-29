@@ -33,7 +33,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Props } from "./editSubproduto";
+import Props from "./editSubproduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -57,6 +57,13 @@ export type Taxa = {
   vigencia_inicio: string;
   vigencia_prazo: string;
   tipo_operacao_nome: string;
+};
+
+export type Props = {
+  // subproduto: Subproduto;
+  produto: Produto;
+  onClose: () => void;
+  onRefresh?: () => void; // pode ser opcional
 };
 
 export default function Produto({ produto }: Props) {
