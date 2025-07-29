@@ -18,11 +18,6 @@ export default function Page() {
     <ProtectedRoute requiredPermission="Subprodutos_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
-        {/* {podeCriar && (
-          <Button id="" onClick={() => setIsCadastroOpen(true)}>
-            Nova Tabela
-          </Button>
-        )} */}
       </div>
 
       {!isCadastroOpen && <TaxaProduto onClose={handleCloseCadastro} />}

@@ -240,6 +240,9 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
+
+      setIsCadastroOpen(true)
+
     } catch (error) {
       console.error(error);
       setMessage("Erro ao criar relação com convênio");
