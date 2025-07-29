@@ -69,7 +69,7 @@ export type Produto = {
 };
 
 export type Props = {
-  produto: Produto;
+  produto?: Produto;
   onClose: () => void;
 };
 
@@ -213,7 +213,7 @@ export default function TabelaProduto({ produto }: Props) {
         `${API_BASE_URL}/rel-produto-Tabela/criar`,
         {
           Tabela_prazo_hash: TabelaSelecionado?.id,
-          produto_hash: produto.id,
+          produto_hash: produto?.id,
           vigencia_inicio: format(inicio ?? new Date(), "yyyy-MM-dd"),
           vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
         },

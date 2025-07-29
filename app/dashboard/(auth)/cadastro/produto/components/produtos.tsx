@@ -11,7 +11,6 @@ import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroTabela";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import ProdutoDetalhesTabs from "./editSubproduto";
-import type { Produto } from "./tableProduto";
 import {
   Table,
   TableBody,
@@ -43,6 +42,20 @@ type Option = {
   hash?: string; // opcional
 };
 
+export type Produto = {
+  id: string;
+  nome: string;
+  status: number;
+  idade_minima: number;
+  idade_maxima: number;
+  prazo_minimo: number;
+  prazo_maximo: number;
+  id_uy3: string | null;
+  cor_grafico: string | null;
+  config_tabela_hash: string;
+  usuario_atualizacao: string;
+  tabela_hash: string;
+};
 
 export type Taxa = {
   taxa_prazo_hash: string;
@@ -61,7 +74,7 @@ export type Taxa = {
 
 export type Props = {
   // subproduto: Subproduto;
-  produto: Produto;
+  produto?: Produto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };
