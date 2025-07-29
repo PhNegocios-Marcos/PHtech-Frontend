@@ -307,76 +307,10 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                 </button>
               </div>
 
-              <Card>
-                <h5 className="mx-5 text-xl font-semibold">Produto</h5>
-                <div className="m-5 grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <span className="text-sm font-bold text-black">Convenio</span>
-                    <div className="w-full">
-                      <Combobox
-                        data={convenio}
-                        displayField="nome"
-                        value={convenioSelecionado}
-                        onChange={setConvenioSelecionado}
-                        searchFields={["nome"]}
-                        placeholder="Selecione uma Taxa"
-                        className=""
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <span className="text-sm font-bold text-black">Modalidade</span>
-                    <div className="w-full">
-                      <Combobox
-                        data={modalidade}
-                        displayField="name"
-                        value={{
-                          ...modalidadeSelected,
-                          name:
-                            modalidadeSelected?.name?.length > 20
-                              ? modalidadeSelected.name.slice(0, 20) + "..."
-                              : modalidadeSelected?.name
-                        }}
-                        onChange={setModalidadeSelected}
-                        searchFields={["name"]}
-                        placeholder="Selecione uma Taxa"
-                        className=""
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <span className="text-sm font-bold text-black">Tipo de Operação</span>
-                    <div className="w-full">
-                      <Combobox
-                        data={produtos}
-                        displayField="name"
-                        value={{
-                          ...selectedProduto,
-                          name:
-                            selectedProduto?.name?.length > 35
-                              ? selectedProduto.name.slice(0, 35) + "..."
-                              : selectedProduto?.name
-                        }}
-                        onChange={setSelectedProduto}
-                        searchFields={["name"]}
-                        placeholder="Selecione o produto"
-                        className=""
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mx-5 flex items-center justify-end">
-                  <Button onClick={salvarProduto}>Salvar</Button>
-                </div>
-              </Card>
-
               <Card className="mt-5 flex-grow overflow-auto">
                 <h5 className="mx-5 text-xl font-semibold">Tabela Taxa</h5>
                 <CardContent>
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <FormField
                       control={methods.control}
                       name="nome_taxa"

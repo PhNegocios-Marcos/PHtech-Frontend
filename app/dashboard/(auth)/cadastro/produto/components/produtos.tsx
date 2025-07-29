@@ -11,6 +11,7 @@ import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroTabela";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import ProdutoDetalhesTabs from "./editSubproduto";
+import type { Produto } from "./tableProduto";
 import {
   Table,
   TableBody,
@@ -41,7 +42,23 @@ type Option = {
   hash?: string; // opcional
 };
 
+// export type Produto = {
+//   id: string;
+//   nome: string;
+//   status: number;
+//   idade_minima: number;
+//   idade_maxima: number;
+//   prazo_minimo: number;
+//   prazo_maximo: number;
+//   id_uy3: string | null;
+//   cor_grafico: string | null;
+//   config_tabela_hash: string;
+//   usuario_atualizacao: string;
+//   tabela_hash: string;
+// };
+
 type Props = {
+  produto: Produto;
   onClose: () => void;
   onSelectTaxa?: (subproduto: Subproduto) => void;
 };
@@ -61,7 +78,7 @@ export type Taxa = {
   tipo_operacao_nome: string;
 };
 
-export default function TaxaProduto({ onSelectTaxa }: Props) {
+export default function Produto({ onSelectTaxa, produto }: Props) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
@@ -137,120 +154,23 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
           </Badge>
         );
       }
+    },
+    {
+      id: "editar",
+      header: "Editar",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleSelectTaxa(row.original)}
+          title="Editar produto">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
     }
-    // {
-    //   id: "editar",
-    //   header: "Editar",
-    //   cell: ({ row }) => (
-    //     <Button
-    //       variant="ghost"
-    //       size="icon"
-    //       onClick={() => handleSelectTaxa(row.original)}
-    //       title="Editar produto">
-    //       <Pencil className="h-4 w-4" />
-    //     </Button>
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false
-    // }
   ];
-
-  useEffect(() => {
-    async function fetchConvenios() {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/convenio`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const data = res.data.map((c: any) => ({
-          id: c.convenio_hash,
-          nome: c.convenio_nome
-        }));
-        setConvenio(data);
-      } catch (error) {
-        console.error("Erro ao carregar convênios", error);
-      }
-    }
-
-    fetchConvenios();
-  }, [token]);
-
-  // Carrega os convenios ao iniciar
-  useEffect(() => {
-    const fetchConvenios = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/produtos/listar`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const formatado = response.data.map((item: any) => ({
-          id: item.id,
-          name: item.nome,
-          hash: item.id
-        }));
-
-        setModalidade(formatado);
-      } catch (error) {
-        console.error("Erro ao buscar convênios:", error);
-      }
-    };
-
-    fetchConvenios();
-  }, []);
-
-  useEffect(() => {
-    const fetchProdutos = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const formatado = response.data.map((item: any) => ({
-          id: item.produtos_subprodutos_id,
-          name: item.produtos_subprodutos_nome
-        }));
-
-        setProdutos(formatado);
-      } catch (error) {
-        console.error("Erro ao buscar produtos:", error);
-      }
-    };
-
-    fetchProdutos();
-  }, []);
-
-  async function salvarProduto() {
-    try {
-      await axios.post(
-        `${API_BASE_URL}/rel-produto-sub-produto-convenio/criar`,
-
-        {
-          convenio_hash: convenioSelecionado?.id,
-          modalidade_hash: modalidadeSelected?.id,
-          tipo_operacao_hash: selectedProduto?.id
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-      setMessage("Relação com convênio criada com sucesso!");
-      setMessageType("success");
-
-      setIsCadastroOpen(true)
-
-    } catch (error) {
-      console.error(error);
-      setMessage("Erro ao criar relação com convênio");
-      setMessageType("error");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
     async function fetchRelacionamentos() {
@@ -293,53 +213,14 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <ProdutoDetalhesTabs subproduto={selectedTaxa} onClose={() => setSelectedTaxa(null)} />
+        <ProdutoDetalhesTabs produto={produto} subproduto={selectedTaxa} onClose={() => setSelectedTaxa(null)} />
       ) : (
         <Card className="">
           <CardHeader>
-            <CardTitle>Produto</CardTitle>
+            <CardTitle>Produtos</CardTitle>
           </CardHeader>
           <CardContent>
             <>
-              <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Convenio</span>
-                  <Combobox
-                    data={convenio}
-                    displayField="nome"
-                    value={convenioSelecionado}
-                    onChange={setConvenioSelecionado}
-                    searchFields={["nome"]}
-                    placeholder="Selecione uma Taxa"
-                  />
-                </div>
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Modalidade</span>
-                  <Combobox
-                    data={modalidade}
-                    displayField="name"
-                    value={modalidadeSelected}
-                    onChange={setModalidadeSelected}
-                    searchFields={["name"]}
-                    placeholder="Selecione uma Taxa"
-                  />
-                </div>
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Tipo de Operação</span>
-                  <Combobox
-                    data={produtos}
-                    displayField="name"
-                    value={selectedProduto}
-                    onChange={setSelectedProduto}
-                    placeholder="Selecione o produto"
-                    searchFields={["name"]}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center justify-end">
-                <Button onClick={salvarProduto}>Salvar</Button>
-              </div>
-
               <div className="mt-10 rounded-md border">
                 <Table>
                   <TableHeader>

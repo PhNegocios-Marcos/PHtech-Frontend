@@ -22,7 +22,7 @@ type ComboboxProps<T> = {
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
-  className?: string; // ✅ Adicionado
+  className?: any; // ✅ Adicionado
 };
 
 export function Combobox<T extends Record<string, any>>({
