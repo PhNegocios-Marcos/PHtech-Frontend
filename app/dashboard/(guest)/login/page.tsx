@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -107,71 +107,92 @@ export default function Page() {
   const closeModal = () => setCurrentModal("none");
   const closeModalPromotoras = () => setPromotorasModal("none");
 
-  return (
-    <div className="flex flex-col items-center justify-center bg-gradient-to-tr from-[#c91212] to-[#6d2516] py-4 lg:h-screen">
-      {currentModal === "none" && promotorasModal === "none" && (
-        <Card className="mx-auto w-[95%] md:w-[40%]">
-          <Image
-            src="/logo.png" // caminho da imagem (pública ou importada)
-            alt="Descrição da imagem"
-            width={200}
-            height={200}
-            className="mx-auto"
-          />
-          <CardHeader>
-            <CardTitle className="text-2xl">Login</CardTitle>
-            <CardDescription className="text-[13px]">
-              Digite seu e-mail e senha abaixo para acessar sua conta
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="contact@bundui.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Senha</Label>
-                  <Link
-                    href="/dashboard/forgot-password"
-                    className="ml-auto inline-block text-sm underline">
-                    Esqueceu sua senha?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-              </div>
-              {loginError && <p className="text-center text-sm text-red-500">{loginError}</p>}
-              <Button onClick={handleLogin} type="button" className="w-full">
-                Login
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+  const imageList = [
+    "/login01.png"
+  ];
 
-      {currentModal === "2FA" ? (
-        <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-      ) : promotorasModal === "promotoras" ? (
-        <Promotoras onNext={() => setCurrentModal("modal2")} onClose={closeModalPromotoras} />
-      ) : usa2faModal === "usa_2fa" ? (
-        <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-      ) : null}
+  const randomImage = useMemo(() => {
+    const index = Math.floor(Math.random() * imageList.length);
+    return imageList[index];
+  }, []);
+
+  return (
+    <div className="flex pb-8 lg:h-screen lg:pb-0">
+      <div className="hidden w-1/2 bg-gray-100 lg:block">
+        <Image
+          width={1000}
+          height={1000}
+          src={randomImage}
+          alt="Imagem da tela de login"
+          className="h-full w-full object-cover"
+          unoptimized
+        />
+      </div>
+      <div className="flex w-full items-center justify-center lg:w-1/2">
+        {currentModal === "none" && promotorasModal === "none" && (
+          <div className="w-[80%]">
+            <Image
+              src="/logo.png" // caminho da imagem (pública ou importada)
+              alt="Descrição da imagem"
+              width={200}
+              height={200}
+              className="mx-auto"
+            />
+            <CardHeader>
+              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardDescription className="text-[13px]">
+                Digite seu e-mail e senha abaixo para acessar sua conta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="contact@bundui.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <Label htmlFor="password">Senha</Label>
+                    <Link
+                      href="/dashboard/forgot-password"
+                      className="ml-auto inline-block text-sm underline">
+                      Esqueceu sua senha?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                </div>
+                {loginError && <p className="text-center text-sm text-red-500">{loginError}</p>}
+                <Button onClick={handleLogin} type="button" className="w-full">
+                  Login
+                </Button>
+              </div>
+            </CardContent>
+          </div>
+        )}
+
+        {currentModal === "2FA" ? (
+          <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
+        ) : promotorasModal === "promotoras" ? (
+          <Promotoras onNext={() => setCurrentModal("modal2")} onClose={closeModalPromotoras} />
+        ) : usa2faModal === "usa_2fa" ? (
+          <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
+        ) : null}
+      </div>
     </div>
   );
 }
