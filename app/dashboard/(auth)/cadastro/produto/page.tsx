@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroTabelaModal from "./components/cadastroTabela";
 import CampoBoasVindas from "@/components/boasvindas";
+import Produto from "./components/produtos";
 
 type Props = {
   produto: any;
