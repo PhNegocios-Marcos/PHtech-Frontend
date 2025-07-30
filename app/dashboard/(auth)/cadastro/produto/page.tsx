@@ -7,9 +7,10 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroTabelaModal from "./components/cadastroNovoProduto";
 import CampoBoasVindas from "@/components/boasvindas";
+import { Props } from "./components/produtos";
 
 
-export default function Page() {
+export default function Page({produto}: Props) {
   const podeCriar = useHasPermission("Subprodutos_criar");
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
@@ -25,7 +26,7 @@ export default function Page() {
         </Button>
       </div>
 
-      {!isCadastroOpen && <TaxaProduto onClose={handleCloseCadastro} />}
+      {!isCadastroOpen && <TaxaProduto produto={produto} onClose={handleCloseCadastro} />}
 
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
