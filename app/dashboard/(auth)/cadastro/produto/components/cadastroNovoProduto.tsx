@@ -303,7 +303,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
 
               <Card>
                 <h5 className="mx-5 text-xl font-semibold">Produto</h5>
-                <div className="m-5 grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="m-5">
                   <div className="space-y-2">
                     <span className="text-sm font-bold text-black">Convenio</span>
                     <div className="w-full">
