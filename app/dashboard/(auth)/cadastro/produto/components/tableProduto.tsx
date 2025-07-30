@@ -55,23 +55,24 @@ type Option = {
 };
 
 export type Produto = {
-  id?: string;
-  nome?: string;
-  status?: number;
-  idade_minima?: number;
-  idade_maxima?: number;
-  prazo_minimo?: number;
-  prazo_maximo?: number;
-  id_uy3?: string | null;
-  cor_grafico?: string | null;
-  config_tabela_hash?: string;
-  usuario_atualizacao?: string;
-  tabela_hash?: string;
-  selectedCategoria?: string;
+  id: string;
+  nome: string;
+  status: number;
+  idade_minima: number;
+  idade_maxima: number;
+  prazo_minimo: number;
+  prazo_maximo: number;
+  id_uy3: string | null;
+  cor_grafico: string | null;
+  config_tabela_hash: string;
+  usuario_atualizacao: string;
+  tabela_hash: string;
+  status_relacionamento: any;
+  relacionamento_hash: any;
 };
 
 export type Props = {
-  produto?: Produto;
+  produto: Produto;
   onClose: () => void;
 };
 
@@ -89,7 +90,7 @@ export type Tabela = {
   vigencia_prazo: string;
 };
 
-export default function TabelaProduto({ produto }: Props) {
+export default function TabelaProduto({ produto, onClose }: Props) {
   const { token, userData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [Tabela, setTabela] = useState<Option[]>([]);
@@ -197,28 +198,28 @@ export default function TabelaProduto({ produto }: Props) {
 
   const { inicio, fim } = form.getValues();
 
-  useEffect(() => {
-    async function fetchConvenios() {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/config_Tabelas_prazos/listar`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
+  // useEffect(() => {
+  //   async function fetchConvenios() {
+  //     try {
+  //       const res = await axios.get(`${API_BASE_URL}/config_Tabelas_prazos/listar`, {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`
+  //         }
+  //       });
 
-        const data = res.data.map((c: any) => ({
-          id: c.produtos_config_Tabela_prazo_id,
-          nome: c.produtos_config_Tabela_prazo_nome
-        }));
-        setTabela(data);
-      } catch (error) {
-        console.error("Erro ao carregar convênios", error);
-      }
-    }
+  //       const data = res.data.map((c: any) => ({
+  //         id: c.produtos_config_Tabela_prazo_id,
+  //         nome: c.produtos_config_Tabela_prazo_nome
+  //       }));
+  //       setTabela(data);
+  //     } catch (error) {
+  //       console.error("Erro ao carregar convênios", error);
+  //     }
+  //   }
 
-    fetchConvenios();
-  }, [token]);
+  //   fetchConvenios();
+  // }, [token]);
 
   async function salvarTabela() {
     try {
@@ -320,10 +321,17 @@ export default function TabelaProduto({ produto }: Props) {
       <Card className="">
         <CardHeader>
           <div className="flex flex-row justify-between">
-            <CardTitle>Tabela do Produto</CardTitle>
-            <Button id="" onClick={() => setIsCadastroOpen(true)}>
-              Nova Tabela
-            </Button>
+            <div>
+              <CardTitle>Tabela do Produto</CardTitle>
+            </div>
+            <div className="flex gap-3">
+              <Button id="" onClick={() => setIsCadastroOpen(true)}>
+                Nova Tabela
+              </Button>
+              <Button onClick={onClose} variant="outline">
+                Voltar
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
@@ -382,7 +390,7 @@ export default function TabelaProduto({ produto }: Props) {
           </div>
         </CardContent>
       </Card>
-      <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <CadastroTabelaModal produto={produto} isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </div>
   );
 }
