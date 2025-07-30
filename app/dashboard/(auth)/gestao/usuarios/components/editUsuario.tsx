@@ -78,13 +78,13 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
           <Card className="col-span-2">
             <CardHeader>
               <CardTitle>Editar Usuário</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={methods.control}
                   name="nome"

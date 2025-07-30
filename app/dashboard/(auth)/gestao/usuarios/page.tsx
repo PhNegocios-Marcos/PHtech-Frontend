@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroUsuarioModal from "./components/CadastroUsuarioModal";
+import Equipes from "./components/equipe";
 
 export default function Page() {
   const router = useRouter();

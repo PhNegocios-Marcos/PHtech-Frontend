@@ -4,6 +4,8 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsuarioEdit } from "./editUsuario";
 import { Button } from "@/components/ui/button";
+import Equipes from "./equipe";
+import Perfil from "./perfil";
 
 type Usuario = {
   id: string;
@@ -25,8 +27,8 @@ type UsuarioPerfilProps = {
 
 export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProps) {
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center border-b pb-2">
+    <div className="space-y-4 p-4">
+      <div className="flex items-center justify-between border-b pb-2">
         <h2 className="text-lg font-semibold">Detalhes do Usuário</h2>
         <Button onClick={onClose} variant="outline">
           Voltar
@@ -36,21 +38,20 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>
-          <TabsTrigger value="reports" disabled>
-            Relacionados
-          </TabsTrigger>
+          <TabsTrigger value="reports">Equipes</TabsTrigger>
+          <TabsTrigger value="Perfil">Perfil</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
-          <UsuarioEdit 
-            usuario={usuario} 
-            onClose={onClose} 
-            onRefresh={onRefresh} 
-          />
+          <UsuarioEdit usuario={usuario} onClose={onClose} onRefresh={onRefresh} />
         </TabsContent>
 
         <TabsContent value="reports">
-          {/* Conteúdo dos relacionados */}
+          <Equipes usuario={usuario} />
+        </TabsContent>
+
+        <TabsContent value="Perfil">
+          <Perfil usuario={usuario} />
         </TabsContent>
       </Tabs>
     </div>
