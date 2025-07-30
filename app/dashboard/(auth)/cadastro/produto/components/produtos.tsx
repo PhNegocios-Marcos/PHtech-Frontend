@@ -73,7 +73,7 @@ export type Taxa = {
 };
 
 export type Props = {
-  produto: Produto;
+  produto?: Produto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };
@@ -98,9 +98,6 @@ export default function Produto({ produto }: Props) {
   const [modalidade, setModalidade] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Option[]>([]);
   const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
-  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
-
-
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
@@ -215,8 +212,8 @@ export default function Produto({ produto }: Props) {
 
   return (
     <div className="space-y-6">
-      {selectedTaxa ? (
-        <TabelaProduto produto={selectedTaxa} onClose={() => setSelectedTaxa(null)} />
+      {selectedTaxa && produto ? (
+        <TabelaProduto produto={produto} onClose={() => setSelectedTaxa(null)} />
       ) : (
         <Card className="">
           <CardHeader>
