@@ -81,7 +81,7 @@ const ProcessStepper = () => {
 };
 
 // Enhanced Components
-const Informacoes = ({ Proposta }: { Proposta: Proposta | null }) => (
+const Informacoes = ({ proposta }: { proposta: Proposta }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
@@ -92,22 +92,20 @@ const Informacoes = ({ Proposta }: { Proposta: Proposta | null }) => (
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">ID da Proposta</p>
-            <p className="text-lg font-mono bg-muted px-3 py-2 rounded">{Proposta?.id}</p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Correspondente</p>
-            <p className="text-lg">{Proposta?.Correspondente}</p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Tomador</p>
-            <p className="text-lg font-medium">{Proposta?.Tomador}</p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">CPF</p>
-            <p className="text-lg font-mono">{Proposta?.CPF}</p>
-          </div>
+          {[
+            { label: "Produto", value: proposta.Produto },
+            { label: "Modo de Liquidação", value: "Débito em Conta" },
+            { label: "Tomador", value: proposta.Tomador },
+            { label: "Tipo de Liquidação", value: "Automática" },
+            { label: "Conta de Liquidação", value: "123456-7 / Banco XYZ" },
+            { label: "Código IPOC", value: "IPOC-2025-001" },
+            { label: "Observações", value: "Nenhuma observação adicional" },
+          ].map((item, index) => (
+            <div key={index} className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+              <p className="text-lg font-medium">{item.value}</p>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -203,7 +201,7 @@ const Operacao = () => (
                   <td className="px-4 py-3 font-medium">{row.parcela}</td>
                   <td className="px-4 py-3">{row.vencimento}</td>
                   <td className="px-4 py-3 font-mono">{row.saldo}</td>
-                  <td className="px-4 py-Â3 font-mono">{row.amortizacao}</td>
+                  <td className="px-4 py-3 font-mono">{row.amortizacao}</td>
                   <td className="px-4 py-3 font-mono">{row.juros}</td>
                   <td className="px-4 py-3 font-mono font-semibold">{row.pagamento}</td>
                 </tr>
@@ -225,33 +223,114 @@ const Operacao = () => (
 );
 
 const Documentos = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2 text-lg">
-        <FileText className="w-5 h-5" />
-        Documentos Necessários
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-4">
-        {[
-          { doc: "RG", status: "completed", date: "20/07/2025" },
-          { doc: "Comprovante de Residência", status: "completed", date: "21/07/2025" },
-          { doc: "Contrato", status: "pending", date: null },
-        ].map((item, index) => (
-          <div key={index} className="flex items-center justify-between p-4 rounded-lg border bg-muted">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${item.status === "completed" ? "bg-primary" : "bg-secondary"}`} />
-              <span className="font-medium">{item.doc}</span>
-            </div>
-            <Badge variant={item.status === "completed" ? "default" : "secondary"}>
-              {item.status === "completed" ? `Enviado em ${item.date}` : "Pendente"}
-            </Badge>
-          </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
+  <div className="space-y-8">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <FileText className="w-5 h-5" />
+          Documentos da Operação
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted">
+                <th className="px-4 py-3 text-left font-semibold">Nome</th>
+                <th className="px-4 py-3 text-left font-semibold">Tipo de Documento</th>
+                <th className="px-4 py-3 text-left font-semibold">Signatários</th>
+                <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
+                <th className="px-4 py-3 text-left font-semibold">Status da Assinatura</th>
+                <th className="px-4 py-3 text-left font-semibold">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {
+                  nome: "FotoRG_3e5eb5bc-ab55-4896-a93c-9dc4ec1b5f79.pdf",
+                  tipo: "Documento de Identificação com Foto",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "Concluído",
+                },
+                {
+                  nome: "AssinaturaDigital_eafca2c7-eb22-4c61-8ea1-65907f8ebcc4.png",
+                  tipo: "Documento",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "Concluído",
+                },
+                {
+                  nome: "TermoConsentimento_2bdd6ed5-b530-46bb-8fde-3e906457ff19.pdf",
+                  tipo: "Contrato Assinado",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "-",
+                },
+                {
+                  nome: "Proposta_08cda6d9-a934-4068-be34-6e59ae1464a9.pdf",
+                  tipo: "Contrato Assinado",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "-",
+                },
+                {
+                  nome: "Voucher_790e5885-9b3e-4832-873c-d611acce90d3.pdf",
+                  tipo: "Documento",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "Concluído",
+                },
+                {
+                  nome: "FotoCliente_e946756e-0cb7-40ac-a60f-2189daae5111.png",
+                  tipo: "Selfie",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:36:21",
+                  status: "Concluído",
+                },
+                {
+                  nome: "Contrato.pdf",
+                  tipo: "Minuta",
+                  signatarios: "Tiago Silva Oliveira",
+                  data: "30/07/2025, 15:23:29",
+                  status: "Concluído",
+                },
+              ].map((row, index) => (
+                <tr key={index} className={`transition-colors hover:bg-muted ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+                  <td className="px-4 py-3 font-medium">{row.nome}</td>
+                  <td className="px-4 py-3">{row.tipo}</td>
+                  <td className="px-4 py-3">{row.signatarios}</td>
+                  <td className="px-4 py-3">{row.data}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant={row.status === "Concluído" ? "default" : "secondary"}>{row.status}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Button variant="ghost" size="sm">
+                      Visualizar
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 text-sm text-muted-foreground">
+          Linhas por página: 5 | 1–5 de 5
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <FileText className="w-5 h-5" />
+          Documentos - Tiago Silva Oliveira
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">Nenhum documento encontrado</p>
+      </CardContent>
+    </Card>
+  </div>
 );
 
 const Assinaturas = () => (
@@ -263,21 +342,40 @@ const Assinaturas = () => (
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="space-y-4">
-        {[
-          { party: "Assinatura Tomador", status: "pending" },
-          { party: "Assinatura Avalista", status: "completed", date: "22/07/2025" },
-        ].map((item, index) => (
-          <div key={index} className="flex items-center justify-between p-4 rounded-lg border bg-muted">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${item.status === "completed" ? "bg-primary" : "bg-secondary"}`} />
-              <span className="font-medium">{item.party}</span>
-            </div>
-            <Badge variant={item.status === "completed" ? "default" : "secondary"}>
-              {item.status === "completed" ? `Assinado em ${item.date}` : "Pendente"}
-            </Badge>
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-muted">
+              <th className="px-4 py-3 text-left font-semibold">Signatário</th>
+              <th className="px-4 py-3 text-left font-semibold">Telefone</th>
+              <th className="px-4 py-3 text-left font-semibold">Email</th>
+              <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
+              <th className="px-4 py-3 text-left font-semibold">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                signatario: "Tiago Silva Oliveira",
+                telefone: "(75) 99143-4902",
+                email: "traquino.silva12@gmail.com",
+                data: "30/07/2025, 19:07",
+              },
+            ].map((row, index) => (
+              <tr key={index} className={`transition-colors hover:bg-muted ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+                <td className="px-4 py-3 font-medium">{row.signatario}</td>
+                <td className="px-4 py-3">{row.telefone}</td>
+                <td className="px-4 py-3">{row.email}</td>
+                <td className="px-4 py-3">{row.data}</td>
+                <td className="px-4 py-3">
+                  <Button variant="ghost" size="sm">
+                    Reenviar
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </CardContent>
   </Card>
@@ -288,24 +386,97 @@ const Historico = () => (
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <History className="w-5 h-5" />
-        Histórico da Operação
+        Andamento da Operação
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="space-y-4">
-        {[
-          { date: "25/07/2025", event: "Proposta criada", status: "completed" },
-          { date: "26/07/2025", event: "Documentos enviados", status: "completed" },
-          { date: "27/07/2025", event: "Análise de crédito iniciada", status: "current" },
-        ].map((item, index) => (
-          <div key={index} className="flex items-start gap-4">
-            <div className={`w-3 h-3 rounded-full mt-1 ${item.status === "completed" ? "bg-primary" : "bg-secondary"}`} />
-            <div>
-              <p className="font-medium">{item.event}</p>
-              <p className="text-sm text-muted-foreground">{item.date}</p>
+      <div className="space-y-6">
+        {/* Summary Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { label: "Correspondente", value: "PH Negócios" },
+            { label: "Operador", value: "PhNegociosAPI" },
+            { label: "Grupo", value: "Admin" },
+            { label: "Data da Última Atualização", value: "30/07/2025" },
+            { label: "Última Atualização Feita Por", value: "PhNegociosAPI" },
+          ].map((item, index) => (
+            <div key={index} className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+              <p className="text-lg font-medium">{item.value}</p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        {/* Timeline */}
+        <div className="relative">
+          <div className="absolute left-3 top-0 w-0.5 h-full bg-border" />
+          {[
+            {
+              event: "Rascunho",
+              description: "Registro criado",
+              iniciado: "30/07/2025 - 15:23:20 por PhNegociosAPI",
+              finalizado: "30/07/2025 - 15:23:22 por PhNegociosAPI",
+              status: "completed",
+            },
+            {
+              event: "Aprovação de Compliance",
+              description: "Aprovado pelo sistema. Esteira de compliance executada com sucesso.",
+              iniciado: "30/07/2025 - 15:23:22 por Sistema",
+              finalizado: "30/07/2025 - 15:23:22 por Sistema",
+              status: "completed",
+            },
+            {
+              event: "Aprovação de Crédito",
+              description: "Aprovado automaticamente pelo sistema: Crédito analisado pelo fundo cessionário",
+              iniciado: "30/07/2025 - 15:23:23 por Sistema",
+              finalizado: "30/07/2025 - 15:23:23 por Sistema",
+              status: "completed",
+            },
+            {
+              event: "Aprovação de Instrumento",
+              description: "Aprovado automaticamente pelo sistema",
+              iniciado: "30/07/2025 - 15:23:24 por Sistema",
+              finalizado: "30/07/2025 - 15:23:25 por Sistema",
+              status: "completed",
+            },
+            {
+              event: "Assinatura",
+              description: "Coleta de assinatura concluída com sucesso por TIAGO SILVA OLIVEIRA com score 95.",
+              iniciado: "30/07/2025 - 15:23:29 por Sistema",
+              finalizado: "30/07/2025 - 15:36:22 por Sistema",
+              status: "completed",
+            },
+            {
+              event: "Garantia Manual",
+              description: "Aprovação da garantia não concluída por cancelamento manual.",
+              iniciado: "30/07/2025 - 15:36:23 por Sistema",
+              finalizado: "30/07/2025 - 15:42:52 por PhNegociosAPI",
+              status: "failed",
+            },
+            {
+              event: "Cancelada",
+              description: "Operação cancelada manualmente: Cliente ja com emprestimo ativo !.",
+              iniciado: "30/07/2025 - 15:42:53 por Sistema",
+              finalizado: "30/07/2025 - 15:42:53 por Sistema",
+              status: "failed",
+            },
+          ].map((item, index) => (
+            <div key={index} className="relative flex items-start gap-4 mb-6">
+              <div
+                className={`absolute w-6 h-6 rounded-full flex items-center justify-center left-0 mt-1 ${
+                  item.status === "completed" ? "bg-primary" : "bg-destructive"
+                }`}
+              >
+                <CheckCircle className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="ml-10">
+                <p className="text-lg font-semibold">{item.event}</p>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">Iniciado: {item.iniciado}</p>
+                <p className="text-sm text-muted-foreground">Finalizado: {item.finalizado}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </CardContent>
   </Card>
@@ -329,10 +500,10 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
   // Mock data for demonstration
   const mockProposta: Proposta = {
     id: "OP-2025-001",
-    Correspondente: "Banco XYZ",
+    Correspondente: "PH Negócios",
     Operação: "Crédito Pessoal",
     Produto: "Empréstimo",
-    Tomador: "João Silva Santos",
+    Tomador: "Tiago Silva Oliveira",
     CPF: "123.456.789-00",
     Valor: "R$ 3.702,74",
     Data: "30/07/2025",
@@ -455,7 +626,7 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
                     <h3 className="text-2xl font-bold">{section.label}</h3>
                   </div>
                   <div className="space-y-8">
-                    <section.component Proposta={formData} />
+                    <section.component proposta={formData} />
                   </div>
                 </section>
               ))}

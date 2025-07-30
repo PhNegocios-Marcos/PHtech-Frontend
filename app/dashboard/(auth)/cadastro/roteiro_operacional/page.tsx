@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
-import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -17,233 +14,473 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  useReactTable
+  useReactTable,
 } from "@tanstack/react-table";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const createSchema = z.object({
-  convenio_hash: z.string().min(1, "Convênio é obrigatório"),
-  idade_minima: z.string().min(1, "Idade mínima é obrigatória"),
-  idade_maxima: z.string().min(1, "Idade máxima é obrigatória"),
-  prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
-  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
-  valor_bruto_minimo: z.string().min(1, "Valor bruto mínimo é obrigatório"),
-  valor_bruto_maximo: z.string().min(1, "Valor bruto máximo é obrigatório"),
-  margem_minima: z.string().min(1, "Margem mínima é obrigatória"),
-  margem_maxima: z.string().min(1, "Margem máxima é obrigatória"),
-  margem_seguranca: z.string().min(1, "Margem de segurança é obrigatória")
-});
-
-const updateSchema = z.object({
-  rotina_operacional_hash: z.string().min(1, "Hash é obrigatório"),
-  valor_bruto_minimo: z.string().min(1, "Valor bruto mínimo é obrigatório"),
-  valor_bruto_maximo: z.string().min(1, "Valor bruto máximo é obrigatório")
-});
-
-type CreateFormData = z.infer<typeof createSchema>;
-type UpdateFormData = z.infer<typeof updateSchema>;
-
-type Option = {
-  id: string;
-  nome: string;
-};
 
 type RoteiroOperacional = {
   rotina_operacional_hash: string;
-  convenio_hash?: string;
+  nome: string;
+  descricao: string;
   idade_minima: number;
   idade_maxima: number;
   prazo_minimo: number;
   prazo_maximo: number;
   valor_bruto_minimo: string;
   valor_bruto_maximo: string;
-  margem_minima: string;
-  margem_maxima: string;
-  margem_seguranca: string;
+  taxa_minima: string;
+  taxa_maxima: string;
+  usa_margem_seguranca: boolean;
+  tac_min: string;
+  tac_max: string;
+  usa_limite_proposta: boolean;
+  quantidade_propostas_ativas: number;
 };
 
-export default function RoteiroOperacionalPage() {
-  const [loading, setLoading] = useState(false);
-  const [convenios, setConvenios] = useState<Option[]>([]);
-  const [roteiros, setRoteiros] = useState<RoteiroOperacional[]>([]);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedRoteiro, setSelectedRoteiro] = useState<RoteiroOperacional | null>(null);
+const createSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  descricao: z.string().min(1, "Descrição é obrigatória"),
+  idade_minima: z.string().min(1, "Idade mínima é obrigatória"),
+  idade_maxima: z.string().min(1, "Idade máxima é obrigatória"),
+  prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
+  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
+  valor_bruto_minimo: z.string().min(1, "Valor bruto mínimo é obrigatório"),
+  valor_bruto_maximo: z.string().min(1, "Valor bruto máximo é obrigatório"),
+  taxa_minima: z.string().min(1, "Taxa mínima é obrigatória"),
+  taxa_maxima: z.string().min(1, "Taxa máxima é obrigatória"),
+  usa_margem_seguranca: z.enum(["true", "false"], { message: "Selecione uma opção" }),
+  tac_min: z.string().min(1, "TAC mínima é obrigatória"),
+  tac_max: z.string().min(1, "TAC máxima é obrigatória"),
+  usa_limite_proposta: z.enum(["true", "false"], { message: "Selecione uma opção" }),
+  quantidade_propostas_ativas: z.string().min(1, "Quantidade de propostas ativas é obrigatória"),
+});
 
-  const { token } = useAuth();
-  const { toast } = useToast();
+type CreateFormData = z.infer<typeof createSchema>;
 
-  const createForm = useForm<CreateFormData>({
+type CadastroRoteiroModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: CreateFormData) => void;
+};
+
+const CadastroRoteiroModal = ({ isOpen, onClose, onSubmit }: CadastroRoteiroModalProps) => {
+  const methods = useForm<CreateFormData>({
     resolver: zodResolver(createSchema),
     defaultValues: {
-      convenio_hash: "",
+      nome: "",
+      descricao: "",
       idade_minima: "",
       idade_maxima: "",
       prazo_minimo: "",
       prazo_maximo: "",
       valor_bruto_minimo: "",
       valor_bruto_maximo: "",
-      margem_minima: "",
-      margem_maxima: "",
-      margem_seguranca: ""
-    }
+      taxa_minima: "",
+      taxa_maxima: "",
+      usa_margem_seguranca: "false",
+      tac_min: "",
+      tac_max: "",
+      usa_limite_proposta: "false",
+      quantidade_propostas_ativas: "",
+    },
   });
 
-  const updateForm = useForm<UpdateFormData>({
-    resolver: zodResolver(updateSchema),
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 !left-auto z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg"
+      >
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Cadastrar Novo Roteiro</h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-2xl font-bold hover:text-gray-900"
+                  aria-label="Fechar"
+                >
+                  ×
+                </button>
+              </div>
+              <Card className="flex-grow overflow-auto">
+                <CardHeader>
+                  <CardTitle>Dados do Roteiro Operacional</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={methods.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o nome do roteiro" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="descricao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite a descrição" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="idade_minima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Idade Mínima</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="18" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="idade_maxima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Idade Máxima</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="65" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="prazo_minimo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prazo Mínimo (meses)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="6" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="prazo_maximo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prazo Máximo (meses)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="36" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="valor_bruto_minimo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Bruto Mínimo</FormLabel>
+                          <FormControl>
+                            <Input placeholder="500.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="valor_bruto_maximo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Bruto Máximo</FormLabel>
+                          <FormControl>
+                            <Input placeholder="15500.50" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="taxa_minima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa Mínima (% a.m.)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="1.5" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="taxa_maxima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa Máxima (% a.m.)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="5.0" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="usa_margem_seguranca"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Usa Margem de Segurança</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Sim</SelectItem>
+                              <SelectItem value="false">Não</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="tac_min"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>TAC Mínima</FormLabel>
+                          <FormControl>
+                            <Input placeholder="100.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="tac_max"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>TAC Máxima</FormLabel>
+                          <FormControl>
+                            <Input placeholder="500.00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="usa_limite_proposta"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Usa Limite de Proposta</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Sim</SelectItem>
+                              <SelectItem value="false">Não</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="quantidade_propostas_ativas"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantidade de Propostas Ativas</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="10" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="mt-6 flex justify-end gap-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Cadastrar</Button>
+              </div>
+            </form>
+          </Form>
+        </FormProvider>
+      </aside>
+    </>
+  );
+};
+
+export default function RoteiroOperacionalPage() {
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roteiros, setRoteiros] = useState<RoteiroOperacional[]>([
+    {
+      rotina_operacional_hash: "RO-001",
+      nome: "Roteiro Pessoal",
+      descricao: "Roteiro para crédito pessoal",
+      idade_minima: 18,
+      idade_maxima: 65,
+      prazo_minimo: 6,
+      prazo_maximo: 36,
+      valor_bruto_minimo: "500.00",
+      valor_bruto_maximo: "15000.00",
+      taxa_minima: "1.5",
+      taxa_maxima: "4.99",
+      usa_margem_seguranca: true,
+      tac_min: "100.00",
+      tac_max: "500.00",
+      usa_limite_proposta: false,
+      quantidade_propostas_ativas: 10,
+    },
+    {
+      rotina_operacional_hash: "RO-002",
+      nome: "Roteiro Empresarial",
+      descricao: "Roteiro para crédito empresarial",
+      idade_minima: 21,
+      idade_maxima: 70,
+      prazo_minimo: 12,
+      prazo_maximo: 48,
+      valor_bruto_minimo: "1000.00",
+      valor_bruto_maximo: "50000.00",
+      taxa_minima: "2.0",
+      taxa_maxima: "5.5",
+      usa_margem_seguranca: false,
+      tac_min: "200.00",
+      tac_max: "1000.00",
+      usa_limite_proposta: true,
+      quantidade_propostas_ativas: 5,
+    },
+    {
+      rotina_operacional_hash: "RO-003",
+      nome: "Roteiro Consignado",
+      descricao: "Roteiro para crédito consignado",
+      idade_minima: 25,
+      idade_maxima: 60,
+      prazo_minimo: 3,
+      prazo_maximo: 24,
+      valor_bruto_minimo: "300.00",
+      valor_bruto_maximo: "10000.00",
+      taxa_minima: "1.2",
+      taxa_maxima: "3.5",
+      usa_margem_seguranca: true,
+      tac_min: "50.00",
+      tac_max: "300.00",
+      usa_limite_proposta: true,
+      quantidade_propostas_ativas: 8,
+    },
+  ]);
+
+  const { toast } = useToast();
+
+  const createForm = useForm<CreateFormData>({
+    resolver: zodResolver(createSchema),
     defaultValues: {
-      rotina_operacional_hash: "",
+      nome: "",
+      descricao: "",
+      idade_minima: "",
+      idade_maxima: "",
+      prazo_minimo: "",
+      prazo_maximo: "",
       valor_bruto_minimo: "",
-      valor_bruto_maximo: ""
-    }
+      valor_bruto_maximo: "",
+      taxa_minima: "",
+      taxa_maxima: "",
+      usa_margem_seguranca: "false",
+      tac_min: "",
+      tac_max: "",
+      usa_limite_proposta: "false",
+      quantidade_propostas_ativas: "",
+    },
   });
 
-  useEffect(() => {
-    async function fetchConvenios() {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/convenio`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const data = res.data.map((c: any) => ({
-          id: c.convenio_hash,
-          nome: c.convenio_nome
-        }));
-        setConvenios(data);
-      } catch (error) {
-        console.error("Erro ao carregar convênios", error);
-        toast({
-          title: "Erro",
-          description: "Falha ao carregar convênios",
-          variant: "destructive"
-        });
-      }
-    }
-
-    async function fetchRoteiros() {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
-        console.log("Roteiros recebidos:", res.data); // Debug log
-        setRoteiros(res.data);
-      } catch (error) {
-        console.error("Erro ao carregar roteiros", error);
-        toast({
-          title: "Erro",
-          description: "Falha ao carregar roteiros operacionais",
-          variant: "destructive"
-        });
-      }
-    }
-
-    fetchConvenios();
-    fetchRoteiros();
-  }, [token, toast]);
-
-  const onCreateSubmit = async (data: CreateFormData) => {
+  const onCreateSubmit = (data: CreateFormData) => {
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/rotina-operacional/criar`, {
-        convenio_hash: data.convenio_hash,
-        idade_minima: data.idade_minima,
-        idade_maxima: data.idade_maxima,
-        prazo_minimo: data.prazo_minimo,
-        prazo_maximo: data.prazo_maximo,
-        valor_bruto_minimo: parseFloat(data.valor_bruto_minimo),
-        valor_bruto_maximo: parseFloat(data.valor_bruto_maximo),
-        margem_minima: data.margem_minima,
-        margem_maxima: data.margem_maxima,
-        margem_seguranca: data.margem_seguranca
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
+      const newRoteiro: RoteiroOperacional = {
+        rotina_operacional_hash: `RO-${Math.random().toString(36).slice(2, 9)}`,
+        nome: data.nome,
+        descricao: data.descricao,
+        idade_minima: parseInt(data.idade_minima),
+        idade_maxima: parseInt(data.idade_maxima),
+        prazo_minimo: parseInt(data.prazo_minimo),
+        prazo_maximo: parseInt(data.prazo_maximo),
+        valor_bruto_minimo: data.valor_bruto_minimo,
+        valor_bruto_maximo: data.valor_bruto_maximo,
+        taxa_minima: data.taxa_minima,
+        taxa_maxima: data.taxa_maxima,
+        usa_margem_seguranca: data.usa_margem_seguranca === "true",
+        tac_min: data.tac_min,
+        tac_max: data.tac_max,
+        usa_limite_proposta: data.usa_limite_proposta === "true",
+        quantidade_propostas_ativas: parseInt(data.quantidade_propostas_ativas),
+      };
+      setRoteiros([...roteiros, newRoteiro]);
       toast({
         title: "Sucesso",
         description: "Roteiro operacional cadastrado com sucesso!",
-        className: "bg-green-50 border-green-200 text-green-800"
+        className: "bg-green-50 border-green-200 text-green-800",
       });
       createForm.reset();
-      // Refresh list
-      const res = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log("Roteiros atualizados:", res.data); // Debug log
-      setRoteiros(res.data);
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Erro ao cadastrar roteiro:", error);
       toast({
         title: "Erro",
         description: "Falha ao cadastrar roteiro operacional",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onUpdateSubmit = async (data: UpdateFormData) => {
-    setLoading(true);
-    try {
-      await axios.put(`${API_BASE_URL}/rotina-operacional/atualizar`, {
-        rotina_operacional_hash: data.rotina_operacional_hash,
-        valor_bruto_minimo: parseFloat(data.valor_bruto_minimo),
-        valor_bruto_maximo: parseFloat(data.valor_bruto_maximo)
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      toast({
-        title: "Sucesso",
-        description: "Roteiro operacional atualizado com sucesso!",
-        className: "bg-green-50 border-green-200 text-green-800"
-      });
-      setIsUpdateModalOpen(false);
-      updateForm.reset();
-      // Refresh list
-      const res = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log("Roteiros atualizados:", res.data); // Debug log
-      setRoteiros(res.data);
-    } catch (error) {
-      console.error("Erro ao atualizar roteiro:", error);
-      toast({
-        title: "Erro",
-        description: "Falha ao atualizar roteiro operacional",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -252,255 +489,89 @@ export default function RoteiroOperacionalPage() {
 
   const columns: ColumnDef<RoteiroOperacional>[] = [
     {
-      accessorKey: "convenio_hash",
-      header: "Convênio",
-      cell: ({ row }) => <span>{row.original.convenio_hash ? row.original.convenio_hash.slice(0, 8) + "..." : "N/A"}</span>
+      accessorKey: "nome",
+      header: "Nome",
+    },
+    {
+      accessorKey: "descricao",
+      header: "Descrição",
     },
     {
       accessorKey: "idade_minima",
-      header: "Idade Mínima"
+      header: "Idade Mínima",
     },
     {
       accessorKey: "idade_maxima",
-      header: "Idade Máxima"
+      header: "Idade Máxima",
     },
     {
       accessorKey: "prazo_minimo",
-      header: "Prazo Mínimo"
+      header: "Prazo Mínimo",
     },
     {
       accessorKey: "prazo_maximo",
-      header: "Prazo Máximo"
+      header: "Prazo Máximo",
     },
     {
       accessorKey: "valor_bruto_minimo",
       header: "Valor Bruto Mín.",
-      cell: ({ row }) => <span>R$ {parseFloat(row.original.valor_bruto_minimo).toFixed(2)}</span>
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.valor_bruto_minimo).toFixed(2)}</span>,
     },
     {
       accessorKey: "valor_bruto_maximo",
       header: "Valor Bruto Máx.",
-      cell: ({ row }) => <span>R$ {parseFloat(row.original.valor_bruto_maximo).toFixed(2)}</span>
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.valor_bruto_maximo).toFixed(2)}</span>,
     },
     {
-      accessorKey: "margem_minima",
-      header: "Margem Mín.",
-      cell: ({ row }) => <span>{row.original.margem_minima}%</span>
+      accessorKey: "taxa_minima",
+      header: "Taxa Mínima",
+      cell: ({ row }) => <span>{row.original.taxa_minima}%</span>,
     },
     {
-      accessorKey: "margem_maxima",
-      header: "Margem Máx.",
-      cell: ({ row }) => <span>{row.original.margem_maxima}%</span>
+      accessorKey: "taxa_maxima",
+      header: "Taxa Máxima",
+      cell: ({ row }) => <span>{row.original.taxa_maxima}%</span>,
     },
     {
-      accessorKey: "margem_seguranca",
-      header: "Margem Segurança",
-      cell: ({ row }) => <span>{row.original.margem_seguranca}%</span>
+      accessorKey: "usa_margem_seguranca",
+      header: "Usa Margem Segurança",
+      cell: ({ row }) => <span>{row.original.usa_margem_seguranca ? "Sim" : "Não"}</span>,
     },
     {
-      id: "actions",
-      header: "Ações",
-      cell: ({ row }) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setSelectedRoteiro(row.original);
-            updateForm.setValue("rotina_operacional_hash", row.original.rotina_operacional_hash);
-            updateForm.setValue("valor_bruto_minimo", row.original.valor_bruto_minimo);
-            updateForm.setValue("valor_bruto_maximo", row.original.valor_bruto_maximo);
-            setIsUpdateModalOpen(true);
-          }}
-        >
-          Editar
-        </Button>
-      )
-    }
+      accessorKey: "tac_min",
+      header: "TAC Mínima",
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.tac_min).toFixed(2)}</span>,
+    },
+    {
+      accessorKey: "tac_max",
+      header: "TAC Máxima",
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.tac_max).toFixed(2)}</span>,
+    },
+    {
+      accessorKey: "usa_limite_proposta",
+      header: "Usa Limite Proposta",
+      cell: ({ row }) => <span>{row.original.usa_limite_proposta ? "Sim" : "Não"}</span>,
+    },
+    {
+      accessorKey: "quantidade_propostas_ativas",
+      header: "Propostas Ativas",
+    },
   ];
 
   const table = useReactTable({
     data: roteiros,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
   });
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Gerenciamento de Roteiros Operacionais</h1>
-
-      <Card className="mb-8 border-0 shadow-lg rounded-xl bg-gray-50">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-700">Cadastrar Novo Roteiro</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <FormProvider {...createForm}>
-            <Form {...createForm}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={createForm.control}
-                  name="convenio_hash"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Convênio</FormLabel>
-                      <FormControl>
-                        <Combobox
-                          data={convenios}
-                          displayField="nome"
-                          value={convenios.find((c) => c.id === field.value) || null}
-                          onChange={(option: Option | null) => {
-                            field.onChange(option ? option.id : "");
-                          }}
-                          searchFields={["nome"]}
-                          placeholder="Selecione um Convênio"
-                          /* @ts-ignore */
-                          className="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="idade_minima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Idade Mínima</FormLabel>
-                      <FormControl>
-                        <Input placeholder="18" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="idade_maxima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Idade Máxima</FormLabel>
-                      <FormControl>
-                        <Input placeholder="65" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="prazo_minimo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Prazo Mínimo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="6" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="prazo_maximo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Prazo Máximo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="36" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="valor_bruto_minimo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Valor Bruto Mínimo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="500.00" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="valor_bruto_maximo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Valor Bruto Máximo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="15500.50" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="margem_minima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Margem Mínima</FormLabel>
-                      <FormControl>
-                        <Input placeholder="20" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="margem_maxima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Margem Máxima</FormLabel>
-                      <FormControl>
-                        <Input placeholder="25" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="margem_seguranca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Margem de Segurança</FormLabel>
-                      <FormControl>
-                        <Input placeholder="50" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="mt-8 flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => createForm.reset()}
-                  className="rounded-md border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Limpar
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={createForm.handleSubmit(onCreateSubmit)}
-                  disabled={loading}
-                  className="rounded-md text-white transition-colors"
-                >
-                  {loading ? "Salvando..." : "Cadastrar Roteiro"}
-                </Button>
-              </div>
-            </Form>
-          </FormProvider>
-        </CardContent>
-      </Card>
-
+      <div className="mb-8">
+        <Button onClick={() => setIsModalOpen(true)} className="rounded-md text-white transition-colors">
+          Cadastrar Roteiro
+        </Button>
+      </div>
       <Card className="border-0 shadow-lg rounded-xl bg-gray-50">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-gray-700">Roteiros Operacionais</CardTitle>
@@ -540,64 +611,11 @@ export default function RoteiroOperacionalPage() {
           </Table>
         </CardContent>
       </Card>
-
-      <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-700">Atualizar Roteiro Operacional</DialogTitle>
-          </DialogHeader>
-          <FormProvider {...updateForm}>
-            <Form {...updateForm}>
-              <div className="space-y-6">
-                <FormField
-                  control={updateForm.control}
-                  name="valor_bruto_minimo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Valor Bruto Mínimo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="500.01" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={updateForm.control}
-                  name="valor_bruto_maximo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Valor Bruto Máximo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="25500.50" {...field} className="rounded-md border-gray-300" />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="mt-6 flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsUpdateModalOpen(false)}
-                  className="rounded-md border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={updateForm.handleSubmit(onUpdateSubmit)}
-                  disabled={loading}
-                  className="rounded-md text-white transition-colors"
-                >
-                  {loading ? "Atualizando..." : "Atualizar"}
-                </Button>
-              </div>
-            </Form>
-          </FormProvider>
-        </DialogContent>
-      </Dialog>
+      <CadastroRoteiroModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={onCreateSubmit}
+      />
     </div>
   );
 }
