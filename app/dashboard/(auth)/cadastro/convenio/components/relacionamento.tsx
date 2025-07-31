@@ -119,7 +119,7 @@ export default function RelacaoProdutoConvenio({ convenio }: Props) {
   }
 
   return (
-    <Card className="mx-auto max-w-4xl p-4">
+    <Card>
       <CardHeader>
         <CardTitle>Relacionar Produto</CardTitle>
       </CardHeader>
