@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -215,10 +216,16 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
+          className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Editar Roteiro</CardTitle>
+              <div className="flex justify-between">
+                <CardTitle>Editar Roteiro</CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
