@@ -119,7 +119,7 @@ export default function RelacaoProdutoConvenio({ convenio }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="m-6">
       <CardHeader>
         <CardTitle>Relacionar Produto</CardTitle>
       </CardHeader>
