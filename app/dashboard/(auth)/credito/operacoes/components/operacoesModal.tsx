@@ -648,7 +648,7 @@ export default function OperacoesDetalhes({ Proposta }: PropostaDetalhesProps) {
           <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
           <p className="text-muted-foreground mt-1">ID: {formData.id}</p>
         </div>
-       <Button onClick={() => router.back()} variant="outline" size="sm">
+      <Button onClick={() => router.back()} variant="outline" size="sm">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Voltar
       </Button>

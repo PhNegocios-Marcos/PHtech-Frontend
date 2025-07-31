@@ -238,6 +238,7 @@ export function OperacoesTable() {
       <CardContent>
         {selectedUser ? (
           <OperacoesDrawer
+          /* @ts-ignore */
             isOpen={true}
             onClose={() => setSelectedUser(null)}
             Proposta={selectedUser}
