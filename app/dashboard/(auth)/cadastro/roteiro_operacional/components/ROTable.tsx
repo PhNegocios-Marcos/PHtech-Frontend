@@ -214,11 +214,12 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Usuários</CardTitle>
+        <CardTitle>RO</CardTitle>
       </CardHeader>
       <CardContent>
         {selectedRO ? (
           <ModalRO
+            roteiro={selectedRO} // Passe o roteiro selecionado
             onClose={() => setSelectedRO(null)}
             onRefresh={handleRefresh}
           />

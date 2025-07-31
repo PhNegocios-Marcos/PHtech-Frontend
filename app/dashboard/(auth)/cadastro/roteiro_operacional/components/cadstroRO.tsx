@@ -161,7 +161,6 @@ export default function CadastroRoteiroModal({
   ];
 
   const onSubmit = async (data: CreateFormData) => {
-    console.log("ola mundo");
     try {
       // Transformar os dados para o formato esperado pela API
       const payload = {
@@ -303,9 +302,6 @@ export default function CadastroRoteiroModal({
                 </button>
               </div>
               <Card className="flex-grow overflow-auto">
-                <CardHeader>
-                  <CardTitle>Dados do Roteiro Operacional</CardTitle>
-                </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {formFields.map(renderFormField)}

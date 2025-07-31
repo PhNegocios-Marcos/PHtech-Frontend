@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import RoteiroOperacionalTable from "./components/cadstroRO";
+import RoteiroOperacionalTable from "./components/ROTable";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
-import CadastroRoteiroModal from "./components/ROTable";
+import CadastroRoteiroModal from "./components/cadstroRO";
 import CampoBoasVindas from "@/components/boasvindas";
 
 export default function RoteiroOperacionalPage() {
@@ -25,9 +25,9 @@ export default function RoteiroOperacionalPage() {
         )}
       </div>
 
-      <RoteiroOperacionalTable onSuccess={handleCloseModal} isOpen={isModalOpen} onClose={handleCloseModal} />
+      <RoteiroOperacionalTable  isOpen={isModalOpen} onClose={handleCloseModal} />
 
-      <CadastroRoteiroModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <CadastroRoteiroModal onSuccess={handleCloseModal} isOpen={isModalOpen} onClose={handleCloseModal} />
     </ProtectedRoute>
   );
 }
