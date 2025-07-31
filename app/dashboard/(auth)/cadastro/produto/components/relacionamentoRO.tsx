@@ -224,15 +224,15 @@ export default function RelRO({ produto, equipes }: Option) {
   });
 
   return (
-    <Card className="p-4">
+    <Card>
       <CardHeader>
         <CardTitle>Relacionar Produto</CardTitle>
       </CardHeader>
 
       <CardContent>
-        <div className="mt-5 mb-5">
+        <div className="">
           {/* Coluna 1 - Convênio */}
-          <div className="space-y-2">
+          <div className="">
             <span className="text-muted-foreground text-sm">Roteiros Operacionais</span>
             <Combobox
               data={equipesDisponiveis}
@@ -259,50 +259,52 @@ export default function RelRO({ produto, equipes }: Option) {
           </p>
         )}
       </CardContent>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => {
-                  const isLast = index === headerGroup.headers.length - 1;
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={`truncate overflow-hidden whitespace-nowrap ${
-                        isLast ? "w-16" : "w-auto"
-                      }`}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
-                  {row.getVisibleCells().map((cell, index) => {
-                    const isLast = index === row.getVisibleCells().length - 1;
+      <CardContent>
+        <div className="rounded-md border px-6">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header, index) => {
+                    const isLast = index === headerGroup.headers.length - 1;
                     return (
-                      <TableCell
-                        key={cell.id}
+                      <TableHead
+                        key={header.id}
                         className={`truncate overflow-hidden whitespace-nowrap ${
                           isLast ? "w-16" : "w-auto"
                         }`}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     );
                   })}
                 </TableRow>
-              ))
-            ) : (
-              <CarregandoTable />
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
+                    {row.getVisibleCells().map((cell, index) => {
+                      const isLast = index === row.getVisibleCells().length - 1;
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={`truncate overflow-hidden whitespace-nowrap ${
+                            isLast ? "w-16" : "w-auto"
+                          }`}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <CarregandoTable />
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
     </Card>
   );
 }

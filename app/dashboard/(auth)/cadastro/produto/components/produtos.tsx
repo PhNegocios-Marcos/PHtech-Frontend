@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroNovoProduto";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import {ModalProduto} from "./ProdutoModal";
+import { ModalProduto } from "./ProdutoModal";
 import {
   Table,
   TableBody,
@@ -18,6 +18,13 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import {
   ColumnDef,
   flexRender,
@@ -31,6 +38,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -98,6 +106,7 @@ export default function Produto({ produto }: Props) {
   const [modalidade, setModalidade] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Option[]>([]);
   const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
@@ -195,25 +204,34 @@ export default function Produto({ produto }: Props) {
     data: produtosRelacionados,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <ModalProduto produto={selectedTaxa} onRefresh={() => setSelectedTaxa(null)} onClose={() => setSelectedTaxa(null)} />
+        <ModalProduto
+          produto={selectedTaxa}
+          onRefresh={() => setSelectedTaxa(null)}
+          onClose={() => setSelectedTaxa(null)}
+        />
       ) : (
         <Card className="">
           <CardHeader>
@@ -221,6 +239,35 @@ export default function Produto({ produto }: Props) {
           </CardHeader>
           <CardContent>
             <>
+              <div className="mb-4 flex items-center gap-2">
+                <Input
+                  placeholder="Filtrar por qualquer campo..."
+                  value={globalFilter}
+                  onChange={(event) => setGlobalFilter(event.target.value)}
+                  className="max-w-sm"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-auto">
+                      Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <div className="mt-10 rounded-md border">
                 <Table>
                   <TableHeader>

@@ -15,6 +15,13 @@ import { CarregandoTable } from "./tabela_carregando";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import CadastroTabelaModal from "./modalNovaTable";
 import { Produto } from "./ProdutoModal";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 import {
   Form,
@@ -33,6 +40,8 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
+
 import {
   ColumnDef,
   flexRender,
@@ -87,7 +96,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
   const [rowSelection, setRowSelection] = useState({});
   const [produtosRelacionados, setProdutosRelacionados] = useState<Produto[]>([]);
   const [selectedCategoria, setSelectedCategoria] = useState<Option | null>(null);
-
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [selectedTaxa, setSelectedTaxa] = useState<Produto | null>(null);
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const [taxa, setTaxa] = useState<Option[]>([]);
@@ -285,18 +294,23 @@ export default function TabelaProduto({ produto, onClose }: Props) {
     data: produtosRelacionados,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase());
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection
+      rowSelection,
+      globalFilter
     }
   });
 
@@ -317,6 +331,36 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         </CardHeader>
 
         <CardContent>
+          <div className="mb-4 flex items-center gap-2">
+            <Input
+              placeholder="Filtrar por qualquer campo..."
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <div className="mt-10 rounded-md border">
             <Table>
               <TableHeader>
@@ -371,7 +415,11 @@ export default function TabelaProduto({ produto, onClose }: Props) {
           </div>
         </CardContent>
       </Card>
-      <CadastroTabelaModal produto={produto} isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <CadastroTabelaModal
+        produto={produto}
+        isOpen={isCadastroOpen}
+        onClose={handleCloseCadastro}
+      />
     </div>
   );
 }
