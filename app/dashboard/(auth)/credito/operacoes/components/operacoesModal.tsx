@@ -1,10 +1,65 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, FileText, PenTool, History, Info, Calculator, X, ArrowRight } from "lucide-react";
+import { CheckCircle, Clock, FileText, PenTool, History, Info, Calculator, ArrowLeft, ArrowRight } from "lucide-react";
+
+// Function to format any number or string into Brazilian Reais (BRL)
+const formatToBRL = (value: number | string | null | undefined): string => {
+  if (value == null) {
+    return "R$ 0,00";
+  }
+  let cleanedValue = String(value).replace(/[^\d.,-]/g, "");
+  cleanedValue = cleanedValue.replace(",", ".");
+  const numericValue = parseFloat(cleanedValue.replace(/\.+/g, ".")) || 0;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
+// Function to format date from YYYY-MM-DD HH:MM:SS to DD/MM/YYYY HH:MM:SS
+const formatToBrazilianDate = (date: string | null | undefined): string => {
+  if (!date) {
+    return "N/A";
+  }
+  try {
+    const dateTime = new Date(date);
+    if (isNaN(dateTime.getTime())) {
+      return "Data inválida";
+    }
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(dateTime);
+  } catch {
+    return "Data inválida";
+  }
+};
+
+// Function to format CPF or CNPJ based on length
+const formatCpfOrCnpj = (value: string | null | undefined): string => {
+  if (!value) {
+    return "N/A";
+  }
+  const cleanedValue = value.replace(/\D/g, "");
+  if (cleanedValue.length === 11) {
+    return cleanedValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  } else if (cleanedValue.length === 14) {
+    return cleanedValue.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+  }
+  return cleanedValue;
+};
 
 type Proposta = {
   id: string;
@@ -20,9 +75,7 @@ type Proposta = {
   Tabela: string;
 };
 
-type PropostaDrawerProps = {
-  isOpen: boolean;
-  onClose: () => void;
+type PropostaDetalhesProps = {
   Proposta: Proposta | null;
 };
 
@@ -82,8 +135,8 @@ const ProcessStepper = () => {
 
 // Enhanced Components
 const Informacoes = ({ proposta }: { proposta: Proposta }) => (
-  <div className="space-y-6">
-    <Card>
+  <div className="space-y-6 w-full">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Info className="w-5 h-5" />
@@ -91,17 +144,19 @@ const Informacoes = ({ proposta }: { proposta: Proposta }) => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {[
             { label: "Produto", value: proposta.Produto },
             { label: "Modo de Liquidação", value: "Débito em Conta" },
             { label: "Tomador", value: proposta.Tomador },
-            { label: "Tipo de Liquidação", value: "Automática" },
+            { label: "CPF/CNPJ", value: formatCpfOrCnpj(proposta.CPF) },
             { label: "Conta de Liquidação", value: "123456-7 / Banco XYZ" },
             { label: "Código IPOC", value: "IPOC-2025-001" },
+            { label: "Valor", value: formatToBRL(proposta.Valor) },
+            { label: "Data de Início", value: formatToBrazilianDate(proposta.Data) },
             { label: "Observações", value: "Nenhuma observação adicional" },
           ].map((item, index) => (
-            <div key={index} className="space-y-2">
+            <div key={index} className="space-y-2 w-full">
               <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
               <p className="text-lg font-medium">{item.value}</p>
             </div>
@@ -113,8 +168,8 @@ const Informacoes = ({ proposta }: { proposta: Proposta }) => (
 );
 
 const Operacao = () => (
-  <div className="space-y-8">
-    <Card>
+  <div className="space-y-8 w-full">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Calculator className="w-5 h-5" />
@@ -122,7 +177,7 @@ const Operacao = () => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {[
             { label: "Valor da Parcela", value: "R$ 290,00", highlight: true },
             { label: "Taxa de Juros A.M.", value: "4,9900%", highlight: true },
@@ -135,7 +190,7 @@ const Operacao = () => (
             { label: "CORBAN", value: "0,00000000" },
             { label: "Ajustar Vencimentos", value: "Dias Úteis" },
           ].map((item, index) => (
-            <div key={index} className={`p-4 rounded-lg border ${item.highlight ? "bg-secondary" : "bg-muted"}`}>
+            <div key={index} className={`p-4 rounded-lg border ${item.highlight ? "bg-secondary" : "bg-muted"} w-full`}>
               <p className="text-sm font-medium text-muted-foreground mb-1">{item.label}</p>
               <p className={`text-lg ${item.highlight ? "font-bold" : "font-semibold"}`}>{item.value}</p>
             </div>
@@ -143,7 +198,7 @@ const Operacao = () => (
         </div>
       </CardContent>
     </Card>
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <ArrowRight className="w-5 h-5" />
@@ -151,7 +206,7 @@ const Operacao = () => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {[
             { label: "Data de Emissão", value: "30/07/2025" },
             { label: "Data de Vencimento", value: "21/09/2028" },
@@ -164,7 +219,7 @@ const Operacao = () => (
             { label: "Valor Futuro", value: "R$ 10.440,00", highlight: true },
             { label: "CET A.A.", value: "107,1710%", highlight: true },
           ].map((item, index) => (
-            <div key={index} className={`p-4 rounded-lg border ${item.highlight ? "bg-secondary" : "bg-muted"}`}>
+            <div key={index} className={`p-4 rounded-lg border ${item.highlight ? "bg-secondary" : "bg-muted"} w-full`}>
               <p className="text-sm font-medium text-muted-foreground mb-1">{item.label}</p>
               <p className={`text-lg ${item.highlight ? "font-bold" : "font-semibold"}`}>{item.value}</p>
             </div>
@@ -172,12 +227,12 @@ const Operacao = () => (
         </div>
       </CardContent>
     </Card>
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">Detalhes das Parcelas</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">
@@ -223,8 +278,8 @@ const Operacao = () => (
 );
 
 const Documentos = () => (
-  <div className="space-y-8">
-    <Card>
+  <div className="space-y-8 w-full">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <FileText className="w-5 h-5" />
@@ -232,7 +287,7 @@ const Documentos = () => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">
@@ -319,7 +374,7 @@ const Documentos = () => (
         </div>
       </CardContent>
     </Card>
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <FileText className="w-5 h-5" />
@@ -334,7 +389,7 @@ const Documentos = () => (
 );
 
 const Assinaturas = () => (
-  <Card>
+  <Card className="w-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <PenTool className="w-5 h-5" />
@@ -342,7 +397,7 @@ const Assinaturas = () => (
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto w-full">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted">
@@ -382,7 +437,7 @@ const Assinaturas = () => (
 );
 
 const Historico = () => (
-  <Card>
+  <Card className="w-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <History className="w-5 h-5" />
@@ -390,9 +445,8 @@ const Historico = () => (
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="space-y-6">
-        {/* Summary Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {[
             { label: "Correspondente", value: "PH Negócios" },
             { label: "Operador", value: "PhNegociosAPI" },
@@ -400,14 +454,13 @@ const Historico = () => (
             { label: "Data da Última Atualização", value: "30/07/2025" },
             { label: "Última Atualização Feita Por", value: "PhNegociosAPI" },
           ].map((item, index) => (
-            <div key={index} className="space-y-2">
+            <div key={index} className="space-y-2 w-full">
               <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
               <p className="text-lg font-medium">{item.value}</p>
             </div>
           ))}
         </div>
-        {/* Timeline */}
-        <div className="relative">
+        <div className="relative w-full">
           <div className="absolute left-3 top-0 w-0.5 h-full bg-border" />
           {[
             {
@@ -460,7 +513,7 @@ const Historico = () => (
               status: "failed",
             },
           ].map((item, index) => (
-            <div key={index} className="relative flex items-start gap-4 mb-6">
+            <div key={index} className="relative flex items-start gap-4 mb-6 w-full">
               <div
                 className={`absolute w-6 h-6 rounded-full flex items-center justify-center left-0 mt-1 ${
                   item.status === "completed" ? "bg-primary" : "bg-destructive"
@@ -468,7 +521,7 @@ const Historico = () => (
               >
                 <CheckCircle className="w-4 h-4 text-primary-foreground" />
               </div>
-              <div className="ml-10">
+              <div className="ml-10 w-full">
                 <p className="text-lg font-semibold">{item.event}</p>
                 <p className="text-sm text-muted-foreground">{item.description}</p>
                 <p className="text-sm text-muted-foreground mt-1">Iniciado: {item.iniciado}</p>
@@ -490,12 +543,13 @@ const sections = [
   { id: "historico", label: "Histórico", component: Historico, icon: History },
 ];
 
-export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaDrawerProps) {
+export default function OperacoesDetalhes({ Proposta }: PropostaDetalhesProps) {
   const [formData, setFormData] = useState<Proposta | null>(null);
   const [activeSection, setActiveSection] = useState<string>("informacoes");
   const [progress, setProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const router = useRouter();
 
   // Mock data for demonstration
   const mockProposta: Proposta = {
@@ -504,31 +558,25 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
     Operação: "Crédito Pessoal",
     Produto: "Empréstimo",
     Tomador: "Tiago Silva Oliveira",
-    CPF: "123.456.789-00",
-    Valor: "R$ 3.702,74",
-    Data: "30/07/2025",
+    CPF: "12345678901",
+    Valor: "3702.74",
+    Data: "2025-07-30 15:23:20",
     status: 2,
     roteiro: "Análise",
     Tabela: "Tabela A",
   };
 
   useEffect(() => {
-    if (isOpen) {
-      setFormData(Proposta || mockProposta);
-      setActiveSection("informacoes"); // Reset to first section when drawer opens
-    } else {
-      setActiveSection("informacoes"); // Reset when drawer closes
-      setProgress(0);
-    }
-  }, [Proposta, isOpen]);
+    setFormData(Proposta || mockProposta);
+    setActiveSection("informacoes");
+    setProgress(0);
+  }, [Proposta]);
 
   useEffect(() => {
-    if (!isOpen) return;
-
     const observerOptions = {
       root: containerRef.current,
-      rootMargin: "-50% 0px -50% 0px", // Trigger when section is near the center of the viewport
-      threshold: [0, 0.1, 0.5, 0.9, 1], // Multiple thresholds for smoother transitions
+      rootMargin: "-50% 0px -50% 0px",
+      threshold: [0, 0.1, 0.5, 0.9, 1],
     };
 
     const observer = new IntersectionObserver(
@@ -541,7 +589,6 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
             const rect = entry.target.getBoundingClientRect();
             const topPosition = rect.top;
 
-            // Select the section closest to the top of the container
             if (topPosition < minTop && entry.intersectionRatio >= 0.5) {
               minTop = topPosition;
               topmostSection = entry.target.id;
@@ -569,23 +616,21 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
         if (section) observer.unobserve(section);
       });
     };
-  }, [isOpen, activeSection]);
+  }, [activeSection]);
 
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current[sectionId];
     if (element && containerRef.current) {
       const container = containerRef.current;
-      const offset = 120;
-      const elementPosition = element.getBoundingClientRect().top;
-      const containerPosition = container.getBoundingClientRect().top;
-      const offsetPosition = elementPosition - containerPosition + container.scrollTop - offset;
+      const offset = 120; // Adjust this value based on your header height
+      const elementPosition = element.getBoundingClientRect().top + container.scrollTop;
+      const offsetPosition = elementPosition - offset;
 
       container.scrollTo({
         top: offsetPosition,
         behavior: "smooth",
       });
 
-      // Update active section immediately on click
       setActiveSection(sectionId);
       const sectionIndex = sections.findIndex((s) => s.id === sectionId);
       const newProgress = ((sectionIndex + 1) / sections.length) * 100;
@@ -593,100 +638,96 @@ export default function OperacoesDrawer({ isOpen, onClose, Proposta }: PropostaD
     }
   };
 
-  if (!isOpen || !formData) return null;
+  if (!formData) return null;
 
   return (
-    <div className="fixed inset-0 bg-background z-50">
-      <div className="h-full flex max-w-7xl mx-auto bg-background shadow-lg">
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
-            <div>
-              <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
-              <p className="text-muted-foreground mt-1">ID: {formData.id}</p>
-            </div>
-            <Button onClick={onClose} variant="outline" size="sm">
-              <X className="w-4 h-4 mr-2" />
-              Fechar
-            </Button>
-          </div>
-          {/* Process Stepper */}
-          <div className="px-6 py-6">
+    <div className="w-full h-screen py-6 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b px-6 py-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
+          <p className="text-muted-foreground mt-1">ID: {formData.id}</p>
+        </div>
+       <Button onClick={() => router.back()} variant="outline" size="sm">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Voltar
+      </Button>
+      </div>
+      {/* Main Content */}
+      <div className="flex h-[calc(100%-120px)]">
+        {/* Scrollable Content */}
+        <div ref={containerRef} className="flex-1 px-8 pb-16 overflow-y-auto" style={{ scrollBehavior: "smooth" }}>
+          <div className="py-6">
             <ProcessStepper />
           </div>
-          {/* Content */}
-          <div ref={containerRef} className="flex-1 overflow-y-auto px-8 pb-16" style={{ scrollBehavior: "smooth" }}>
-            <div className="space-y-20 py-10">
-              {sections.map((section) => (
-                /* @ts-ignore */
-                <section key={section.id} ref={(el) => (sectionRefs.current[section.id] = el)} id={section.id} className="scroll-mt-28">
-                  <div className="flex items-center gap-3 mb-6 pb-3 border-b">
-                    <section.icon className="w-6 h-6" />
-                    <h3 className="text-2xl font-bold">{section.label}</h3>
-                  </div>
-                  <div className="space-y-8">
-                    <section.component proposta={formData} />
-                  </div>
-                </section>
-              ))}
-            </div>
+          <div className="space-y-20 py-10">
+            {sections.map((section) => (
+              /* @ts-ignore */
+              <section key={section.id} ref={(el) => (sectionRefs.current[section.id] = el)} id={section.id} className="scroll-mt-28">
+                <div className="flex items-center gap-3 mb-6 pb-3 border-b">
+                  <section.icon className="w-6 h-6" />
+                  <h3 className="text-2xl font-bold">{section.label}</h3>
+                </div>
+                <div className="space-y-8 w-full">
+                  <section.component proposta={formData} />
+                </div>
+              </section>
+            ))}
           </div>
         </div>
         {/* Timeline Navigation */}
-        <div className="w-80 border-l">
-          <div className="sticky top-0 p-8">
-            {/* Progress Header */}
-            <div className="mb-8">
-              <h4 className="text-sm font-bold text-muted-foreground mb-3 uppercase tracking-wide">
-                Progresso da Navegação
-              </h4>
-              <div className="w-full bg-muted rounded-full h-2.5 mb-2">
-                <div
-                  className="bg-primary h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
+        <div className="w-80 border-l h-full">
+          <div className="sticky top-6 p-8 h-full flex flex-col justify-between">
+            <div>
+              <div className="mb-8">
+                <h4 className="text-sm font-bold text-muted-foreground mb-3 uppercase tracking-wide">
+                  Progresso da Navegação
+                </h4>
+                <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+                  <div
+                    className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">{Math.round(progress)}% concluído</p>
               </div>
-              <p className="text-xs text-muted-foreground">{Math.round(progress)}% concluído</p>
-            </div>
-            {/* Navigation */}
-            <nav className="space-y-3">
-              {sections.map((section, index) => {
-                const Icon = section.icon;
-                const isActive = activeSection === section.id;
-                const isCompleted = sections.findIndex((s) => s.id === activeSection) > index;
-                return (
-                  <div key={section.id} className="relative">
-                    {index !== sections.length - 1 && (
-                      <div
-                        className={`absolute left-6 top-14 w-0.5 h-10 transition-all duration-300 ${
-                          isCompleted || isActive ? "bg-primary" : "bg-border"
-                        }`}
-                      />
-                    )}
-                    <button
-                      onClick={() => scrollToSection(section.id)}
-                      className={`flex items-center w-full text-left px-4 py-4 rounded-lg text-sm transition-all duration-300 ${
-                        isActive ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <div className="relative">
+              <nav className="space-y-3 flex-1">
+                {sections.map((section, index) => {
+                  const Icon = section.icon;
+                  const isActive = activeSection === section.id;
+                  const isCompleted = sections.findIndex((s) => s.id === activeSection) > index;
+                  return (
+                    <div key={section.id} className="relative">
+                      {index !== sections.length - 1 && (
                         <div
-                          className={`w-5 h-5 rounded-full flex items-center justify-center mr-4 transition-all duration-300 ${
-                            isActive ? "bg-primary-foreground/20" : isCompleted ? "bg-primary text-primary-foreground" : "bg-muted"
+                          className={`absolute left-6 top-14 w-0.5 h-10 transition-all duration-300 ${
+                            isCompleted || isActive ? "bg-primary" : "bg-border"
                           }`}
-                        >
-                          {isCompleted ? <CheckCircle className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
+                        />
+                      )}
+                      <button
+                        onClick={() => scrollToSection(section.id)}
+                        className={`flex items-center w-full text-left px-4 py-4 rounded-lg text-sm transition-all duration-300 ${
+                          isActive ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <div className="relative">
+                          <div
+                            className={`w-5 h-5 rounded-full flex items-center justify-center mr-4 transition-all duration-300 ${
+                              isActive ? "bg-primary-foreground/20" : isCompleted ? "bg-primary text-primary-foreground" : "bg-muted"
+                            }`}
+                          >
+                            {isCompleted ? <CheckCircle className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
+                          </div>
                         </div>
-                      </div>
-                      <span className="flex-1 font-medium">{section.label}</span>
-                      {isActive && <ArrowRight className="w-4 h-4 ml-2" />}
-                    </button>
-                  </div>
-                );
-              })}
-            </nav>
-            {/* Action Buttons */}
+                        <span className="flex-1 font-medium">{section.label}</span>
+                        {isActive && <ArrowRight className="w-4 h-4 ml-2" />}
+                      </button>
+                    </div>
+                  );
+                })}
+              </nav>
+            </div>
             <div className="mt-8 space-y-3">
               <Button className="w-full">
                 <CheckCircle className="w-4 h-4 mr-2" />

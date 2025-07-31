@@ -37,7 +37,63 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
-import  OperacoesDrawer from "./operacoesModal";
+import OperacoesDrawer from "./operacoesModal";
+
+// Function to format any number or string into Brazilian Reais (BRL)
+const formatToBRL = (value: number | string | null | undefined): string => {
+  if (value == null) {
+    return "R$ 0,00";
+  }
+  let cleanedValue = String(value).replace(/[^\d.,-]/g, "");
+  cleanedValue = cleanedValue.replace(",", ".");
+  const numericValue = parseFloat(cleanedValue.replace(/\.+/g, ".")) || 0;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
+// Function to format date from YYYY-MM-DD HH:MM:SS to DD/MM/YYYY HH:MM:SS
+const formatToBrazilianDate = (date: string | null | undefined): string => {
+  if (!date) {
+    return "N/A";
+  }
+  try {
+    const dateTime = new Date(date);
+    if (isNaN(dateTime.getTime())) {
+      return "Data inválida";
+    }
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(dateTime);
+  } catch {
+    return "Data inválida";
+  }
+};
+
+// Function to format CPF or CNPJ based on length
+const formatCpfOrCnpj = (value: string | null | undefined): string => {
+  if (!value) {
+    return "N/A";
+  }
+  const cleanedValue = value.replace(/\D/g, ""); // Remove non-digits
+  if (cleanedValue.length === 11) {
+    // CPF: 123.456.789-01
+    return cleanedValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  } else if (cleanedValue.length === 14) {
+    // CNPJ: 12.345.678/0001-90
+    return cleanedValue.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+  }
+  return cleanedValue; // Return unformatted if not CPF or CNPJ
+};
 
 type Proposta = {
   id: string;
@@ -69,9 +125,21 @@ export function OperacoesTable() {
     { accessorKey: "Operação", header: "Operação" },
     { accessorKey: "Produto", header: "Produto" },
     { accessorKey: "Tomador", header: "Tomador" },
-    { accessorKey: "CPF", header: "CPF/CNPJ" },
-    { accessorKey: "Valor", header: "Valor principal" },
-    { accessorKey: "Data", header: "Data de início" },
+    {
+      accessorKey: "CPF",
+      header: "CPF/CNPJ",
+      cell: ({ row }) => <span>{formatCpfOrCnpj(row.original.CPF)}</span>,
+    },
+    {
+      accessorKey: "Valor",
+      header: "Valor principal",
+      cell: ({ row }) => <span>{formatToBRL(row.original.Valor)}</span>,
+    },
+    {
+      accessorKey: "Data",
+      header: "Data de início",
+      cell: ({ row }) => <span>{formatToBrazilianDate(row.original.Data)}</span>,
+    },
     { accessorKey: "status", header: "Status" },
     { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
     // { accessorKey: "Tabela", header: "Tabela" },
@@ -146,9 +214,12 @@ export function OperacoesTable() {
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
-      return String(row.getValue(columnId))
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
+      // Adjust global filter to handle formatted values
+      const value = columnId === "CPF" ? formatCpfOrCnpj(row.getValue(columnId)) :
+                    columnId === "Valor" ? formatToBRL(row.getValue(columnId)) :
+                    columnId === "Data" ? formatToBrazilianDate(row.getValue(columnId)) :
+                    String(row.getValue(columnId));
+      return value.toLowerCase().includes(String(filterValue).toLowerCase());
     },
     state: {
       sorting,
@@ -214,7 +285,7 @@ export function OperacoesTable() {
                           <TableHead
                             key={header.id}
                             className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                              isLast ? "w-16" : "w-auto"
                             }`}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </TableHead>
@@ -236,7 +307,7 @@ export function OperacoesTable() {
                             <TableCell
                               key={cell.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>
