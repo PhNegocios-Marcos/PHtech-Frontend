@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./tabela_carregando";
 import CadastroTabelaModal from "./cadastroNovoProduto";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import TabelaProduto from "./tableProduto";
+import {ModalProduto} from "./ProdutoModal";
 import {
   Table,
   TableBody,
@@ -213,11 +213,7 @@ export default function Produto({ produto }: Props) {
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        produto ? (
-          <TabelaProduto produto={produto} onClose={() => setSelectedTaxa(null)} />
-        ) : (
-          <p>Nenhum produto selecionado</p>
-        )
+        <ModalProduto produto={selectedTaxa} onRefresh={() => setSelectedTaxa(null)} onClose={() => setSelectedTaxa(null)} />
       ) : (
         <Card className="">
           <CardHeader>

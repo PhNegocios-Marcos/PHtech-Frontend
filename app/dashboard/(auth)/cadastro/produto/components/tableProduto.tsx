@@ -11,9 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CarregandoTable } from "./leads_carregando";
+import { CarregandoTable } from "./tabela_carregando";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import CadastroTabelaModal from "./modalNovaTable";
+import { Produto } from "./ProdutoModal";
 
 import {
   Form,
@@ -52,23 +53,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 type Option = {
   id: string;
   nome: string;
-};
-
-export type Produto = {
-  id: string;
-  nome: string;
-  status: number;
-  idade_minima: number;
-  idade_maxima: number;
-  prazo_minimo: number;
-  prazo_maximo: number;
-  id_uy3: string | null;
-  cor_grafico: string | null;
-  config_tabela_hash: string;
-  usuario_atualizacao: string;
-  tabela_hash: string;
-  status_relacionamento: any;
-  relacionamento_hash: any;
 };
 
 export type Props = {
@@ -317,7 +301,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
   });
 
   return (
-    <div className="space-y-6 p-6">
+    <div>
       <Card className="">
         <CardHeader>
           <div className="flex flex-row justify-between">
@@ -327,9 +311,6 @@ export default function TabelaProduto({ produto, onClose }: Props) {
             <div className="flex gap-3">
               <Button id="" onClick={() => setIsCadastroOpen(true)}>
                 Nova Tabela
-              </Button>
-              <Button onClick={onClose} variant="outline">
-                Voltar
               </Button>
             </div>
           </div>
