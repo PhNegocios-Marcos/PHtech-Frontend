@@ -150,7 +150,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
   }
 
   return (
-    <Card className="mx-auto max-w-4xl p-4">
+    <Card className="py-6 m-6">
       <CardHeader>
         <CardTitle>Relacionar Produto</CardTitle>
       </CardHeader>

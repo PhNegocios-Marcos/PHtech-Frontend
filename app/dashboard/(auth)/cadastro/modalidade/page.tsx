@@ -30,7 +30,7 @@ export default function Page() {
       </div>
 
       {/* Exibe a tabela somente se modal de cadastro e detalhe não estiverem abertos */}
-      {!isCadastroOpen && !produtoSelecionado && (
+      {!produtoSelecionado && (
         <ProdutosTable onSelectProduto={(produto) => setProdutoSelecionado(produto)} />
       )}
 

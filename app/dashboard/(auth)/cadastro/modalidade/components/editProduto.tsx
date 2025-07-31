@@ -28,7 +28,6 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
         <TabsList>
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="relacionamento">Relacionamento</TabsTrigger>
-          <TabsTrigger value="Tabela">Tabela</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -41,10 +40,6 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
 
         <TabsContent value="relacionamento">
           <RelacionamentoProduto produto={produto} onClose={() => console.log("Fechar aba")} />
-        </TabsContent>
-
-        <TabsContent value="Tabela">
-          <TabelaProduto produto={produto} onClose={() => console.log("Fechar aba")}/>
         </TabsContent>
       </Tabs>
     </div>
