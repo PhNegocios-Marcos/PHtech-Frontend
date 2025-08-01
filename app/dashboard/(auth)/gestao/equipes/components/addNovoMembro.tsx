@@ -53,9 +53,10 @@ type UsuarioComStatus = Usuario & {
 
 type UsuariosTableProps = {
   equipeNome: string;
+  onClose: () => void;
 };
 
-export function NovoMembro({ equipeNome }: UsuariosTableProps) {
+export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
   const [usuarios, setUsuarios] = useState<UsuarioComStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
@@ -188,7 +189,7 @@ export function NovoMembro({ equipeNome }: UsuariosTableProps) {
             type="checkbox"
             checked={checked}
             onChange={() => handleCheckboxChange(user)}
-            className="h-5 w-5 rounded border-gray-300 accent-primary"
+            className="accent-primary h-5 w-5 rounded border-gray-300"
           />
         );
       }
@@ -207,7 +208,16 @@ export function NovoMembro({ equipeNome }: UsuariosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Usuários da Equipe {equipeNome}</CardTitle>
+        <CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Equipe: <span className="text-primary">{equipeNome}</span>
+            </CardTitle>
+            <Button onClick={onClose} variant="outline">
+              Voltar
+            </Button>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">

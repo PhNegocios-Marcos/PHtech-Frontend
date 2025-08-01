@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { EquipeEditForm } from "./editEquipe";
 import { UsuariosPorEquipeTable } from "./listaPromotoras";
-import { NovoMembro } from "./addNovoMembro"
+import { NovoMembro } from "./addNovoMembro";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
@@ -40,13 +40,6 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
 
   return (
     <div className="w-full space-y-4 px-6">
-      <div className="flex items-center justify-between border-b pb-4">
-        <h2 className="text-2xl font-semibold">Detalhes da Equipe</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
-
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>
@@ -63,7 +56,7 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
         </TabsContent>
 
         <TabsContent value="ADD_novo_members">
-          <NovoMembro equipeNome={formData.nome} />
+          <NovoMembro equipeNome={formData.nome} onClose={onClose} />
         </TabsContent>
       </Tabs>
     </div>

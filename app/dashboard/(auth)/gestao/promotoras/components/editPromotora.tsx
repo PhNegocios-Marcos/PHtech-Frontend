@@ -88,10 +88,18 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 overflow-y-auto p-6 pt-0">
+          className="grid grid-cols-2 overflow-y-auto pt-6">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Dados da Promotora</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  Dados da Promotora:{" "}
+                  <span className="text-primary">{data.nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3 space-y-4">

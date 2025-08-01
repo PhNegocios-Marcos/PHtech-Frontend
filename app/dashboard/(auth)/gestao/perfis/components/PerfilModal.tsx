@@ -46,13 +46,6 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center justify-between border-b pb-4">
-        <h2 className="text-2xl font-semibold">Detalhes da Equipe</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
-
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>
@@ -65,11 +58,11 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
         </TabsContent>
 
         <TabsContent value="reports">
-          <UsuariosPorEquipeTable equipeNome={formData.nome} />
+          <UsuariosPorEquipeTable onClose={onClose} equipeNome={formData.nome} />
         </TabsContent>
 
         <TabsContent value="activities">
-          <Permissoes equipeNome={formData.nome} perfilId={formData.id} />
+          <Permissoes equipeNome={formData.nome} perfilId={formData.id} onClose={onClose} />
         </TabsContent>
       </Tabs>
     </div>

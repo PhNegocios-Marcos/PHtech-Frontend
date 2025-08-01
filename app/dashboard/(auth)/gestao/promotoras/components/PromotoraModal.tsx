@@ -38,13 +38,6 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
 
   return (
     <aside className="w-full rounded-md bg-white p-4 shadow">
-      <div className="mb-4 flex items-center justify-between border-b pb-4">
-        <h2 className="text-lg font-semibold">Usuários da Promotora</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
-
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>

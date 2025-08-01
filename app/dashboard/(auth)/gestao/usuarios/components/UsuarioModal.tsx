@@ -28,13 +28,6 @@ type UsuarioPerfilProps = {
 export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProps) {
   return (
     <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between border-b pb-2">
-        <h2 className="text-lg font-semibold">Detalhes do Usuário</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
-
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>

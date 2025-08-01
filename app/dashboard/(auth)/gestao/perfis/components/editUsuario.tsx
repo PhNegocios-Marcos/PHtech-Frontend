@@ -11,12 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -85,11 +80,18 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 overflow-y-auto p-6"
-        >
+          className="grid grid-cols-2 gap-4 overflow-y-auto">
           <Card className="col-span-2">
             <CardHeader>
               <CardTitle>Dados do Perfil</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  Dados do Perfil: <span className="text-primary">{perfil?.nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">

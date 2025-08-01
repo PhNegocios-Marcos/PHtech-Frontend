@@ -23,9 +23,10 @@ type PermissaoMapeada = {
 type PermissoesProps = {
   equipeNome: string;
   perfilId: string;
+  onClose: () => void;
 };
 
-export function Permissoes({ equipeNome, perfilId }: PermissoesProps) {
+export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
   const [permissoes, setPermissoes] = useState<PermissaoMapeada>({});
   const [equipeLabel, setEquipeLabel] = useState<string>(equipeNome);
   const { token } = useAuth();
@@ -140,7 +141,14 @@ export function Permissoes({ equipeNome, perfilId }: PermissoesProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Permissões do Perfil: {equipeLabel}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Permissões do Perfil: <span className="text-primary">{equipeLabel}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="overflow-auto">
         <table className="min-w-full border text-sm">

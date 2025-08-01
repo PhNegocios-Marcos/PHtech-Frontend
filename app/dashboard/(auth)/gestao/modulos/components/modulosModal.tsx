@@ -38,12 +38,6 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
 
   return (
     <div className="w-full space-y-4 px-6">
-      <div className="flex items-center justify-between border-b pb-4">
-        <h2 className="text-2xl font-semibold">Detalhes da Modulos</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
 
       <Tabs defaultValue="Informações" className="space-y-4">
         {/* <TabsList>
@@ -52,9 +46,9 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
           <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger>
         </TabsList> */}
 
-        <TabsContent value="Informações" className="space-y-4">
+        {/* <TabsContent value="Informações" className="space-y-4"> */}
           <ModulosEditForm modulos={formData} onClose={handleSuccess} />
-        </TabsContent>
+        {/* </TabsContent> */}
 
         {/* <TabsContent value="members">
           <UsuariosPorEquipeTable equipeNome={formData.nome} />

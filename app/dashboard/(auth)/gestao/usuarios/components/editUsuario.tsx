@@ -78,13 +78,23 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+        <form
+          onSubmit={methods.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Editar Usuário</CardTitle>
+              <CardTitle></CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  Editar Usuário: <span className="text-primary">{usuario.nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={methods.control}
                   name="nome"

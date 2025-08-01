@@ -39,23 +39,17 @@ export function PermissoesDrawer({ isOpen, onClose, permissao, onRefresh }: Equi
 
   return (
     <div className="w-full space-y-4 px-6">
-      <div className="flex items-center justify-between border-b pb-4">
-        <h2 className="text-2xl font-semibold">Editar Permissões</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          {/* <TabsTrigger value="overview">Informações</TabsTrigger>
+        {/* <TabsList>
+          <TabsTrigger value="overview">Informações</TabsTrigger>
           <TabsTrigger value="members">Membros</TabsTrigger>
-          <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger> */}
-        </TabsList>
+          <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger>
+        </TabsList> */}
 
-        <TabsContent value="overview" className="space-y-4">
+        {/* <TabsContent value="overview" className="space-y-4"> */}
           <EquipeEditForm permissoes={formData} onClose={handleSuccess} />
-        </TabsContent>
+        {/* </TabsContent> */}
 
         {/* <TabsContent value="members">
           <UsuariosPorEquipeTable equipeNome={formData.nome} />

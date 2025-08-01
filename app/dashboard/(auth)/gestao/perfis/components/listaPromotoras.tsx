@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,9 +22,11 @@ type PermissoesPorSecao = {
 
 type UsuariosTableProps = {
   equipeNome: string;
+    onClose: () => void;
+
 };
 
-export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
+export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTableProps) {[]
   const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
   const [equipeLabel, setEquipeLabel] = useState<string>("");
   const { token } = useAuth();
@@ -34,9 +37,9 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ id, status: novoStatus }),
+        body: JSON.stringify({ id, status: novoStatus })
       });
 
       if (!response.ok) {
@@ -72,8 +75,8 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         });
 
         if (!response.ok) {
@@ -102,7 +105,7 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
             novoFormato[secao][acao] = {
               id: item.id_relacionamento,
               acao,
-              status: item.permissao_status,
+              status: item.permissao_status
             };
           }
         }
@@ -121,7 +124,14 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Permissões do Perfil: {equipeLabel}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Permissões do Perfil: <span className="text-primary">{equipeLabel}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="overflow-auto">
         <table className="min-w-full border text-sm">
@@ -129,7 +139,7 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
             <tr>
               <th className="border px-2 py-1 text-left">Seção</th>
               {acoes.map((acao) => (
-                <th key={acao} className="border px-2 py-1 capitalize text-center">
+                <th key={acao} className="border px-2 py-1 text-center capitalize">
                   {acao}
                 </th>
               ))}
@@ -138,7 +148,7 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
           <tbody>
             {Object.entries(permissoesPorSecao).map(([secao, acoesObj]) => (
               <tr key={secao} className="even:bg-muted/30">
-                <td className="border px-2 py-1 capitalize font-medium">{secao.toLowerCase()}</td>
+                <td className="border px-2 py-1 font-medium capitalize">{secao.toLowerCase()}</td>
                 {acoes.map((acao) => {
                   const permissao = acoesObj[acao];
                   return (
