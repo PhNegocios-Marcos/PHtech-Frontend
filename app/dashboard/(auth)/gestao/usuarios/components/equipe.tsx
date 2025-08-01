@@ -45,9 +45,10 @@ type Option = {
   hash?: string; // opcional
   status_relacionamento?: any;
   id_relacionamento?: any;
+  onClose: () => void;
 };
 
-export default function Equipes({ usuario, equipes }: Option) {
+export default function Equipes({ usuario, equipes, onClose }: Option) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [equipe, setEquipe] = React.useState<Option[]>([]); // para tabela: equipes vinculadas ao usuário
@@ -225,9 +226,16 @@ export default function Equipes({ usuario, equipes }: Option) {
   });
 
   return (
-    <Card className="max-w-4xl p-4">
+    <Card>
       <CardHeader>
-        <CardTitle>Relacionar Produto</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Relacionar Produto: <span className="text-primary">{usuario.nome}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent>
@@ -260,7 +268,7 @@ export default function Equipes({ usuario, equipes }: Option) {
           </p>
         )}
       </CardContent>
-      <div className="rounded-md border">
+      <div className="mx-6 rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -37,9 +37,8 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
   };
 
   return (
-    <div className="w-full space-y-4 px-6">
 
-      <Tabs defaultValue="Informações" className="space-y-4">
+      <Tabs defaultValue="Informações">
         {/* <TabsList>
           <TabsTrigger value="Informações">Informações</TabsTrigger>
           <TabsTrigger value="members">Membros</TabsTrigger>
@@ -58,6 +57,5 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
           <NovoMembro equipeNome={formData.nome} />
         </TabsContent> */}
       </Tabs>
-    </div>
   );
 }

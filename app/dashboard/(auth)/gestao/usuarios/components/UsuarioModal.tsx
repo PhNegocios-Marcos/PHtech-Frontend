@@ -27,8 +27,7 @@ type UsuarioPerfilProps = {
 
 export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProps) {
   return (
-    <div className="space-y-4 p-4">
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Informações</TabsTrigger>
           <TabsTrigger value="reports">Equipes</TabsTrigger>
@@ -40,13 +39,12 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
         </TabsContent>
 
         <TabsContent value="reports">
-          <Equipes usuario={usuario} />
+          <Equipes usuario={usuario} onClose={onClose} />
         </TabsContent>
 
         <TabsContent value="Perfil">
-          <Perfil usuario={usuario} />
+          <Perfil usuario={usuario} onClose={onClose} />
         </TabsContent>
       </Tabs>
-    </div>
   );
 }

@@ -80,7 +80,7 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
+          className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">

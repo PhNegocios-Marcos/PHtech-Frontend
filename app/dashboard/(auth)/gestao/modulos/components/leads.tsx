@@ -152,16 +152,6 @@ export function ModulosTable() {
   return (
     <>
       {!selectedModulos ? (
-        <ModulosDrawer
-          isOpen={!!selectedModulos}
-          modulos={selectedModulos}
-          onClose={() => {
-            handleCloseDrawer();
-            handleRefresh();
-          }}
-          onRefresh={handleRefresh}
-        />
-      ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
             <CardTitle>Modulos</CardTitle>
@@ -247,6 +237,16 @@ export function ModulosTable() {
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <ModulosDrawer
+          isOpen={!!selectedModulos}
+          modulos={selectedModulos}
+          onClose={() => {
+            handleCloseDrawer();
+            handleRefresh();
+          }}
+          onRefresh={handleRefresh}
+        />
       )}
     </>
   );

@@ -88,7 +88,7 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={methods.handleSubmit(onSubmit)}>
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">

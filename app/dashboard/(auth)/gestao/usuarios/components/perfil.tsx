@@ -226,7 +226,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
   });
 
   return (
-    <Card className="max-w-4xl p-4">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
@@ -268,7 +268,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
           </p>
         )}
       </CardContent>
-      <div className="rounded-md border">
+      <div className="rounded-md border mx-6">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
