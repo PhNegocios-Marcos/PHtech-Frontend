@@ -83,7 +83,6 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
           className="grid grid-cols-2 gap-4 overflow-y-auto">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Dados do Perfil</CardTitle>
               <div className="flex items-center justify-between">
                 <CardTitle>
                   Dados do Perfil: <span className="text-primary">{perfil?.nome}</span>

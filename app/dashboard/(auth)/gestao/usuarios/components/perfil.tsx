@@ -45,9 +45,10 @@ type Option = {
   hash?: string; // opcional
   status_relacionamento?: any;
   id_relacionamento?: any;
+  onClose: () => void;
 };
 
-export default function Perfil({ usuario, equipes }: Option) {
+export default function Perfil({ usuario, equipes, onClose }: Option) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [equipe, setEquipe] = React.useState<Option[]>([]); // para tabela: equipes vinculadas ao usuário
@@ -139,30 +140,30 @@ export default function Perfil({ usuario, equipes }: Option) {
   }, [token]);
 
   // Fetch equipes vinculadas ao usuário para a tabela
-//   useEffect(() => {
-//     async function fetchEquipe() {
-//       try {
-//         const res = await axios.get(`${API_BASE_URL}/perfil/${equipesDisponiveis.id}`, {
-//           headers: {
-//             "Content-Type": "application/json",
-//             Authorization: `Bearer ${token}`
-//           }
-//         });
+  //   useEffect(() => {
+  //     async function fetchEquipe() {
+  //       try {
+  //         const res = await axios.get(`${API_BASE_URL}/perfil/${equipesDisponiveis.id}`, {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`
+  //           }
+  //         });
 
-//         const data = res.data.map((p: any) => ({
-//           id: p.id,
-//           nome: p.nome,
-//           descricao: p.descricao,
-//           status_relacionamento: p.status
-//         }));
+  //         const data = res.data.map((p: any) => ({
+  //           id: p.id,
+  //           nome: p.nome,
+  //           descricao: p.descricao,
+  //           status_relacionamento: p.status
+  //         }));
 
-//         setEquipe(data);
-//       } catch (error) {
-//         console.error("Erro ao carregar equipes do usuário", error);
-//       }
-//     }
-//     fetchEquipe();
-//   }, [token, usuario.email, refreshKey]);
+  //         setEquipe(data);
+  //       } catch (error) {
+  //         console.error("Erro ao carregar equipes do usuário", error);
+  //       }
+  //     }
+  //     fetchEquipe();
+  //   }, [token, usuario.email, refreshKey]);
 
   async function relacionarEquipe() {
     if (!equipesSelect) {
@@ -227,7 +228,14 @@ export default function Perfil({ usuario, equipes }: Option) {
   return (
     <Card className="max-w-4xl p-4">
       <CardHeader>
-        <CardTitle>Relacionar Produto</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Editar Usuário: <span className="text-primary">{usuario.nome}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent>

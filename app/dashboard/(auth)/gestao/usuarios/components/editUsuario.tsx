@@ -83,7 +83,6 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
           className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle></CardTitle>
               <div className="flex items-center justify-between">
                 <CardTitle>
                   Editar Usuário: <span className="text-primary">{usuario.nome}</span>

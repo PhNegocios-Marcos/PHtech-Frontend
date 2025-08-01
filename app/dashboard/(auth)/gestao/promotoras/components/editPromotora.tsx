@@ -19,7 +19,7 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Tipo de dados da Promotora
-type Promotora = {
+export type Promotora = {
   id: string;
   nome: string;
   razao_social: string;
@@ -88,7 +88,7 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       <Form {...methods}>
         <form
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 overflow-y-auto pt-6">
+          className="grid grid-cols-2 overflow-y-auto">
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">

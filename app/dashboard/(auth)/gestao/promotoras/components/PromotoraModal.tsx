@@ -37,19 +37,17 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
   if (!isOpen || !formData) return null;
 
   return (
-    <aside className="w-full rounded-md bg-white p-4 shadow">
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Informações</TabsTrigger>
-          <TabsTrigger value="reports">Usuários</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview">
-          <PromotorEdit data={formData} onClose={onClose} />
-        </TabsContent>
-        <TabsContent value="reports">
-          <UsuariosTable cnpj={formData.cnpj} />
-        </TabsContent>
-      </Tabs>
-    </aside>
+    <Tabs defaultValue="overview" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="overview">Informações</TabsTrigger>
+        <TabsTrigger value="reports">Usuários</TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview">
+        <PromotorEdit data={formData} onClose={onClose} />
+      </TabsContent>
+      <TabsContent value="reports">
+        <UsuariosTable cnpj={formData.cnpj} onClose={onClose} promotora={formData} />
+      </TabsContent>
+    </Tabs>
   );
 }

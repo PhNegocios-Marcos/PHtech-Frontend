@@ -33,6 +33,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
+import { Promotora } from "./editPromotora";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -44,7 +45,9 @@ type Usuario = {
 };
 
 type UsuariosTableProps = {
+  promotora: Promotora;
   cnpj: string; // <- CNPJ como prop
+  onClose: () => void;
 };
 
 const usuarioColumns: ColumnDef<Usuario>[] = [
@@ -54,7 +57,7 @@ const usuarioColumns: ColumnDef<Usuario>[] = [
   { accessorKey: "status", header: "Status" }
 ];
 
-export function UsuariosTable({ cnpj }: UsuariosTableProps) {
+export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -127,7 +130,14 @@ export function UsuariosTable({ cnpj }: UsuariosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Usuários Vinculados</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            <h2>Usuários Vinculados: <span className="text-primary">{promotora.nome}</span></h2>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">

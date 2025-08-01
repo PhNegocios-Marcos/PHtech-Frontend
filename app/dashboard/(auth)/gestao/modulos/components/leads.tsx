@@ -42,7 +42,6 @@ export function ModulosTable() {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-
   React.useEffect(() => {
     async function fetchModulos() {
       if (!token) return;
@@ -151,92 +150,8 @@ export function ModulosTable() {
   };
 
   return (
-    <Card className="col-span-2">
-      <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Modulos</CardTitle>
-      </CardHeader>
-
+    <>
       {!selectedModulos ? (
-        <CardContent>
-          <div className="mb-4 flex items-center gap-2">
-            <Input
-              placeholder="Filtrar por qualquer campo..."
-              value={globalFilter}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className="max-w-sm"
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header, index) => {
-                      const isLast = index === headerGroup.headers.length - 1;
-                      return (
-                        <TableHead
-                          key={header.id}
-                          className={`truncate overflow-hidden whitespace-nowrap ${
-                            isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
-                          }`}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      onDoubleClick={() => handleRowDoubleClick(row.original)}
-                      className="hover:bg-muted cursor-pointer">
-                      {row.getVisibleCells().map((cell, index) => {
-                        const isLast = index === row.getVisibleCells().length - 1;
-                        return (
-                          <TableCell
-                            key={cell.id}
-                            className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
-                            }`}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))
-                ) : (
-                  <CarregandoTable />
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      ) : (
         <ModulosDrawer
           isOpen={!!selectedModulos}
           modulos={selectedModulos}
@@ -246,7 +161,93 @@ export function ModulosTable() {
           }}
           onRefresh={handleRefresh}
         />
+      ) : (
+        <Card className="col-span-2">
+          <CardHeader className="flex flex-col justify-between">
+            <CardTitle>Modulos</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="mb-4 flex items-center gap-2">
+              <Input
+                placeholder="Filtrar por qualquer campo..."
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+                className="max-w-sm"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header, index) => {
+                        const isLast = index === headerGroup.headers.length - 1;
+                        return (
+                          <TableHead
+                            key={header.id}
+                            className={`truncate overflow-hidden whitespace-nowrap ${
+                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                            }`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        onDoubleClick={() => handleRowDoubleClick(row.original)}
+                        className="hover:bg-muted cursor-pointer">
+                        {row.getVisibleCells().map((cell, index) => {
+                          const isLast = index === row.getVisibleCells().length - 1;
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={`truncate overflow-hidden whitespace-nowrap ${
+                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                              }`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <CarregandoTable />
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-    </Card>
+    </>
   );
 }
