@@ -320,11 +320,16 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         <CardHeader>
           <div className="flex flex-row justify-between">
             <div>
-              <CardTitle>Tabela do Produto</CardTitle>
+              <CardTitle>
+                Detalhes do Produto: <span className="text-primary">{produto.nome}</span>
+              </CardTitle>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-row gap-3">
               <Button id="" onClick={() => setIsCadastroOpen(true)}>
                 Nova Tabela
+              </Button>
+              <Button onClick={onClose} variant="outline">
+                Voltar
               </Button>
             </div>
           </div>

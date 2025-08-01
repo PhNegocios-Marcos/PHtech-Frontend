@@ -94,7 +94,14 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
         <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Editar Órgão</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  Editar Órgão: <span className="text-primary">{orgao.orgao_nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">

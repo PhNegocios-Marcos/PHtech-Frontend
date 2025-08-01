@@ -20,7 +20,7 @@ type Props = {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function RelacaoProdutoConvenio({ convenio }: Props) {
+export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
   const [averbador, setAverbador] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
 
@@ -90,8 +90,6 @@ export default function RelacaoProdutoConvenio({ convenio }: Props) {
     setMessage("");
     setMessageType("");
 
-
-
     try {
       await axios.post(
         `${API_BASE_URL}/listarSubprodutos/`,
@@ -121,7 +119,14 @@ export default function RelacaoProdutoConvenio({ convenio }: Props) {
   return (
     <Card className="m-6">
       <CardHeader>
-        <CardTitle>Relacionar Produto</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Relacionar Produto: <span className="text-primary">{convenio.convenio_nome}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent>

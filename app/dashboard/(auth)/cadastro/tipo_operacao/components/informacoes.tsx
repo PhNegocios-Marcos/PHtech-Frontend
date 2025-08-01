@@ -9,19 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,11 +31,7 @@ type SubprodutoDrawerProps = {
   onRefresh: () => void;
 };
 
-export function SubprodutoEdit({
-  subproduto,
-  onClose,
-  onRefresh
-}: SubprodutoDrawerProps) {
+export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDrawerProps) {
   const methods = useForm<Subproduto>({
     resolver: zodResolver(subprodutoSchema),
     defaultValues: {
@@ -104,11 +89,18 @@ export function SubprodutoEdit({
         onSubmit={methods.handleSubmit(onSubmit, (errors) => {
           console.warn("Erros de validação:", errors);
         })}
-        className="grid grid-cols-2 gap-4 p-6"
-      >
+        className="grid grid-cols-2 gap-4">
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Editar Categoria</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>
+                Editar Tipo de Operação:{" "}
+                <span className="text-primary">{subproduto.produtos_subprodutos_nome}</span>
+              </CardTitle>
+              <Button onClick={onClose} variant="outline">
+                Voltar
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
@@ -150,7 +142,9 @@ export function SubprodutoEdit({
                       <Combobox
                         data={statusOptions}
                         displayField="name"
-                        value={statusOptions.find(opt => opt.id === field.value) ?? statusOptions[0]}
+                        value={
+                          statusOptions.find((opt) => opt.id === field.value) ?? statusOptions[0]
+                        }
                         onChange={(selected) => field.onChange(selected?.id ?? 1)}
                         searchFields={["name"]}
                       />

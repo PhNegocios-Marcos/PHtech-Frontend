@@ -16,14 +16,7 @@ type Props = {
 
 export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Props) {
   return (
-    <div className="space-y-4 rounded-md border p-4 shadow-sm">
-      <div className="flex items-center justify-between border-b pb-2">
-        <h2 className="text-lg font-semibold">{produto.nome}</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       <Tabs defaultValue="info" className="w-full">
         <TabsList>
           <TabsTrigger value="info">Informações</TabsTrigger>

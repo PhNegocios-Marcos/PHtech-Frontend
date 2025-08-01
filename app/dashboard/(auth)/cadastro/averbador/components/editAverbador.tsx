@@ -16,13 +16,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 
 const averbadorSchema = z.object({
   averbador_hash: z.string(),
   averbador_nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  averbador_status: z.coerce.number(),
+  averbador_status: z.coerce.number()
 });
 
 type Averbador = z.infer<typeof averbadorSchema>;
@@ -36,7 +36,7 @@ type AverbadorDrawerProps = {
 export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawerProps) {
   const methods = useForm<Averbador>({
     resolver: zodResolver(averbadorSchema),
-    defaultValues: averbador,
+    defaultValues: averbador
   });
 
   const { token } = useAuth();
@@ -47,7 +47,7 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
 
   const statusOptions = [
     { id: 1, name: "Ativo" },
-    { id: 0, name: "Inativo" },
+    { id: 0, name: "Inativo" }
   ];
 
   const onSubmit = async (data: Averbador) => {
@@ -79,7 +79,7 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
 
     try {
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/averbador/atualizar`, changedFields, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       onClose();
       onRefresh();
@@ -92,13 +92,20 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 pt-6">
           <Card className="col-span-2">
             <CardHeader>
-              <CardTitle>Editar Averbador</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  Editar Averbador: <span className="text-primary">{averbador.averbador_nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={methods.control}
                   name="averbador_nome"

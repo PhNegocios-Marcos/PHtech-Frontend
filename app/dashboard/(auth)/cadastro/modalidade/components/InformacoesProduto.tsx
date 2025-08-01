@@ -105,7 +105,14 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6 p-6">
           <Card>
             <CardHeader>
-              <CardTitle>Editar Produto</CardTitle>
+              <div className="flex items-center justify-between">
+              <CardTitle>
+                Editar Modalidade: <span className="text-primary">{produto.nome}</span>
+              </CardTitle>
+              <Button onClick={onClose} variant="outline">
+                Voltar
+              </Button>
+            </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

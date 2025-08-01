@@ -20,7 +20,7 @@ type Props = {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function RelacaoProdutoConvenio({ produto }: Props) {
+export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
   const [convenios, setConvenios] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
 
@@ -41,12 +41,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         const res = await axios.get(`${API_BASE_URL}/convenio`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         });
         const data = res.data.map((c: any) => ({
           id: c.convenio_hash,
-          name: c.convenio_nome,
+          name: c.convenio_nome
         }));
         setConvenios(data);
       } catch (error) {
@@ -63,12 +63,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         const res = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         });
         const data = res.data.map((p: any) => ({
           id: p.produtos_subprodutos_id,
-          name: p.produtos_subprodutos_nome,
+          name: p.produtos_subprodutos_nome
         }));
         setProdutos(data);
       } catch (error) {
@@ -95,12 +95,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         `${API_BASE_URL}/rel_produto_convenio/criar`,
         {
           convenio_hash: selectedConvenio.id,
-          produto_hash: produto.id,
+          produto_hash: produto.id
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
       setMessage("Relação com convênio criada com sucesso!");
@@ -130,12 +130,12 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
         `${API_BASE_URL}/rel-produto-sub-produto/criar`,
         {
           sub_produto_hash: selectedSubProduto.id,
-          produto_hash: produto.id,
+          produto_hash: produto.id
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
       setMessage("Relação com Tipo de Operacao criada com sucesso!");
@@ -150,13 +150,20 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
   }
 
   return (
-    <Card className="py-6 m-6">
+    <Card className="m-6 py-6">
       <CardHeader>
-        <CardTitle>Relacionar Produto</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Editar Modalidade: <span className="text-primary">{produto.nome}</span>
+          </CardTitle>
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5 mb-5">
+        <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Coluna 1 - Convênio */}
           <div className="space-y-2">
             <span className="text-muted-foreground text-sm">Convênio</span>
@@ -168,11 +175,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
               searchFields={["name"]}
               placeholder="Selecione um convênio"
             />
-            <Button
-              onClick={handleRelacionarConvenio}
-              disabled={loading}
-              className="mt-2"
-            >
+            <Button onClick={handleRelacionarConvenio} disabled={loading} className="mt-2">
               {loading ? "Salvando..." : "Relacionar Convênio"}
             </Button>
           </div>
@@ -188,11 +191,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
               searchFields={["name"]}
               placeholder="Selecione um Tipo de Operacao"
             />
-            <Button
-              onClick={handleRelacionarCategoria}
-              disabled={loading02}
-              className="mt-2"
-            >
+            <Button onClick={handleRelacionarCategoria} disabled={loading02} className="mt-2">
               {loading02 ? "Salvando..." : "Relacionar Tipo de Operacao"}
             </Button>
           </div>
@@ -203,8 +202,7 @@ export default function RelacaoProdutoConvenio({ produto }: Props) {
           <p
             className={`mt-4 text-sm ${
               messageType === "success" ? "text-green-600" : "text-red-600"
-            }`}
-          >
+            }`}>
             {message}
           </p>
         )}

@@ -47,12 +47,6 @@ type produtoProps = {
 export function ModalProduto({ onClose, onRefresh, produto }: produtoProps) {
   return (
     <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between border-b pb-2">
-        <h2 className="text-lg font-semibold">Detalhes do Produto</h2>
-        <Button onClick={onClose} variant="outline">
-          Voltar
-        </Button>
-      </div>
 
       <Tabs defaultValue="Tabela" className="space-y-4">
         <TabsList>

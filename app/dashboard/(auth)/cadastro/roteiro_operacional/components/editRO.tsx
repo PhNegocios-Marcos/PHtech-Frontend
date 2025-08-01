@@ -220,7 +220,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex justify-between">
-                <CardTitle>Editar Roteiro</CardTitle>
+                <CardTitle>Editar Roteiro:{" "}<span>{roteiro.nome}</span></CardTitle>
                 <Button onClick={onClose} variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
