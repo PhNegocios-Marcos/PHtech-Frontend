@@ -177,16 +177,6 @@ export function EquipesTable() {
   return (
     <>
       {!selectedEquipe ? (
-        <EquipeDrawer
-          isOpen={!!selectedEquipe} // ou true/false conforme sua lógica
-          equipe={selectedEquipe}
-          onClose={() => {
-            handleCloseDrawer();
-            handleRefresh();
-          }}
-          onRefresh={handleRefresh}
-        />
-      ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
             <CardTitle>Equipes</CardTitle>
@@ -272,6 +262,16 @@ export function EquipesTable() {
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <EquipeDrawer
+          isOpen={!!selectedEquipe} // ou true/false conforme sua lógica
+          equipe={selectedEquipe}
+          onClose={() => {
+            handleCloseDrawer();
+            handleRefresh();
+          }}
+          onRefresh={handleRefresh}
+        />
       )}
     </>
   );

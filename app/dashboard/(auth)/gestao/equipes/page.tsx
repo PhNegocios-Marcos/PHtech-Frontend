@@ -23,19 +23,18 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-          {/* <CustomDateRangePicker /> */}
+        {/* <CustomDateRangePicker /> */}
 
-          {podeCriar && (
-            <Button id="Equipes_criar" onClick={() => setIsCadastroOpen(true)}>
-              Nova Equipe
-            </Button>
-          )}
-        </div>
+        {podeCriar && (
+          <Button id="Equipes_criar" onClick={() => setIsCadastroOpen(true)}>
+            Nova Equipe
+          </Button>
+        )}
+      </div>
 
-        {!isCadastroOpen && <EquipesTable />}
-
-        {/* Modal de cadastro novo usuário */}
-        <CadastroUsuarioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      {!isCadastroOpen && <EquipesTable />}
+      {/* Modal de cadastro novo usuário */}
+      <CadastroUsuarioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }
