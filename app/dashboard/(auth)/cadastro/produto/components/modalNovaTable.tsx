@@ -35,8 +35,8 @@ const schema = z.object({
   prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
   prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
   taxa_mensal: z.string().min(1, "Taxa mensal é obrigatório"),
-  incrementador: z.string().min(1, "Taxa mensal é obrigatório"),
-  periodiciade: z.string().min(1, "Taxa mensal é obrigatório")
+  incrementador: z.string().min(1, "Incrementador é obrigatório"),
+  periodiciade: z.string().min(1, "Periodicidade é obrigatória")
 });
 
 type FormData = z.infer<typeof schema>;
@@ -50,13 +50,8 @@ type CadastroTabelaModalProps = {
 type Option = {
   id?: string;
   nome: string;
-  hash?: string; // opcional
+  hash?: string;
 };
-
-// type Props = {
-//   onClose: () => void;
-//   onSelectTaxa?: (produto: Produto) => void;
-// };
 
 export type Taxa = {
   taxa_prazo_hash: string;
@@ -73,8 +68,48 @@ export type Taxa = {
   tipo_operacao_nome: string;
 };
 
+const formFields = [
+  {
+    name: "nome_taxa",
+    label: "Nome Tabela",
+    type: "input",
+    placeholder: "Digite o nome"
+  },
+  {
+    name: "prazo_minimo",
+    label: "Prazo mínimo",
+    type: "input",
+    placeholder: "12"
+  },
+  {
+    name: "prazo_maximo",
+    label: "Prazo máximo",
+    type: "input",
+    placeholder: "64"
+  },
+  {
+    name: "taxa_mensal",
+    label: "Taxa mensal",
+    type: "input",
+    placeholder: "1.6"
+  },
+  {
+    name: "incrementador",
+    label: "Incrementador",
+    type: "combobox",
+    options: [{ id: "PERSONALIZADO", name: "PERSONALIZADO" }]
+  },
+  {
+    name: "periodiciade",
+    label: "Periodicidade",
+    type: "input",
+    placeholder: "12"
+  }
+];
+
 export default function CadastroTabelaModal({ isOpen, onClose, produto }: CadastroTabelaModalProps) {
   const [idProduto, setIdProduto] = useState<any>(null);
+  const { token, userData } = useAuth();
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -87,18 +122,14 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
       periodiciade: ""
     }
   });
-  const { reset } = useForm<FormData>();
-  const form = useForm({
+
+  const dateForm = useForm({
     defaultValues: {
       inicio: undefined,
       fim: undefined
     }
   });
-  const { inicio, fim } = form.getValues();
-
-  const statusOptions = [{ id: "PERSONALIZADO", name: "PERSONALIZADO" }];
-
-  const { token, userData } = useAuth();
+  const { inicio, fim } = dateForm.getValues();
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -107,7 +138,7 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
     }
 
     const payload = {
-      relacionamento_produto: idProduto.rel_produto_subproduto_convenio_convenio_id,
+      relacionamento_produto: idProduto?.rel_produto_subproduto_convenio_convenio_id,
       nome_tabela: data.nome_taxa,
       prazo_minimo: data.prazo_minimo,
       prazo_maximo: data.prazo_maximo,
@@ -136,7 +167,7 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
       }
 
       alert("Tabela cadastrada com sucesso!");
-      reset(); // limpa o formulário
+      methods.reset();
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
@@ -171,101 +202,39 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
               <h5 className="mx-5 text-xl font-semibold">Tabela Taxa</h5>
               <CardContent>
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <FormField
-                    control={methods.control}
-                    name="nome_taxa"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Tabela</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Digite o nome" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {formFields.map((field) => (
+                    <FormField
+                      key={field.name}
+                      control={methods.control}
+                      name={field.name as keyof FormData}
+                      render={({ field: renderField }) => (
+                        <FormItem>
+                          <FormLabel>{field.label}</FormLabel>
+                          <FormControl>
+                            {field.type === "input" ? (
+                              <Input placeholder={field.placeholder} {...renderField} />
+                            ) : field.type === "combobox" ? (
+                              <Combobox
+                                data={field.options || []}
+                                displayField="name"
+                                value={field.options?.find((opt) => opt.id === renderField.value) ?? null}
+                                onChange={(selected) => renderField.onChange(selected?.id ?? "")}
+                                searchFields={["name"]}
+                              />
+                            ) : null}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
 
-                  <FormField
-                    control={methods.control}
-                    name="prazo_minimo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prozo mínimo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="12" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={methods.control}
-                    name="prazo_maximo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prazo máximo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="64" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={methods.control}
-                    name="taxa_mensal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Taxa mensal</FormLabel>
-                        <FormControl>
-                          <Input placeholder="1.6" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={methods.control}
-                    name="incrementador"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Incrementador</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={statusOptions}
-                            displayField="name"
-                            value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                            onChange={(selected) => field.onChange(selected?.id ?? 1)}
-                            searchFields={["name"]}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={methods.control}
-                    name="periodiciade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Periodiciade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="12" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <div>
-                    <FormProvider {...form}>
-                      <Form {...form}>
+                    <FormProvider {...dateForm}>
+                      <Form {...dateForm}>
                         <div className="space-y-8">
                           <FormField
-                            control={form.control}
+                            control={dateForm.control}
                             name="inicio"
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
@@ -307,11 +276,11 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
                     </FormProvider>
                   </div>
                   <div>
-                    <FormProvider {...form}>
-                      <Form {...form}>
+                    <FormProvider {...dateForm}>
+                      <Form {...dateForm}>
                         <div className="space-y-8">
                           <FormField
-                            control={form.control}
+                            control={dateForm.control}
                             name="fim"
                             render={({ field }) => (
                               <FormItem className="flex flex-col">

@@ -51,7 +51,7 @@ export default function CadastroEquipeModal({
     },
   });
 
-  const { token } = useAuth();
+  const { token, selectedPromotoraId } = useAuth();
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -60,7 +60,7 @@ export default function CadastroEquipeModal({
     }
 
     const payload = {
-      promotora: "01976542-845b-7376-ad43-bed5c9cd29b3", // <-- ID fixo da promotora
+      promotora: selectedPromotoraId,
       nome: data.nome,
       descricao: data.descricao,
       status: Number(data.status),

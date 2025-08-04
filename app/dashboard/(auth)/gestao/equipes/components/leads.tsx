@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 
 import {
   Table,
@@ -259,6 +259,28 @@ export function EquipesTable() {
                   )}
                 </TableBody>
               </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
