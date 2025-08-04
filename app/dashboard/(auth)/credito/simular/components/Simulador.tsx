@@ -23,6 +23,8 @@ import axios from "axios";
 
 interface SimuladorFgtsProps {
   produtoHash: any;
+  categoriaHash: any;
+  convenioHash: any;
   onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void; // aceita dois parâmetros
   proutoName: string;
 }
@@ -43,6 +45,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function SimuladorFgts({
   produtoHash,
   onCadastrarCliente,
+  convenioHash,
+  categoriaHash,
   proutoName
 }: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -61,13 +65,17 @@ export default function SimuladorFgts({
   useEffect(() => {
     async function fetchSections() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/simulacao-campos-produtos/listar`, {
+        const response = await axios({
+          method: "get",
+          url: `${API_BASE_URL}/simulacao-campos-produtos/listar`,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           },
-          params: {
-            simulacao_campos_produtos_produto_id: produtoHash
+          data: {
+            modalidade_hash: produtoHash,
+            operacao_hash: categoriaHash,
+            convenio_hash: convenioHash
           }
         });
 

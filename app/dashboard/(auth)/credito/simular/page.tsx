@@ -31,7 +31,7 @@ export default function CreditSimular() {
 
   const { token } = useAuth();
 
-  console.log("selectedProduto.hash", selectedProduto)
+  // console.log("selectedProduto.hash", selectedProduto)
 
   // Carrega os convenios ao iniciar
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function CreditSimular() {
                   displayField="name"
                   value={selectedProduto}
                   onChange={(val) => setSelectedProduto(val)}
-                  label="Produto"
+                  label="Modalidade"
                   placeholder="Selecione o produto"
                   searchFields={["name"]}
                 />
@@ -168,7 +168,9 @@ export default function CreditSimular() {
             </div>
             {selectedCategoria && selectedProduto && (
               <SimuladorFgts
-                produtoHash={selectedProduto.id}
+                convenioHash={selectedConvenio?.hash}
+                produtoHash={selectedProduto.hash}
+                categoriaHash={selectedCategoria.hash}
                 onCadastrarCliente={handleAbrirCadastro}
                 proutoName={selectedProduto.name.toLowerCase()}
               />
