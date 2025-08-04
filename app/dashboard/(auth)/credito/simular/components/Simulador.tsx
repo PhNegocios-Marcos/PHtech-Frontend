@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
 import {
   Table,
   TableHeader,
@@ -16,16 +15,15 @@ import {
   TableHead
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
-
 import PropostaCliente, { Simulacao, Parcela } from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
 
 interface SimuladorFgtsProps {
-  produtoHash: any;
+  modalidadeHash: any;
   categoriaHash: any;
   convenioHash: any;
-  onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void; // aceita dois parâmetros
+  onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void;
   proutoName: string;
 }
 
@@ -43,7 +41,7 @@ interface Section {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function SimuladorFgts({
-  produtoHash,
+  modalidadeHash,
   onCadastrarCliente,
   convenioHash,
   categoriaHash,
@@ -55,12 +53,11 @@ export default function SimuladorFgts({
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [abrirCadastro, setAbrirCadastro] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
-
   const [simulacaoSelecionadaKey, setSimulacaoSelecionadaKey] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showSimulateButton, setShowSimulateButton] = useState(true);
 
   const { token } = useAuth();
-
-  // console.log("produtoHash", produtoHash)
 
   useEffect(() => {
     async function fetchSections() {
@@ -72,8 +69,8 @@ export default function SimuladorFgts({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           },
-          data: {
-            modalidade_hash: produtoHash,
+          params: {
+            modalidade_hash: modalidadeHash,
             operacao_hash: categoriaHash,
             convenio_hash: convenioHash
           }
@@ -81,6 +78,8 @@ export default function SimuladorFgts({
 
         const data = response.data;
         const arrData = Array.isArray(data) ? data : [data];
+
+        console.log("data: ", data);
 
         const parsedSections: Section[] = arrData.map((item: any) => ({
           type: item.simulacao_campos_produtos_type,
@@ -90,13 +89,36 @@ export default function SimuladorFgts({
         }));
 
         setSections(parsedSections);
-      } catch (error) {
+        setErrorMessage("");
+        setShowSimulateButton(true);
+
+        if (parsedSections.length === 0) {
+          console.log("parsedSections null", parsedSections);
+          setErrorMessage("Não há relacionamento");
+          setShowSimulateButton(false);
+        }
+      } catch (error: any) {
         console.error("Erro ao carregar campos da simulação:", error);
+
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data === null &&
+          error.response.data.error ===
+            // "Relacionamento nao possui campos configurados para a simulação"
+            setErrorMessage("Produto não possui campos configurados para a simulação")
+        ) {
+          setErrorMessage("Produto não possui campos configurados para a simulação");
+          setShowSimulateButton(false);
+        } else {
+          setErrorMessage("Ocorreu um erro ao carregar os campos da simulação");
+          setShowSimulateButton(false);
+        }
       }
     }
 
     fetchSections();
-  }, [produtoHash, token]);
+  }, [token]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -107,7 +129,7 @@ export default function SimuladorFgts({
 
     const fields = sections[0].fields;
     const body: Record<string, any> = {
-      produto_hash: produtoHash,
+      produto_hash: modalidadeHash,
       taxa_banco: "20"
     };
 
@@ -253,16 +275,26 @@ export default function SimuladorFgts({
   if (cpfProposta && simulacaoSelecionadaKey && resultado?.mensagem) {
     const simulacaoEscolhida = resultado.mensagem[simulacaoSelecionadaKey];
     return (
-      <PropostaCliente cpf={cpfProposta} produtoHash={produtoHash} simulacao={simulacaoEscolhida} />
+      <PropostaCliente
+        cpf={cpfProposta}
+        modalidadeHash={modalidadeHash}
+        simulacao={simulacaoEscolhida}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
+      {errorMessage && (
+        <div className="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700 text-center">{errorMessage}</div>
+      )}
+
       <div className="flex justify-end gap-4">
-        <Button onClick={handleSimular} disabled={loading}>
-          {loading ? "Simulando..." : "Simular"}
-        </Button>
+        {showSimulateButton && (
+          <Button onClick={handleSimular} disabled={loading}>
+            {loading ? "Simulando..." : "Simular"}
+          </Button>
+        )}
         {resultado?.mensagem && <Button onClick={handleCadastrarCliente}>Montar proposta</Button>}
       </div>
 

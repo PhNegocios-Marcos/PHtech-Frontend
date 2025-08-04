@@ -11,27 +11,26 @@ import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-interface Produto {
-  id: number;
-  name: string;
-  hash: string;
+interface Modalidade {
+  id: any;
+  name: any;
+  hash: any;
 }
 
 export default function CreditSimular() {
-  const [convenios, setConvenios] = useState<Produto[]>([]);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [categorias, setCategorias] = useState<Produto[]>([]);
+  const [convenios, setConvenios] = useState<Modalidade[]>([]);
+  const [modalidades, setModalidades] = useState<Modalidade[]>([]);
+  const [categorias, setCategorias] = useState<Modalidade[]>([]);
 
-  const [selectedConvenio, setSelectedConvenio] = useState<Produto | null>(null);
-  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
-  const [selectedCategoria, setSelectedCategoria] = useState<Produto | null>(null);
+  const [selectedConvenio, setSelectedConvenio] = useState<Modalidade | null>(null);
+  const [selectedModalidade, setSelectedModalidade] = useState<Modalidade | null>(null);
+  const [selectedCategoria, setSelectedCategoria] = useState<Modalidade | null>(null);
 
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [simulacao, setSimulacao] = useState<any>(null);
+  const [simuladorKey, setSimuladorKey] = useState<number>(0); // Nova chave para forçar remontagem
 
   const { token } = useAuth();
-
-  // console.log("selectedProduto.hash", selectedProduto)
 
   // Carrega os convenios ao iniciar
   useEffect(() => {
@@ -59,7 +58,7 @@ export default function CreditSimular() {
   useEffect(() => {
     if (!selectedConvenio) return;
 
-    const fetchProdutos = async () => {
+    const fetchModalidades = async () => {
       try {
         const response = await axios.get(
           `${API_BASE_URL}/convenio/${selectedConvenio.hash}/produtos`,
@@ -68,43 +67,41 @@ export default function CreditSimular() {
           }
         );
 
-        // console.log("Resposta de produtos:", response.data);
-
         const produtosArray = response.data.mensagem ?? [];
 
         const formatado = produtosArray.map((item: any) => ({
-          id: item.produtos_id,
-          name: item.produtos_nome,
-          hash: item.rel_produtos_convenios_id
+          id: item.modalidade_hash,
+          name: item.modalidade_nome,
+          hash: item.relacionamento_hash
         }));
 
-        setProdutos(formatado);
-        setSelectedProduto(null);
+        setModalidades(formatado);
+        setSelectedModalidade(null);
         setSelectedCategoria(null);
       } catch (error) {
         console.error("Erro ao buscar produtos:", error);
       }
     };
 
-    fetchProdutos();
+    fetchModalidades();
   }, [selectedConvenio]);
 
   // Carrega categorias ao selecionar produto
   useEffect(() => {
-    if (!selectedProduto) return;
+    if (!selectedModalidade) return;
 
     const fetchCategorias = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/rel-produto-sub-produto/${selectedProduto.id}`,
+          `${API_BASE_URL}/rel-produto-sub-produto/${selectedModalidade.id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
 
-        const subprodutos = Array.isArray(response.data) ? response.data : [response.data];
+        const subModalidades = Array.isArray(response.data) ? response.data : [response.data];
 
-        const formatado = subprodutos.map((item: any) => ({
+        const formatado = subModalidades.map((item: any) => ({
           id: item.produtos_subprodutos_id,
           name: item.get_subprodutos?.[0]?.produtos_subprodutos_nome ?? "Sem nome",
           hash: item.rel_produto_subproduto_id
@@ -112,13 +109,14 @@ export default function CreditSimular() {
 
         setCategorias(formatado);
         setSelectedCategoria(null);
+        setSimuladorKey(prev => prev + 1); // Incrementa a chave quando novas categorias são carregadas
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
       }
     };
 
     fetchCategorias();
-  }, [selectedProduto]);
+  }, [selectedModalidade]);
 
   const handleAbrirCadastro = (cpf: string, dadosSimulacao: any) => {
     setCpfProposta(cpf);
@@ -144,35 +142,50 @@ export default function CreditSimular() {
 
               {selectedConvenio && (
                 <Combobox
-                  data={produtos}
+                  data={modalidades}
                   displayField="name"
-                  value={selectedProduto}
-                  onChange={(val) => setSelectedProduto(val)}
+                  value={
+                    selectedModalidade
+                      ? {
+                          id: selectedModalidade.id,
+                          name:
+                            selectedModalidade.name.length > 23
+                              ? selectedModalidade.name.slice(0, 20) + "..."
+                              : selectedModalidade.name,
+                          hash: selectedModalidade.hash
+                        }
+                      : null
+                  }
+                  onChange={(val: Modalidade) => setSelectedModalidade(val)}
                   label="Modalidade"
-                  placeholder="Selecione o produto"
+                  placeholder="Selecione o Modalidade"
                   searchFields={["name"]}
                 />
               )}
 
-              {selectedProduto && (
+              {selectedModalidade && (
                 <Combobox
                   data={categorias}
                   displayField="name"
                   value={selectedCategoria}
-                  onChange={(val) => setSelectedCategoria(val)}
+                  onChange={(val) => {
+                    setSelectedCategoria(val);
+                    setSimuladorKey(prev => prev + 1); // Incrementa a chave quando nova categoria é selecionada
+                  }}
                   label="Tipo de Operação"
                   placeholder="Selecione o Tipo de Operação"
                   searchFields={["name"]}
                 />
               )}
             </div>
-            {selectedCategoria && selectedProduto && (
+            {selectedCategoria && selectedModalidade && (
               <SimuladorFgts
+                key={`simulador-${simuladorKey}`} // Chave única que força remontagem
                 convenioHash={selectedConvenio?.hash}
-                produtoHash={selectedProduto.hash}
-                categoriaHash={selectedCategoria.hash}
+                modalidadeHash={selectedModalidade.id}
+                categoriaHash={selectedCategoria.id}
                 onCadastrarCliente={handleAbrirCadastro}
-                proutoName={selectedProduto.name.toLowerCase()}
+                proutoName={selectedModalidade.name.toLowerCase()}
               />
             )}
           </>

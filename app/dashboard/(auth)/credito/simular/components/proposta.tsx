@@ -88,7 +88,7 @@ interface ClienteApiResponse {
 interface PropostaClienteProps {
   cpf: string;
   simulacao?: Simulacao | undefined;
-  produtoHash: string;
+  modalidadeHash: string;
 }
 
 const pixKeyTypeOptions = [
@@ -98,13 +98,13 @@ const pixKeyTypeOptions = [
   { id: "4", name: "Chave Aleatória" }
 ];
 
-export default function PropostaCliente({ cpf, simulacao, produtoHash }: PropostaClienteProps) {
+export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
 
-  console.log("produto 1: ", produtoHash);
+  console.log("produto 1: ", modalidadeHash);
 
   // console.log("cliente", cliente);
 
@@ -187,13 +187,13 @@ export default function PropostaCliente({ cpf, simulacao, produtoHash }: Propost
     .slice(0, 2);
   const endereco = Object.values(cliente.enderecos || {})[0];
 
-  console.log("produto 2: ", produtoHash);
+  console.log("produto 2: ", modalidadeHash);
 
   const gerarProposta = async () => {
     try {
       const body = {
         cliente_hash: cliente.hash,
-        produto_hash: produtoHash, // precisa ser definido em algum lugar (ex: dropdown selecionado)
+        produto_hash: modalidadeHash, // precisa ser definido em algum lugar (ex: dropdown selecionado)
         promotora_hash: selectedPromotoraId, // idem
         responsavel_hash: idUser, // idem
         cliente_banco_hash: cliente.dados_bancarios?.[0]?.id ?? null, // primeiro dado bancário
