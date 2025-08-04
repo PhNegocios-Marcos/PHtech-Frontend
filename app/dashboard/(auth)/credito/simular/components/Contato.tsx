@@ -6,130 +6,122 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 
-const contatoSchema = z.object({
-  ddd1: z.string().min(2, "DDD obrigatório"),
-  numero1: z.string().min(8, "Número obrigatório"),
-  ddd2: z.string().min(2, "DDD obrigatório"),
-  numero2: z.string().min(8, "Número obrigatório"),
-  email: z.string().email("Email inválido")
-});
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  mask?: string;
+}
 
-type ContatoFormData = z.infer<typeof contatoSchema>;
+interface ContatoProps {
+  formData: any;
+  onChange: (path: string, value: any) => void;
+  fields: FormField[];
+}
 
-export const Telefones = forwardRef(
-  (
-    {
-      formData,
-      onChange
-    }: {
-      formData: any;
-      onChange: (path: string, value: any) => void;
-    },
-    ref
-  ) => {
-    const {
-      register,
-      watch,
-      formState: { errors },
-      trigger
-    } = useForm<ContatoFormData>({
-      resolver: zodResolver(contatoSchema),
-      defaultValues: {
-        ddd1: formData.telefones[0].ddd,
-        numero1: formData.telefones[0].numero,
-        ddd2: formData.telefones[1].ddd,
-        numero2: formData.telefones[1].numero,
-        email: formData.emails[0].email
+export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProps, ref) => {
+  // Criar schema dinamicamente
+  const createSchema = () => {
+    const schemaObj: Record<string, any> = {};
+
+    fields.forEach((field) => {
+      if (field.required) {
+        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
+        if (field.name.includes("email")) {
+          schemaObj[field.name] = schemaObj[field.name].email("Email inválido");
+        }
+      } else {
+        schemaObj[field.name] = z.string().optional();
       }
     });
 
-    // Observa os valores e sincroniza com onChange externo
-    const watchedValues = watch();
+    return z.object(schemaObj);
+  };
 
-    useEffect(() => {
-      onChange("telefones.0.ddd", watchedValues.ddd1);
-    }, [watchedValues.ddd1]);
+  const contatoSchema = createSchema();
+  type ContatoFormData = z.infer<typeof contatoSchema>;
 
-    useEffect(() => {
-      onChange("telefones.0.numero", watchedValues.numero1);
-    }, [watchedValues.numero1]);
+  const {
+    register,
+    watch,
+    formState: { errors },
+    trigger
+  } = useForm<ContatoFormData>({
+    resolver: zodResolver(contatoSchema),
+    defaultValues: {
+      ddd1: formData.telefones[0].ddd,
+      numero1: formData.telefones[0].numero,
+      ddd2: formData.telefones[1].ddd,
+      numero2: formData.telefones[1].numero,
+      email: formData.emails[0].email
+    }
+  });
 
-    useEffect(() => {
-      onChange("telefones.1.ddd", watchedValues.ddd2);
-    }, [watchedValues.ddd2]);
+  // Observa os valores e sincroniza com onChange externo
+  const watchedValues = watch();
 
-    useEffect(() => {
-      onChange("telefones.1.numero", watchedValues.numero2);
-    }, [watchedValues.numero2]);
+  useEffect(() => {
+    onChange("telefones.0.ddd", watchedValues.ddd1);
+  }, [watchedValues.ddd1]);
 
-    useEffect(() => {
-      onChange("emails.0.email", watchedValues.email);
-    }, [watchedValues.email]);
+  useEffect(() => {
+    onChange("telefones.0.numero", watchedValues.numero1);
+  }, [watchedValues.numero1]);
 
-    useImperativeHandle(ref, () => ({
-      validate: () => trigger()
-    }));
+  useEffect(() => {
+    onChange("telefones.1.ddd", watchedValues.ddd2);
+  }, [watchedValues.ddd2]);
 
-    // console.log(watchedValues.email)
+  useEffect(() => {
+    onChange("telefones.1.numero", watchedValues.numero2);
+  }, [watchedValues.numero2]);
+
+  useEffect(() => {
+    onChange("emails.0.email", watchedValues.email);
+  }, [watchedValues.email]);
+
+  useImperativeHandle(ref, () => ({
+    validate: () => trigger()
+  }));
+
+  const renderField = (field: FormField) => {
+    const fieldName = field.name;
+    const value = watchedValues[fieldName] || "";
+    const errorMessage = errors[field.name]?.message;
+    const isErrorString = typeof errorMessage === "string";
 
     return (
-      <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
-        <div className="grid grid-cols-4 gap-2">
-          <div className="col-span-1">
-            <span>DDD</span>
-            <Input
-              {...register("ddd1")}
-              placeholder="DDD"
-              className="mt-1"
-            />
-            {errors.ddd1 && <p className="text-sm text-red-600">{errors.ddd1.message}</p>}
-          </div>
-
-          <div className="col-span-3">
-            <span>Número</span>
-            <Input
-              {...register("numero1")}
-              placeholder="Número"
-              className="mt-1"
-            />
-            {errors.numero1 && <p className="text-sm text-red-600">{errors.numero1.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-2">
-          <div className="col-span-1">
-            <span>DDD</span>
-            <Input
-              {...register("ddd2")}
-              placeholder="DDD"
-              className="mt-1"
-            />
-            {errors.ddd2 && <p className="text-sm text-red-600">{errors.ddd2.message}</p>}
-          </div>
-
-          <div className="col-span-3">
-            <span>Número</span>
-            <Input
-              {...register("numero2")}
-              placeholder="Número"
-              className="mt-1"
-            />
-            {errors.numero2 && <p className="text-sm text-red-600">{errors.numero2.message}</p>}
-          </div>
-        </div>
-
-        <div>
-          <span>E-mail</span>
-          <Input
-            {...register("email")}
-            placeholder="E-mail"
-            className="full"
-          />
-          {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
-        </div>
-      </form>
+      <div key={field.name} className={field.name.includes("ddd") ? "col-span-1" : "col-span-3"}>
+        <span>{field.label}</span>
+        <Input
+          {...register(fieldName)}
+          placeholder={field.label}
+          value={value}
+          onChange={(e) => {
+            onChange(
+              `telefones.${fieldName.includes("1") ? "0" : "1"}.${fieldName.includes("ddd") ? "ddd" : "numero"}`,
+              e.target.value
+            );
+          }}
+          className="mt-1"
+        />
+        {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+      </div>
     );
-  }
-);
+  };
+
+  return (
+    <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
+      <div className="grid grid-cols-4 gap-2">
+        {fields.filter((f) => f.name.includes("1")).map(renderField)}
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {fields.filter((f) => f.name.includes("2")).map(renderField)}
+      </div>
+      <div>{fields.filter((f) => f.name === "email").map(renderField)}</div>
+    </form>
+  );
+});
 
 Telefones.displayName = "Telefones";

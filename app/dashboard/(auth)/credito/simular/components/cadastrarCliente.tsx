@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DadosPessoais } from "./DadosPessoais";
@@ -19,8 +19,23 @@ interface CadastrarProps {
   onClienteExiste?: (cpf: string) => void;
 }
 
+interface FormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  options?: { value: string; label: string }[];
+}
+
+interface FormSection {
+  section: string;
+  fields: FormField[];
+}
+
 export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarProps) {
   const { token } = useAuth();
+  const [formSections, setFormSections] = useState<FormSection[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState("DadosPessoais");
   const tabOrder = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
@@ -37,6 +52,7 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     DadosBancarios: bancariosRef
   };
 
+  // Estado inicial do formulário
   const [formData, setFormData] = useState({
     nome: "",
     nome_pai: "",
@@ -83,6 +99,31 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
   });
 
+  useEffect(() => {
+    const fetchFormFields = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/form-fields`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch form fields");
+        }
+        
+        const data = await response.json();
+        setFormSections(data);
+      } catch (error) {
+        console.error("Error fetching form fields:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFormFields();
+  }, [token]);
+
   const handleChange = (path: string, value: any) => {
     const keys = path.split(".");
     setFormData((prev) => {
@@ -109,7 +150,6 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
   };
 
-  // Função sanitiza só os campos necessários, preservando email com pontos
   const sanitizeFormData = (data: any): any => {
     const clone = structuredClone(data);
 
@@ -121,7 +161,6 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
       "telefones.1.ddd",
       "telefones.1.numero",
       "enderecos.0.cep"
-      // Adicione outros campos que precisar limpar
     ];
 
     limparCampos.forEach((path) => {
@@ -178,6 +217,10 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
   };
 
+  if (loading) {
+    return <div>Carregando formulário...</div>;
+  }
+
   return (
     <div>
       <Card className="mx-auto mt-10 max-w-6xl space-y-6 p-6">
@@ -192,16 +235,36 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
           </TabsList>
 
           <TabsContent value="DadosPessoais">
-            <DadosPessoais ref={dadosPessoaisRef} formData={formData} onChange={handleChange} />
+            <DadosPessoais 
+              ref={dadosPessoaisRef} 
+              formData={formData} 
+              onChange={handleChange}
+              fields={formSections.find(s => s.section === "DadosPessoais")?.fields || []}
+            />
           </TabsContent>
           <TabsContent value="Contato">
-            <Telefones ref={telefonesRef} formData={formData} onChange={handleChange} />
+            <Telefones 
+              ref={telefonesRef} 
+              formData={formData} 
+              onChange={handleChange}
+              fields={formSections.find(s => s.section === "Contato")?.fields || []}
+            />
           </TabsContent>
           <TabsContent value="Enderecos">
-            <Enderecos ref={enderecosRef} formData={formData} onChange={handleChange} />
+            <Enderecos 
+              ref={enderecosRef} 
+              formData={formData} 
+              onChange={handleChange}
+              fields={formSections.find(s => s.section === "Enderecos")?.fields || []}
+            />
           </TabsContent>
           <TabsContent value="DadosBancarios">
-            <DadosBancarios ref={bancariosRef} formData={formData} onChange={handleChange} />
+            <DadosBancarios 
+              ref={bancariosRef} 
+              formData={formData} 
+              onChange={handleChange}
+              fields={formSections.find(s => s.section === "DadosBancarios")?.fields || []}
+            />
           </TabsContent>
         </Tabs>
 
