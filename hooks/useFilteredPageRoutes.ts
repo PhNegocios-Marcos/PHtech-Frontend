@@ -74,7 +74,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Averbador_criar",
       "Orgaos_criar",
       "Produto_Ver",
-      "Produto_Roteiro_Operacional"
+      "Produto_Roteiro_Operacional",
+      "Esteria_Ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

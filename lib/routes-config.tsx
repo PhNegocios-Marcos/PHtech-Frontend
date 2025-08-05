@@ -85,6 +85,12 @@ export const page_routes: PageRoutesType[] = [
             title: "Produto",
             href: "/dashboard/cadastro/produto"
             // icon: "ChartPie"
+          },
+          {
+            id: "Esteria_Ver",
+            title: "Esteira",
+            href: "/dashboard/cadastro/esteira"
+            // icon: "ChartPie"
           }
         ]
       },
