@@ -10,7 +10,7 @@ import Esteira from "./components/esteira";
 export default function Page() {
   const podeCriar = useHasPermission("Subprodutos_criar");
   const [isEsteiraOpen, setIsEsteiraOpen] = useState(false);
-  const [selectedEsteiraHash, setSelectedEsteiraHash] = useState<string | null>(null);
+  const [selectedEsteiraHash, setSelectedEsteiraHash] = useState<any>(null);
 
   const handleOpenEsteira = (hash: string) => {
     setSelectedEsteiraHash(hash);
@@ -32,12 +32,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isEsteiraOpen && (
-          <Esteira 
-          esteiraHash={selectedEsteiraHash} 
-          onClose={handleCloseEsteira} 
-        />
-      )}
+      {!isEsteiraOpen && <Esteira esteira={selectedEsteiraHash} esteiraHash={selectedEsteiraHash} onClose={handleCloseEsteira} />}
     </ProtectedRoute>
   );
 }

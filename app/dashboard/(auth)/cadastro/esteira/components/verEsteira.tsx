@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableItem } from "./SortableItem";
+import { Esteira } from "./esteira";
 
 interface Etapa {
   relacionamento_esteira_estapa_hash: string;
@@ -32,13 +33,14 @@ interface Etapa {
 }
 
 interface ProcessoEsteiraViewerProps {
+  esteira: Esteira;
   esteiraHash: string;
   onClose: () => void;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteiraHash, onClose }) => {
+const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, esteiraHash, onClose }) => {
   const [etapas, setEtapas] = useState<Etapa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,6 +55,8 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteiraHa
       coordinateGetter: sortableKeyboardCoordinates
     })
   );
+
+//   console.log("esteiraHash", esteira.esteira_hash)
 
   useEffect(() => {
     const fetchEtapas = async () => {

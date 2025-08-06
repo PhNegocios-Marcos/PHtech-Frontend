@@ -49,13 +49,13 @@ export type Esteira = {
 };
 
 export type Props = {
-  esteira?: Esteira;
+  esteira: Esteira;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
   esteiraHash: any;
 };
 
-export default function Produto({ onClose, esteiraHash }: Props) {
+export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   const { token } = useAuth();
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -70,6 +70,8 @@ export default function Produto({ onClose, esteiraHash }: Props) {
   const handleSelectTaxa = (taxa: Esteira) => {
     setSelectedTaxa(taxa);
   };
+
+  console.log("esteiraData: ", esteiraData[0].esteira_hash)
 
   const columns: ColumnDef<Esteira>[] = [
     { accessorKey: "esteira_nome", header: "Nome" },
@@ -206,7 +208,7 @@ export default function Produto({ onClose, esteiraHash }: Props) {
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <VerEsteira esteiraHash={esteiraHash} onClose={onClose} />
+        <VerEsteira esteiraHash={esteiraHash} esteira={esteira} onClose={onClose} />
       ) : (
         <Card className="">
           <CardHeader>
