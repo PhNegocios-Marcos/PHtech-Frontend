@@ -38,12 +38,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { generateMeta } from "@/lib/utils";
-import  VerEsteira  from "./verEsteira"
+import VerEsteira from "./verEsteira";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Esteira = {
   esteira_hash: any;
-  esteira_nome: string;
+  esteira_nome: any;
   esteira_status: number;
   esteira_usuario_criacao: string;
 };
@@ -68,10 +68,11 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const handleSelectTaxa = (taxa: Esteira) => {
-    setSelectedTaxa(taxa);
+    setSelectedTaxa(taxa.esteira_hash);
+    setEsteiraData(taxa.esteira_nome);
   };
 
-  console.log("esteiraData: ", esteiraData[0].esteira_hash)
+  // console.log("esteiraData: ", esteiraData);
 
   const columns: ColumnDef<Esteira>[] = [
     { accessorKey: "esteira_nome", header: "Nome" },
@@ -204,11 +205,10 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
     }
   });
 
-
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <VerEsteira esteiraHash={esteiraHash} esteira={esteira} onClose={onClose} />
+        <VerEsteira esteiraHash={selectedTaxa} esteiraData={esteiraData} onClose={onClose} />
       ) : (
         <Card className="">
           <CardHeader>

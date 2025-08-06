@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DndContext,
   closestCenter,
@@ -17,8 +18,9 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableItem } from "./SortableItem";
-import { Esteira } from "./esteira";
-
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 interface Etapa {
   relacionamento_esteira_estapa_hash: string;
   info_etapa: {
@@ -33,17 +35,22 @@ interface Etapa {
 }
 
 interface ProcessoEsteiraViewerProps {
-  esteira: Esteira;
-  esteiraHash: string;
+  esteiraHash: any;
+  esteiraData: any;
   onClose: () => void;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, esteiraHash, onClose }) => {
+const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
+  esteiraData,
+  esteiraHash,
+  onClose
+}) => {
   const [etapas, setEtapas] = useState<Etapa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { token } = useAuth();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -56,12 +63,15 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, 
     })
   );
 
-//   console.log("esteiraHash", esteira.esteira_hash)
-
   useEffect(() => {
     const fetchEtapas = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/processo-esteira/ver/${esteiraHash}`);
+        const res = await axios.get(`${API_BASE_URL}/processo-esteira/ver/${esteiraHash}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
         setEtapas(res.data);
       } catch (err) {
         setError("Erro ao carregar etapas");
@@ -114,30 +124,33 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, 
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Gerenciamento de Etapas</h1>
-        <button onClick={onClose} className="rounded bg-gray-200 px-4 py-2 hover:bg-gray-300">
+    <Card>
+      <CardHeader className="mb-6 flex items-center justify-between">
+        <CardTitle>
+          Gerenciamento de Etapas: <span className="text-primary">{esteiraData}</span>
+        </CardTitle>
+        <Button onClick={onClose} variant="outline">
           Fechar
-        </button>
-      </div>
-      
-      <div className="mb-6 flex justify-between">
-        <div className="flex space-x-2">
+        </Button>
+      </CardHeader>
+
+      <CardContent className="mb-6 flex justify-between">
+        {/* <div className="flex space-x-2">
           <button className="rounded bg-blue-500 px-4 py-2 text-white">Todas</button>
           <button className="rounded bg-gray-200 px-4 py-2">Pendentes</button>
           <button className="rounded bg-green-500 px-4 py-2 text-white">Finalizadas</button>
-        </div>
+        </div> */}
 
-        <div className="flex space-x-2">
-          <input type="text" placeholder="Buscar etapa..." className="rounded border px-4 py-2" />
-          <button
-            className="rounded bg-purple-500 px-4 py-2 text-white"
-            onClick={updateServerOrder}>
-            Salvar Ordem
-          </button>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            placeholder="Buscar etapa..."
+            // value={globalFilter}
+            // onChange={(event) => setGlobalFilter(event.target.value)}
+            className="max-w-sm"
+          />
+          <Button onClick={updateServerOrder}>Salvar Ordem</Button>
         </div>
-      </div>
+      </CardContent>
 
       <DndContext
         sensors={sensors}
@@ -149,7 +162,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, 
             .filter((e) => e.info_etapa.etapa_visualiza === 1)
             .map((e) => e.relacionamento_esteira_estapa_hash)}
           strategy={verticalListSortingStrategy}>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 mx-6">
             {etapas
               .filter((e) => e.info_etapa.etapa_visualiza === 1)
               .sort((a, b) => a.indice_etapa - b.indice_etapa)
@@ -157,8 +170,8 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, 
                 <SortableItem
                   key={etapa.relacionamento_esteira_estapa_hash}
                   id={etapa.relacionamento_esteira_estapa_hash}>
-                  <div
-                    className={`rounded-lg border p-4 ${getColorClass(etapa.info_etapa.etapa_cor)}`}>
+                  <Card
+                    className="p-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="text-lg font-bold">{etapa.info_etapa.etapa_nome}</h3>
@@ -177,24 +190,24 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({ esteira, 
                     </div>
 
                     <div className="mt-4 flex justify-between">
-                      <button className="text-blue-500 hover:text-blue-700">Editar</button>
-                      <button className="text-red-500 hover:text-red-700">Remover</button>
+                      <Button variant="outline">Editar</Button>
+                      <Button>Remover</Button>
                     </div>
-                  </div>
+                  </Card>
                 </SortableItem>
               ))}
           </div>
         </SortableContext>
       </DndContext>
-    </div>
+    </Card>
   );
 };
 
 // Funções auxiliares corrigidas
-function getColorClass(cor: string): string {
-  if (cor.startsWith("bg-")) return cor;
-  return `bg-${cor}-100 border-${cor}-300`;
-}
+// function getColorClass(cor: string): string {
+//   if (cor.startsWith("bg-")) return cor;
+//   return `bg-${cor}-100 border-${cor}-300`;
+// }
 
 function getStatusText(situacao: string): string {
   switch (situacao) {
