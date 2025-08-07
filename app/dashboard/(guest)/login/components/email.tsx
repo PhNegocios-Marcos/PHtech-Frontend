@@ -22,10 +22,10 @@ export default function OTPForm({ onNext }: OTPFormProps) {
   const router = useRouter();
 
   async function handleVerify(pin: string) {
-    if (!token) {
-      alert("Token de autenticação não encontrado.");
-      return;
-    }
+    // if (!token) {
+    //   alert("Token de autenticação não encontrado.");
+    //   return;
+    // }
 
     setLoading(true);
     setError("");

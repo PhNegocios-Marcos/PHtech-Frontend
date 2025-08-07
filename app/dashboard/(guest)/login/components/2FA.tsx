@@ -125,7 +125,35 @@ export default function FA({ onNext, onClose }: FAProps) {
       console.error("Erro ao fazer Login: ", err);
     }
 
-    router.push("/dashboard/default"); // fallback
+    // router.push("/dashboard/default"); // fallback
+        if (!token) {
+      alert("Token de autenticação não encontrado.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/email_2fa_gerar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Erro ao solicitar TOKEN EMAIL.");
+        return;
+      }
+
+      console.log("email enviado com sucesso:", data);
+      setEmailModal("email");
+    } catch (error: any) {
+      console.error("Erro ao solicitar email:", error);
+      alert("Erro na solicitação de email.");
+    }
   };
 
   const handleGoogle = async () => {
