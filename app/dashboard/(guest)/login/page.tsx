@@ -37,6 +37,7 @@ export default function Page() {
     setSenha,
     setPromotoras,
     setId,
+    setUsa_2fa,
     setTokenExpiraEm,
     setToken,
     setUserData,
@@ -82,10 +83,12 @@ export default function Page() {
       // Armazenando dados no contexto
       setMail(email);
       setSenha(password);
+      setUsa_2fa(data?.usa_2fa);
       setPromotoras(data?.promotoras);
       setId(data?.id); // ✅ ID do usuário sendo armazenado
 
       // console.log("data: ", data)
+      // console.log("usa_2fa page: ", data?.usa_2fa);
 
       // console.log(id)
 
@@ -107,9 +110,7 @@ export default function Page() {
   const closeModal = () => setCurrentModal("none");
   const closeModalPromotoras = () => setPromotorasModal("none");
 
-  const imageList = [
-    "/login01.jpg"
-  ];
+  const imageList = ["/login01.jpg"];
 
   const randomImage = useMemo(() => {
     const index = Math.floor(Math.random() * imageList.length);

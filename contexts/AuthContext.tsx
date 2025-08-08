@@ -17,6 +17,8 @@ type AuthContextType = {
   setToken: (token: string | null) => void;
   tokenExpiraEm: string | null;
   setTokenExpiraEm: (expira: string | null) => void;
+  usa_2fa: any | null;
+  setUsa_2fa: (id: any | null) => void;
   id: string | null;
   setId: (id: string | null) => void;
   email: string | null;
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setTokenState] = useState<string | null>(null);
   const [tokenExpiraEm, setTokenExpiraEmState] = useState<string | null>(null);
   const [id, setIdState] = useState<string | null>(null);
+  const [usa_2fa, setUsa_2fa] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [senha, setSenhaState] = useState<string | null>(null);
   const [userDataState, setUserDataState] = useState<UserData | null>(null);
@@ -104,9 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setId = (newId: string | null) => {
     setIdState(newId);
-    newId
-      ? sessionStorage.setItem("auth_id", newId)
-      : sessionStorage.removeItem("auth_id");
+    newId ? sessionStorage.setItem("auth_id", newId) : sessionStorage.removeItem("auth_id");
   };
 
   const setMail = (newEmail: string | null) => {
@@ -198,6 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTokenExpiraEm,
         id,
         setId,
+        usa_2fa,
+        setUsa_2fa,
         email,
         setMail,
         senha,
@@ -218,8 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSelectedPromotoraLogo: setSelectedPromotoraTemasStateLogo,
         selectedPromotoraNome,
         setSelectedPromotoraNome
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

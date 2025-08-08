@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -6,9 +6,9 @@ import { Combobox } from "./Combobox";
 import { Button } from "@/components/ui/button";
 import FA from "./2FA";
 import { ArrowLeftIcon } from "lucide-react";
+import Login from "./login";
 
-
-type ModalType = "none" | "2FA" | "modal2" | "promotoras";
+type ModalType = "none" | "2FA" | "modal2" | "promotoras" | "usa_2fa";
 
 type OTPFormProps = {
   onNext?: () => void;
@@ -33,6 +33,7 @@ type Promotora = {
 
 export default function OTPForm({ onNext, onClose }: OTPFormProps) {
   const {
+    usa_2fa,
     promotoras,
     setSelectedPromotoraId,
     setSelectedPromotoraTemas,
@@ -43,6 +44,7 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
   const router = useRouter();
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
   const [selectedPromotora, setSelectedPromotora] = useState<Promotora | null>(null);
+  const [usa2faModal, setUsa2faModal] = useState<ModalType>("none");
 
   const handleConfirm = () => {
     if (selectedPromotora && selectedPromotora.id) {
@@ -64,6 +66,16 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
 
   const closeModal = () => setCurrentModal("none");
 
+  // console.log("usa_2fa: ", usa_2fa);
+
+  useEffect(() => {
+    if (usa_2fa === 0) {
+      setUsa2faModal("usa_2fa");
+    } else {
+      setCurrentModal("2FA");
+    }
+  }, [usa_2fa]);
+
   return (
     <div>
       {currentModal === "none" && (
@@ -84,7 +96,7 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
               searchFields={["nome"]}
             />
           </CardContent>
-          
+
           <Button className="mx-auto w-20" onClick={handleConfirm}>
             Confirmar
           </Button>
@@ -97,9 +109,11 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
         </Card>
       )}
 
-      {currentModal === "2FA" && (
+      {currentModal === "2FA" ? (
         <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-      )}
+      ) : usa2faModal === "usa_2fa" ? (
+        <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
+      ) : null}
     </div>
   );
 }

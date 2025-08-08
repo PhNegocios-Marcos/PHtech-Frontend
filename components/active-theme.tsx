@@ -57,7 +57,7 @@ export function ActiveThemeProvider({
   // Aplica tema com base no tema da promotora
   useEffect(() => {
     if (promotoraId !== "") {
-      console.log("não tem promotora");
+      // console.log("não tem promotora");
     }
 
     if (selectedPromotoraTemas) {

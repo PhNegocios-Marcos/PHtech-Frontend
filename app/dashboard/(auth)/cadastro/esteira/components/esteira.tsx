@@ -66,6 +66,9 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
 
   const [selectedTaxa, setSelectedTaxa] = useState<Esteira | null>(null);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   const handleSelectTaxa = (taxa: Esteira) => {
     setSelectedTaxa(taxa.esteira_hash);
@@ -208,7 +211,12 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   return (
     <div className="space-y-6">
       {selectedTaxa ? (
-        <VerEsteira esteiraHash={selectedTaxa} esteiraData={esteiraData} onClose={onClose} />
+        <VerEsteira
+          isOpen={isCadastroOpen}
+          esteiraHash={selectedTaxa}
+          esteiraData={esteiraData}
+          onClose={onClose}
+        />
       ) : (
         <Card className="">
           <CardHeader>

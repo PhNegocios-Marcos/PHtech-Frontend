@@ -12,10 +12,7 @@ export default function Page() {
   const [isEsteiraOpen, setIsEsteiraOpen] = useState(false);
   const [selectedEsteiraHash, setSelectedEsteiraHash] = useState<any>(null);
 
-  const handleOpenEsteira = (hash: string) => {
-    setSelectedEsteiraHash(hash);
-    setIsEsteiraOpen(true);
-  };
+  const handleOpenEsteira = () => setSelectedEsteiraHash(false);
 
   const handleCloseEsteira = () => {
     setIsEsteiraOpen(false);
@@ -27,12 +24,16 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-        {podeCriar && (
-          <Button onClick={() => handleOpenEsteira("hash-da-esteira-padrao")}>Novo Produto</Button>
-        )}
+        {podeCriar && <Button onClick={() => setSelectedEsteiraHash(true)}>Nova Esteira</Button>}
       </div>
 
-      {!isEsteiraOpen && <Esteira esteira={selectedEsteiraHash} esteiraHash={selectedEsteiraHash} onClose={handleCloseEsteira} />}
+      {!isEsteiraOpen && (
+        <Esteira
+          esteira={selectedEsteiraHash}
+          esteiraHash={selectedEsteiraHash}
+          onClose={handleCloseEsteira}
+        />
+      )}
     </ProtectedRoute>
   );
 }

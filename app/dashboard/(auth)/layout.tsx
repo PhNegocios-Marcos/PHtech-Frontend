@@ -12,9 +12,9 @@ const TEMPO_INATIVIDADE = 30 * 60 * 1000; // 30 minutos
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { token, tokenExpiraEm, loading } = useAuth();
+  const { token, tokenExpiraEm, loading, userData } = useAuth();
 
-  // console.log(token)
+  // console.log("userData: ", userData)
 
   // console.log("localStorage", localStorage);
   // console.log("sessionStorage", sessionStorage);
