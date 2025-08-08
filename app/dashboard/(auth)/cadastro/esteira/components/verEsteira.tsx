@@ -409,13 +409,13 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
         <SortableContext
           items={filteredEtapas.map((e) => e.relacionamento_esteira_estapa_hash)}
           strategy={verticalListSortingStrategy}>
-          <div className="mx-6 grid grid-cols-1 gap-4">
+          <div className="mx-6 grid grid-cols-1">
             {filteredEtapas.map((etapa) => (
               <div
                 key={etapa.relacionamento_esteira_estapa_hash}
                 id={etapa.relacionamento_esteira_estapa_hash}>
-                <Card className="p-4">
-                  <div className="flex items-start justify-between">
+                {/* <Card className="p-4"> */}
+                  {/* <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-lg font-bold">{etapa.info_etapa.etapa_nome}</h3>
                       <p className="text-sm">Ordem: {etapa.indice_etapa}</p>
@@ -430,14 +430,12 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                       }`}>
                       {getStatusText(etapa.info_etapa.etapa_situacao)}
                     </span>
-                  </div>
+                  </div> */}
 
                   {etapa.processos && etapa.processos.length > 0 && (
                     <div className="mt-4 space-y-6">
                       {etapa.processos.map((processo) => (
-                        <div
-                          key={processo.dadosStatusEtapa.status_hash}
-                          className="rounded bg-gray-50 p-4">
+                        <Card key={processo.dadosStatusEtapa.status_hash} className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium">{processo.dadosStatusEtapa.status_nome}</p>
@@ -447,8 +445,15 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                                 </p>
                               )}
                             </div>
-                            <span className="rounded bg-gray-200 px-2 py-1 text-xs">
-                              {processo.dadosStatusEtapa.status_tipo === "AND" ? "AND" : "OR"}
+                            <span
+                              className={`rounded-full px-2 py-1 text-xs ${
+                                processo.dadosStatusEtapa.status_tipo === "0"
+                                  ? "bg-yellow-200 text-yellow-800"
+                                  : processo.dadosStatusEtapa.status_tipo === "1"
+                                    ? "bg-orange-200 text-orange-800"
+                                    : "bg-green-200 text-green-800"
+                              }`}>
+                              {getStatusText(processo.dadosStatusEtapa.status_tipo)}
                             </span>
                           </div>
                           <div className="mt-4">
@@ -675,11 +680,11 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </div>
+                        </Card>
                       ))}
                     </div>
                   )}
-                </Card>
+                {/* </Card> */}
               </div>
             ))}
           </div>
@@ -691,11 +696,11 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
 
 function getStatusText(situacao: string): string {
   switch (situacao) {
-    case "0":
+    case "PEN":
       return "Pendente";
-    case "1":
+    case "AND":
       return "Em Andamento";
-    case "2":
+    case "FIN":
       return "Finalizado";
     default:
       return "Desconhecido";
