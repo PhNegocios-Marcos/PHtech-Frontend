@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
-import { ThemeCustomizerPanel } from "../theme-customizer";
-import { DEFAULT_THEME, THEMES } from "@/lib/themes";
+import { THEMES } from "@/lib/themes";
 import { useThemeConfig } from "@/components/active-theme";
 import {
   Select,
@@ -21,7 +20,6 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
 import {
   Form,
   FormControl,
@@ -31,16 +29,21 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
+import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
 
 const masterOptions = [
   { id: "1", name: "Sim" },
   { id: "0", name: "Não" }
+];
+
+const usaParadaOptions = [
+  { id: "1", nome: "Sim" },
+  { id: "0", nome: "Não" }
 ];
 
 const schema = z
@@ -49,23 +52,11 @@ const schema = z
     razao_social: z.string().min(1, "Razão social é obrigatória"),
     cnpj: z.string().regex(cnpjRegex, "CNPJ inválido"),
     master: z.enum(["0", "1"]),
+    usa_parada: z.enum(["0", "1"]),
     radius: z.string().optional(),
     master_id: z.string().uuid().optional(),
-    rateio_master: z
-      .number({
-        required_error: "Rateio Master é obrigatório",
-        invalid_type_error: "Rateio Master deve ser número"
-      })
-      .min(0)
-      .max(100),
-    rateio_sub: z
-      .number({
-        required_error: "Rateio Sub é obrigatório",
-        invalid_type_error: "Rateio Sub deve ser número"
-      })
-      .min(0)
-      .max(100)
-      .optional(),
+    rateio_master: z.number().min(0).max(100),
+    rateio_sub: z.number().min(0).max(100).optional(),
     file: z.any().optional()
   })
   .refine(
@@ -99,6 +90,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       razao_social: "",
       cnpj: "",
       master: "1",
+      usa_parada: "0",
       rateio_master: 100,
       rateio_sub: 0,
       master_id: undefined,
@@ -111,12 +103,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const masterValue = methods.watch("master");
 
   const [files, setFiles] = useState<any[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
   const [master, setMaster] = useState<any[]>([]);
-  const [masterSelecionado, setMasterSelecionado] = useState<any | null>(null);
-
-  const { theme, setTheme } = useThemeConfig();
+  const { theme } = useThemeConfig();
+  const [selectedPreset, setSelectedPreset] = useState(theme.preset);
 
   const onDrop = (acceptedFiles: File[]) => {
     const imageFiles = acceptedFiles.map((file) => ({
@@ -134,47 +123,29 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     maxSize: 5 * 1024 * 1024
   });
 
-  const handleDragEnter = () => setIsDragging(true);
-  const handleDragLeave = () => setIsDragging(false);
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const [selectedPreset, setSelectedPreset] = useState(theme.preset); // tema selecionado, mas não aplicado
-
   function handlePreset(value: any) {
-    setSelectedPreset(value); // salva o valor sem aplicar
+    setSelectedPreset(value);
   }
 
   useEffect(() => {
-    async function fetchConvenios() {
+    async function fetchMasters() {
       try {
         const res = await axios.get(`${API_BASE_URL}/promotora/listar`, {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           }
         });
-
-        const data = res.data.map((c: any) => ({
-          id: c.id,
-          nome: c.nome
-        }));
-
-        console.log("data: ", data);
+        const data = res.data.map((c: any) => ({ id: c.id, nome: c.nome }));
         setMaster(data);
       } catch (error) {
-        console.error("Erro ao carregar convênios", error);
+        console.error("Erro ao carregar masters", error);
       }
     }
-
-    fetchConvenios();
+    fetchMasters();
   }, [token]);
 
   if (!isOpen) return null;
@@ -184,25 +155,13 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       alert("Token não encontrado. Faça login.");
       return;
     }
-
-    const payload = {
-      nome: data.nome,
-      razao_social: data.razao_social,
-      cnpj: Number(data.cnpj.replace(/\D/g, "")),
-      master: Number(data.master),
-      rateio_master: data.rateio_master,
-      ...(data.master === "0" && {
-        master_id: masterSelecionado?.id,
-        rateio_sub: data.rateio_sub
-      })
-    };
-
     try {
       const formData = new FormData();
       formData.append("nome", data.nome);
       formData.append("razao_social", data.razao_social);
       formData.append("cnpj", data.cnpj.replace(/\D/g, ""));
       formData.append("master", data.master);
+      formData.append("usa_parada", data.usa_parada);
       formData.append("rateio_master", data.rateio_master.toString());
 
       if (data.master === "0") {
@@ -210,13 +169,11 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
         formData.append("master_id", data.master_id ?? "");
       }
 
-      // Adiciona os campos do tema
       formData.append("tema[preset]", theme.preset);
       formData.append("tema[radius]", theme.radius);
       formData.append("tema[scale]", theme.scale);
       formData.append("tema[contentLayout]", theme.contentLayout);
 
-      // Adiciona a imagem (se houver)
       if (files.length > 0 && files[0].file) {
         formData.append("tema[image]", files[0].file);
       }
@@ -237,14 +194,86 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     }
   }
 
+  // Campos fixos
+  const formFields = [
+    { name: "nome", label: "Nome", placeholder: "Digite o nome" },
+    { name: "razao_social", label: "Razão Social", placeholder: "Digite a razão social" },
+    {
+      name: "cnpj",
+      label: "CNPJ",
+      placeholder: "00.000.000/0000-00",
+      maxLength: 18,
+      format: (val: string) =>
+        val
+          .replace(/\D/g, "")
+          .replace(/^(\d{2})(\d)/, "$1.$2")
+          .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2")
+          .slice(0, 18)
+    },
+    {
+      name: "rateio_master",
+      label: "Rateio Master (%)",
+      type: "number",
+      min: 0,
+      max: 100,
+      step: 0.01
+    },
+    {
+      name: "usa_parada",
+      label: "Usa Parada",
+      component: (field: any) => (
+        <Combobox
+          data={usaParadaOptions}
+          displayField="nome"
+          value={usaParadaOptions.find((item) => item.id === field.value) ?? null}
+          onChange={(selected) => field.onChange(selected?.id ?? "0")}
+          placeholder="Selecione"
+        />
+      )
+    }
+  ];
+
+  // Campos condicionais (aparece só se master === "0")
+  const conditionalFields = [
+    {
+      name: "master_id",
+      label: "Master ID (UUID)",
+      component: (field: any) => (
+        <Combobox
+          data={master}
+          displayField="nome"
+          value={master.find((item) => item.id === field.value) ?? null}
+          onChange={(selected) => field.onChange(selected?.id)}
+          searchFields={["nome"]}
+          placeholder="Selecione uma promotora"
+        />
+      ),
+      showIf: () => masterValue === "0"
+    },
+    {
+      name: "rateio_sub",
+      label: "Rateio Sub (%)",
+      component: (field: any) => (
+        <Input
+          type="number"
+          step="0.01"
+          min={0}
+          max={100}
+          {...field}
+          onChange={(e) => field.onChange(Number(e.target.value))}
+        />
+      ),
+      showIf: () => masterValue === "0"
+    }
+  ];
+
   return (
     <>
       <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+      <aside className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
@@ -253,8 +282,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
+                  className="text-2xl font-bold hover:text-gray-900">
                   ×
                 </button>
               </div>
@@ -265,63 +293,55 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormField
-                      control={methods.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite o nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Campos fixos */}
+                    {formFields.map(
+                      ({
+                        name,
+                        label,
+                        placeholder,
+                        type,
+                        min,
+                        max,
+                        step,
+                        maxLength,
+                        format,
+                        component
+                      }) => (
+                        <FormField
+                          key={name}
+                          control={methods.control}
+                          name={name as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{label}</FormLabel>
+                              <FormControl>
+                                {component ? (
+                                  component(field)
+                                ) : (
+                                  <Input
+                                    type={type || "text"}
+                                    placeholder={placeholder}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    maxLength={maxLength}
+                                    {...field}
+                                    onChange={(e) => {
+                                      let value = e.target.value;
+                                      if (format) value = format(value);
+                                      field.onChange(type === "number" ? Number(value) : value);
+                                    }}
+                                  />
+                                )}
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )
+                    )}
 
-                    <FormField
-                      control={methods.control}
-                      name="razao_social"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Razão Social</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite a razão social" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="cnpj"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CNPJ</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="00.000.000/0000-00"
-                              {...field}
-                              maxLength={18}
-                              onChange={(e) => {
-                                let val = e.target.value;
-                                val = val
-                                  .replace(/\D/g, "")
-                                  .replace(/^(\d{2})(\d)/, "$1.$2")
-                                  .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-                                  .replace(/\.(\d{3})(\d)/, ".$1/$2")
-                                  .replace(/(\d{4})(\d)/, "$1-$2")
-                                  .slice(0, 18);
-                                field.onChange(val);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
+                    {/* Campo master */}
                     <FormField
                       control={methods.control}
                       name="master"
@@ -342,93 +362,25 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                       )}
                     />
 
-                    <FormField
-                      control={methods.control}
-                      name="rateio_master"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Rateio Master (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min={0}
-                              max={100}
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Campos condicionais */}
+                    {conditionalFields
+                      .filter((f) => f.showIf())
+                      .map(({ name, label, component }) => (
+                        <FormField
+                          key={name}
+                          control={methods.control}
+                          name={name as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{label}</FormLabel>
+                              <FormControl>{component(field)}</FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
 
-                    <FormField
-                      control={methods.control}
-                      name="master_id"
-                      render={({ field }) => (
-                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
-                          <FormLabel>Master ID (UUID)</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={master}
-                              displayField="nome"
-                              value={master.find((item) => item.id === field.value) ?? null}
-                              onChange={(selected) => {
-                                field.onChange(selected?.id);
-                              }}
-                              searchFields={["nome"]}
-                              placeholder="Selecione uma promotora"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="rateio_sub"
-                      render={({ field }) => (
-                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
-                          <FormLabel>Rateio Sub (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min={0}
-                              max={100}
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="master_id"
-                      render={({ field }) => (
-                        <FormItem className={masterValue === "0" ? "" : "hidden"}>
-                          <FormLabel>Master ID (UUID)</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={master}
-                              displayField="nome"
-                              value={master.find((item) => item.id === field.value) ?? null}
-                              onChange={(selected) => {
-                                field.onChange(selected?.id);
-                              }}
-                              searchFields={["nome"]}
-                              placeholder="Selecione uma promotora"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Seletor de tema */}
                     <div className="flex flex-col gap-4">
                       <Label>Theme preset:</Label>
                       <Select value={selectedPreset} onValueChange={handlePreset}>
@@ -443,7 +395,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                                   <span
                                     key={key}
                                     className="size-2 rounded-full"
-                                    style={{ backgroundColor: color }}></span>
+                                    style={{ backgroundColor: color }}
+                                  />
                                 ))}
                               </div>
                               {theme.name}
@@ -457,17 +410,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                   {/* Upload de imagens */}
                   <div className="mt-6">
                     <CardTitle>Imagens</CardTitle>
-                    <div
-                      onDragEnter={handleDragEnter}
-                      onDragLeave={handleDragLeave}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                      className="border-input data-[dragging=true]:bg-accent/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors">
-                      <input
-                        {...getInputProps()}
-                        className="sr-only"
-                        aria-label="Upload image file"
-                      />
+                    <div className="border-input relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors">
+                      <input {...getInputProps()} className="sr-only" />
                       {files.length > 0 ? (
                         <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-4">
                           {files.map((file) => (
@@ -501,7 +445,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                             variant="outline"
                             className="mt-4"
                             onClick={openFileDialog}>
-                            <UploadIcon className="-ms-1 opacity-60" aria-hidden="true" />
+                            <UploadIcon className="-ms-1 opacity-60" />
                             Selecionar imagens
                           </Button>
                         </div>
