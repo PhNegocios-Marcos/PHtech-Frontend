@@ -68,11 +68,16 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
-  const handleCloseCadastro = () => setIsCadastroOpen(false);
+  // Função para fechar o componente VerEsteira
+  const handleClose = () => {
+    setSelectedTaxa(null); // Reseta a seleção para fechar o VerEsteira
+    setIsCadastroOpen(false); // Opcional: reseta o estado isCadastroOpen
+    onClose(); // Chama a função onClose passada pelo componente pai, se necessário
+  };
 
   const handleSelectTaxa = (taxa: Esteira) => {
-    setSelectedTaxa(taxa.esteira_hash);
-    setEsteiraData(taxa.esteira_nome);
+    setSelectedTaxa(taxa); // Define o item selecionado
+    setIsCadastroOpen(true); // Abre o componente VerEsteira
   };
 
   // console.log("esteiraData: ", esteiraData);
@@ -213,9 +218,9 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
       {selectedTaxa ? (
         <VerEsteira
           isOpen={isCadastroOpen}
-          esteiraHash={selectedTaxa}
-          esteiraData={esteiraData}
-          onClose={onClose}
+          esteiraHash={selectedTaxa.esteira_hash} // Use selectedTaxa.esteira_hash
+          esteiraData={selectedTaxa.esteira_nome} // Pass the nome as a string
+          onClose={handleClose}
         />
       ) : (
         <Card className="">

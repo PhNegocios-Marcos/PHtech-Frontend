@@ -6,13 +6,15 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CampoBoasVindas from "@/components/boasvindas";
 import Esteira from "./components/esteira";
+import CadatroEsteira from "./components/cadastrarEsteira";
 
 export default function Page() {
   const podeCriar = useHasPermission("Subprodutos_criar");
   const [isEsteiraOpen, setIsEsteiraOpen] = useState(false);
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const [selectedEsteiraHash, setSelectedEsteiraHash] = useState<any>(null);
 
-  const handleOpenEsteira = () => setSelectedEsteiraHash(false);
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   const handleCloseEsteira = () => {
     setIsEsteiraOpen(false);
@@ -24,7 +26,7 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-        {podeCriar && <Button onClick={() => setSelectedEsteiraHash(true)}>Nova Esteira</Button>}
+        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Nova Esteira</Button>}
       </div>
 
       {!isEsteiraOpen && (
@@ -34,6 +36,8 @@ export default function Page() {
           onClose={handleCloseEsteira}
         />
       )}
+
+      <CadatroEsteira isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }

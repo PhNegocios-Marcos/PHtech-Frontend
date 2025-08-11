@@ -50,6 +50,7 @@ import {
   CircleIcon
 } from "@radix-ui/react-icons";
 
+// Tipos de dados
 interface Etapa {
   relacionamento_esteira_estapa_hash: string;
   info_etapa: {
@@ -112,10 +113,38 @@ interface ProcessoEsteiraViewerProps {
 interface TextoLimitadoProps {
   texto?: any;
   limite?: any;
-  sufixo?: any; // Opcional (default: "...")
+  sufixo?: any;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Configurações para os campos de status
+const STATUS_FIELDS = [
+  {
+    field: "esteira_acao_status_atual",
+    label: "Status Atual:",
+    placeholder: "Selecione um status"
+  },
+  { field: "esteira_acao_status_aprova", label: "Status Aprovação:", placeholder: "Nenhum" },
+  { field: "esteira_acao_status_reprova", label: "Status Reprovação:", placeholder: "Nenhum" },
+  { field: "esteira_acao_status_pendencia", label: "Status Pendência:", placeholder: "Nenhum" }
+];
+
+// Configurações para as notificações
+const NOTIFICATION_TYPES = [
+  { key: "cadastro", label: "Cadastro PEN", icons: [EnvelopeOpenIcon, EnvelopeClosedIcon] },
+  { key: "responsavel", label: "Responsável", icons: [PersonIcon, AvatarIcon] },
+  { key: "aprovar", label: "Aprovar", icons: [CheckCircledIcon, CircleIcon] }
+];
+
+// Configurações para as ações disponíveis
+const AVAILABLE_ACTIONS = [
+  { field: "esteira_acao_paradinha", label: "Paradinha" },
+  { field: "esteira_acao_reinicio", label: "Reinício" },
+  { field: "esteira_acao_edita_cadastro", label: "Edita Cadastro" },
+  { field: "esteira_acao_anexa_arquivo", label: "Anexa Arquivo" },
+  { field: "esteira_acao_resolve_pendencia", label: "Resolve Pendência" }
+];
 
 const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   esteiraData,
@@ -151,8 +180,6 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   };
 
   const handleLocalStatusChange = (acaoHash: string, field: string, newValue: string) => {
-    // const truncatedValue = value.slice(0, 20);
-
     setEtapas((prevEtapas) =>
       prevEtapas.map((etapa) => ({
         ...etapa,
@@ -186,7 +213,6 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   const fetchEtapas = async () => {
     try {
       setLoading(true);
-
       const resEtapas = await axios.get(`${API_BASE_URL}/processo-esteira/ver/${esteiraHash}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -334,7 +360,6 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   }) => {
     const [open, setOpen] = useState(false);
 
-    // Exibe texto truncado no trigger do combobox
     const displayValue = value
       ? (statusList.find((status) => status.status_hash === value)?.status_nome || "").slice(
           0,
@@ -432,24 +457,6 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
               <div
                 key={etapa.relacionamento_esteira_estapa_hash}
                 id={etapa.relacionamento_esteira_estapa_hash}>
-                {/* <Card className="p-4"> */}
-                {/* <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">{etapa.info_etapa.etapa_nome}</h3>
-                      <p className="text-sm">Ordem: {etapa.indice_etapa}</p>
-                    </div>
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs ${
-                        etapa.info_etapa.etapa_situacao === "0"
-                          ? "bg-yellow-200 text-yellow-800"
-                          : etapa.info_etapa.etapa_situacao === "1"
-                            ? "bg-orange-200 text-orange-800"
-                            : "bg-green-200 text-green-800"
-                      }`}>
-                      {getStatusText(etapa.info_etapa.etapa_situacao)}
-                    </span>
-                  </div> */}
-
                 {etapa.processos && etapa.processos.length > 0 && (
                   <div className="mt-4 space-y-6">
                     {etapa.processos.map((processo) => (
@@ -475,60 +482,22 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                           </span>
                         </div>
                         <div className="">
-                          {/* <h4 className="text-md mb-2 font-semibold">Configuração de Status</h4> */}
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Status Atual:</Label>
-                              <StatusCombobox
-                                value={
-                                  processo.dadosAcaoStatusAtual.esteira_acao_status_atual || ""
-                                }
-                                placeholder="Selecione um status"
-                                field="esteira_acao_status_atual"
-                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                onValueChange={handleLocalStatusChange}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Status Aprovação:</Label>
-                              <StatusCombobox
-                                value={
-                                  processo.dadosAcaoStatusAtual.esteira_acao_status_aprova || ""
-                                }
-                                placeholder="Nenhum"
-                                field="esteira_acao_status_aprova"
-                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                onValueChange={handleLocalStatusChange}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Status Reprovação:</Label>
-                              <StatusCombobox
-                                value={
-                                  processo.dadosAcaoStatusAtual.esteira_acao_status_reprova || ""
-                                }
-                                placeholder="Nenhum"
-                                field="esteira_acao_status_reprova"
-                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                onValueChange={handleLocalStatusChange}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Status Pendência:</Label>
-                              <StatusCombobox
-                                value={
-                                  processo.dadosAcaoStatusAtual.esteira_acao_status_pendencia || ""
-                                }
-                                placeholder="Nenhum"
-                                field="esteira_acao_status_pendencia"
-                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                onValueChange={handleLocalStatusChange}
-                              />
-                            </div>
+                            {STATUS_FIELDS.map(({ field, label, placeholder }) => (
+                              <div className="space-y-2" key={field}>
+                                <Label className="text-sm font-medium">{label}</Label>
+                                <StatusCombobox
+                                  value={processo.dadosAcaoStatusAtual[field] || ""}
+                                  placeholder={placeholder}
+                                  field={field}
+                                  acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
+                                  onValueChange={handleLocalStatusChange}
+                                />
+                              </div>
+                            ))}
                           </div>
                         </div>
 
-                        {/* Seção modificada para usar dropdown */}
                         <div className="mt-4">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -548,139 +517,48 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                                   </h4>
                                   <div className="flex flex-col items-start space-y-2">
                                     <div className="flex space-x-4">
-                                      <Button
-                                        variant="outline"
-                                        className={`flex items-center space-x-2 ${
-                                          selectedNotifications.includes("cadastro")
-                                            ? "bg-red-500 text-white"
-                                            : ""
-                                        }`}
-                                        onClick={() => handleNotificationToggle("cadastro")}>
-                                        {selectedNotifications.includes("cadastro") ? (
-                                          <EnvelopeOpenIcon className="h-4 w-4" />
-                                        ) : (
-                                          <EnvelopeClosedIcon className="h-4 w-4" />
-                                        )}
-                                        <span>Cadastro PEN</span>
-                                      </Button>
-
-                                      <Button
-                                        variant="outline"
-                                        className={`flex items-center space-x-2 ${
-                                          selectedNotifications.includes("responsavel")
-                                            ? "bg-red-500 text-white"
-                                            : ""
-                                        }`}
-                                        onClick={() => handleNotificationToggle("responsavel")}>
-                                        {selectedNotifications.includes("responsavel") ? (
-                                          <PersonIcon className="h-4 w-4" />
-                                        ) : (
-                                          <AvatarIcon className="h-4 w-4" />
-                                        )}
-                                        <span>Responsável</span>
-                                      </Button>
-
-                                      <Button
-                                        variant="outline"
-                                        className={`flex items-center space-x-2 ${
-                                          selectedNotifications.includes("aprovar")
-                                            ? "bg-red-500 text-white"
-                                            : ""
-                                        }`}
-                                        onClick={() => handleNotificationToggle("aprovar")}>
-                                        {selectedNotifications.includes("aprovar") ? (
-                                          <CheckCircledIcon className="h-4 w-4" />
-                                        ) : (
-                                          <CircleIcon className="h-4 w-4" />
-                                        )}
-                                        <span>Aprovar</span>
-                                      </Button>
+                                      {NOTIFICATION_TYPES.map(
+                                        ({ key, label, icons: [ActiveIcon, InactiveIcon] }) => (
+                                          <Button
+                                            key={key}
+                                            variant="outline"
+                                            className={`flex items-center space-x-2 ${
+                                              selectedNotifications.includes(key)
+                                                ? "bg-red-500 text-white"
+                                                : ""
+                                            }`}
+                                            onClick={() => handleNotificationToggle(key)}>
+                                            {selectedNotifications.includes(key) ? (
+                                              <ActiveIcon className="h-4 w-4" />
+                                            ) : (
+                                              <InactiveIcon className="h-4 w-4" />
+                                            )}
+                                            <span>{label}</span>
+                                          </Button>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="min-w-0">
                                   <h4 className="text-md mb-2 font-semibold">Ações Disponíveis</h4>
                                   <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={
-                                          processo.dadosAcaoStatusAtual.esteira_acao_paradinha === 1
-                                        }
-                                        onCheckedChange={() =>
-                                          handleCheckboxChange(
-                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
-                                            "esteira_acao_paradinha",
-                                            processo.dadosAcaoStatusAtual.esteira_acao_paradinha
-                                          )
-                                        }
-                                      />
-                                      <Label>Paradinha</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={
-                                          processo.dadosAcaoStatusAtual.esteira_acao_reinicio === 1
-                                        }
-                                        onCheckedChange={() =>
-                                          handleCheckboxChange(
-                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
-                                            "esteira_acao_reinicio",
-                                            processo.dadosAcaoStatusAtual.esteira_acao_reinicio
-                                          )
-                                        }
-                                      />
-                                      <Label>Reinício</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={
-                                          processo.dadosAcaoStatusAtual
-                                            .esteira_acao_edita_cadastro === 1
-                                        }
-                                        onCheckedChange={() =>
-                                          handleCheckboxChange(
-                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
-                                            "esteira_acao_edita_cadastro",
-                                            processo.dadosAcaoStatusAtual
-                                              .esteira_acao_edita_cadastro
-                                          )
-                                        }
-                                      />
-                                      <Label>Edita Cadastro</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={
-                                          processo.dadosAcaoStatusAtual
-                                            .esteira_acao_anexa_arquivo === 1
-                                        }
-                                        onCheckedChange={() =>
-                                          handleCheckboxChange(
-                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
-                                            "esteira_acao_anexa_arquivo",
-                                            processo.dadosAcaoStatusAtual.esteira_acao_anexa_arquivo
-                                          )
-                                        }
-                                      />
-                                      <Label>Anexa Arquivo</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        checked={
-                                          processo.dadosAcaoStatusAtual
-                                            .esteira_acao_resolve_pendencia === 1
-                                        }
-                                        onCheckedChange={() =>
-                                          handleCheckboxChange(
-                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
-                                            "esteira_acao_resolve_pendencia",
-                                            processo.dadosAcaoStatusAtual
-                                              .esteira_acao_resolve_pendencia
-                                          )
-                                        }
-                                      />
-                                      <Label>Resolve Pendência</Label>
-                                    </div>
+                                    {AVAILABLE_ACTIONS.map(({ field, label }) => (
+                                      <div className="flex items-center space-x-2" key={field}>
+                                        <Checkbox
+                                          checked={processo.dadosAcaoStatusAtual[field] === 1}
+                                          onCheckedChange={() =>
+                                            handleCheckboxChange(
+                                              processo.dadosAcaoStatusAtual
+                                                .esteira_acao_status_hash,
+                                              field,
+                                              processo.dadosAcaoStatusAtual[field]
+                                            )
+                                          }
+                                        />
+                                        <Label>{label}</Label>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
@@ -691,7 +569,6 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                     ))}
                   </div>
                 )}
-                {/* </Card> */}
               </div>
             ))}
           </div>
