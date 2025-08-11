@@ -113,7 +113,7 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
         <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
       ) : usa2faModal === "usa_2fa" ? (
         <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-      ) : null}
+       ) : null}
     </div>
   );
 }

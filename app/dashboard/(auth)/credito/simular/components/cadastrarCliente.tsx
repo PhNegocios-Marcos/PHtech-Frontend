@@ -102,10 +102,13 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
   useEffect(() => {
     const fetchFormFields = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/form-fields`, {
+        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
+          // body: {
+            
+          // }
         });
         
         if (!response.ok) {

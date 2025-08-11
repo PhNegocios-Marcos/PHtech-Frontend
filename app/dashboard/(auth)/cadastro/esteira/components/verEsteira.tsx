@@ -109,6 +109,12 @@ interface ProcessoEsteiraViewerProps {
   isOpen: boolean;
 }
 
+interface TextoLimitadoProps {
+  texto?: any;
+  limite?: any;
+  sufixo?: any; // Opcional (default: "...")
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
@@ -132,7 +138,21 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
     );
   };
 
+  const TextoLimitado = ({ texto, limite, sufixo = "..." }: TextoLimitadoProps) => {
+    if (!texto) return "";
+    return texto.length > limite ? `${texto.slice(0, limite)}${sufixo}` : texto;
+  };
+
+  const findStatusByTruncatedText = (texto: string) => {
+    return (
+      statusList.find((status) => status.status_nome.slice(0, 20) === texto.slice(0, 20))
+        ?.status_hash || ""
+    );
+  };
+
   const handleLocalStatusChange = (acaoHash: string, field: string, newValue: string) => {
+    // const truncatedValue = value.slice(0, 20);
+
     setEtapas((prevEtapas) =>
       prevEtapas.map((etapa) => ({
         ...etapa,
@@ -314,6 +334,18 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   }) => {
     const [open, setOpen] = useState(false);
 
+    // Exibe texto truncado no trigger do combobox
+    const displayValue = value
+      ? (statusList.find((status) => status.status_hash === value)?.status_nome || "").slice(
+          0,
+          20
+        ) +
+        (value &&
+        (statusList.find((status) => status.status_hash === value)?.status_nome || "").length > 20
+          ? "..."
+          : "")
+      : placeholder;
+
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -323,10 +355,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
             aria-expanded={open}
             className="w-full justify-between"
             disabled={disabled}>
-            {value
-              ? statusList.find((status) => status.status_hash === value)?.status_nome ||
-                placeholder
-              : placeholder}
+            {displayValue}
             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -335,23 +364,12 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
             <CommandInput placeholder="Buscar status..." className="h-9" />
             <CommandEmpty>Nenhum status encontrado.</CommandEmpty>
             <CommandGroup>
-              <CommandItem
-                value=""
-                onSelect={() => {
-                  onValueChange(acaoHash, field, "");
-                  setOpen(false);
-                }}>
-                Nenhum
-                <CheckIcon
-                  className={cn("ml-auto h-4 w-4", value === "" ? "opacity-100" : "opacity-0")}
-                />
-              </CommandItem>
               {statusList.map((status) => (
                 <CommandItem
                   key={status.status_hash}
                   value={status.status_hash}
-                  onSelect={(currentValue) => {
-                    onValueChange(acaoHash, field, currentValue);
+                  onSelect={() => {
+                    onValueChange(acaoHash, field, status.status_hash);
                     setOpen(false);
                   }}>
                   {status.status_nome}
@@ -380,7 +398,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
 
   return (
     <Card>
-      <CardHeader className="mb-6 flex items-center justify-between">
+      <CardHeader className="flex items-center justify-between">
         <CardTitle>
           Gerenciamento de Etapas: <span className="text-primary">{esteiraData}</span>
         </CardTitle>
@@ -389,7 +407,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
         </Button>
       </CardHeader>
 
-      <CardContent className="mb-6 flex justify-between">
+      <CardContent className="flex justify-between">
         <div className="grid grid-cols-2 gap-4">
           <Input
             placeholder="Buscar etapa..."
@@ -415,7 +433,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                 key={etapa.relacionamento_esteira_estapa_hash}
                 id={etapa.relacionamento_esteira_estapa_hash}>
                 {/* <Card className="p-4"> */}
-                  {/* <div className="flex items-start justify-between">
+                {/* <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-lg font-bold">{etapa.info_etapa.etapa_nome}</h3>
                       <p className="text-sm">Ordem: {etapa.indice_etapa}</p>
@@ -432,258 +450,247 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                     </span>
                   </div> */}
 
-                  {etapa.processos && etapa.processos.length > 0 && (
-                    <div className="mt-4 space-y-6">
-                      {etapa.processos.map((processo) => (
-                        <Card key={processo.dadosStatusEtapa.status_hash} className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{processo.dadosStatusEtapa.status_nome}</p>
-                              {processo.dadosAcaoStatusAtual.processo_nome && (
-                                <p className="text-sm text-gray-600">
-                                  {processo.dadosAcaoStatusAtual.processo_nome}
-                                </p>
-                              )}
-                            </div>
-                            <span
-                              className={`rounded-full px-2 py-1 text-xs ${
-                                processo.dadosStatusEtapa.status_tipo === "0"
-                                  ? "bg-yellow-200 text-yellow-800"
-                                  : processo.dadosStatusEtapa.status_tipo === "1"
-                                    ? "bg-orange-200 text-orange-800"
-                                    : "bg-green-200 text-green-800"
-                              }`}>
-                              {getStatusText(processo.dadosStatusEtapa.status_tipo)}
-                            </span>
+                {etapa.processos && etapa.processos.length > 0 && (
+                  <div className="mt-4 space-y-6">
+                    {etapa.processos.map((processo) => (
+                      <Card key={processo.dadosStatusEtapa.status_hash} className="gap-0 p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">
+                              {processo.dadosStatusEtapa.status_nome}{" "}
+                              <span className="text-sm text-gray-600">
+                                {processo.dadosAcaoStatusAtual.processo_nome}
+                              </span>{" "}
+                            </p>
                           </div>
-                          <div className="mt-4">
-                            <h4 className="text-md mb-2 font-semibold">Configuração de Status</h4>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">Status Atual:</Label>
-                                <StatusCombobox
-                                  value={
-                                    processo.dadosAcaoStatusAtual.esteira_acao_status_atual || ""
-                                  }
-                                  placeholder="Selecione um status"
-                                  field="esteira_acao_status_atual"
-                                  acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                  onValueChange={handleLocalStatusChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">Status Aprovação:</Label>
-                                <StatusCombobox
-                                  value={
-                                    processo.dadosAcaoStatusAtual.esteira_acao_status_aprova || ""
-                                  }
-                                  placeholder="Nenhum"
-                                  field="esteira_acao_status_aprova"
-                                  acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                  onValueChange={handleLocalStatusChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">Status Reprovação:</Label>
-                                <StatusCombobox
-                                  value={
-                                    processo.dadosAcaoStatusAtual.esteira_acao_status_reprova || ""
-                                  }
-                                  placeholder="Nenhum"
-                                  field="esteira_acao_status_reprova"
-                                  acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                  onValueChange={handleLocalStatusChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">Status Pendência:</Label>
-                                <StatusCombobox
-                                  value={
-                                    processo.dadosAcaoStatusAtual.esteira_acao_status_pendencia ||
-                                    ""
-                                  }
-                                  placeholder="Nenhum"
-                                  field="esteira_acao_status_pendencia"
-                                  acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
-                                  onValueChange={handleLocalStatusChange}
-                                />
-                              </div>
+                          <span
+                            className={`rounded-full px-2 py-1 text-xs ${
+                              processo.dadosStatusEtapa.status_tipo === "0"
+                                ? "bg-yellow-200 text-yellow-800"
+                                : processo.dadosStatusEtapa.status_tipo === "1"
+                                  ? "bg-orange-200 text-orange-800"
+                                  : "bg-green-200 text-green-800"
+                            }`}>
+                            {getStatusText(processo.dadosStatusEtapa.status_tipo)}
+                          </span>
+                        </div>
+                        <div className="">
+                          {/* <h4 className="text-md mb-2 font-semibold">Configuração de Status</h4> */}
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Status Atual:</Label>
+                              <StatusCombobox
+                                value={
+                                  processo.dadosAcaoStatusAtual.esteira_acao_status_atual || ""
+                                }
+                                placeholder="Selecione um status"
+                                field="esteira_acao_status_atual"
+                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
+                                onValueChange={handleLocalStatusChange}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Status Aprovação:</Label>
+                              <StatusCombobox
+                                value={
+                                  processo.dadosAcaoStatusAtual.esteira_acao_status_aprova || ""
+                                }
+                                placeholder="Nenhum"
+                                field="esteira_acao_status_aprova"
+                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
+                                onValueChange={handleLocalStatusChange}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Status Reprovação:</Label>
+                              <StatusCombobox
+                                value={
+                                  processo.dadosAcaoStatusAtual.esteira_acao_status_reprova || ""
+                                }
+                                placeholder="Nenhum"
+                                field="esteira_acao_status_reprova"
+                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
+                                onValueChange={handleLocalStatusChange}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Status Pendência:</Label>
+                              <StatusCombobox
+                                value={
+                                  processo.dadosAcaoStatusAtual.esteira_acao_status_pendencia || ""
+                                }
+                                placeholder="Nenhum"
+                                field="esteira_acao_status_pendencia"
+                                acaoHash={processo.dadosAcaoStatusAtual.esteira_acao_status_hash}
+                                onValueChange={handleLocalStatusChange}
+                              />
                             </div>
                           </div>
+                        </div>
 
-                          {/* Seção modificada para usar dropdown */}
-                          <div className="mt-4">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full justify-between">
-                                  Configurações Avançadas
-                                  <ChevronDownIcon className="ml-2 h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                className="w-[var(--radix-dropdown-menu-trigger-width)] max-w-full p-4"
-                                align="start"
-                                sideOffset={5}>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                  <div className="min-w-0">
-                                    <h4 className="text-md mb-2 font-semibold">
-                                      Opções de Notificação
-                                    </h4>
-                                    <div className="flex flex-col items-start space-y-2">
-                                      <div className="flex space-x-4">
-                                        <Button
-                                          variant="outline"
-                                          className={`flex items-center space-x-2 ${
-                                            selectedNotifications.includes("cadastro")
-                                              ? "bg-red-500 text-white"
-                                              : ""
-                                          }`}
-                                          onClick={() => handleNotificationToggle("cadastro")}>
-                                          {selectedNotifications.includes("cadastro") ? (
-                                            <EnvelopeOpenIcon className="h-4 w-4" />
-                                          ) : (
-                                            <EnvelopeClosedIcon className="h-4 w-4" />
-                                          )}
-                                          <span>Cadastro PEN</span>
-                                        </Button>
+                        {/* Seção modificada para usar dropdown */}
+                        <div className="mt-4">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" className="w-full justify-between">
+                                Configurações Avançadas
+                                <ChevronDownIcon className="ml-2 h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className="w-[var(--radix-dropdown-menu-trigger-width)] max-w-full p-4"
+                              align="start"
+                              sideOffset={5}>
+                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="min-w-0">
+                                  <h4 className="text-md mb-2 font-semibold">
+                                    Opções de Notificação
+                                  </h4>
+                                  <div className="flex flex-col items-start space-y-2">
+                                    <div className="flex space-x-4">
+                                      <Button
+                                        variant="outline"
+                                        className={`flex items-center space-x-2 ${
+                                          selectedNotifications.includes("cadastro")
+                                            ? "bg-red-500 text-white"
+                                            : ""
+                                        }`}
+                                        onClick={() => handleNotificationToggle("cadastro")}>
+                                        {selectedNotifications.includes("cadastro") ? (
+                                          <EnvelopeOpenIcon className="h-4 w-4" />
+                                        ) : (
+                                          <EnvelopeClosedIcon className="h-4 w-4" />
+                                        )}
+                                        <span>Cadastro PEN</span>
+                                      </Button>
 
-                                        <Button
-                                          variant="outline"
-                                          className={`flex items-center space-x-2 ${
-                                            selectedNotifications.includes("responsavel")
-                                              ? "bg-red-500 text-white"
-                                              : ""
-                                          }`}
-                                          onClick={() => handleNotificationToggle("responsavel")}>
-                                          {selectedNotifications.includes("responsavel") ? (
-                                            <PersonIcon className="h-4 w-4" />
-                                          ) : (
-                                            <AvatarIcon className="h-4 w-4" />
-                                          )}
-                                          <span>Responsável</span>
-                                        </Button>
+                                      <Button
+                                        variant="outline"
+                                        className={`flex items-center space-x-2 ${
+                                          selectedNotifications.includes("responsavel")
+                                            ? "bg-red-500 text-white"
+                                            : ""
+                                        }`}
+                                        onClick={() => handleNotificationToggle("responsavel")}>
+                                        {selectedNotifications.includes("responsavel") ? (
+                                          <PersonIcon className="h-4 w-4" />
+                                        ) : (
+                                          <AvatarIcon className="h-4 w-4" />
+                                        )}
+                                        <span>Responsável</span>
+                                      </Button>
 
-                                        <Button
-                                          variant="outline"
-                                          className={`flex items-center space-x-2 ${
-                                            selectedNotifications.includes("aprovar")
-                                              ? "bg-red-500 text-white"
-                                              : ""
-                                          }`}
-                                          onClick={() => handleNotificationToggle("aprovar")}>
-                                          {selectedNotifications.includes("aprovar") ? (
-                                            <CheckCircledIcon className="h-4 w-4" />
-                                          ) : (
-                                            <CircleIcon className="h-4 w-4" />
-                                          )}
-                                          <span>Aprovar</span>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="min-w-0">
-                                    <h4 className="text-md mb-2 font-semibold">
-                                      Ações Disponíveis
-                                    </h4>
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={
-                                            processo.dadosAcaoStatusAtual.esteira_acao_paradinha ===
-                                            1
-                                          }
-                                          onCheckedChange={() =>
-                                            handleCheckboxChange(
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_status_hash,
-                                              "esteira_acao_paradinha",
-                                              processo.dadosAcaoStatusAtual.esteira_acao_paradinha
-                                            )
-                                          }
-                                        />
-                                        <Label>Paradinha</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={
-                                            processo.dadosAcaoStatusAtual.esteira_acao_reinicio ===
-                                            1
-                                          }
-                                          onCheckedChange={() =>
-                                            handleCheckboxChange(
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_status_hash,
-                                              "esteira_acao_reinicio",
-                                              processo.dadosAcaoStatusAtual.esteira_acao_reinicio
-                                            )
-                                          }
-                                        />
-                                        <Label>Reinício</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={
-                                            processo.dadosAcaoStatusAtual
-                                              .esteira_acao_edita_cadastro === 1
-                                          }
-                                          onCheckedChange={() =>
-                                            handleCheckboxChange(
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_status_hash,
-                                              "esteira_acao_edita_cadastro",
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_edita_cadastro
-                                            )
-                                          }
-                                        />
-                                        <Label>Edita Cadastro</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={
-                                            processo.dadosAcaoStatusAtual
-                                              .esteira_acao_anexa_arquivo === 1
-                                          }
-                                          onCheckedChange={() =>
-                                            handleCheckboxChange(
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_status_hash,
-                                              "esteira_acao_anexa_arquivo",
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_anexa_arquivo
-                                            )
-                                          }
-                                        />
-                                        <Label>Anexa Arquivo</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={
-                                            processo.dadosAcaoStatusAtual
-                                              .esteira_acao_resolve_pendencia === 1
-                                          }
-                                          onCheckedChange={() =>
-                                            handleCheckboxChange(
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_status_hash,
-                                              "esteira_acao_resolve_pendencia",
-                                              processo.dadosAcaoStatusAtual
-                                                .esteira_acao_resolve_pendencia
-                                            )
-                                          }
-                                        />
-                                        <Label>Resolve Pendência</Label>
-                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        className={`flex items-center space-x-2 ${
+                                          selectedNotifications.includes("aprovar")
+                                            ? "bg-red-500 text-white"
+                                            : ""
+                                        }`}
+                                        onClick={() => handleNotificationToggle("aprovar")}>
+                                        {selectedNotifications.includes("aprovar") ? (
+                                          <CheckCircledIcon className="h-4 w-4" />
+                                        ) : (
+                                          <CircleIcon className="h-4 w-4" />
+                                        )}
+                                        <span>Aprovar</span>
+                                      </Button>
                                     </div>
                                   </div>
                                 </div>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
+                                <div className="min-w-0">
+                                  <h4 className="text-md mb-2 font-semibold">Ações Disponíveis</h4>
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={
+                                          processo.dadosAcaoStatusAtual.esteira_acao_paradinha === 1
+                                        }
+                                        onCheckedChange={() =>
+                                          handleCheckboxChange(
+                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
+                                            "esteira_acao_paradinha",
+                                            processo.dadosAcaoStatusAtual.esteira_acao_paradinha
+                                          )
+                                        }
+                                      />
+                                      <Label>Paradinha</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={
+                                          processo.dadosAcaoStatusAtual.esteira_acao_reinicio === 1
+                                        }
+                                        onCheckedChange={() =>
+                                          handleCheckboxChange(
+                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
+                                            "esteira_acao_reinicio",
+                                            processo.dadosAcaoStatusAtual.esteira_acao_reinicio
+                                          )
+                                        }
+                                      />
+                                      <Label>Reinício</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={
+                                          processo.dadosAcaoStatusAtual
+                                            .esteira_acao_edita_cadastro === 1
+                                        }
+                                        onCheckedChange={() =>
+                                          handleCheckboxChange(
+                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
+                                            "esteira_acao_edita_cadastro",
+                                            processo.dadosAcaoStatusAtual
+                                              .esteira_acao_edita_cadastro
+                                          )
+                                        }
+                                      />
+                                      <Label>Edita Cadastro</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={
+                                          processo.dadosAcaoStatusAtual
+                                            .esteira_acao_anexa_arquivo === 1
+                                        }
+                                        onCheckedChange={() =>
+                                          handleCheckboxChange(
+                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
+                                            "esteira_acao_anexa_arquivo",
+                                            processo.dadosAcaoStatusAtual.esteira_acao_anexa_arquivo
+                                          )
+                                        }
+                                      />
+                                      <Label>Anexa Arquivo</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        checked={
+                                          processo.dadosAcaoStatusAtual
+                                            .esteira_acao_resolve_pendencia === 1
+                                        }
+                                        onCheckedChange={() =>
+                                          handleCheckboxChange(
+                                            processo.dadosAcaoStatusAtual.esteira_acao_status_hash,
+                                            "esteira_acao_resolve_pendencia",
+                                            processo.dadosAcaoStatusAtual
+                                              .esteira_acao_resolve_pendencia
+                                          )
+                                        }
+                                      />
+                                      <Label>Resolve Pendência</Label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
                 {/* </Card> */}
               </div>
             ))}
