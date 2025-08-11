@@ -25,6 +25,7 @@ interface SimuladorFgtsProps {
   convenioHash: any;
   onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void;
   proutoName: string;
+  onProdutoIdReceived?: (produtoId: string) => void; // Nova prop opcional
 }
 
 interface ResultadoSimulacao {
@@ -45,7 +46,8 @@ export default function SimuladorFgts({
   onCadastrarCliente,
   convenioHash,
   categoriaHash,
-  proutoName
+  proutoName,
+  onProdutoIdReceived // Adicione aqui na desestruturação das props
 }: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
@@ -56,6 +58,7 @@ export default function SimuladorFgts({
   const [simulacaoSelecionadaKey, setSimulacaoSelecionadaKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showSimulateButton, setShowSimulateButton] = useState(true);
+  const [produtoId, setProdutoId] = useState<string | null>(null);
 
   const { token } = useAuth();
 
@@ -79,8 +82,6 @@ export default function SimuladorFgts({
         const data = response.data;
         const arrData = Array.isArray(data) ? data : [data];
 
-        console.log("data: ", data);
-
         const parsedSections: Section[] = arrData.map((item: any) => ({
           type: item.simulacao_campos_produtos_type,
           title: item.simulacao_campos_produtos_title,
@@ -92,22 +93,17 @@ export default function SimuladorFgts({
         setErrorMessage("");
         setShowSimulateButton(true);
 
-        if (parsedSections.length === 0) {
-          console.log("parsedSections null", parsedSections);
-          setErrorMessage("Não há relacionamento");
-          setShowSimulateButton(false);
+        // Captura o simulacao_campos_produtos_produto_id
+        if (arrData.length > 0 && arrData[0].simulacao_campos_produtos_produto_id) {
+          const id = arrData[0].simulacao_campos_produtos_produto_id;
+          setProdutoId(id);
+          if (onProdutoIdReceived) {
+            onProdutoIdReceived(id);
+          }
         }
       } catch (error: any) {
         console.error("Erro ao carregar campos da simulação:", error);
-
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data === null &&
-          error.response.data.error ===
-            // "Relacionamento nao possui campos configurados para a simulação"
-            setErrorMessage("Produto não possui campos configurados para a simulação")
-        ) {
+        if (error.response && error.response.data && error.response.data === null) {
           setErrorMessage("Produto não possui campos configurados para a simulação");
           setShowSimulateButton(false);
         } else {
@@ -118,7 +114,7 @@ export default function SimuladorFgts({
     }
 
     fetchSections();
-  }, [token]);
+  }, [token, modalidadeHash, categoriaHash, convenioHash, onProdutoIdReceived]);
 
   const handleChange = (key: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [key]: value }));
@@ -253,11 +249,12 @@ export default function SimuladorFgts({
   };
 
   // Cadastro aberto
-  if (abrirCadastro && formValues.cpf) {
+  if (abrirCadastro && formValues.cpf && produtoId) {
     return (
       <Cadastrar
         cpf={formValues.cpf}
         simulacao={resultado?.mensagem}
+        produtoId={produtoId} // Passe o produtoId aqui
         onCadastrado={(cpf, simulacao) => {
           setCpfProposta(cpf);
           setAbrirCadastro(false);
@@ -286,7 +283,9 @@ export default function SimuladorFgts({
   return (
     <div className="space-y-6">
       {errorMessage && (
-        <div className="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700 text-center">{errorMessage}</div>
+        <div className="mb-4 rounded-lg bg-red-100 p-4 text-center text-sm text-red-700">
+          {errorMessage}
+        </div>
       )}
 
       <div className="flex justify-end gap-4">

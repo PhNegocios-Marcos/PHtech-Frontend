@@ -52,7 +52,6 @@ import {
 
 // Tipos de dados
 interface Etapa {
-  relacionamento_esteira_estapa_hash: string;
   info_etapa: {
     etapa_hash: string;
     etapa_nome: string;
@@ -122,12 +121,12 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const STATUS_FIELDS = [
   {
     field: "esteira_acao_status_atual",
-    label: "Status Atual:",
+    label: "Atual:",
     placeholder: "Selecione um status"
   },
-  { field: "esteira_acao_status_aprova", label: "Status Aprovação:", placeholder: "Nenhum" },
-  { field: "esteira_acao_status_reprova", label: "Status Reprovação:", placeholder: "Nenhum" },
-  { field: "esteira_acao_status_pendencia", label: "Status Pendência:", placeholder: "Nenhum" }
+  { field: "esteira_acao_status_aprova", label: "Aprovação:", placeholder: "Nenhum" },
+  { field: "esteira_acao_status_reprova", label: "Reprovação:", placeholder: "Nenhum" },
+  { field: "esteira_acao_status_pendencia", label: " Pendência:", placeholder: "Nenhum" }
 ];
 
 // Configurações para as notificações
@@ -280,10 +279,10 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
     if (over && active.id !== over.id) {
       setEtapas((items) => {
         const oldIndex = items.findIndex(
-          (item) => item.relacionamento_esteira_estapa_hash === active.id
+          (item) => item.info_etapa.etapa_hash === active.id
         );
         const newIndex = items.findIndex(
-          (item) => item.relacionamento_esteira_estapa_hash === over.id
+          (item) => item.info_etapa.etapa_hash === over.id
         );
 
         const newItems = arrayMove(items, oldIndex, newIndex);
@@ -301,7 +300,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
       await axios.put(`${API_BASE_URL}/processo-esteira/ordem`, {
         esteira_hash: esteiraHash,
         etapas: etapas.map((e) => ({
-          relacionamento_hash: e.relacionamento_esteira_estapa_hash,
+          etapa_hash: e.info_etapa.etapa_hash,
           nova_ordem: e.indice_etapa
         }))
       });
@@ -450,13 +449,13 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
         onDragEnd={handleDragEnd}
         modifiers={[restrictToVerticalAxis]}>
         <SortableContext
-          items={filteredEtapas.map((e) => e.relacionamento_esteira_estapa_hash)}
+          items={filteredEtapas.map((e) => e.info_etapa.etapa_hash)}
           strategy={verticalListSortingStrategy}>
           <div className="mx-6 grid grid-cols-1">
             {filteredEtapas.map((etapa) => (
               <div
-                key={etapa.relacionamento_esteira_estapa_hash}
-                id={etapa.relacionamento_esteira_estapa_hash}>
+                key={etapa.info_etapa.etapa_hash}
+                id={etapa.info_etapa.etapa_hash}>
                 {etapa.processos && etapa.processos.length > 0 && (
                   <div className="mt-4 space-y-6">
                     {etapa.processos.map((processo) => (
@@ -580,11 +579,11 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
 
 function getStatusText(situacao: string): string {
   switch (situacao) {
-    case "PEN":
+    case "0":
       return "Pendente";
-    case "AND":
+    case "1":
       return "Em Andamento";
-    case "FIN":
+    case "2":
       return "Finalizado";
     default:
       return "Desconhecido";

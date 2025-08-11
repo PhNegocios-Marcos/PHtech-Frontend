@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DadosPessoais } from "./DadosPessoais";
@@ -9,14 +10,17 @@ import { Enderecos } from "./Enderecos";
 import { DadosBancarios } from "./DadosBancarios";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { Produto } from "../../../cadastro/produto/components/ProdutoModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CadastrarProps {
   cpf: string;
   simulacao: any;
+  produto?: Produto;
   onCadastrado?: (cpf: string, simulacao: any) => void;
   onClienteExiste?: (cpf: string) => void;
+  produtoId?: string;
 }
 
 interface FormField {
@@ -32,9 +36,15 @@ interface FormSection {
   fields: FormField[];
 }
 
-export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarProps) {
+export default function Cadastrar({
+  cpf,
+  simulacao,
+  onCadastrado,
+  produto,
+  produtoId
+}: CadastrarProps) {
   const { token } = useAuth();
-  const [formSections, setFormSections] = useState<FormSection[]>([]);
+  const [formSections, setFormSections] = useState<FormSection[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState("DadosPessoais");
@@ -44,6 +54,11 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
   const telefonesRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const enderecosRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const bancariosRef = useRef<{ validate: () => Promise<boolean> }>(null);
+
+  const getFields = (sectionName: string) => {
+    if (!formSections) return []; // Isso cobre o caso de formSections ser null
+    return formSections.find((s) => s.section === sectionName)?.fields || [];
+  };
 
   const tabRefs: Record<string, React.RefObject<any>> = {
     DadosPessoais: dadosPessoaisRef,
@@ -99,33 +114,55 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     }
   });
 
+  console.log("protudoId: ", produtoId);
+
+  // 2. Alternativa com seções pré-definidas (se não puder listar dinamicamente)
   useEffect(() => {
-    const fetchFormFields = async () => {
+    const fetchDefaultSections = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-          // body: {
-            
-          // }
-        });
-        
-        if (!response.ok) {
-          throw new Error("Failed to fetch form fields");
+        if (!produtoId) {
+          setFormSections([]);
+          setLoading(false);
+          return;
         }
-        
-        const data = await response.json();
-        setFormSections(data);
+
+        // Lista de seções que podem existir
+        const possibleSections = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
+
+        // Busca apenas as seções que existem para este produto
+        const sectionsData = await Promise.all(
+          possibleSections.map(async (sectionName) => {
+            try {
+              const response = await axios.get(
+                `${API_BASE_URL}/produto-config-campos-cadastro/listar`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                  params: { produto_hash: produtoId, section: sectionName }
+                }
+              );
+              return {
+                section: sectionName,
+                fields: response.data.fields
+              };
+            } catch {
+              // Se a seção não existir, retorna null (será filtrado depois)
+              return null;
+            }
+          })
+        );
+
+        // Filtra seções não encontradas
+        setFormSections(sectionsData.filter(Boolean) as FormSection[]);
       } catch (error) {
-        console.error("Error fetching form fields:", error);
+        console.error("Erro ao buscar seções:", error);
+        setFormSections([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFormFields();
-  }, [token]);
+    fetchDefaultSections();
+  }, [token, produtoId]);
 
   const handleChange = (path: string, value: any) => {
     const keys = path.split(".");
@@ -197,22 +234,17 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
     try {
       const sanitizedData = sanitizeFormData(formData);
 
-      const resPost = await fetch(`${API_BASE_URL}/cliente`, {
-        method: "POST",
+      const response = await axios.post(`${API_BASE_URL}/cliente`, sanitizedData, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(sanitizedData)
+        }
       });
 
-      if (resPost.ok) {
+      if (response.status === 200) {
         alert("Cliente cadastrado com sucesso!");
         if (onCadastrado) {
           onCadastrado(formData.cpf, simulacao);
         }
-      } else {
-        alert("Erro ao cadastrar cliente.");
       }
     } catch (err) {
       console.error("Erro ao cadastrar cliente:", err);
@@ -238,35 +270,35 @@ export default function Cadastrar({ cpf, simulacao, onCadastrado }: CadastrarPro
           </TabsList>
 
           <TabsContent value="DadosPessoais">
-            <DadosPessoais 
-              ref={dadosPessoaisRef} 
-              formData={formData} 
+            <DadosPessoais
+              ref={dadosPessoaisRef}
+              formData={formData}
               onChange={handleChange}
-              fields={formSections.find(s => s.section === "DadosPessoais")?.fields || []}
+              fields={getFields("DadosPessoais")}
             />
           </TabsContent>
           <TabsContent value="Contato">
-            <Telefones 
-              ref={telefonesRef} 
-              formData={formData} 
+            <Telefones
+              ref={telefonesRef}
+              formData={formData}
               onChange={handleChange}
-              fields={formSections.find(s => s.section === "Contato")?.fields || []}
+              fields={getFields("DadosPessoais")}
             />
           </TabsContent>
           <TabsContent value="Enderecos">
-            <Enderecos 
-              ref={enderecosRef} 
-              formData={formData} 
+            <Enderecos
+              ref={enderecosRef}
+              formData={formData}
               onChange={handleChange}
-              fields={formSections.find(s => s.section === "Enderecos")?.fields || []}
+              fields={getFields("DadosPessoais")}
             />
           </TabsContent>
           <TabsContent value="DadosBancarios">
-            <DadosBancarios 
-              ref={bancariosRef} 
-              formData={formData} 
+            <DadosBancarios
+              ref={bancariosRef}
+              formData={formData}
               onChange={handleChange}
-              fields={formSections.find(s => s.section === "DadosBancarios")?.fields || []}
+              fields={getFields("DadosPessoais")}
             />
           </TabsContent>
         </Tabs>

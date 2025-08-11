@@ -21,7 +21,7 @@ export default function CreditSimular() {
   const [convenios, setConvenios] = useState<Modalidade[]>([]);
   const [modalidades, setModalidades] = useState<Modalidade[]>([]);
   const [categorias, setCategorias] = useState<Modalidade[]>([]);
-
+  const [produtoId, setProdutoId] = useState<string | null>(null);
   const [selectedConvenio, setSelectedConvenio] = useState<Modalidade | null>(null);
   const [selectedModalidade, setSelectedModalidade] = useState<Modalidade | null>(null);
   const [selectedCategoria, setSelectedCategoria] = useState<Modalidade | null>(null);
@@ -109,7 +109,7 @@ export default function CreditSimular() {
 
         setCategorias(formatado);
         setSelectedCategoria(null);
-        setSimuladorKey(prev => prev + 1); // Incrementa a chave quando novas categorias são carregadas
+        setSimuladorKey((prev) => prev + 1); // Incrementa a chave quando novas categorias são carregadas
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
       }
@@ -170,7 +170,7 @@ export default function CreditSimular() {
                   value={selectedCategoria}
                   onChange={(val) => {
                     setSelectedCategoria(val);
-                    setSimuladorKey(prev => prev + 1); // Incrementa a chave quando nova categoria é selecionada
+                    setSimuladorKey((prev) => prev + 1); // Incrementa a chave quando nova categoria é selecionada
                   }}
                   label="Tipo de Operação"
                   placeholder="Selecione o Tipo de Operação"
@@ -186,11 +186,14 @@ export default function CreditSimular() {
                 categoriaHash={selectedCategoria.id}
                 onCadastrarCliente={handleAbrirCadastro}
                 proutoName={selectedModalidade.name.toLowerCase()}
+                onProdutoIdReceived={(id) => {
+                  setProdutoId(id);
+                }}
               />
             )}
           </>
         ) : (
-          simulacao && <Proposta cpf={cpfProposta} simulacao={simulacao} />
+          simulacao && <Proposta  cpf={cpfProposta} simulacao={simulacao} />
         )}
       </div>
     </ProtectedRoute>
