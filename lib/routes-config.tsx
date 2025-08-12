@@ -93,6 +93,12 @@ export const page_routes: PageRoutesType[] = [
             // icon: "ChartPie"
           },
           {
+            id: "Seguradora_Ver",
+            title: "Seguradora",
+            href: "/dashboard/cadastro/seguradora"
+            // icon: "ChartPie"
+          },
+          {
             id: "Seguro_Ver",
             title: "Seguro",
             href: "/dashboard/cadastro/seguro"

@@ -76,7 +76,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Produto_Ver",
       "Produto_Roteiro_Operacional",
       "Esteria_Ver",
-      "Seguro_Ver"
+      "Seguro_Ver",
+      "Seguradora_Ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
