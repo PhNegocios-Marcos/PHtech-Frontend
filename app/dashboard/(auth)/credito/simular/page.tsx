@@ -8,6 +8,9 @@ import SimuladorFgts from "./components/Simulador";
 import Proposta from "./components/cadastrarCliente";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+import CadastroInputUser from "./components/cadastroInputUser";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -25,12 +28,14 @@ export default function CreditSimular() {
   const [selectedConvenio, setSelectedConvenio] = useState<Modalidade | null>(null);
   const [selectedModalidade, setSelectedModalidade] = useState<Modalidade | null>(null);
   const [selectedCategoria, setSelectedCategoria] = useState<Modalidade | null>(null);
-
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [simulacao, setSimulacao] = useState<any>(null);
   const [simuladorKey, setSimuladorKey] = useState<number>(0); // Nova chave para forçar remontagem
 
   const { token } = useAuth();
+  const podeCriar = useHasPermission("Input_Campos_Cadastro_Cliente_Criar");
 
   // Carrega os convenios ao iniciar
   useEffect(() => {
@@ -125,7 +130,10 @@ export default function CreditSimular() {
 
   return (
     <ProtectedRoute requiredPermission="Simular_ver">
-      <CampoBoasVindas />
+      <div className="flex flex-row justify-between">
+        <CampoBoasVindas />
+        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Novo Campos Cadastro</Button>}
+      </div>
       <div className="space-y-6">
         {!cpfProposta ? (
           <>
@@ -193,9 +201,10 @@ export default function CreditSimular() {
             )}
           </>
         ) : (
-          simulacao && <Proposta  cpf={cpfProposta} simulacao={simulacao} />
+          simulacao && <Proposta cpf={cpfProposta} simulacao={simulacao} />
         )}
       </div>
+      <CadastroInputUser isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }

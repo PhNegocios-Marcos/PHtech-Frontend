@@ -77,7 +77,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Produto_Roteiro_Operacional",
       "Esteria_Ver",
       "Seguro_Ver",
-      "Seguradora_Ver"
+      "Seguradora_Ver",
+      "Input_Campos_Cadastro_Cliente_Criar",
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
