@@ -33,6 +33,7 @@ type FormData = z.infer<typeof schema>;
 type CadastroSeguroModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onRefresh?: () => void;
 };
 
 type SeguradoraOption = {
@@ -40,7 +41,7 @@ type SeguradoraOption = {
   name: string;
 };
 
-export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroModalProps) {
+export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: CadastroSeguroModalProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -54,18 +55,19 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
 
   const { token } = useAuth();
   const [seguradoras, setSeguradoras] = useState<SeguradoraOption[]>([]);
+  const [seguradoraSelect, setSeguradoraSelect] = useState<SeguradoraOption | null>(null);
 
   useEffect(() => {
     if (!token || !isOpen) return;
 
     async function fetchSeguradoras() {
       try {
-        // Assumindo que existe um endpoint para listar seguradoras
         const response = await fetch(`${API_BASE_URL}/seguradoras/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache" // Evitar cache
           }
         });
 
@@ -73,7 +75,7 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
 
         const data = await response.json();
         const options = data.map((seguradora: any) => ({
-          id: seguradora.hash,
+          id: seguradora.seguradora_hash,
           name: seguradora.nome
         }));
         setSeguradoras(options);
@@ -86,6 +88,12 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
     fetchSeguradoras();
   }, [token, isOpen]);
 
+  useEffect(() => {
+    methods.setValue("seguradora_hash", seguradoraSelect?.id ?? "");
+    console.log("Seguradora selecionada:", seguradoraSelect);
+    console.log("Valor do campo seguradora_hash:", methods.watch("seguradora_hash"));
+  }, [seguradoraSelect, methods]);
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       alert("Token não encontrado. Faça login.");
@@ -93,6 +101,7 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
     }
 
     try {
+      console.log("Dados enviados:", data);
       const response = await fetch(`${API_BASE_URL}/seguro-faixas/criar`, {
         method: "POST",
         headers: {
@@ -108,6 +117,12 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
       }
 
       alert("Faixa de seguro cadastrada com sucesso!");
+      methods.reset();
+      setSeguradoraSelect(null);
+      if (onRefresh) {
+        console.log("Chamando onRefresh...");
+        await onRefresh(); // Aguarda a conclusão do refresh
+      }
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar faixa de seguro:", error);
@@ -156,9 +171,10 @@ export default function CadastroSeguroModal({ isOpen, onClose }: CadastroSeguroM
                             <Combobox
                               data={seguradoras}
                               displayField="name"
-                              value={seguradoras.find((opt) => opt.id === field.value) ?? null}
-                              onChange={(selected) => field.onChange(selected?.id)}
+                              value={seguradoraSelect}
+                              onChange={setSeguradoraSelect}
                               searchFields={["name"]}
+                              placeholder="Selecione uma seguradora"
                             />
                           </FormControl>
                           <FormMessage />

@@ -80,11 +80,11 @@ export function SeguradorasTable() {
   }, [filtro, seguradoras]);
 
   const columns: ColumnDef<SeguradoraLinha>[] = [
-    {
-      accessorKey: "seguradora_hash",
-      header: "Hash da Seguradora",
-      cell: (info) => <strong>{info.getValue() as string}</strong>
-    },
+    // {
+    //   accessorKey: "seguradora_hash",
+    //   header: "Hash da Seguradora",
+    //   cell: (info) => <strong>{info.getValue() as string}</strong>
+    // },
     {
       accessorKey: "nome",
       header: "Nome"

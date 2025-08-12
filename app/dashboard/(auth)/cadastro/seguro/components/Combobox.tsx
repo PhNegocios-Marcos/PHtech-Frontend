@@ -16,6 +16,7 @@ type ComboboxProps<T> = {
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
+  valueField: any;
 };
 
 export function Combobox<T extends Record<string, any>>({

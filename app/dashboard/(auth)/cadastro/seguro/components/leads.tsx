@@ -70,11 +70,10 @@ export function SeguroTable() {
 
   const filteredSeguros = React.useMemo(() => {
     const filtroLower = filtro.toLowerCase();
-    return seguros.filter(
-      (s) =>
-        s.seguradora_hash.toLowerCase().includes(filtroLower) ||
-        s.faixa_inicio.toLowerCase().includes(filtroLower) ||
-        s.faixa_fim.toLowerCase().includes(filtroLower)
+    return seguros.filter((s) =>
+      [s.seguradora_hash, s.faixa_inicio, s.faixa_fim].some((campo) =>
+        (campo || "").toLowerCase().includes(filtroLower)
+      )
     );
   }, [filtro, seguros]);
 
