@@ -23,7 +23,7 @@ const seguradoraSchema = z.object({
   seguradora_hash: z.string(),
   nome: z.string().min(1, "Nome é obrigatório"),
   razao_social: z.string().min(1, "Razão social é obrigatória"),
-  cnpj: z.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, "CNPJ inválido"),
+  cnpj: z.string().optional(),
   status: z.number()
 });
 
@@ -135,7 +135,7 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

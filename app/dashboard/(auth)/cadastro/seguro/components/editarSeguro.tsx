@@ -21,7 +21,7 @@ import {
 
 const seguroSchema = z.object({
   id: z.string(),
-  seguradora_hash: z.string().min(1, "Seguradora é obrigatória"),
+  seguradora_hash: z.string().optional(),
   faixa_inicio: z.string().min(1, "Faixa inicial é obrigatória"),
   faixa_fim: z.string().min(1, "Faixa final é obrigatória"),
   valor_seguradora: z.string().min(1, "Valor da seguradora é obrigatório"),
@@ -84,11 +84,14 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
     try {
       const payload: Partial<SeguroFormValues> = { id: data.id };
 
-      if (data.seguradora_hash !== seguro.seguradora_hash) payload.seguradora_hash = data.seguradora_hash;
+      if (data.seguradora_hash !== seguro.seguradora_hash)
+        payload.seguradora_hash = data.seguradora_hash;
       if (data.faixa_inicio !== seguro.faixa_inicio) payload.faixa_inicio = data.faixa_inicio;
       if (data.faixa_fim !== seguro.faixa_fim) payload.faixa_fim = data.faixa_fim;
-      if (data.valor_seguradora !== seguro.valor_seguradora) payload.valor_seguradora = data.valor_seguradora;
-      if (data.valor_pago_cliente !== seguro.valor_pago_cliente) payload.valor_pago_cliente = data.valor_pago_cliente;
+      if (data.valor_seguradora !== seguro.valor_seguradora)
+        payload.valor_seguradora = data.valor_seguradora;
+      if (data.valor_pago_cliente !== seguro.valor_pago_cliente)
+        payload.valor_pago_cliente = data.valor_pago_cliente;
 
       await axios.put(`${API_BASE_URL}/seguro-faixas/atualizar`, payload, {
         headers: {
@@ -113,7 +116,8 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
               <div className="flex items-center justify-between">
                 <CardTitle>
                   <h2>
-                    Editar Faixa de Seguro: <span className="text-primary">{seguro.seguradora_hash}</span>
+                    Editar Faixa de Seguro:{" "}
+                    <span className="text-primary">{seguro.seguradora_hash}</span>
                   </h2>
                 </CardTitle>
                 <Button onClick={onClose} variant="outline">
@@ -130,13 +134,7 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                     <FormItem>
                       <FormLabel>Seguradora</FormLabel>
                       <FormControl>
-                        <Combobox
-                          data={seguradoras}
-                          displayField="name"
-                          value={seguradoras.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected?.id)}
-                          searchFields={["name"]}
-                        />
+                        <Input {...field} disabled/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

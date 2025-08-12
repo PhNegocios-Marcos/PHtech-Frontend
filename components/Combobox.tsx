@@ -16,6 +16,7 @@ type ComboboxProps<T> = {
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
+  disabled?: any;
 };
 
 export function Combobox<T extends Record<string, any>>({
@@ -26,6 +27,7 @@ export function Combobox<T extends Record<string, any>>({
   label,
   placeholder = 'Selecione',
   searchFields = [displayField],
+  disabled 
 }: ComboboxProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
