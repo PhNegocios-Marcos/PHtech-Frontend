@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -34,6 +35,7 @@ type EquipeFormValues = z.infer<typeof permissoesSchema> & {
 type EquipeEditProps = {
   permissoes: EquipeFormValues;
   onClose: () => void;
+  onCancel: () => void
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -48,6 +50,14 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
   useEffect(() => {
     methods.reset(permissoes);
+    toast.info("Dados da equipe carregados", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      },
+      description: `Editando: ${permissoes.nome}`
+    });
   }, [permissoes, methods]);
 
   const statusOptions = [
@@ -56,8 +66,19 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
   ];
 
   const onSubmit = async (data: EquipeFormValues) => {
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: "Faça login para continuar"
+      });
+      return;
+    }
+
     try {
-      // Remove o campo nome se ele não foi alterado
       const payload: Partial<EquipeFormValues> = { id: data.id, status: data.status };
 
       if (data.nome && data.nome !== permissoes.nome) {
@@ -70,6 +91,15 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
           "Content-Type": "application/json"
         }
       });
+
+      toast.success("Equipe atualizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: `Alterações salvas para: ${data.nome}`
+      });
       onClose();
     } catch (error: any) {
       const msg = error?.response?.data?.erro || "Erro ao atualizar equipe";
@@ -79,12 +109,38 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
           type: "manual",
           message: msg
         });
+        toast.warning("Nome já existe", {
+          style: {
+            background: 'var(--toast-warning)',
+            color: 'var(--toast-warning-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: "Escolha outro nome para a equipe"
+        });
       } else {
-        alert(msg);
+        toast.error("Falha na atualização", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: msg
+        });
       }
 
       console.error("Erro ao atualizar equipe:", error);
     }
+  };
+
+  const handleClose = () => {
+    toast.info("Edição cancelada", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
   };
 
   return (
@@ -99,7 +155,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                     Editar Averbador: <span className="text-primary">{permissoes.nome}</span>
                   </h2>
                 </CardTitle>
-                <Button onClick={onClose} variant="outline">
+                <Button onClick={handleClose} variant="outline">
                   Voltar
                 </Button>
               </div>
@@ -142,7 +198,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
                 <Button type="submit">Salvar Alterações</Button>

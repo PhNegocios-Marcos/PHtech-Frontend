@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -67,15 +68,30 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
         if (!response.ok) throw new Error("Erro ao buscar módulos");
 
         const data = await response.json();
-        // Ajuste conforme o retorno da API
         const options = data.map((modulo: any) => ({
           id: String(modulo.id),
           name: modulo.nome
         }));
         setModulos(options);
+        
+        toast.success("Módulos carregados com sucesso", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: `${options.length} módulos disponíveis`
+        });
       } catch (error) {
         console.error("Erro ao listar módulos:", error);
-        alert("Erro ao listar módulos.");
+        toast.error("Falha ao carregar módulos", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: "Não foi possível carregar a lista de módulos"
+        });
       }
     }
 
@@ -84,7 +100,14 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Autenticação necessária", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: "Faça login para continuar"
+      });
       return;
     }
 
@@ -100,22 +123,47 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.message || "Erro ao cadastrar equipe");
       }
 
-      alert("Equipe cadastrada com sucesso!");
+      toast.success("Equipe cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: `Equipe ${data.nome} criada`
+      });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar equipe:", error);
-      alert("Erro ao cadastrar equipe: " + error);
+      toast.error("Falha ao cadastrar equipe", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: error.message || "Erro desconhecido"
+      });
     }
   };
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    toast.info("Cadastro cancelado", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
+  };
+
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
       <aside
         role="dialog"
@@ -123,12 +171,12 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
         className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar Nova Equipe</h2>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="text-2xl font-bold hover:text-gray-900"
                   aria-label="Fechar">
                   ×
@@ -180,12 +228,12 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
               </Card>
 
               <div className="mt-6 flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
                 <Button type="submit">Cadastrar Equipe</Button>
               </div>
-            </div>
+            </form>
           </Form>
         </FormProvider>
       </aside>
