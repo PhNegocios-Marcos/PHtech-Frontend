@@ -11,6 +11,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroInputUser from "./components/cadastroInputUser";
+import CadastroInputProduto from "./components/cadastroCampoProduto";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,11 +29,15 @@ export default function CreditSimular() {
   const [selectedConvenio, setSelectedConvenio] = useState<Modalidade | null>(null);
   const [selectedModalidade, setSelectedModalidade] = useState<Modalidade | null>(null);
   const [selectedCategoria, setSelectedCategoria] = useState<Modalidade | null>(null);
-  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
-  const handleCloseCadastro = () => setIsCadastroOpen(false);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [simulacao, setSimulacao] = useState<any>(null);
   const [simuladorKey, setSimuladorKey] = useState<number>(0); // Nova chave para forçar remontagem
+
+  const [isCadastroOpen, setIsCadastroOpen] = useState(false);
+  const handleCloseCadastro = () => setIsCadastroOpen(false);
+
+  const [isCadastroOpen2, setIsCadastroOpen2] = useState(false);
+  const handleCloseCadastro2 = () => setIsCadastroOpen2(false);
 
   const { token } = useAuth();
   const podeCriar = useHasPermission("Input_Campos_Cadastro_Cliente_Criar");
@@ -132,7 +137,15 @@ export default function CreditSimular() {
     <ProtectedRoute requiredPermission="Simular_ver">
       <div className="flex flex-row justify-between">
         <CampoBoasVindas />
-        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Novo Campos Cadastro</Button>}
+        <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
+          {" "}
+          {podeCriar && (
+            <Button onClick={() => setIsCadastroOpen(true)}>Novo Campos Cadastro Usuario</Button>
+          )}
+          {podeCriar && (
+            <Button onClick={() => setIsCadastroOpen2(true)}>Novo Campos Cadastro Produto</Button>
+          )}
+        </div>
       </div>
       <div className="space-y-6">
         {!cpfProposta ? (
@@ -205,6 +218,7 @@ export default function CreditSimular() {
         )}
       </div>
       <CadastroInputUser isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <CadastroInputProduto isOpen={isCadastroOpen2} onClose={handleCloseCadastro2} />
     </ProtectedRoute>
   );
 }

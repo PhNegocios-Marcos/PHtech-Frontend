@@ -55,9 +55,10 @@ export default function Cadastrar({
   const enderecosRef = useRef<{ validate: () => Promise<boolean> }>(null);
   const bancariosRef = useRef<{ validate: () => Promise<boolean> }>(null);
 
-  const getFields = (sectionName: string) => {
-    if (!formSections) return []; // Isso cobre o caso de formSections ser null
-    return formSections.find((s) => s.section === sectionName)?.fields || [];
+  const getFields = (sectionName: string): FormField[] => {
+    if (!formSections) return [];
+    const section = formSections.find((s) => s.section === sectionName);
+    return section ? section.fields : [];
   };
 
   const tabRefs: Record<string, React.RefObject<any>> = {
@@ -114,9 +115,9 @@ export default function Cadastrar({
     }
   });
 
-  console.log("protudoId: ", produtoId);
+  console.log("produtoId: ", produtoId);
 
-  // 2. Alternativa com seções pré-definidas (se não puder listar dinamicamente)
+  // Busca seções e campos do formulário
   useEffect(() => {
     const fetchDefaultSections = async () => {
       try {
@@ -126,12 +127,11 @@ export default function Cadastrar({
           return;
         }
 
-        // Lista de seções que podem existir
-        const possibleSections = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
+        // Lista de seções possíveis
 
-        // Busca apenas as seções que existem para este produto
+        // Busca apenas as seções válidas para o produto
         const sectionsData = await Promise.all(
-          possibleSections.map(async (sectionName) => {
+          tabOrder.map(async (sectionName) => {
             try {
               const response = await axios.get(
                 `${API_BASE_URL}/produto-config-campos-cadastro/listar`,
@@ -140,19 +140,24 @@ export default function Cadastrar({
                   params: { produto_hash: produtoId, section: sectionName }
                 }
               );
-              return {
-                section: sectionName,
-                fields: response.data.fields
-              };
-            } catch {
-              // Se a seção não existir, retorna null (será filtrado depois)
+              // Verifica se a resposta contém campos válidos
+              if (response.data.fields && Array.isArray(response.data.fields)) {
+                return {
+                  section: sectionName,
+                  fields: response.data.fields
+                };
+              }
               return null;
+            } catch {
+              return null; // Seção não encontrada ou erro
             }
           })
         );
 
-        // Filtra seções não encontradas
-        setFormSections(sectionsData.filter(Boolean) as FormSection[]);
+        // Filtra seções válidas e remove nulos
+        const validSections = sectionsData.filter((section): section is FormSection => section !== null);
+        setFormSections(validSections);
+        console.log("formSections:", JSON.stringify(validSections, null, 2)); // Log para depuração
       } catch (error) {
         console.error("Erro ao buscar seções:", error);
         setFormSections([]);
@@ -282,7 +287,7 @@ export default function Cadastrar({
               ref={telefonesRef}
               formData={formData}
               onChange={handleChange}
-              fields={getFields("DadosPessoais")}
+              fields={getFields("Contato")}
             />
           </TabsContent>
           <TabsContent value="Enderecos">
@@ -290,7 +295,7 @@ export default function Cadastrar({
               ref={enderecosRef}
               formData={formData}
               onChange={handleChange}
-              fields={getFields("DadosPessoais")}
+              fields={getFields("Enderecos")}
             />
           </TabsContent>
           <TabsContent value="DadosBancarios">
@@ -298,7 +303,7 @@ export default function Cadastrar({
               ref={bancariosRef}
               formData={formData}
               onChange={handleChange}
-              fields={getFields("DadosPessoais")}
+              fields={getFields("DadosBancarios")}
             />
           </TabsContent>
         </Tabs>

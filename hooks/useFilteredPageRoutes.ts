@@ -79,6 +79,7 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Seguro_Ver",
       "Seguradora_Ver",
       "Input_Campos_Cadastro_Cliente_Criar",
+      "TaxaCadastro_Ver",
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

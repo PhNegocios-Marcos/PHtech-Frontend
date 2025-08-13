@@ -82,6 +82,14 @@ const sectionOptions = [
   { value: "DadosBancarios", label: "Dados Bancários" }
 ] as const;
 
+// Opções fixas para o campo tipo_pix
+const tipoPixOptions = [
+  { value: "email", label: "E-mail" },
+  { value: "cpf", label: "CPF" },
+  { value: "cnpj", label: "CNPJ" },
+  { value: "chave_aleatoria", label: "Chave Aleatória" }
+];
+
 export default function CadastroCamposModal({
   isOpen,
   onClose,
@@ -93,7 +101,7 @@ export default function CadastroCamposModal({
       produto_hash: "",
       sections: [
         {
-          section: "DadosPessoais", // Valor inicial válido
+          section: "DadosPessoais",
           fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
         }
       ]
@@ -104,35 +112,35 @@ export default function CadastroCamposModal({
   const [produtos, setProdutos] = useState<ProdutoOption[]>([]);
   const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | null>(null);
   const [availableFields] = useState([
-    { value: "nome", label: "Nome" },
-    { value: "nome_pai", label: "Nome do Pai" },
-    { value: "nome_mae", label: "Nome da Mãe" },
-    { value: "tipo_documento", label: "Tipo de Documento" },
-    { value: "numero_documento", label: "Número do Documento" },
-    { value: "cpf", label: "CPF" },
-    { value: "sexo", label: "Sexo" },
-    { value: "data_nascimento", label: "Data de Nascimento" },
-    { value: "estado_civil", label: "Estado Civil" },
-    { value: "naturalidade", label: "Naturalidade" },
-    { value: "nacionalidade", label: "Nacionalidade" },
-    { value: "telefones.0.ddd", label: "DDD Telefone 1" },
-    { value: "telefones.0.numero", label: "Número Telefone 1" },
-    { value: "telefones.1.ddd", label: "DDD Telefone 2" },
-    { value: "telefones.1.numero", label: "Número Telefone 2" },
-    { value: "enderecos.0.cep", label: "CEP" },
-    { value: "enderecos.0.logradouro", label: "Logradouro" },
-    { value: "enderecos.0.numero", label: "Número" },
-    { value: "enderecos.0.complemento", label: "Complemento" },
-    { value: "enderecos.0.bairro", label: "Bairro" },
-    { value: "enderecos.0.cidade", label: "Cidade" },
-    { value: "enderecos.0.estado", label: "Estado" },
-    { value: "enderecos.0.uf", label: "UF" },
-    { value: "emails.0.email", label: "E-mail" },
-    { value: "dados_bancarios.0.id_banco", label: "Banco" },
-    { value: "dados_bancarios.0.agencia", label: "Agência" },
-    { value: "dados_bancarios.0.conta", label: "Conta" },
-    { value: "dados_bancarios.0.tipo_pix", label: "Tipo PIX" },
-    { value: "dados_bancarios.0.pix", label: "Chave PIX" }
+    { value: "nome", label: "Nome", section: "DadosPessoais" },
+    { value: "nome_pai", label: "Nome do Pai", section: "DadosPessoais" },
+    { value: "nome_mae", label: "Nome da Mãe", section: "DadosPessoais" },
+    { value: "tipo_documento", label: "Tipo de Documento", section: "DadosPessoais" },
+    { value: "numero_documento", label: "Número do Documento", section: "DadosPessoais" },
+    { value: "cpf", label: "CPF", section: "DadosPessoais" },
+    { value: "sexo", label: "Sexo", section: "DadosPessoais" },
+    { value: "data_nascimento", label: "Data de Nascimento", section: "DadosPessoais" },
+    { value: "estado_civil", label: "Estado Civil", section: "DadosPessoais" },
+    { value: "naturalidade", label: "Naturalidade", section: "DadosPessoais" },
+    { value: "nacionalidade", label: "Nacionalidade", section: "DadosPessoais" },
+    { value: "telefones.0.ddd", label: "DDD Telefone 1", section: "Contato" },
+    { value: "telefones.0.numero", label: "Número Telefone 1", section: "Contato" },
+    { value: "telefones.1.ddd", label: "DDD Telefone 2", section: "Contato" },
+    { value: "telefones.1.numero", label: "Número Telefone 2", section: "Contato" },
+    { value: "emails.0.email", label: "E-mail", section: "Contato" },
+    { value: "enderecos.0.cep", label: "CEP", section: "Enderecos" },
+    { value: "enderecos.0.logradouro", label: "Logradouro", section: "Enderecos" },
+    { value: "enderecos.0.numero", label: "Número", section: "Enderecos" },
+    { value: "enderecos.0.complemento", label: "Complemento", section: "Enderecos" },
+    { value: "enderecos.0.bairro", label: "Bairro", section: "Enderecos" },
+    { value: "enderecos.0.cidade", label: "Cidade", section: "Enderecos" },
+    { value: "enderecos.0.estado", label: "Estado", section: "Enderecos" },
+    { value: "enderecos.0.uf", label: "UF", section: "Enderecos" },
+    { value: "dados_bancarios.0.id_banco", label: "Banco", section: "DadosBancarios" },
+    { value: "dados_bancarios.0.agencia", label: "Agência", section: "DadosBancarios" },
+    { value: "dados_bancarios.0.conta", label: "Conta", section: "DadosBancarios" },
+    { value: "dados_bancarios.0.tipo_pix", label: "Tipo PIX", section: "DadosBancarios" },
+    { value: "dados_bancarios.0.pix", label: "Chave PIX", section: "DadosBancarios" }
   ]);
 
   const {
@@ -144,10 +152,44 @@ export default function CadastroCamposModal({
     name: "sections"
   });
 
-  // Filtrar seções disponíveis para evitar duplicatas
   const getAvailableSectionOptions = () => {
     const selectedSections = methods.getValues("sections").map((s) => s.section);
     return sectionOptions.filter((option) => !selectedSections.includes(option.value));
+  };
+
+  const transformApiData = (apiData: any): FormData['sections'] => {
+    const sections: { [key: string]: { produto_hash: string; section: "DadosPessoais" | "Contato" | "Enderecos" | "DadosBancarios"; fields: z.infer<typeof fieldSchema>[] } } = {};
+
+    apiData.fields.forEach((field: any) => {
+      let sectionName: "DadosPessoais" | "Contato" | "Enderecos" | "DadosBancarios";
+      if (field.name.startsWith("dados_bancarios")) {
+        sectionName = "DadosBancarios";
+      } else if (field.name.startsWith("emails")) {
+        sectionName = "Contato";
+      } else if (field.name.startsWith("enderecos")) {
+        sectionName = "Enderecos";
+      } else {
+        sectionName = "DadosPessoais";
+      }
+
+      if (!sections[sectionName]) {
+        sections[sectionName] = {
+          produto_hash: apiData.produto_hash,
+          section: sectionName,
+          fields: []
+        };
+      }
+
+      sections[sectionName].fields.push({
+        name: field.name,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        options: field.options || []
+      });
+    });
+
+    return Object.values(sections);
   };
 
   useEffect(() => {
@@ -170,7 +212,6 @@ export default function CadastroCamposModal({
 
         const options = data.map((produto: any) => ({
           id: produto.relacionamento_hash,
-          // Aqui concatena os 3 nomes separados por " - "
           name: `${produto.convenio_nome} - ${produto.modalidade_credito_nome} - ${produto.tipo_operacao_nome}`
         }));
 
@@ -181,8 +222,30 @@ export default function CadastroCamposModal({
       }
     }
 
+    async function fetchConfig() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache"
+          }
+        });
+
+        if (!response.ok) throw new Error("Erro ao buscar configuração");
+
+        const apiData = await response.json();
+        const transformedData = transformApiData(apiData);
+        methods.reset({ produto_hash: apiData.produto_hash, sections: transformedData });
+      } catch (error) {
+        console.error("Erro ao carregar configuração:", error);
+      }
+    }
+
     fetchProdutos();
-  }, [token, isOpen]);
+    fetchConfig();
+  }, [token, isOpen, methods]);
 
   useEffect(() => {
     methods.setValue("produto_hash", produtoSelect?.id ?? "");
@@ -207,7 +270,7 @@ export default function CadastroCamposModal({
         }))
       }));
 
-      console.log("Dados enviados:", payload);
+      console.log("Payload enviado:", JSON.stringify(payload, null, 2));
 
       const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/criar`, {
         method: "POST",
@@ -218,9 +281,11 @@ export default function CadastroCamposModal({
         body: JSON.stringify(payload)
       });
 
+      const responseData = await response.json();
+      console.log("Resposta da API:", JSON.stringify(responseData, null, 2));
+
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(JSON.stringify(responseData));
       }
 
       alert("Configuração de campos cadastrada com sucesso!");
@@ -367,16 +432,32 @@ export default function CadastroCamposModal({
 
 type FieldArrayProps = {
   sectionIndex: number;
-  availableFields: { value: string; label: string }[];
+  availableFields: { value: string; label: string; section: string }[];
   className?: string;
 };
 
 function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProps) {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: `sections.${sectionIndex}.fields`
   });
+
+  const currentSection = watch(`sections.${sectionIndex}.section`);
+  const filteredFields = availableFields.filter(field => field.section === currentSection);
+
+  useEffect(() => {
+    fields.forEach((field, fieldIndex) => {
+      const fieldName = watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`);
+      if (fieldName === "dados_bancarios.0.tipo_pix") {
+        setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "select");
+        setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, tipoPixOptions);
+      } else if (fieldName === "dados_bancarios.0.pix") {
+        setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "text");
+        setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, []);
+      }
+    });
+  }, [watch, setValue, sectionIndex, fields]);
 
   return (
     <div className={clsx("grid gap-4", className)}>
@@ -391,10 +472,19 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
                   <FormLabel>Nome do Campo</FormLabel>
                   <FormControl>
                     <Combobox
-                      data={availableFields}
+                      data={filteredFields}
                       displayField="label"
-                      value={availableFields.find((f) => f.value === field.value) || null}
-                      onChange={(selected) => field.onChange(selected?.value || "")}
+                      value={filteredFields.find((f) => f.value === field.value) || null}
+                      onChange={(selected) => {
+                        field.onChange(selected?.value || "");
+                        if (selected?.value === "dados_bancarios.0.tipo_pix") {
+                          setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "select");
+                          setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, tipoPixOptions);
+                        } else if (selected?.value === "dados_bancarios.0.pix") {
+                          setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "text");
+                          setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, []);
+                        }
+                      }}
                       searchFields={["label"]}
                       placeholder="Selecione um campo"
                     />
@@ -447,6 +537,10 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
                       onChange={(selected) => field.onChange(selected?.value || "text")}
                       searchFields={["label"]}
                       placeholder="Selecione o tipo"
+                      disabled={
+                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.tipo_pix" ||
+                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.pix"
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -475,7 +569,11 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
           </div>
 
           {watch(`sections.${sectionIndex}.fields.${fieldIndex}.type`) === "select" && (
-            <OptionArray sectionIndex={sectionIndex} fieldIndex={fieldIndex} />
+            <OptionArray
+              sectionIndex={sectionIndex}
+              fieldIndex={fieldIndex}
+              isTipoPix={watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.tipo_pix"}
+            />
           )}
 
           <Button
@@ -502,9 +600,10 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
 type OptionArrayProps = {
   sectionIndex: number;
   fieldIndex: number;
+  isTipoPix?: boolean;
 };
 
-function OptionArray({ sectionIndex, fieldIndex }: OptionArrayProps) {
+function OptionArray({ sectionIndex, fieldIndex, isTipoPix }: OptionArrayProps) {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -523,7 +622,11 @@ function OptionArray({ sectionIndex, fieldIndex }: OptionArrayProps) {
               <FormItem>
                 <FormLabel>Valor</FormLabel>
                 <FormControl>
-                  <Input placeholder="Digite o valor" {...field} />
+                  <Input
+                    placeholder="Digite o valor"
+                    {...field}
+                    disabled={isTipoPix}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -536,28 +639,36 @@ function OptionArray({ sectionIndex, fieldIndex }: OptionArrayProps) {
               <FormItem>
                 <FormLabel>Rótulo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Digite o rótulo" {...field} />
+                  <Input
+                    placeholder="Digite o rótulo"
+                    {...field}
+                    disabled={isTipoPix}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button
-            type="button"
-            variant="destructive"
-            className="self-end"
-            onClick={() => remove(optionIndex)}>
-            Remover
-          </Button>
+          {!isTipoPix && (
+            <Button
+              type="button"
+              variant="destructive"
+              className="self-end"
+              onClick={() => remove(optionIndex)}>
+              Remover
+            </Button>
+          )}
         </div>
       ))}
-      <Button
-        type="button"
-        variant="outline"
-        className="mt-4"
-        onClick={() => append({ value: "", label: "" })}>
-        Adicionar Opção
-      </Button>
+      {!isTipoPix && (
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4"
+          onClick={() => append({ value: "", label: "" })}>
+          Adicionar Opção
+        </Button>
+      )}
     </div>
   );
 }
