@@ -35,7 +35,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Promotora } from "./editPromotora";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -48,7 +48,7 @@ type Usuario = {
 
 type UsuariosTableProps = {
   promotora: Promotora;
-  cnpj: string; // <- CNPJ como prop
+  cnpj: string;
   onClose: () => void;
 };
 
@@ -69,7 +69,17 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
 
   useEffect(() => {
     async function fetchUsuariosRelacionados() {
-      if (!token || !cnpj) return;
+      if (!token || !cnpj) {
+        toast.error("Autenticação necessária", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: "Token ou CNPJ não encontrado"
+        });
+        return;
+      }
 
       try {
         const response = await fetch(`${API_BASE_URL}/rel_usuario_promotora/${cnpj}`, {
@@ -102,8 +112,24 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         });
 
         setUsuarios(usuariosArray);
+        toast.success("Usuários carregados com sucesso", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: `${usuariosArray.length} usuários encontrados`
+        });
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
+        toast.error("Falha ao carregar usuários", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: error.message || "Erro desconhecido"
+        });
       }
     }
 
@@ -129,6 +155,17 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
     }
   });
 
+  const handleClose = () => {
+    toast.info("Fechando lista de usuários", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
+  };
+
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -138,7 +175,7 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
               Usuários Vinculados: <span className="text-primary">{promotora.nome}</span>
             </h2>
           </CardTitle>
-          <Button onClick={onClose} variant="outline">
+          <Button onClick={handleClose} variant="outline">
             Voltar
           </Button>
         </div>

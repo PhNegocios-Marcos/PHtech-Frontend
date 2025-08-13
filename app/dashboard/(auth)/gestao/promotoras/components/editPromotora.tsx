@@ -16,9 +16,10 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Tipo de dados da Promotora
 export type Promotora = {
   id: string;
   nome: string;
@@ -32,7 +33,6 @@ export type Promotora = {
   status: number;
 };
 
-// Props do componente
 type PromotorEditProps = {
   data: Promotora;
   onClose: () => void;
@@ -50,7 +50,14 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
 
   const onSubmit = async (formData: Promotora) => {
     if (!token) {
-      console.error("Token global não definido! Autenticação inválida.");
+      // console.error("Token global não definido! Autenticação inválida.");
+      toast.error("Token de autenticação não encontrado.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -69,12 +76,24 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
         }
       });
 
-      alert("Promotora atualizada com sucesso!");
+      toast.success("Promotora atualizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       window.location.reload();
     } catch (error: any) {
-      console.error("Erro ao atualizar promotora:", error.response?.data || error.message);
-      alert(`Erro: ${JSON.stringify(error.response?.data || error.message)}`);
+      // console.error("Erro ao atualizar promotora:", error.response?.data || error.message);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

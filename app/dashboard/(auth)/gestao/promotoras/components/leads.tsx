@@ -16,6 +16,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 import {
   Table,
@@ -68,7 +69,6 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
       header: "Rateio Master",
       cell: ({ getValue }) => {
         const valor = getValue<number>();
-        // Converte para inteiro e adiciona %
         return `${Math.round(valor)}%`;
       }
     },
@@ -144,10 +144,29 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
         setPromotoras(promotorasArray);
       } catch (error: any) {
         console.error("Erro ao buscar promotoras:", error.message || error);
+        toast.error("Erro ao carregar lista de promotoras", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: error.message || "Tente novamente mais tarde"
+        });
       }
     }
 
-    fetchPromotoras();
+    if (token) {
+      fetchPromotoras();
+    } else {
+      toast.error("Autenticação necessária", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: "Faça login para acessar esta página"
+      });
+    }
   }, [token]);
 
   const table = useReactTable({
@@ -177,7 +196,26 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   });
 
   const handleRowClick = (promotora: Promotora) => {
-    onSelectPromotora(promotora); // apenas isso!
+    try {
+      onSelectPromotora(promotora);
+      toast.success("Promotora selecionada", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: `Editando: ${promotora.nome}`
+      });
+    } catch (error: any) {
+      toast.error("Erro ao selecionar promotora", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: error.message || "Tente novamente"
+      });
+    }
   };
 
   return (
@@ -227,7 +265,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
                       <TableHead
                         key={header.id}
                         className={`truncate overflow-hidden whitespace-nowrap ${
-                          isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                          isLast ? "w-16" : "w-auto"
                         }`}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
@@ -249,7 +287,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
                         <TableCell
                           key={cell.id}
                           className={`truncate overflow-hidden whitespace-nowrap ${
-                            isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                            isLast ? "w-16" : "w-auto"
                           }`}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
@@ -289,7 +327,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
         <PromotoraDrawer
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          promotora={selectedPromotora as any} // ajuste conforme sua tipagem no Drawer
+          promotora={selectedPromotora as any}
         />
       </CardContent>
     </Card>

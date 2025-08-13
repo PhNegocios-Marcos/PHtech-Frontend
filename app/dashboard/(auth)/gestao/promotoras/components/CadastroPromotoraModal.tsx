@@ -32,6 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
@@ -143,6 +144,13 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
         setMaster(data);
       } catch (error) {
         console.error("Erro ao carregar masters", error);
+        toast.error("Erro ao carregar lista de promotoras master", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
     fetchMasters();
@@ -152,7 +160,13 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
 
   async function onSubmit(data: FormData) {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token de autenticação não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
     try {
@@ -185,12 +199,24 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
         }
       });
 
-      alert("Promotora cadastrada com sucesso!");
+      toast.success("Promotora cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       router.push("/dashboard/default");
     } catch (error: any) {
       console.error("Erro ao cadastrar promotora:", error.response?.data || error.message);
-      alert(`Erro: ${JSON.stringify(error.response?.data || error.message)}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   }
 
