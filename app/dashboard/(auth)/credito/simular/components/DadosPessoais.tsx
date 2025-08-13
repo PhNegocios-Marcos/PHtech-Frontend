@@ -22,119 +22,127 @@ interface DadosPessoaisProps {
   fields: FormField[];
 }
 
-export const DadosPessoais = forwardRef(
-  ({ formData, onChange, fields }: DadosPessoaisProps, ref) => {
-    // Criar schema dinamicamente com base nos campos
-    const createSchema = () => {
-      const schemaObj: Record<string, any> = {};
+export const DadosPessoais = forwardRef<
+  { validate: () => Promise<boolean> },
+  DadosPessoaisProps
+>(({ formData, onChange, fields }, ref) => {
+  // Deduplicate fields by name to avoid rendering duplicates
+  const uniqueFields = Array.from(
+    new Map(fields.map((field) => [field.name, field])).values()
+  );
 
-      fields.forEach((field) => {
-        if (field.required) {
-          schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
-        } else {
-          schemaObj[field.name] = z.string().optional();
-        }
-      });
+  // Criar schema dinamicamente com base nos campos
+  const createSchema = () => {
+    const schemaObj: Record<string, any> = {};
 
-      return z.object(schemaObj);
-    };
-
-    const schema = createSchema();
-    type FormData = z.infer<typeof schema>;
-
-    const {
-      register,
-      setValue,
-      formState: { errors },
-      trigger
-    } = useForm<FormData>({
-      resolver: zodResolver(schema),
-      defaultValues: fields.reduce(
-        (acc, field) => {
-          acc[field.name] = formData[field.name] || "";
-          return acc;
-        },
-        {} as Record<string, any>
-      )
+    uniqueFields.forEach((field) => {
+      if (field.required) {
+        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
+      } else {
+        schemaObj[field.name] = z.string().optional();
+      }
     });
 
-    useImperativeHandle(ref, () => ({
-      validate: () => trigger()
-    }));
+    return z.object(schemaObj);
+  };
 
-    const renderField = (field: FormField) => {
-      const errorMessage = errors[field.name]?.message;
-      const isErrorString = typeof errorMessage === "string";
+  const schema = createSchema();
+  type FormData = z.infer<typeof schema>;
 
-      switch (field.type) {
-        case "text":
-          return (
-            <div key={field.name}>
-              <span>{field.label}</span>
-              <Input
-                {...register(field.name)}
-                placeholder={field.label}
-                onChange={(e) => {
-                  setValue(field.name, e.target.value);
-                  onChange(field.name, e.target.value);
-                }}
-                value={formData[field.name] || ""}
-                className="mt-1"
-              />
-              {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
-            </div>
-          );
+  const {
+    register,
+    setValue,
+    formState: { errors },
+    trigger
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: uniqueFields.reduce(
+      (acc, field) => {
+        acc[field.name] = formData[field.name] || "";
+        return acc;
+      },
+      {} as Record<string, any>
+    )
+  });
 
-        case "select":
-          return (
-            <div key={field.name}>
-              <span>{field.label}</span>
-              <Combobox
-                value={field.options?.find((opt) => opt.value === formData[field.name]) || null}
-                onChange={(selected) => {
-                  setValue(field.name, selected.value);
-                  onChange(field.name, selected.value);
-                }}
-                data={field.options || []}
-                displayField="label"
-                placeholder={field.label}
-                className="mt-1"
-              />
-              {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
-            </div>
-          );
+  useImperativeHandle(ref, () => ({
+    validate: () => trigger()
+  }));
 
-        case "date":
-          return (
-            <div key={field.name}>
-              <span>{field.label}</span>
-              <Input
-                type="date"
-                {...register(field.name)}
-                onChange={(e) => {
-                  setValue(field.name, e.target.value);
-                  onChange(field.name, e.target.value);
-                }}
-                value={formData[field.name] || ""}
-                className="mt-1"
-              />
-              {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
-            </div>
-          );
+  const renderField = (field: FormField) => {
+    const errorMessage = errors[field.name]?.message;
+    const isErrorString = typeof errorMessage === "string";
 
-        default:
-          return null;
-      }
-    };
+    switch (field.type) {
+      case "text":
+        return (
+          <div key={field.name} className="space-y-2">
+            <span>{field.label}</span>
+            <Input
+              {...register(field.name)}
+              placeholder={field.label}
+              onChange={(e) => {
+                setValue(field.name, e.target.value);
+                onChange(field.name, e.target.value);
+              }}
+              value={formData[field.name] || ""}
+              className="mt-1"
+            />
+            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+          </div>
+        );
 
-    return (
-      <form
-        className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-2"
-        onSubmit={(e) => e.preventDefault()}>
-        {fields.map(renderField)}
-      </form>
-    );
-  }
-);
+      case "select":
+        return (
+          <div key={field.name} className="space-y-2">
+            <span>{field.label}</span>
+            <Combobox
+              value={field.options?.find((opt) => opt.value === formData[field.name]) || null}
+              onChange={(selected) => {
+                setValue(field.name, selected?.value || "");
+                onChange(field.name, selected?.value || "");
+              }}
+              data={field.options || []}
+              displayField="label"
+              placeholder={field.label}
+              searchFields={["label"]}
+              className="mt-1"
+            />
+            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+          </div>
+        );
+
+      case "date":
+        return (
+          <div key={field.name} className="space-y-2">
+            <span>{field.label}</span>
+            <Input
+              type="date"
+              {...register(field.name)}
+              onChange={(e) => {
+                setValue(field.name, e.target.value);
+                onChange(field.name, e.target.value);
+              }}
+              value={formData[field.name] || ""}
+              className="mt-1"
+            />
+            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <form
+      className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-2"
+      onSubmit={(e) => e.preventDefault()}
+    >
+      {uniqueFields.map(renderField)}
+    </form>
+  );
+});
 
 DadosPessoais.displayName = "DadosPessoais";

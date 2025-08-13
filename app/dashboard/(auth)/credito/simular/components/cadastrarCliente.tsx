@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { DadosPessoais } from "./DadosPessoais";
 import { Telefones } from "./Contato";
 import { Enderecos } from "./Enderecos";
 import { DadosBancarios } from "./DadosBancarios";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Produto } from "../../../cadastro/produto/components/ProdutoModal";
 
@@ -36,6 +37,11 @@ interface FormSection {
   fields: FormField[];
 }
 
+// Interface para tipar as refs
+interface TabRef {
+  validate: () => Promise<boolean>;
+}
+
 export default function Cadastrar({
   cpf,
   simulacao,
@@ -50,26 +56,37 @@ export default function Cadastrar({
   const [activeTab, setActiveTab] = useState("DadosPessoais");
   const tabOrder = ["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"];
 
-  const dadosPessoaisRef = useRef<{ validate: () => Promise<boolean> }>(null);
-  const telefonesRef = useRef<{ validate: () => Promise<boolean> }>(null);
-  const enderecosRef = useRef<{ validate: () => Promise<boolean> }>(null);
-  const bancariosRef = useRef<{ validate: () => Promise<boolean> }>(null);
+  const dadosPessoaisRef = useRef<TabRef | null>(null);
+  const telefonesRef = useRef<TabRef | null>(null);
+  const enderecosRef = useRef<TabRef | null>(null);
+  const bancariosRef = useRef<TabRef | null>(null);
 
-  const getFields = (sectionName: string): FormField[] => {
-    if (!formSections) return [];
-    const section = formSections.find((s) => s.section === sectionName);
-    return section ? section.fields : [];
-  };
-
-  const tabRefs: Record<string, React.RefObject<any>> = {
+  // Definir tabRefs com tipagem correta
+  const tabRefs: Record<string, React.RefObject<TabRef | null>> = {
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
     Enderecos: enderecosRef,
     DadosBancarios: bancariosRef
   };
 
-  // Estado inicial do formulário
+  // Function to get fields for a specific section
+  const getFields = (sectionName: string): FormField[] => {
+    if (!formSections) return [];
+    const section = formSections.find((s) => s.section === sectionName);
+    if (!section) return [];
+    // Para a seção Enderecos, garantir que os nomes dos campos sejam prefixados com "enderecos.0."
+    if (sectionName === "Enderecos") {
+      return section.fields.map((field) => ({
+        ...field,
+        name: field.name.startsWith("enderecos.0.") ? field.name : `enderecos.0.${field.name}`
+      }));
+    }
+    return section.fields;
+  };
+
+  // Initial form state
   const [formData, setFormData] = useState({
+    produtoId: produtoId || "", // Adicione o produtoId aqui
     nome: "",
     nome_pai: "",
     nome_mae: "",
@@ -115,7 +132,16 @@ export default function Cadastrar({
     }
   });
 
-  // Busca seções e campos do formulário
+  useEffect(() => {
+    if (produtoId) {
+      setFormData((prev) => ({
+        ...prev,
+        produtoId: produtoId
+      }));
+    }
+  }, [produtoId]);
+
+  // Fetch form sections and fields
   useEffect(() => {
     const fetchDefaultSections = async () => {
       try {
@@ -125,27 +151,22 @@ export default function Cadastrar({
           return;
         }
 
-        // Busca todas as seções de uma vez
-        const response = await axios.get(
-          `${API_BASE_URL}/produto-config-campos-cadastro/listar`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { produto_hash: produtoId }
-          }
-        );
+        // Fetch all sections at once
+        const response = await axios.get(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { produto_hash: produtoId }
+        });
 
-        // Transforma a resposta da API em FormSection[]
+        // Transform API response into FormSection[]
         const sectionsData: FormSection[] = Object.keys(response.data).map((sectionName) => ({
           section: sectionName,
           fields: response.data[sectionName].map((item: any) => item.fields)
         }));
 
-        // Filtra apenas as seções que estão em tabOrder
-        const validSections = sectionsData.filter((section) =>
-          tabOrder.includes(section.section)
-        );
+        // Filter only sections in tabOrder
+        const validSections = sectionsData.filter((section) => tabOrder.includes(section.section));
         setFormSections(validSections);
-        console.log("formSections:", JSON.stringify(validSections, null, 2)); // Log para depuração
+        console.log("formSections:", JSON.stringify(validSections, null, 2)); // Debug log
       } catch (error) {
         console.error("Erro ao buscar seções:", error);
         setFormSections([]);
@@ -157,19 +178,32 @@ export default function Cadastrar({
     fetchDefaultSections();
   }, [token, produtoId]);
 
+  // Handle form field changes
   const handleChange = (path: string, value: any) => {
+    console.log("handleChange chamado:", { path, value }); // Log para depuração
     const keys = path.split(".");
     setFormData((prev) => {
       const updated = structuredClone(prev);
       let obj: any = updated;
+
+      // Iterar pelas chaves, criando objetos/arrays intermediários se necessário
       for (let i = 0; i < keys.length - 1; i++) {
-        obj = obj[keys[i]];
+        const key = keys[i];
+        // Se a chave não existe ou é undefined, criar um objeto ou array
+        if (!obj[key]) {
+          // Se a próxima chave for numérica, criar um array; senão, criar um objeto
+          obj[key] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+        }
+        obj = obj[key];
       }
+
+      // Definir o valor na última chave
       obj[keys[keys.length - 1]] = value;
       return updated;
     });
   };
 
+  // Handle navigation to the next tab
   const handleNext = async () => {
     const ref = tabRefs[activeTab];
     if (ref?.current?.validate) {
@@ -183,6 +217,7 @@ export default function Cadastrar({
     }
   };
 
+  // Sanitize form data before submission
   const sanitizeFormData = (data: any): any => {
     const clone = structuredClone(data);
 
@@ -212,6 +247,7 @@ export default function Cadastrar({
     return clone;
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
     for (const tab of tabOrder) {
       const ref = tabRefs[tab];
@@ -226,6 +262,9 @@ export default function Cadastrar({
 
     try {
       const sanitizedData = sanitizeFormData(formData);
+
+      // Adicione logs para depuração
+      console.log("Dados sendo enviados:", sanitizedData);
 
       const response = await axios.post(`${API_BASE_URL}/cliente`, sanitizedData, {
         headers: {

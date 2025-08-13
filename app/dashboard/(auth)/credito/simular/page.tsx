@@ -140,10 +140,10 @@ export default function CreditSimular() {
         <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
           {" "}
           {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen(true)}>Novo Campos Cadastro Usuario</Button>
+            <Button onClick={() => setIsCadastroOpen(true)}>Campos Usuario</Button>
           )}
           {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen2(true)}>Novo Campos Cadastro Produto</Button>
+            <Button onClick={() => setIsCadastroOpen2(true)}>Campos Produto</Button>
           )}
         </div>
       </div>

@@ -85,9 +85,9 @@ export function Combobox<T extends Record<string, any>>({
             />
             <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
             <CommandGroup>
-              {filteredData.map((item) => (
+              {filteredData.map((item, index) => (
                 <CommandItem
-                  key={item[displayField] as string}
+                  key={item.id ?? `${item[displayField]}-${index}`} // Usar id se disponível, senão combinar displayField com índice
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);

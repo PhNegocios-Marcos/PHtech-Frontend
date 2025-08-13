@@ -24,7 +24,7 @@ interface ComboboxProps<T> {
   data: T[];
   displayField: keyof T;
   value: T | null;
-  onChange: (item: T) => void;
+  onChange: (item: T | null) => void; // Ajustado para aceitar null
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
@@ -32,12 +32,27 @@ interface ComboboxProps<T> {
   dropdownClassName?: string;
 }
 
+// Tipo para os itens de availableFields
+interface AvailableField {
+  value: string;
+  label: string;
+  type: string;
+}
+
+// Tipo para os itens de tipos de campo
+interface TypeOption {
+  value: string;
+  label: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Esquema de validação para um único campo
 const fieldSchema = z.object({
   key: z.string().min(1, "Chave do campo é obrigatória"),
-  label: z.string().min(1, "Rótulo é obrigatório"),
+  label: z.string().min(1, "Rótulo é obrigatório").refine((val) => val !== "Sem nome", {
+    message: "Rótulo não pode ser 'Sem nome'"
+  }),
   type: z.enum(["text", "number", "date"], {
     errorMap: () => ({ message: "Tipo de campo inválido" })
   }),
@@ -51,7 +66,13 @@ const schema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   items: z.array(fieldSchema).min(1, "Pelo menos um item é obrigatório"),
   fields: z.array(fieldSchema).min(1, "Pelo menos um campo é obrigatório")
-});
+}).refine(
+  (data) => {
+    const allLabels = [...data.items, ...data.fields].map((field) => field.label);
+    return allLabels.length === new Set(allLabels).size;
+  },
+  { message: "Os rótulos dos campos devem ser únicos" }
+);
 
 type FormData = z.infer<typeof schema>;
 
@@ -100,7 +121,7 @@ export default function CadastroInputProduto({
   const { token } = useAuth();
   const [produtos, setProdutos] = useState<ProdutoOption[]>([]);
   const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | null>(null);
-  const [availableFields] = useState([
+  const [availableFields] = useState<AvailableField[]>([
     { value: "cpf", label: "CPF", type: "text" },
     { value: "saldo", label: "Saldo FGTS", type: "text" },
     { value: "mes_aniversario", label: "Mês Aniversário", type: "number" },
@@ -170,7 +191,7 @@ export default function CadastroInputProduto({
               items: [
                 {
                   key: "",
-                  label: "",
+                  label: `Campo ${items.length + 1}`,
                   type: "text",
                   required: false,
                   placeholder: ""
@@ -179,7 +200,7 @@ export default function CadastroInputProduto({
               fields: [
                 {
                   key: "",
-                  label: "",
+                  label: `Campo ${fields.length + 1}`,
                   type: "text",
                   required: false,
                   placeholder: ""
@@ -196,160 +217,91 @@ export default function CadastroInputProduto({
         const transformedData = {
           produto_hash: apiData.produto_hash || produtoSelect.id,
           title: apiData.title || "Dados da Simulação",
-          items: apiData.items?.map((item: any) => ({
+          items: apiData.items?.map((item: any, index: number) => ({
             key: item.key,
-            label: item.label,
+            label: item.label || `Campo ${index + 1}`,
             type: item.type,
             required: item.required || false,
             placeholder: item.placeholder || ""
           })) || [
             {
               key: "",
-              label: "",
+              label: `Campo ${items.length + 1}`,
               type: "text",
               required: false,
               placeholder: ""
             }
           ],
-          fields: apiData.fields?.map((field: any) => ({
+          fields: apiData.fields?.map((field: any, index: number) => ({
             key: field.key,
-            label: field.label,
+            label: field.label || `Campo ${index + 1}`,
             type: field.type,
             required: field.required || false,
             placeholder: field.placeholder || ""
           })) || [
             {
               key: "",
-              label: "",
+              label: `Campo ${fields.length + 1}`,
               type: "text",
               required: false,
               placeholder: ""
             }
           ]
         };
+
         methods.reset(transformedData);
       } catch (error) {
-        console.error("Erro ao carregar configuração:", error);
-        methods.reset({
-          produto_hash: produtoSelect.id,
-          title: "Dados da Simulação",
-          items: [
-            {
-              key: "",
-              label: "",
-              type: "text",
-              required: false,
-              placeholder: ""
-            }
-          ],
-          fields: [
-            {
-              key: "",
-              label: "",
-              type: "text",
-              required: false,
-              placeholder: ""
-            }
-          ]
-        });
+        console.error("Erro ao buscar configuração:", error);
+        alert("Erro ao buscar configuração.");
       }
     }
 
     fetchProdutos();
     fetchConfig();
-  }, [token, isOpen, produtoSelect, methods]);
-
-  useEffect(() => {
-    methods.setValue("produto_hash", produtoSelect?.id ?? "");
-  }, [produtoSelect, methods]);
+  }, [token, isOpen, produtoSelect, methods, items.length, fields.length]);
 
   const onSubmit = async (data: FormData) => {
-    if (!token) {
-      alert("Token não encontrado. Faça login.");
-      return;
-    }
-
     try {
-      const payload = {
-        produto_hash: data.produto_hash,
-        type: "form",
-        title: data.title,
-        items: data.items.map((item) => ({
-          key: item.key,
-          label: item.label,
-          type: item.type,
-          placeholder: item.placeholder || undefined
-        })),
-        fields: data.fields.map((field) => ({
-          key: field.key,
-          label: field.label,
-          type: field.type,
-          required: field.required || false
-        }))
-      };
-
-      console.log("Payload enviado:", JSON.stringify(payload, null, 2));
-
-      const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/criar`, {
+      await fetch(`${API_BASE_URL}/simulacao-campos-produtos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          produto_hash: data.produto_hash,
+          simulacao_campos_produtos_type: "fgts",
+          simulacao_campos_produtos_title: data.title,
+          simulacao_campos_produtos_items: JSON.stringify(data.items),
+          simulacao_campos_produtos_fields: JSON.stringify(data.fields)
+        })
       });
 
-      const responseData = await response.json();
-      console.log("Resposta da API:", JSON.stringify(responseData, null, 2));
-
-      if (!response.ok) {
-        throw new Error(JSON.stringify(responseData));
-      }
-
-      alert("Configuração de campos cadastrada com sucesso!");
-      methods.reset();
-      setProdutoSelect(null);
-      if (onRefresh) {
-        await onRefresh();
-      }
+      alert("Configuração salva com sucesso!");
+      if (onRefresh) onRefresh();
       onClose();
     } catch (error) {
-      console.error("Erro ao cadastrar configuração de campos:", error);
-      alert("Erro ao cadastrar configuração de campos: " + error);
+      console.error("Erro ao salvar configuração:", error);
+      alert("Erro ao salvar configuração.");
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
-
       <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+        className={clsx(
+          "fixed inset-y-0 right-0 z-50 h-screen w-full max-w-2xl border-l bg-background p-6 shadow-lg transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}>
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Configurar Campos de Simulação</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
-              </div>
-
-              <Card className="flex-grow overflow-auto">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Configuração dos Campos</CardTitle>
+                  <CardTitle>Cadastro de Campos da Simulação</CardTitle>
                 </CardHeader>
-
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4">
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
                     <FormField
                       control={methods.control}
                       name="produto_hash"
@@ -360,8 +312,11 @@ export default function CadastroInputProduto({
                             <Combobox
                               data={produtos}
                               displayField="name"
-                              value={produtoSelect}
-                              onChange={setProdutoSelect}
+                              value={produtos.find((p) => p.id === field.value) || null}
+                              onChange={(selected: ProdutoOption | null) => {
+                                field.onChange(selected?.id || "");
+                                setProdutoSelect(selected);
+                              }}
                               searchFields={["name"]}
                               placeholder="Selecione um produto"
                             />
@@ -414,7 +369,7 @@ export default function CadastroInputProduto({
 
 type FieldArrayProps = {
   arrayName: "items" | "fields";
-  availableFields: { value: string; label: string; type: string }[];
+  availableFields: AvailableField[];
   append: (value: any) => void;
   remove: (index: number) => void;
   fields: any[];
@@ -423,6 +378,20 @@ type FieldArrayProps = {
 
 function FieldArray({ arrayName, availableFields, append, remove, fields, className }: FieldArrayProps) {
   const { control, watch, setValue } = useFormContext();
+
+  // Função para gerar um label único
+  const generateUniqueLabel = (baseLabel: string, existingLabels: string[]) => {
+    let newLabel = baseLabel;
+    let counter = 1;
+    while (existingLabels.includes(newLabel)) {
+      newLabel = `${baseLabel} ${counter}`;
+      counter++;
+    }
+    return newLabel;
+  };
+
+  // Obter labels existentes para evitar duplicatas
+  const existingLabels = watch(`${arrayName}`).map((field: any) => field.label);
 
   return (
     <div className={clsx("grid gap-4", className)}>
@@ -436,13 +405,19 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                 <FormItem>
                   <FormLabel>Chave do Campo</FormLabel>
                   <FormControl>
-                    <Combobox
+                    <Combobox<AvailableField>
                       data={availableFields}
                       displayField="label"
                       value={availableFields.find((f) => f.value === field.value) || null}
-                      onChange={(selected) => {
+                      onChange={(selected: AvailableField | null) => {
                         field.onChange(selected?.value || "");
                         setValue(`${arrayName}.${fieldIndex}.type`, selected?.type || "text");
+                        // Atualizar o label automaticamente com base na seleção
+                        const newLabel = generateUniqueLabel(
+                          selected?.label || `Campo ${fieldIndex + 1}`,
+                          existingLabels.filter((_: string, idx: number) => idx !== fieldIndex)
+                        );
+                        setValue(`${arrayName}.${fieldIndex}.label`, newLabel);
                       }}
                       searchFields={["label"]}
                       placeholder="Selecione um campo"
@@ -460,7 +435,17 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                 <FormItem>
                   <FormLabel>Rótulo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite o rótulo do campo" {...field} />
+                    <Input
+                      placeholder="Digite o rótulo do campo"
+                      {...field}
+                      onChange={(e) => {
+                        const newLabel = generateUniqueLabel(
+                          e.target.value || `Campo ${fieldIndex + 1}`,
+                          existingLabels.filter((_: string, idx: number) => idx !== fieldIndex)
+                        );
+                        field.onChange(newLabel);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -474,7 +459,7 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                 <FormItem>
                   <FormLabel>Tipo</FormLabel>
                   <FormControl>
-                    <Combobox
+                    <Combobox<TypeOption>
                       data={[
                         { value: "text", label: "Texto" },
                         { value: "number", label: "Número" },
@@ -490,7 +475,7 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                               ? "Número"
                               : "Data"
                       }}
-                      onChange={(selected) => field.onChange(selected?.value || "text")}
+                      onChange={(selected: TypeOption | null) => field.onChange(selected?.value || "text")}
                       searchFields={["label"]}
                       placeholder="Selecione o tipo"
                     />
@@ -551,7 +536,10 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
       <Button
         type="button"
         variant="outline"
-        onClick={() => append({ key: "", label: "", type: "text", required: false, placeholder: "" })}
+        onClick={() => {
+          const newLabel = generateUniqueLabel(`Campo ${fields.length + 1}`, existingLabels);
+          append({ key: "", label: newLabel, type: "text", required: false, placeholder: "" });
+        }}
         className="mt-4">
         Adicionar Campo
       </Button>

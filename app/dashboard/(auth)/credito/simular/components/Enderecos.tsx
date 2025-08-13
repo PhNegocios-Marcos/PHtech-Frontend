@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,17 +21,18 @@ interface EnderecoProps {
 }
 
 export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoProps, ref) => {
-  const e = formData.enderecos[0];
+  const e = formData.enderecos[0] || {};
 
   // Criar schema dinamicamente
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
 
     fields.forEach((field) => {
+      const fieldName = field.name.startsWith("enderecos.0.") ? field.name.split(".").slice(2).join(".") : field.name;
       if (field.required) {
-        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
+        schemaObj[fieldName] = z.string().min(1, `${field.label} é obrigatório`);
       } else {
-        schemaObj[field.name] = z.string().optional();
+        schemaObj[fieldName] = z.string().optional();
       }
     });
 
@@ -45,26 +46,46 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
     register,
     setValue,
     formState: { errors },
-    trigger
+    trigger,
   } = useForm<EnderecoFormData>({
     resolver: zodResolver(enderecoSchema),
     defaultValues: fields.reduce(
       (acc, field) => {
-        acc[field.name] = e[field.name] || "";
+        const fieldName = field.name.startsWith("enderecos.0.") ? field.name.split(".").slice(2).join(".") : field.name;
+        acc[fieldName] = e[fieldName] || "";
         return acc;
       },
       {} as Record<string, any>
-    )
+    ),
   });
 
+  // Sincronizar formData com o estado do formulário
+  useEffect(() => {
+    fields.forEach((field) => {
+      const fieldName = field.name.startsWith("enderecos.0.") ? field.name.split(".").slice(2).join(".") : field.name;
+      setValue(fieldName, e[fieldName] || "");
+    });
+  }, [formData, setValue, fields]);
+
   useImperativeHandle(ref, () => ({
-    validate: () => trigger()
+    validate: () => trigger(),
   }));
+
+  // Função para formatar o CEP no formato 99999-999
+  const formatCep = (value: string): string => {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length > 5) {
+      return `${cleaned.slice(0, 5)}-${cleaned.slice(5, 8)}`;
+    }
+    return cleaned;
+  };
 
   const buscarEndereco = async (cep: string) => {
     const cepLimpo = cep.replace(/\D/g, "");
 
-    if (cepLimpo.length !== 8) return;
+    if (cepLimpo.length !== 8) {
+      return;
+    }
 
     try {
       const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
@@ -76,11 +97,11 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
       }
 
       const campos = {
-        logradouro: data.logradouro,
-        bairro: data.bairro,
-        cidade: data.localidade,
-        estado: data.uf,
-        uf: data.uf
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        estado: data.uf || "",
+        uf: data.uf || "",
       };
 
       Object.entries(campos).forEach(([key, val]) => {
@@ -94,26 +115,41 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
   };
 
   const renderField = (field: FormField) => {
-    const errorMessage = errors[field.name]?.message;
+    const fieldName = field.name.startsWith("enderecos.0.") ? field.name.split(".").slice(2).join(".") : field.name;
+    const errorMessage = errors[fieldName]?.message;
     const isErrorString = typeof errorMessage === "string";
 
     return (
-      <div key={field.name}>
+      <div key={field.name} className="grid gap-1">
         <span>{field.label}</span>
-        <Input
-          {...register(field.name)}
-          placeholder={field.label}
-          value={e[field.name] || ""}
-          onChange={async (ev) => {
-            const value = ev.target.value;
-            setValue(field.name, value);
-            onChange(`enderecos.0.${field.name}`, value);
-            if (field.name === "cep" && value.length === 8) {
-              await buscarEndereco(value);
-            }
-          }}
-          className="mt-1"
-        />
+        {field.name === "enderecos.0.cep" ? (
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            onChange={(e) => {
+              const rawValue = e.target.value;
+              const formattedValue = formatCep(rawValue);
+              setValue(fieldName, formattedValue);
+              onChange(field.name, formattedValue);
+              if (formattedValue.replace(/\D/g, "").length === 8) {
+                buscarEndereco(formattedValue);
+              }
+            }}
+            className="mt-1"
+          />
+        ) : (
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            type={field.type}
+            onChange={(e) => {
+              const value = field.type === "number" ? parseInt(e.target.value) || 0 : e.target.value;
+              setValue(fieldName, value);
+              onChange(field.name, value);
+            }}
+            className="mt-1"
+          />
+        )}
         {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
       </div>
     );
@@ -124,11 +160,11 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
       <form className="grid grid-cols-1 gap-5 md:grid-cols-3" onSubmit={(e) => e.preventDefault()}>
         {fields.map(renderField)}
         {/* Complemento (não validado) */}
-        <div>
+        <div className="grid gap-1">
           <span>Complemento</span>
           <Input
             placeholder="Complemento"
-            value={e.complemento}
+            value={e.complemento || ""}
             onChange={(ev) => {
               onChange("enderecos.0.complemento", ev.target.value);
             }}
