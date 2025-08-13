@@ -65,7 +65,6 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
         style: {
           background: 'var(--toast-error)',
           color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
           boxShadow: 'var(--toast-shadow)'
         }
       });
@@ -81,7 +80,6 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
         style: {
           background: 'var(--toast-success)',
           color: 'var(--toast-success-foreground)',
-          border: '1px solid var(--toast-border)',
           boxShadow: 'var(--toast-shadow)'
         }
       });
@@ -93,7 +91,6 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
         style: {
           background: 'var(--toast-error)',
           color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
           boxShadow: 'var(--toast-shadow)'
         }
       });

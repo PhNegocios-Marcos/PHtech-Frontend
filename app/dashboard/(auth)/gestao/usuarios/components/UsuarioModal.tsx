@@ -28,14 +28,14 @@ type UsuarioPerfilProps = {
 
 export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProps) {
   const handleRefresh = () => {
-    toast.info("Atualizando dados do usuário...", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        border: '1px solid var(--toast-border)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info("Atualizando dados do usuário...", {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     border: '1px solid var(--toast-border)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
     onRefresh();
   };
 
@@ -70,7 +70,7 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
           <Equipes 
             usuario={usuario} 
             onClose={onClose} 
-            onRefresh={handleRefresh}
+            // onRefresh={handleRefresh}
           />
         </TabsContent>
 
@@ -78,7 +78,7 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
           <Perfil 
             usuario={usuario} 
             onClose={onClose} 
-            onRefresh={handleRefresh}
+            // onRefresh={handleRefresh}
           />
         </TabsContent>
       </Tabs>

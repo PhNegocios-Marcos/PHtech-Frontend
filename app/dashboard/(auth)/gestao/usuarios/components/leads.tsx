@@ -182,14 +182,14 @@ export function UsuariosTable() {
   });
 
   const handleRefresh = () => {
-    toast.info("Atualizando lista de usuários...", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        border: '1px solid var(--toast-border)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info("Atualizando lista de usuários...", {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     border: '1px solid var(--toast-border)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
     setRefreshKey((prev) => prev + 1);
   };
 
