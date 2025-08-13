@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const usuarioSchema = z.object({
   id: z.string(),
@@ -60,6 +61,14 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
   const onSubmit = async (data: Usuario) => {
     if (!token) {
       console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -67,11 +76,27 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/usuario/atualizar`, data, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      toast.success("Usuário atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -30,7 +32,6 @@ import {
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-// const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 const telefoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
 
 function validarCPF(cpf: string) {
@@ -115,7 +116,14 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token de autenticação não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -142,14 +150,28 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.detail || "Erro ao cadastrar usuário");
       }
 
-      alert("Usuário cadastrado com sucesso!");
+      toast.success("Usuário cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Erro ao cadastrar usuário: " + error);
+      toast.error(`Erro ao cadastrar usuário: ${error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

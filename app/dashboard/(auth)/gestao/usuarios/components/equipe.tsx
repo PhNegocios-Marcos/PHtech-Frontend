@@ -46,6 +46,8 @@ type Option = {
   status_relacionamento?: any;
   id_relacionamento?: any;
   onClose: () => void;
+    onRefresh?: () => void; // Adicione esta linha
+
 };
 
 export default function Equipes({ usuario, equipes, onClose }: Option) {

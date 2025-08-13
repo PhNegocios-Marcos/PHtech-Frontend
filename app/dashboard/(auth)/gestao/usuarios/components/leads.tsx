@@ -34,6 +34,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { UsuarioPerfil } from "./UsuarioModal";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -58,6 +59,7 @@ export function UsuariosTable() {
   const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const { token } = useAuth();
 
@@ -104,7 +106,12 @@ export function UsuariosTable() {
 
   React.useEffect(() => {
     async function fetchUsuarios() {
+      setIsLoading(true);
       try {
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado");
+        }
+
         const response = await fetch(`${API_BASE_URL}/usuario/listar`, {
           method: "GET",
           headers: {
@@ -134,6 +141,16 @@ export function UsuariosTable() {
         );
       } catch (error: any) {
         console.error("Erro ao buscar usuários:", error.message);
+        toast.error(`Erro ao carregar usuários: ${error.message}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            border: '1px solid var(--toast-border)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -165,6 +182,14 @@ export function UsuariosTable() {
   });
 
   const handleRefresh = () => {
+    toast.info("Atualizando lista de usuários...", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        border: '1px solid var(--toast-border)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -224,7 +249,7 @@ export function UsuariosTable() {
                             <TableHead
                               key={header.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(header.column.columnDef.header, header.getContext())}
                             </TableHead>
@@ -234,7 +259,9 @@ export function UsuariosTable() {
                     ))}
                   </TableHeader>
                   <TableBody>
-                    {table.getRowModel().rows.length ? (
+                    {isLoading ? (
+                      <CarregandoTable />
+                    ) : table.getRowModel().rows.length ? (
                       table.getRowModel().rows.map((row) => (
                         <TableRow
                           key={row.id}
@@ -246,7 +273,7 @@ export function UsuariosTable() {
                               <TableCell
                                 key={cell.id}
                                 className={`truncate overflow-hidden whitespace-nowrap ${
-                                  isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                  isLast ? "w-16" : "w-auto"
                                 }`}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                               </TableCell>
@@ -255,15 +282,19 @@ export function UsuariosTable() {
                         </TableRow>
                       ))
                     ) : (
-                      <CarregandoTable />
+                      <TableRow>
+                        <TableCell colSpan={usuarioColumns.length} className="h-24 text-center">
+                          Nenhum usuário encontrado
+                        </TableCell>
+                      </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </div>
               <div className="flex items-center justify-end space-x-2 pt-4">
                 <div className="text-muted-foreground flex-1 text-sm">
-                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                  {table.getFilteredRowModel().rows.length} row(s) selected.
+                  {table.getFilteredSelectedRowModel().rows.length} de{" "}
+                  {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
                 </div>
                 <div className="space-x-2">
                   <Button

@@ -27,6 +27,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,25 +43,24 @@ type Option = {
   equipes?: any;
   equipe?: Equipe;
   usuario: Usuario;
-  hash?: string; // opcional
+  hash?: string;
   status_relacionamento?: any;
   id_relacionamento?: any;
   onClose: () => void;
+    onRefresh?: () => void; // Adicione esta linha
+
 };
 
 export default function Perfil({ usuario, equipes, onClose }: Option) {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [equipe, setEquipe] = React.useState<Option[]>([]); // para tabela: equipes vinculadas ao usuário
-  const [equipesDisponiveis, setEquipesDisponiveis] = React.useState<Option[]>([]); // para combobox: todas as equipes disponíveis
+  const [equipe, setEquipe] = React.useState<Option[]>([]);
+  const [equipesDisponiveis, setEquipesDisponiveis] = React.useState<Option[]>([]);
   const [equipesSelect, setEquipesSelect] = useState<Option | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const { token } = useAuth();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
@@ -98,8 +98,25 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
                     : item
                 )
               );
-            } catch (error) {
+
+              toast.success("Status atualizado com sucesso!", {
+                style: {
+                  background: 'var(--toast-success)',
+                  color: 'var(--toast-success-foreground)',
+                  border: '1px solid var(--toast-border)',
+                  boxShadow: 'var(--toast-shadow)'
+                }
+              });
+            } catch (error: any) {
               console.error("Erro ao atualizar status", error);
+              toast.error(`Erro ao atualizar status: ${error.message}`, {
+                style: {
+                  background: 'var(--toast-error)',
+                  color: 'var(--toast-error-foreground)',
+                  border: '1px solid var(--toast-border)',
+                  boxShadow: 'var(--toast-shadow)'
+                }
+              });
             }
           };
 
@@ -114,13 +131,17 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
         }
       }
     ],
-    []
+    [token]
   );
 
   // Fetch todas as equipes para o Combobox
   useEffect(() => {
     async function fetchEquipesDisponiveis() {
       try {
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado");
+        }
+
         const res = await axios.get(`${API_BASE_URL}/perfil/listar`, {
           headers: {
             "Content-Type": "application/json",
@@ -132,51 +153,41 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
           nome: p.nome
         }));
         setEquipesDisponiveis(data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar equipes disponíveis", error);
+        toast.error(`Erro ao carregar perfis: ${error.message}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            border: '1px solid var(--toast-border)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
     fetchEquipesDisponiveis();
   }, [token]);
 
-  // Fetch equipes vinculadas ao usuário para a tabela
-  //   useEffect(() => {
-  //     async function fetchEquipe() {
-  //       try {
-  //         const res = await axios.get(`${API_BASE_URL}/perfil/${equipesDisponiveis.id}`, {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`
-  //           }
-  //         });
-
-  //         const data = res.data.map((p: any) => ({
-  //           id: p.id,
-  //           nome: p.nome,
-  //           descricao: p.descricao,
-  //           status_relacionamento: p.status
-  //         }));
-
-  //         setEquipe(data);
-  //       } catch (error) {
-  //         console.error("Erro ao carregar equipes do usuário", error);
-  //       }
-  //     }
-  //     fetchEquipe();
-  //   }, [token, usuario.email, refreshKey]);
-
   async function relacionarEquipe() {
     if (!equipesSelect) {
-      setMessage("Selecione convênio");
-      setMessageType("error");
+      toast.error("Selecione um perfil para vincular", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
     setLoading(true);
-    setMessage("");
-    setMessageType("");
 
     try {
+      if (!token) {
+        throw new Error("Token de autenticação não encontrado");
+      }
+
       await axios.post(
         `${API_BASE_URL}/rel_usuario_equipe/criar`,
         {
@@ -189,13 +200,27 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
           }
         }
       );
-      setMessage("Relação com convênio criada com sucesso!");
-      setMessageType("success");
-      setRefreshKey((prev) => prev + 1); // Atualiza tabela após criar
-    } catch (error) {
+
+      toast.success("Perfil vinculado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      setRefreshKey((prev) => prev + 1);
+      setEquipesSelect(null);
+    } catch (error: any) {
       console.error(error);
-      setMessage("Erro ao criar relação com convênio");
-      setMessageType("error");
+      toast.error(`Erro ao vincular perfil: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          border: '1px solid var(--toast-border)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -240,7 +265,6 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
 
       <CardContent>
         <div className="mt-5 mb-5">
-          {/* Coluna 1 - Convênio */}
           <div className="space-y-2">
             <span className="text-muted-foreground text-sm">Perfil</span>
             <Combobox
@@ -249,7 +273,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
               value={equipesSelect}
               onChange={setEquipesSelect}
               searchFields={["nome"]}
-              placeholder="Selecione uma Perfil"
+              placeholder="Selecione um Perfil"
               className="w-full"
             />
             <Button onClick={relacionarEquipe} disabled={loading} className="mt-2">
@@ -257,17 +281,8 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
             </Button>
           </div>
         </div>
-
-        {/* Mensagem de sucesso ou erro */}
-        {message && (
-          <p
-            className={`mt-4 text-sm ${
-              messageType === "success" ? "text-green-600" : "text-red-600"
-            }`}>
-            {message}
-          </p>
-        )}
       </CardContent>
+      
       <div className="rounded-md border mx-6">
         <Table>
           <TableHeader>
@@ -307,7 +322,11 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
                 </TableRow>
               ))
             ) : (
-              <CarregandoTable />
+              <TableRow>
+                <TableCell colSpan={equipeColumns.length} className="h-24 text-center">
+                  Nenhum perfil vinculado
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
