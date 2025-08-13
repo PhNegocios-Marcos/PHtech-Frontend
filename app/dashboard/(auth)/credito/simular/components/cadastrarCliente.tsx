@@ -115,8 +115,6 @@ export default function Cadastrar({
     }
   });
 
-  console.log("produtoId: ", produtoId);
-
   // Busca seções e campos do formulário
   useEffect(() => {
     const fetchDefaultSections = async () => {
@@ -127,35 +125,25 @@ export default function Cadastrar({
           return;
         }
 
-        // Lista de seções possíveis
-
-        // Busca apenas as seções válidas para o produto
-        const sectionsData = await Promise.all(
-          tabOrder.map(async (sectionName) => {
-            try {
-              const response = await axios.get(
-                `${API_BASE_URL}/produto-config-campos-cadastro/listar`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                  params: { produto_hash: produtoId, section: sectionName }
-                }
-              );
-              // Verifica se a resposta contém campos válidos
-              if (response.data.fields && Array.isArray(response.data.fields)) {
-                return {
-                  section: sectionName,
-                  fields: response.data.fields
-                };
-              }
-              return null;
-            } catch {
-              return null; // Seção não encontrada ou erro
-            }
-          })
+        // Busca todas as seções de uma vez
+        const response = await axios.get(
+          `${API_BASE_URL}/produto-config-campos-cadastro/listar`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { produto_hash: produtoId }
+          }
         );
 
-        // Filtra seções válidas e remove nulos
-        const validSections = sectionsData.filter((section): section is FormSection => section !== null);
+        // Transforma a resposta da API em FormSection[]
+        const sectionsData: FormSection[] = Object.keys(response.data).map((sectionName) => ({
+          section: sectionName,
+          fields: response.data[sectionName].map((item: any) => item.fields)
+        }));
+
+        // Filtra apenas as seções que estão em tabOrder
+        const validSections = sectionsData.filter((section) =>
+          tabOrder.includes(section.section)
+        );
         setFormSections(validSections);
         console.log("formSections:", JSON.stringify(validSections, null, 2)); // Log para depuração
       } catch (error) {

@@ -19,6 +19,19 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
 
+// Define ComboboxProps interface to match the Combobox component
+interface ComboboxProps<T> {
+  data: T[];
+  displayField: keyof T;
+  value: T | null;
+  onChange: (item: T) => void;
+  label?: string;
+  placeholder?: string;
+  searchFields?: (keyof T)[];
+  className?: string;
+  dropdownClassName?: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Esquema de validação para um único campo
@@ -136,8 +149,10 @@ export default function CadastroInputProduto({
     }
 
     async function fetchConfig() {
+      if (!produtoSelect?.id) return;
+
       try {
-        const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/listar`, {
+        const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/listar?produto_hash=${produtoSelect.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -146,23 +161,103 @@ export default function CadastroInputProduto({
           }
         });
 
-        if (!response.ok) throw new Error("Erro ao buscar configuração");
+        if (!response.ok) {
+          if (response.status === 404) {
+            // No configuration found for this produto_hash, reset to default
+            methods.reset({
+              produto_hash: produtoSelect.id,
+              title: "Dados da Simulação",
+              items: [
+                {
+                  key: "",
+                  label: "",
+                  type: "text",
+                  required: false,
+                  placeholder: ""
+                }
+              ],
+              fields: [
+                {
+                  key: "",
+                  label: "",
+                  type: "text",
+                  required: false,
+                  placeholder: ""
+                }
+              ]
+            });
+            return;
+          }
+          throw new Error("Erro ao buscar configuração");
+        }
 
         const apiData = await response.json();
-        methods.reset({
-          produto_hash: apiData.produto_hash || "",
+        // Transform API data to match FormData structure
+        const transformedData = {
+          produto_hash: apiData.produto_hash || produtoSelect.id,
           title: apiData.title || "Dados da Simulação",
-          items: apiData.items || [],
-          fields: apiData.fields || []
-        });
+          items: apiData.items?.map((item: any) => ({
+            key: item.key,
+            label: item.label,
+            type: item.type,
+            required: item.required || false,
+            placeholder: item.placeholder || ""
+          })) || [
+            {
+              key: "",
+              label: "",
+              type: "text",
+              required: false,
+              placeholder: ""
+            }
+          ],
+          fields: apiData.fields?.map((field: any) => ({
+            key: field.key,
+            label: field.label,
+            type: field.type,
+            required: field.required || false,
+            placeholder: field.placeholder || ""
+          })) || [
+            {
+              key: "",
+              label: "",
+              type: "text",
+              required: false,
+              placeholder: ""
+            }
+          ]
+        };
+        methods.reset(transformedData);
       } catch (error) {
         console.error("Erro ao carregar configuração:", error);
+        methods.reset({
+          produto_hash: produtoSelect.id,
+          title: "Dados da Simulação",
+          items: [
+            {
+              key: "",
+              label: "",
+              type: "text",
+              required: false,
+              placeholder: ""
+            }
+          ],
+          fields: [
+            {
+              key: "",
+              label: "",
+              type: "text",
+              required: false,
+              placeholder: ""
+            }
+          ]
+        });
       }
     }
 
     fetchProdutos();
     fetchConfig();
-  }, [token, isOpen, methods]);
+  }, [token, isOpen, produtoSelect, methods]);
 
   useEffect(() => {
     methods.setValue("produto_hash", produtoSelect?.id ?? "");

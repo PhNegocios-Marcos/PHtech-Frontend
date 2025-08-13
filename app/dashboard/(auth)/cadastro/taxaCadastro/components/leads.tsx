@@ -58,8 +58,8 @@ export function TaxaCadastroTable() {
       }
 
       const url = `${API_BASE_URL}/faixa-valor-cobrado/listar`;
-      console.log("Fetching from URL:", url);
-      console.log("Using token:", token);
+      // console.log("Fetching from URL:", url);
+      // console.log("Using token:", token);
 
       try {
         const res = await fetch(url, {

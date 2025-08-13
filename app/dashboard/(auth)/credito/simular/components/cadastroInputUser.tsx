@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Combobox } from "@/components/Combobox";
 import {
   Form,
   FormField,
@@ -18,6 +17,22 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
+
+// Import Combobox from separate file
+import { Combobox } from "@/components/Combobox";
+
+// Define ComboboxProps interface to match the Combobox component
+interface ComboboxProps<T> {
+  data: T[];
+  displayField: keyof T;
+  value: T | null;
+  onChange: (item: T) => void;
+  label?: string;
+  placeholder?: string;
+  searchFields?: (keyof T)[];
+  className?: string;
+  dropdownClassName?: string;
+}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -110,7 +125,7 @@ export default function CadastroCamposModal({
 
   const { token } = useAuth();
   const [produtos, setProdutos] = useState<ProdutoOption[]>([]);
-  const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | null>(null);
+  const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | any>(null);
   const [availableFields] = useState([
     { value: "nome", label: "Nome", section: "DadosPessoais" },
     { value: "nome_pai", label: "Nome do Pai", section: "DadosPessoais" },
@@ -158,38 +173,38 @@ export default function CadastroCamposModal({
   };
 
   const transformApiData = (apiData: any): FormData['sections'] => {
-    const sections: { [key: string]: { produto_hash: string; section: "DadosPessoais" | "Contato" | "Enderecos" | "DadosBancarios"; fields: z.infer<typeof fieldSchema>[] } } = {};
+    if (!apiData || typeof apiData !== 'object') {
+      return [{
+        section: "DadosPessoais",
+        fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+      }];
+    }
 
-    apiData.fields.forEach((field: any) => {
-      let sectionName: "DadosPessoais" | "Contato" | "Enderecos" | "DadosBancarios";
-      if (field.name.startsWith("dados_bancarios")) {
-        sectionName = "DadosBancarios";
-      } else if (field.name.startsWith("emails")) {
-        sectionName = "Contato";
-      } else if (field.name.startsWith("enderecos")) {
-        sectionName = "Enderecos";
-      } else {
-        sectionName = "DadosPessoais";
+    const sections: FormData['sections'] = [];
+
+    // Iterate over each section in the API response
+    Object.keys(apiData).forEach((sectionName) => {
+      const sectionData = apiData[sectionName];
+      if (Array.isArray(sectionData)) {
+        const fields = sectionData.map((item: any) => ({
+          name: item.fields.name,
+          label: item.fields.label,
+          type: item.fields.type,
+          required: item.fields.required,
+          options: item.fields.options || []
+        }));
+
+        sections.push({
+          section: sectionName as "DadosPessoais" | "Contato" | "Enderecos" | "DadosBancarios",
+          fields
+        });
       }
-
-      if (!sections[sectionName]) {
-        sections[sectionName] = {
-          produto_hash: apiData.produto_hash,
-          section: sectionName,
-          fields: []
-        };
-      }
-
-      sections[sectionName].fields.push({
-        name: field.name,
-        label: field.label,
-        type: field.type,
-        required: field.required,
-        options: field.options || []
-      });
     });
 
-    return Object.values(sections);
+    return sections.length > 0 ? sections : [{
+      section: "DadosPessoais",
+      fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+    }];
   };
 
   useEffect(() => {
@@ -222,9 +237,15 @@ export default function CadastroCamposModal({
       }
     }
 
+    fetchProdutos();
+  }, [token, isOpen]);
+
+  useEffect(() => {
+    if (!token || !isOpen || !produtoSelect?.id) return;
+
     async function fetchConfig() {
       try {
-        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
+        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar?produto_hash=${produtoSelect.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -233,19 +254,38 @@ export default function CadastroCamposModal({
           }
         });
 
-        if (!response.ok) throw new Error("Erro ao buscar configuração");
+        if (!response.ok) {
+          if (response.status === 404) {
+            // No configuration found for this produto_hash, reset to default
+            methods.reset({
+              produto_hash: produtoSelect.id,
+              sections: [{
+                section: "DadosPessoais",
+                fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+              }]
+            });
+            return;
+          }
+          throw new Error("Erro ao buscar configuração");
+        }
 
         const apiData = await response.json();
         const transformedData = transformApiData(apiData);
-        methods.reset({ produto_hash: apiData.produto_hash, sections: transformedData });
+        methods.reset({ produto_hash: produtoSelect.id, sections: transformedData });
       } catch (error) {
         console.error("Erro ao carregar configuração:", error);
+        methods.reset({
+          produto_hash: produtoSelect.id,
+          sections: [{
+            section: "DadosPessoais",
+            fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+          }]
+        });
       }
     }
 
-    fetchProdutos();
     fetchConfig();
-  }, [token, isOpen, methods]);
+  }, [token, isOpen, produtoSelect, methods]);
 
   useEffect(() => {
     methods.setValue("produto_hash", produtoSelect?.id ?? "");
@@ -462,7 +502,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
   return (
     <div className={clsx("grid gap-4", className)}>
       {fields.map((field, fieldIndex) => (
-        <div key={field.id} className="rounded-md border p-4">
+        <div key={field.id} className="rounded-md border p-4 bg-[var(--secondary-50)]">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}
