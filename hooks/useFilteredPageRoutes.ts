@@ -83,7 +83,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Operacoes_ver",
       "Esteira_ver",
       "Modalidade_ver",
-      "RoteiroOperacional_ver"
+      "RoteiroOperacional_ver",
+      "Alcadas_ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
