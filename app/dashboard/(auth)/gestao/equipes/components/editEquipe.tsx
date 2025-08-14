@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   Form,
   FormControl,
@@ -19,13 +18,12 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const equipeSchema = z.object({
   id: z.string(),
-  // nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   descricao: z.string().optional(),
   status: z.number()
-  // promotora: z.string().optional(),
 });
 
 type EquipeFormValues = z.infer<typeof equipeSchema> & {
@@ -57,17 +55,56 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
   ];
 
   const onSubmit = async (data: EquipeFormValues) => {
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        description: "Faça login para continuar",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      return;
+    }
+
     try {
-      await axios.put(`${API_BASE_URL}/equipe/atualizar`, data, {
+      const response = await axios.put(`${API_BASE_URL}/equipe/atualizar`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       });
+
+      toast.success("Equipe atualizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao atualizar equipe:", error);
-      alert("Erro ao atualizar equipe");
+      const errorMessage = error.response?.data?.message || "Erro ao atualizar equipe";
+      
+      toast.error("Falha na atualização", {
+        description: errorMessage,
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+
+      // Set field errors if available
+      if (error.response?.data?.errors) {
+        Object.entries(error.response.data.errors).forEach(([field, message]) => {
+          methods.setError(field as keyof EquipeFormValues, {
+            type: "manual",
+            message: message as string
+          });
+        });
+      }
     }
   };
 

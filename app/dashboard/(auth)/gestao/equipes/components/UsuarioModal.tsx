@@ -13,7 +13,6 @@ import {
   ColumnFiltersState,
   VisibilityState,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -34,8 +33,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
-
-// import { EquipeDetalhes } from "./editUsuario"; // importe o componente de detalhes
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,12 +63,14 @@ export function EquipesTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
 
   const { token } = useAuth();
 
   React.useEffect(() => {
     async function fetchEquipes() {
       try {
+        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/equipe/listar`, {
           method: "GET",
           headers: {
@@ -86,12 +86,31 @@ export function EquipesTable() {
 
         const data = await response.json();
         setEquipes(data);
+        toast.success("Equipes carregadas com sucesso", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } catch (error: any) {
         console.error("Erro ao carregar equipes:", error.message || error);
+        toast.error("Falha ao carregar equipes", {
+          description: error.message || "Tente novamente mais tarde",
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      } finally {
+        setLoading(false);
       }
     }
 
-    fetchEquipes();
+    if (token) {
+      fetchEquipes();
+    }
   }, [token]);
 
   const table = useReactTable({
@@ -113,15 +132,17 @@ export function EquipesTable() {
     },
   });
 
-  // if (selectedEquipe) {
-  //   // renderiza o detalhe substituindo a tabela
-  //   return (
-  //     // <EquipeDetalhes equipe={selectedEquipe} onBack={() => setSelectedEquipe(null)} />
-  //     console.log("ta faltando algo paizão")
-  //   );
-  // }
+  const handleRowDoubleClick = (equipe: Equipe) => {
+    setSelectedEquipe(equipe);
+    toast.info(`Visualizando equipe: ${equipe.nome}`, {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+  };
 
-  // renderiza a listagem enquanto não há seleção
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
@@ -173,11 +194,13 @@ export function EquipesTable() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
+              {loading ? (
+                <CarregandoTable />
+              ) : table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onDoubleClick={() => setSelectedEquipe(row.original)}
+                    onDoubleClick={() => handleRowDoubleClick(row.original)}
                     className="hover:bg-muted cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -188,7 +211,11 @@ export function EquipesTable() {
                   </TableRow>
                 ))
               ) : (
-                <CarregandoTable />
+                <TableRow>
+                  <TableCell colSpan={equipeColumns.length} className="text-center h-24">
+                    Nenhuma equipe encontrada
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

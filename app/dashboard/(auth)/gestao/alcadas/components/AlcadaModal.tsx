@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Alcadas = {
@@ -23,19 +25,26 @@ type AlcadasDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
   usuario: Alcadas | null;
+  onSuccess?: () => void;
 };
 
-export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
+export function AlcadaDrawer({ isOpen, onClose, usuario, onSuccess }: AlcadasDrawerProps) {
   const [formData, setFormData] = useState<Alcadas | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
     if (usuario) {
       setFormData({ ...usuario });
+      toast.info(`Editando alçada: ${usuario.nome}`, {
+        style: {
+          background: 'var(--toast-info)',
+          color: 'var(--toast-info-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   }, [usuario]);
-
-  if (!isOpen || !formData) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -44,10 +53,20 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
 
   const handleSubmit = async () => {
     if (!token) {
-      console.error("Token global não definido! Autenticação inválida.");
+      toast.error("Autenticação necessária", {
+        description: "Faça login para continuar",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
+    if (!formData) return;
+
+    setIsSubmitting(true);
     const payload = {
       id: formData.id,
       nome: formData.nome,
@@ -62,20 +81,31 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
           Authorization: `Bearer ${token}`,
         },
       });
-      // console.log("Usuário atualizado:", response.data);
-      alert("Usuário atualizado com sucesso!");
+
+      toast.success("Alçada atualizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      
       onClose();
-      window.location.reload();
+      onSuccess?.();
     } catch (error: any) {
-      console.error(
-        "Erro ao atualizar usuário:",
-        error.response ? error.response.data : error.message
-      );
-      alert(
-        `Erro ao atualizar usuário: ${
-          error.response ? JSON.stringify(error.response.data) : error.message
-        }`
-      );
+      console.error("Erro ao atualizar alçada:", error);
+      const errorMessage = error.response?.data?.message || "Erro ao atualizar alçada";
+      
+      toast.error("Falha na atualização", {
+        description: errorMessage,
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -83,6 +113,8 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" },
   ];
+
+  if (!isOpen || !formData) return null;
 
   return (
     <>
@@ -94,24 +126,26 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-lg font-semibold">Editar Usuário</h2>
+          <h2 className="text-lg font-semibold">Editar Alçada</h2>
           <button
             onClick={onClose}
             aria-label="Fechar painel"
             className="text-2xl leading-none text-gray-600 hover:text-gray-900"
+            disabled={isSubmitting}
           >
             ×
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-4 overflow-y-auto p-6">
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium">Nome</label>
             <Input
               name="nome"
               value={formData.nome}
               onChange={handleChange}
               className="mt-1 w-full"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -142,6 +176,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
               value={formData.telefone}
               onChange={handleChange}
               className="mt-1 w-full"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -152,6 +187,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
               value={formData.endereco}
               onChange={handleChange}
               className="mt-1 w-full"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -162,6 +198,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
               value={formData.tipo_acesso}
               onChange={handleChange}
               className="mt-1 w-full"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -176,13 +213,18 @@ export function AlcadaDrawer({ isOpen, onClose, usuario }: AlcadasDrawerProps) {
               }
               label="Status"
               searchFields={["name"]}
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
         <div className="border-t p-4">
-          <Button onClick={handleSubmit} className="w-full">
-            Salvar Alterações
+          <Button 
+            onClick={handleSubmit} 
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </div>
       </aside>

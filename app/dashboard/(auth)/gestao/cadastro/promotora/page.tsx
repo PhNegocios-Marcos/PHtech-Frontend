@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
@@ -29,7 +31,7 @@ export default function CadastroPromotora() {
     control,
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -41,7 +43,6 @@ export default function CadastroPromotora() {
   const { token } = useAuth();
   const router = useRouter();
 
-  // Componente interno para input CNPJ com Cleave
   function InputCleaveCNPJ({
     value,
     onChange,
@@ -77,7 +78,17 @@ export default function CadastroPromotora() {
   }
 
   const onSubmit = async (data: FormData) => {
-    if (!token) return alert("Token não encontrado. Faça login.");
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        description: "Faça login para continuar",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      return;
+    }
 
     const payload = {
       nome: data.nome,
@@ -99,14 +110,38 @@ export default function CadastroPromotora() {
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.message || "Erro ao cadastrar promotora");
       }
 
-      alert("Promotora cadastrada com sucesso!");
+      toast.success("Promotora cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       router.push("/dashboard/default");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar promotora:", error);
-      alert("Erro ao cadastrar promotora: " + error);
+      toast.error("Erro ao cadastrar promotora", {
+        description: error.message || "Tente novamente mais tarde",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+
+      // Set field errors if available
+      if (error.response?.data?.errors) {
+        Object.entries(error.response.data.errors).forEach(([field, message]) => {
+          // @ts-ignore
+          methods.setError(field, {
+            type: "manual",
+            message: message as string
+          });
+        });
+      }
     }
   };
 
@@ -162,11 +197,15 @@ export default function CadastroPromotora() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => router.push("/dashboard/default")}>
+              onClick={() => router.push("/dashboard/default")}
+              disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-primary text-white">
-              Cadastrar
+            <Button 
+              type="submit" 
+              className="bg-primary text-white"
+              disabled={isSubmitting}>
+              {isSubmitting ? "Cadastrando..." : "Cadastrar"}
             </Button>
           </div>
         </form>

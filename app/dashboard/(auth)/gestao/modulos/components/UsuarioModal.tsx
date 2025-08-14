@@ -1,11 +1,14 @@
+// Arquivo: UsuarioDrawer.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext"; // Certifique-se de que este caminho está correto
+import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Usuario = {
@@ -27,7 +30,7 @@ type UsuarioDrawerProps = {
 
 export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
   const [formData, setFormData] = useState<Usuario | null>(null);
-  const { token } = useAuth(); // ✅ hook sendo chamado dentro do componente
+  const { token } = useAuth();
 
   useEffect(() => {
     if (usuario) {
@@ -44,7 +47,13 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
 
   const handleSubmit = async () => {
     if (!token) {
-      console.error("Token global não definido! Autenticação inválida.");
+      toast.error("Token de autenticação não encontrado. Faça login novamente.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -62,21 +71,34 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
           Authorization: `Bearer ${token}`
         }
       });
-      // console.log("Usuário atualizado:", response.data);
-      alert("Usuário atualizado com sucesso!");
-      onClose(); // fecha o drawer após sucesso
+
+      toast.success("Usuário atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      onClose();
+      window.location.reload();
     } catch (error: any) {
       console.error(
         "Erro ao atualizar usuário:",
         error.response ? error.response.data : error.message
       );
-      alert(
+      toast.error(
         `Erro ao atualizar usuário: ${
           error.response ? JSON.stringify(error.response.data) : error.message
-        }`
+        }`,
+        {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        }
       );
     }
-    window.location.reload();
   };
 
   const statusOptions = [
@@ -86,15 +108,12 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
 
   return (
     <>
-      {/* Overlay */}
       <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
 
-      {/* Drawer lateral */}
       <aside
         className="fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col bg-white shadow-lg md:w-1/2"
         role="dialog"
         aria-modal="true">
-        {/* Cabeçalho */}
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-lg font-semibold">Editar Usuário</h2>
           <button
@@ -105,7 +124,6 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
           </button>
         </div>
 
-        {/* Formulário */}
         <div className="grid grid-cols-2 gap-3 overflow-y-auto p-6">
           <div className="h-[100px]">
             <label className="block text-sm font-medium">Nome</label>
@@ -182,7 +200,6 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
           </div>
         </div>
 
-        {/* Botão de salvar */}
         <div className="p-4">
           <Button onClick={handleSubmit}>Salvar Alterações</Button>
         </div>

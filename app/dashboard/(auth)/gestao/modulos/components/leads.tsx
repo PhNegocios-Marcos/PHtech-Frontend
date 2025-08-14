@@ -1,3 +1,4 @@
+// Arquivo: ModulosTable.tsx
 "use client";
 
 import React from "react";
@@ -25,6 +26,7 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -56,9 +58,6 @@ export function ModulosTable() {
         if (!res.ok) throw new Error("Erro ao buscar módulos");
 
         const data = await res.json();
-
-        // console.log("Resposta da API:", data);
-
         const arr: ModuloLinha[] = data.map((m: any) => ({
           id: m.id,
           nome: m.nome,
@@ -66,8 +65,15 @@ export function ModulosTable() {
         }));
 
         setModulos(arr);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar módulos:", error);
+        toast.error(`Erro ao carregar módulos: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -130,13 +136,6 @@ export function ModulosTable() {
     }
   });
 
-  function renderHeader(header: any): React.ReactNode {
-    if (typeof header.column.columnDef.header === "function") {
-      return (header.column.columnDef.header as (ctx: any) => React.ReactNode)(header.getContext());
-    }
-    return String(header.column.columnDef.header);
-  }
-
   const handleRowDoubleClick = (modulos: ModuloLinha) => {
     setSelectedModulos(modulos);
   };
@@ -147,6 +146,13 @@ export function ModulosTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
+    toast.success("Tabela de módulos atualizada!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   return (
@@ -154,7 +160,7 @@ export function ModulosTable() {
       {!selectedModulos ? (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Modulos</CardTitle>
+            <CardTitle>Módulos</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -199,7 +205,7 @@ export function ModulosTable() {
                           <TableHead
                             key={header.id}
                             className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                              isLast ? "w-16" : "w-auto"
                             }`}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </TableHead>
@@ -221,7 +227,7 @@ export function ModulosTable() {
                             <TableCell
                               key={cell.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>

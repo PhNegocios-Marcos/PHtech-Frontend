@@ -30,6 +30,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -77,6 +78,10 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
           })
         ]);
 
+        if (!resUsuarios.ok || !resRelacionamentos.ok) {
+          throw new Error("Erro ao carregar dados");
+        }
+
         const usuariosData = await resUsuarios.json();
         const relacionamentosData: Relacionamento[] = await resRelacionamentos.json();
 
@@ -99,6 +104,14 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
         setUsuarios(usuariosComStatus);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
+        toast.error("Erro ao carregar membros da equipe", {
+          description: "Tente novamente mais tarde",
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } finally {
         setLoading(false);
       }
@@ -112,7 +125,7 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
       if (user.status_relacionamento !== undefined) {
         // Já existe relacionamento, atualizar
         const novoStatus = user.status_relacionamento === 1 ? 0 : 1;
-        await fetch(`${API_BASE_URL}/rel_usuario_equipe/atualizar`, {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/atualizar`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -123,12 +136,25 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
             status: novoStatus
           })
         });
+
+        if (!response.ok) {
+          throw new Error("Falha ao atualizar membro");
+        }
+
         setUsuarios((prev) =>
           prev.map((u) => (u.id === user.id ? { ...u, status_relacionamento: novoStatus } : u))
         );
+
+        toast.success(novoStatus === 1 ? "Membro ativado" : "Membro desativado", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } else {
         // Criar novo relacionamento
-        await fetch(`${API_BASE_URL}/rel_usuario_equipe/criar`, {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/criar`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -139,6 +165,10 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
             nome: equipeNome
           })
         });
+
+        if (!response.ok) {
+          throw new Error("Falha ao adicionar membro");
+        }
 
         // Após criação, recarrega os dados
         const resRelacionamentos = await fetch(`${API_BASE_URL}/rel_usuario_equipe/listar`, {
@@ -162,9 +192,25 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
               : u
           )
         );
+
+        toast.success("Membro adicionado à equipe", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     } catch (err) {
       console.error("Erro ao alterar status:", err);
+      toast.error("Operação falhou", {
+        description: "Não foi possível atualizar o membro",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   }
 

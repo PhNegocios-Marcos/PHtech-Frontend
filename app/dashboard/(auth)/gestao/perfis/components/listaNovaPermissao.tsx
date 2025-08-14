@@ -1,3 +1,4 @@
+// Arquivo: Permissoes.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,10 +35,8 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
 
   const acoes: Acao[] = ["criar", "ver", "atualizar", "desativar"];
 
-  // Estado para as permissões selecionadas (checkboxes marcados)
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
 
-  // Buscar permissões do backend
   useEffect(() => {
     async function fetchPermissoes() {
       if (!token) return;
@@ -76,13 +76,19 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
         setPermissoes(mapeado);
       } catch (error: any) {
         console.error("Erro ao buscar permissões:", error.message || error);
+        toast.error(`Erro ao buscar permissões: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
     fetchPermissoes();
   }, [token]);
 
-  // Inicializar checkboxes selecionados com base nas permissões ativas (status=1)
   useEffect(() => {
     const iniciais = new Set<string>();
 
@@ -98,7 +104,6 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
     setSelecionadas(new Set());
   }, [permissoes]);
 
-  // Função para alternar seleção do checkbox
   const togglePermissao = (nome: string, checked: boolean | undefined) => {
     setSelecionadas((prev) => {
       const novo = new Set(prev);
@@ -111,7 +116,6 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
     });
   };
 
-  // Enviar permissões selecionadas para o backend
   const enviarPermissoesSelecionadas = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/rel_permissao_perfil/criar`, {
@@ -131,10 +135,22 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
         throw new Error(erro?.detail || "Erro ao enviar permissões");
       }
 
-      alert("Permissões atualizadas com sucesso!");
+      toast.success("Permissões atualizadas com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (error: any) {
       console.error("Erro ao enviar permissões:", error.message || error);
-      alert("Erro ao enviar permissões: " + (error.message || error));
+      toast.error(`Erro ao enviar permissões: ${error.message || error}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

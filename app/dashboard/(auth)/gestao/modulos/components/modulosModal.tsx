@@ -1,11 +1,11 @@
+// Arquivo: ModulosDrawer.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { ModulosEditForm } from "./editModulos";
-// import { UsuariosPorEquipeTable } from "./listaPromotoras";
-// import { NovoMembro } from "./addNovoMembro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export type Modulos = {
   id: string;
@@ -25,7 +25,19 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
 
   useEffect(() => {
     if (isOpen && modulos) {
-      setFormData({ ...modulos });
+      try {
+        setFormData({ ...modulos });
+      } catch (error: any) {
+        console.error("Erro ao carregar dados do módulo:", error.message || error);
+        toast.error(`Erro ao carregar dados: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        onClose();
+      }
     }
   }, [modulos, isOpen]);
 
@@ -34,28 +46,18 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
   const handleSuccess = () => {
     onRefresh?.();
     onClose();
+    toast.success("Operação realizada com sucesso!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   return (
-
-      <Tabs defaultValue="Informações">
-        {/* <TabsList>
-          <TabsTrigger value="Informações">Informações</TabsTrigger>
-          <TabsTrigger value="members">Membros</TabsTrigger>
-          <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger>
-        </TabsList> */}
-
-        {/* <TabsContent value="Informações" className="space-y-4"> */}
-          <ModulosEditForm modulos={formData} onClose={handleSuccess} />
-        {/* </TabsContent> */}
-
-        {/* <TabsContent value="members">
-          <UsuariosPorEquipeTable equipeNome={formData.nome} />
-        </TabsContent> */}
-
-        {/* <TabsContent value="ADD_novo_members">
-          <NovoMembro equipeNome={formData.nome} />
-        </TabsContent> */}
-      </Tabs>
+    <Tabs defaultValue="Informações">
+      <ModulosEditForm modulos={formData} onClose={handleSuccess} />
+    </Tabs>
   );
 }

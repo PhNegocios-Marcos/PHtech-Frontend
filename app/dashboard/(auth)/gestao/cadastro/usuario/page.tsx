@@ -1,3 +1,4 @@
+// Arquivo: CadastroPromotora.tsx
 "use client";
 
 import React from "react";
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
@@ -24,7 +27,6 @@ const schema = z
     endereco: z.string().min(1, "Endereço é obrigatório"),
     senha: z.string().min(6, "Senha deve ter ao menos 6 caracteres"),
     confirmar_senha: z.string().min(6, "Confirmação deve ter ao menos 6 caracteres"),
-    // promotora: z.string().uuid("Promotora inválida"),
     tipo_acesso: z.enum(["externo", "interno"])
   })
   .refine((data) => data.senha === data.confirmar_senha, {
@@ -51,16 +53,12 @@ export default function CadastroPromotora() {
       endereco: "",
       senha: "",
       confirmar_senha: ""
-      // promotora: ""
     }
   });
 
   const { token } = useAuth();
   const router = useRouter();
 
-  // console.log('token no cadastro user: ', token)
-
-  // Componente para input Cleave com máscara
   function InputCleave({
     value,
     onChange,
@@ -95,11 +93,16 @@ export default function CadastroPromotora() {
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
-    // Remove máscara antes de enviar para o backend
     const payload = {
       nome: data.nome,
       cpf: data.cpf.replace(/\D/g, ""),
@@ -108,7 +111,6 @@ export default function CadastroPromotora() {
       endereco: data.endereco,
       senha: data.senha,
       confirmar_senha: data.confirmar_senha,
-      // promotora: data.promotora,
       tipo_acesso: data.tipo_acesso
     };
 
@@ -127,11 +129,23 @@ export default function CadastroPromotora() {
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Promotora cadastrada com sucesso!");
+      toast.success("Promotora cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       router.push("/dashboard/default");
     } catch (error) {
       console.error("Erro ao cadastrar usuario:", error);
-      alert("Erro ao cadastrar usuario: " + error);
+      toast.error(`Erro ao cadastrar usuario: ${error}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -184,7 +198,7 @@ export default function CadastroPromotora() {
                     {...field}
                     options={{
                       delimiters: ["(", ") ", "-"],
-                      blocks: [0, 2, 5, 4], // zero para permitir que o primeiro bloco seja "(", depois 2 dígitos do DDD, 5 números e 4 números
+                      blocks: [0, 2, 5, 4],
                       numericOnly: true
                     }}
                     placeholder="(00) 00000-0000"
@@ -217,12 +231,6 @@ export default function CadastroPromotora() {
                 <p className="text-sm text-red-500">{errors.confirmar_senha.message}</p>
               )}
             </div>
-
-            {/* <div>
-            <label className="mb-1 block text-sm">Promotora (UUID)</label>
-            <Input placeholder="UUID da promotora" {...register("promotora")} />
-            {errors.promotora && <p className="text-sm text-red-500">{errors.promotora.message}</p>}
-          </div> */}
 
             <div>
               <label className="mb-1 block text-sm">Tipo de Acesso</label>

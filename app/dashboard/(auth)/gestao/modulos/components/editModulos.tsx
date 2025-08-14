@@ -1,3 +1,4 @@
+// Arquivo: ModulosEditForm.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -18,6 +19,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const equipeSchema = z.object({
   id: z.string(),
@@ -57,7 +59,6 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
     try {
       const payload = { ...data };
 
-      // Se o nome for igual ao original ou estiver vazio, não enviar no payload
       if (data.nome === modulos.nome || !data.nome?.trim()) {
         delete payload.nome;
       }
@@ -68,20 +69,33 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
           "Content-Type": "application/json"
         }
       });
+
+      toast.success("Módulo atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error: any) {
-      const msg = error?.response?.data?.erro || "Erro ao atualizar equipe";
+      const msg = error?.response?.data?.erro || "Erro ao atualizar módulo";
 
       if (msg === "Nome já cadastrado.") {
         methods.setError("nome", {
           type: "manual",
           message: msg
         });
-      } else {
-        alert(msg);
       }
 
-      console.error("Erro ao atualizar equipe:", error);
+      console.error("Erro ao atualizar módulo:", error);
+      toast.error(msg, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -94,7 +108,7 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
               <div className="flex items-center justify-between">
                 <CardTitle>
                   <h2>
-                    Detalhes da Modulos: <span className="text-primary">{modulos.nome}</span>
+                    Detalhes do Módulo: <span className="text-primary">{modulos.nome}</span>
                   </h2>
                 </CardTitle>
                 <Button onClick={onClose} variant="outline">
@@ -109,7 +123,7 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
                   name="nome"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome da Equipe</FormLabel>
+                      <FormLabel>Nome do Módulo</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>

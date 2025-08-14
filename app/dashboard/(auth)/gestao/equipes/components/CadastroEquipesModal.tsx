@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -55,7 +56,14 @@ export default function CadastroEquipeModal({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Autenticação necessária", {
+        description: "Faça login para continuar",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -78,14 +86,28 @@ export default function CadastroEquipeModal({
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.message || "Erro ao cadastrar equipe");
       }
 
-      alert("Equipe cadastrada com sucesso!");
+      toast.success("Equipe cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
-    } catch (error) {
+      methods.reset();
+    } catch (error: any) {
       console.error("Erro ao cadastrar equipe:", error);
-      alert("Erro ao cadastrar equipe: " + error);
+      toast.error("Erro ao cadastrar equipe", {
+        description: error.message || "Tente novamente mais tarde",
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

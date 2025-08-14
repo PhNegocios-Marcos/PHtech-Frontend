@@ -14,7 +14,6 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-
 import {
   Table,
   TableBody,
@@ -34,10 +33,12 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { EquipeDrawer } from "./EquipeModal";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Equipe = {
   id: string;
@@ -63,8 +64,7 @@ export function EquipesTable() {
   const [selectedEquipe, setSelectedEquipe] = React.useState<Equipe | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [selectedUser, setSelectedUser] = React.useState<Equipe | null>(null);
-
+  const [loading, setLoading] = React.useState(true);
   const { token } = useAuth();
 
   const equipeColumns: ColumnDef<Equipe>[] = [
@@ -101,7 +101,7 @@ export function EquipesTable() {
           variant="ghost"
           size="icon"
           onClick={() => handleRowDoubleClick(row.original)}
-          title="Editar usuário">
+          title="Editar equipe">
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -113,6 +113,7 @@ export function EquipesTable() {
   React.useEffect(() => {
     async function fetchEquipes() {
       try {
+        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/equipe/listar`, {
           method: "GET",
           headers: {
@@ -128,12 +129,31 @@ export function EquipesTable() {
 
         const data = await response.json();
         setEquipes(data);
+        toast.success("Equipes carregadas com sucesso", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } catch (error: any) {
         console.error("Erro ao carregar equipes:", error.message || error);
+        toast.error("Falha ao carregar equipes", {
+          description: error.message || "Tente novamente mais tarde",
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      } finally {
+        setLoading(false);
       }
     }
 
-    fetchEquipes();
+    if (token) {
+      fetchEquipes();
+    }
   }, [token, refreshKey]);
 
   const table = useReactTable({
@@ -164,6 +184,13 @@ export function EquipesTable() {
 
   const handleRowDoubleClick = (equipe: Equipe) => {
     setSelectedEquipe(equipe);
+    toast.info(`Editando equipe: ${equipe.nome}`, {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   const handleCloseDrawer = () => {
@@ -172,6 +199,13 @@ export function EquipesTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
+    toast.success("Lista de equipes atualizada", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   return (
@@ -224,7 +258,7 @@ export function EquipesTable() {
                           <TableHead
                             key={header.id}
                             className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                              isLast ? "w-16" : "w-auto"
                             }`}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </TableHead>
@@ -234,7 +268,9 @@ export function EquipesTable() {
                   ))}
                 </TableHeader>
                 <TableBody>
-                  {table.getRowModel().rows.length ? (
+                  {loading ? (
+                    <CarregandoTable />
+                  ) : table.getRowModel().rows.length ? (
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
@@ -246,7 +282,7 @@ export function EquipesTable() {
                             <TableCell
                               key={cell.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>
@@ -255,15 +291,19 @@ export function EquipesTable() {
                       </TableRow>
                     ))
                   ) : (
-                    <CarregandoTable />
+                    <TableRow>
+                      <TableCell colSpan={equipeColumns.length} className="text-center h-24">
+                        Nenhuma equipe encontrada
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 pt-4">
               <div className="text-muted-foreground flex-1 text-sm">
-                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                {table.getFilteredRowModel().rows.length} row(s) selected.
+                {table.getFilteredSelectedRowModel().rows.length} de{" "}
+                {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
               </div>
               <div className="space-x-2">
                 <Button
@@ -286,7 +326,7 @@ export function EquipesTable() {
         </Card>
       ) : (
         <EquipeDrawer
-          isOpen={!!selectedEquipe} // ou true/false conforme sua lógica
+          isOpen={!!selectedEquipe}
           equipe={selectedEquipe}
           onClose={() => {
             handleCloseDrawer();

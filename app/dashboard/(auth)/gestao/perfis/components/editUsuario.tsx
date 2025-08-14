@@ -6,6 +6,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import {
 // Validação com Zod
 const perfilSchema = z.object({
   id: z.string(),
-  nome: z.string().min(2),
+  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   descricao: z.string().optional(),
   status: z.number()
 });
@@ -47,6 +48,14 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
   useEffect(() => {
     if (perfil) {
       methods.reset(perfil);
+      toast.info("Dados do perfil carregados", {
+        style: {
+          background: 'var(--toast-info)',
+          color: 'var(--toast-info-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: `Editando: ${perfil.nome}`
+      });
     }
   }, [perfil, methods]);
 
@@ -57,7 +66,14 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
 
   const onSubmit = async (data: Perfil) => {
     if (!token) {
-      console.error("Token global não definido!");
+      toast.error("Autenticação necessária", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: "Faça login para continuar"
+      });
       return;
     }
 
@@ -66,13 +82,37 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      alert("Perfil atualizado com sucesso!");
+      toast.success("Perfil atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       window.location.reload();
     } catch (error: any) {
       console.error("Erro ao atualizar perfil:", error.response?.data || error.message);
-      alert(`Erro: ${JSON.stringify(error.response?.data || error.message)}`);
+      toast.error("Falha ao atualizar perfil", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: error.response?.data?.message || "Erro desconhecido"
+      });
     }
+  };
+
+  const handleClose = () => {
+    toast.info("Edição cancelada", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
   };
 
   return (
@@ -87,7 +127,7 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
                 <CardTitle>
                   Dados do Perfil: <span className="text-primary">{perfil?.nome}</span>
                 </CardTitle>
-                <Button onClick={onClose} variant="outline">
+                <Button onClick={handleClose} variant="outline">
                   Voltar
                 </Button>
               </div>

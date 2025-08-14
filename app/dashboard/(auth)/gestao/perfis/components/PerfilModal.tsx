@@ -1,3 +1,4 @@
+// Arquivo: PerfilDrawer.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,6 +7,7 @@ import { UsuariosPorEquipeTable } from "./listaPromotoras";
 import { Permissoes } from "./listaNovaPermissao";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type Usuario = {
   id: string;
@@ -38,7 +40,19 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
 
   useEffect(() => {
     if (isOpen && usuario) {
-      setFormData({ ...usuario });
+      try {
+        setFormData({ ...usuario });
+      } catch (error: any) {
+        console.error("Erro ao carregar dados do usuário:", error.message || error);
+        toast.error(`Erro ao carregar dados: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        onClose();
+      }
     }
   }, [usuario, isOpen]);
 

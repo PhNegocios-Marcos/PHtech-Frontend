@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -32,8 +33,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  perfil_do_banco: z.enum(["0", "1"]), // se tiver só 0 e 1, mantenho enum string para select
-  status: z.enum(["0", "1"]) // status ativo (1) ou inativo (0)
+  perfil_do_banco: z.enum(["0", "1"]),
+  status: z.enum(["0", "1"])
 });
 
 type FormData = z.infer<typeof schema>;
@@ -58,6 +59,18 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
   const { token } = useAuth();
 
   const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: "Faça login para continuar"
+      });
+      return;
+    }
+
     const payload = {
       nome: data.nome,
       descricao: data.descricao,
@@ -70,7 +83,6 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Se precisar de token, adicione aqui
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
@@ -78,23 +90,47 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.message || "Erro ao cadastrar perfil");
       }
 
-      alert("Perfil cadastrado com sucesso!");
+      toast.success("Perfil cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
-      router.refresh(); // Atualiza página ou faça o que precisar
-    } catch (error) {
+      router.refresh();
+    } catch (error: any) {
       console.error("Erro ao cadastrar perfil:", error);
-      alert("Erro ao cadastrar perfil: " + error);
+      toast.error("Falha ao cadastrar perfil", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        },
+        description: error.message || "Erro desconhecido"
+      });
     }
+  };
+
+  const handleClose = () => {
+    toast.info("Cadastro cancelado", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
       <aside
         role="dialog"
@@ -107,7 +143,7 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
                 <h2 className="text-xl font-semibold">Cadastrar Novo Perfil</h2>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="text-2xl font-bold hover:text-gray-900"
                   aria-label="Fechar">
                   ×
@@ -197,7 +233,7 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
               </Card>
 
               <div className="mt-6 flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
                 <Button type="submit">Cadastrar</Button>

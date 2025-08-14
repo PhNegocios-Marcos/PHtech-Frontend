@@ -33,6 +33,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -47,7 +48,7 @@ type Promotora = {
 };
 
 type UsuariosTableProps = {
-  equipeNome: string; // Mantido como estava, apenas mudando o prop para receber o nome da equipe
+  equipeNome: string;
 };
 
 const promotoraColumns: ColumnDef<Promotora>[] = [
@@ -69,15 +70,15 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [loading, setLoading] = useState(true);
   const { token } = useAuth();
-
-  // console.log(equipeNome)
 
   useEffect(() => {
     async function fetchPromotorasRelacionadas() {
       if (!token || !equipeNome) return;
 
       try {
+        setLoading(true);
         const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/${equipeNome}`, {
           method: "GET",
           headers: {
@@ -92,7 +93,6 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
         }
 
         const data = await response.json();
-        // Adaptação para manter a estrutura esperada
         const usuariosFormatados = data.usuarios
           .map((usuario: any) => ({
             id: usuario.id_relacionamento,
@@ -103,11 +103,28 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
             },
             status_relacionamento: usuario.status_relacionamento
           }))
-          .filter((usuario: any) => usuario.status_relacionamento === 1); // <- aqui filtra
+          .filter((usuario: any) => usuario.status_relacionamento === 1);
 
         setPromotoras(usuariosFormatados);
+        toast.success(`Usuários da equipe ${equipeNome} carregados`, {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
+        toast.error("Falha ao carregar usuários", {
+          description: error.message || "Tente novamente mais tarde",
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -185,7 +202,9 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
+              {loading ? (
+                <CarregandoTable />
+              ) : table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
@@ -196,7 +215,11 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
                   </TableRow>
                 ))
               ) : (
-                <CarregandoTable />
+                <TableRow>
+                  <TableCell colSpan={promotoraColumns.length} className="text-center h-24">
+                    Nenhum usuário encontrado na equipe
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

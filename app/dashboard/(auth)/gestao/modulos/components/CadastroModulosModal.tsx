@@ -1,3 +1,4 @@
+// Arquivo: CadastroModulosModal.tsx
 "use client";
 
 import React from "react";
@@ -7,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -51,11 +53,15 @@ export default function CadastroModulosModal({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
-
-    // console.log("data:", data)
 
     try {
       const response = await fetch(`${API_BASE_URL}/modulo/criar`, {
@@ -72,11 +78,23 @@ export default function CadastroModulosModal({
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Modulo cadastrada com sucesso!");
+      toast.success("Módulo cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
-    } catch (error) {
-      console.error("Erro ao cadastrar equipe:", error);
-      alert("Erro ao cadastrar equipe: " + error);
+    } catch (error: any) {
+      console.error("Erro ao cadastrar módulo:", error);
+      toast.error(`Erro ao cadastrar módulo: ${error.message || error}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

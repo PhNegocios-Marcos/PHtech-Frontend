@@ -1,3 +1,4 @@
+// Arquivo: UsuariosPorEquipeTable.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,11 +24,10 @@ type PermissoesPorSecao = {
 
 type UsuariosTableProps = {
   equipeNome: string;
-    onClose: () => void;
-
+  onClose: () => void;
 };
 
-export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTableProps) {[]
+export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTableProps) {
   const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
   const [equipeLabel, setEquipeLabel] = useState<string>("");
   const { token } = useAuth();
@@ -61,8 +62,23 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
 
         return atualizado;
       });
+
+      toast.success("Permissão atualizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (error: any) {
       console.error("Erro ao atualizar permissão:", error.message || error);
+      toast.error(`Erro ao atualizar permissão: ${error.message || error}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -92,7 +108,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
 
         for (const secao in permissoes) {
           for (const item of permissoes[secao]) {
-            const nome = item.permissao_nome; // exemplo: "Perfis_criar"
+            const nome = item.permissao_nome;
             const partes = nome.split("_");
             const acao = partes[1] as Acao;
 
@@ -113,6 +129,13 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         setPermissoesPorSecao(novoFormato);
       } catch (error: any) {
         console.error("Erro ao buscar dados:", error.message || error);
+        toast.error(`Erro ao buscar permissões: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 

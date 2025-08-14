@@ -14,6 +14,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   Table,
@@ -39,7 +40,6 @@ import { CarregandoTable } from "./leads_carregando";
 import { PerfilDrawer } from "./PerfilModal";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
 
 type Equipe = {
   id: string;
@@ -83,7 +83,7 @@ export function EquipesTable() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSelectedUser(row.original)}
+          onClick={() => handleEditClick(row.original)}
           title="Editar usuário">
           <Pencil className="h-4 w-4" />
         </Button>
@@ -93,8 +93,32 @@ export function EquipesTable() {
     }
   ];
 
+  const handleEditClick = (equipe: Equipe) => {
+    setSelectedUser(equipe);
+    toast.info("Editando equipe", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      },
+      description: equipe.nome
+    });
+  };
+
   React.useEffect(() => {
     async function fetchEquipes() {
+      if (!token) {
+        toast.error("Autenticação necessária", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: "Faça login para acessar as equipes"
+        });
+        return;
+      }
+
       try {
         const response = await fetch(`${API_BASE_URL}/perfil/listar`, {
           method: "GET",
@@ -118,8 +142,24 @@ export function EquipesTable() {
         }));
 
         setEquipes(equipesArray);
+        toast.success("Equipes carregadas com sucesso", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: `${equipesArray.length} equipes encontradas`
+        });
       } catch (error: any) {
         console.error("Erro ao buscar equipes:", error.message || error);
+        toast.error("Falha ao carregar equipes", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          },
+          description: error.message || "Erro desconhecido"
+        });
       }
     }
 
@@ -152,6 +192,17 @@ export function EquipesTable() {
     }
   });
 
+  const handleCloseDrawer = () => {
+    setSelectedUser(null);
+    toast.info("Edição concluída", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+  };
+
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-col justify-between">
@@ -161,7 +212,7 @@ export function EquipesTable() {
         {selectedUser ? (
           <PerfilDrawer
             isOpen={true}
-            onClose={() => setSelectedUser(null)}
+            onClose={handleCloseDrawer}
             usuario={selectedUser}
           />
         ) : (
@@ -207,7 +258,7 @@ export function EquipesTable() {
                           <TableHead
                             key={header.id}
                             className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                              isLast ? "w-16" : "w-auto"
                             }`}>
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </TableHead>
@@ -221,7 +272,7 @@ export function EquipesTable() {
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        onDoubleClick={() => setSelectedUser(row.original)}
+                        onDoubleClick={() => handleEditClick(row.original)}
                         className="hover:bg-muted cursor-pointer">
                         {row.getVisibleCells().map((cell, index) => {
                           const isLast = index === row.getVisibleCells().length - 1;
@@ -229,7 +280,7 @@ export function EquipesTable() {
                             <TableCell
                               key={cell.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>
