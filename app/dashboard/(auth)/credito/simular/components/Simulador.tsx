@@ -31,7 +31,7 @@ interface SimuladorFgtsProps {
 }
 
 interface ResultadoSimulacao {
-  mensagem: Record<string, Simulacao>;
+  mensagem: Record<string, Simulacao> | Simulacao;
 }
 
 interface Section {
@@ -183,7 +183,17 @@ export default function SimuladorFgts({
       });
       const data = await response.json();
       setResultado(data);
-      setSimulacaoSelecionadaKey(null);
+
+      // Seleciona automaticamente a simulação ao simular
+      // se for apenas uma simulação, seleciona "0"
+      if (data && data.mensagem) {
+        if (Array.isArray(data.mensagem)) {
+          setSimulacaoSelecionadaKey(null); // usuário deve escolher
+        } else {
+          setSimulacaoSelecionadaKey("0");
+        }
+      }
+
       toast.success("Simulação realizada com sucesso!", {
         style: {
           background: 'var(--toast-success)',
@@ -265,6 +275,29 @@ export default function SimuladorFgts({
     }
   };
 
+  const handleMontarProposta = () => {
+    // Se resultado.mensagem for array, verificar se selecionou alguma simulação
+    // Se resultado.mensagem NÃO for array, usar a única simulação
+    if (resultado?.mensagem) {
+      if (Array.isArray(resultado.mensagem)) {
+        if (simulacaoSelecionadaKey !== null) {
+          setCpfProposta(formValues.cpf);
+        } else {
+          toast.error("Selecione uma simulação antes de montar a proposta!", {
+            style: {
+              background: 'var(--toast-error)',
+              color: 'var(--toast-error-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          });
+        }
+      } else {
+        setSimulacaoSelecionadaKey("0");
+        setCpfProposta(formValues.cpf);
+      }
+    }
+  };
+
   const renderInputField = (item: any) => {
     if (item.type === "date") {
       return (
@@ -314,8 +347,18 @@ export default function SimuladorFgts({
     );
   }
 
-  if (cpfProposta && simulacaoSelecionadaKey && resultado?.mensagem) {
-    const simulacaoEscolhida = resultado.mensagem[simulacaoSelecionadaKey];
+  // Exibir a proposta selecionada
+  if (
+    cpfProposta &&
+    resultado?.mensagem &&
+    (
+      (Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey !== null) ||
+      (!Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey === "0")
+    )
+  ) {
+    const simulacaoEscolhida = Array.isArray(resultado.mensagem)
+      ? resultado.mensagem[Number(simulacaoSelecionadaKey)]
+      : resultado.mensagem;
     return (
       <PropostaCliente
         cpf={cpfProposta}
@@ -339,7 +382,18 @@ export default function SimuladorFgts({
             {loading ? "Simulando..." : "Simular"}
           </Button>
         )}
-        {resultado?.mensagem && <Button onClick={handleCadastrarCliente}>Montar proposta</Button>}
+        {resultado?.mensagem && (
+          <Button
+            onClick={handleMontarProposta}
+            disabled={
+              Array.isArray(resultado.mensagem)
+                ? simulacaoSelecionadaKey === null
+                : false
+            }
+          >
+            Montar proposta
+          </Button>
+        )}
       </div>
 
       {sections.length > 0 &&
@@ -351,6 +405,7 @@ export default function SimuladorFgts({
 
       {resultado?.mensagem && (
         <div className="space-y-6">
+          {/* Múltiplas simulações */}
           {Array.isArray(resultado.mensagem) ? (
             resultado.mensagem.length > 0 ? (
               resultado.mensagem.map((simulacao, i) => (
@@ -361,12 +416,8 @@ export default function SimuladorFgts({
                       ? "border-blue-600 bg-blue-50"
                       : "border-gray-300"
                   }`}
-                  onClick={() => {
-                    setSimulacaoSelecionadaKey(i.toString());
-                    if (!cpfProposta && formValues.cpf) {
-                      setCpfProposta(formValues.cpf);
-                    }
-                  }}>
+                  onClick={() => setSimulacaoSelecionadaKey(i.toString())}
+                >
                   <CardHeader>
                     <CardTitle>Simulação {i + 1}</CardTitle>
                   </CardHeader>
@@ -414,16 +465,14 @@ export default function SimuladorFgts({
               <p>Nenhuma simulação encontrada.</p>
             )
           ) : (
+            // Apenas uma simulação (selecionada por padrão)
             <Card
-              className={`mb-6 cursor-pointer border ${
-                simulacaoSelecionadaKey === "0" ? "border-blue-600 bg-blue-50" : "border-gray-300"
+              className={`mb-6 border ${
+                simulacaoSelecionadaKey === "0"
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-gray-300"
               }`}
-              onClick={() => {
-                setSimulacaoSelecionadaKey("0");
-                if (!cpfProposta && formValues.cpf) {
-                  setCpfProposta(formValues.cpf);
-                }
-              }}>
+            >
               <CardHeader>
                 <CardTitle>Simulação</CardTitle>
               </CardHeader>
@@ -437,8 +486,8 @@ export default function SimuladorFgts({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(resultado.mensagem.parcelas) &&
-                      resultado.mensagem.parcelas.map((p, idx) => (
+                    {Array.isArray((resultado.mensagem as Simulacao).parcelas) &&
+                      (resultado.mensagem as Simulacao).parcelas.map((p, idx) => (
                         <TableRow key={idx}>
                           <TableCell>{idx + 1}</TableCell>
                           <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
@@ -449,16 +498,16 @@ export default function SimuladorFgts({
                 </Table>
                 <div className="flex flex-wrap justify-around gap-4">
                   <p>
-                    <strong>IOF:</strong> R$ {resultado.mensagem.iof.toFixed(2)}
+                    <strong>IOF:</strong> R$ {(resultado.mensagem as Simulacao).iof.toFixed(2)}
                   </p>
                   <p>
-                    <strong>Taxa Cadastro:</strong> R$ {resultado.mensagem.taxaCadastro.toFixed(2)}
+                    <strong>Taxa Cadastro:</strong> {(resultado.mensagem as Simulacao).taxaCadastro.toFixed(2)}
                   </p>
                   <p>
-                    <strong>Valor Cliente:</strong> R$ {resultado.mensagem.valorCliente.toFixed(2)}
+                    <strong>Valor Cliente:</strong> R$ {(resultado.mensagem as Simulacao).valorCliente.toFixed(2)}
                   </p>
                   <p>
-                    <strong>CET:</strong> {resultado.mensagem.CET.toFixed(2)}%
+                    <strong>CET:</strong> {(resultado.mensagem as Simulacao).CET.toFixed(2)}%
                   </p>
                 </div>
               </CardContent>

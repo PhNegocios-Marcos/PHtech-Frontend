@@ -358,8 +358,8 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
                 {simulacao.parcelas.map((p, i) => (
                   <TableRow key={i}>
                     <TableCell>{i + 1}</TableCell>
-                    <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
-                    <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
+                    <TableCell>R$ {(p.valor_parcela ?? 0).toFixed(2)}</TableCell>
+                    <TableCell>R$ {(p.valor_juros ?? 0).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -367,16 +367,16 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
 
             <div className="flex flex-wrap justify-around gap-4">
               <p>
-                <strong>IOF:</strong> R$ {simulacao.iof.toFixed(2)}
+                <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>Tabela de Cadastro:</strong> R$ {simulacao.TabelaCadastro.toFixed(2)}
+                <strong>Tabela de Cadastro:</strong> R$ {(simulacao.TabelaCadastro ?? simulacao.taxaCadastro ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>Valor Cliente:</strong> R$ {simulacao.valorCliente.toFixed(2)}
+                <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>CET:</strong> {simulacao.CET.toFixed(2)}%
+                <strong>CET:</strong> {(simulacao.CET ?? 0).toFixed(2)}%
               </p>
             </div>
           </CardContent>

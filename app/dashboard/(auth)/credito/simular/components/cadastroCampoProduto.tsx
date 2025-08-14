@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Combobox } from "@/components/Combobox";
 import {
   Form,
   FormField,
@@ -18,13 +17,14 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
+import { Combobox } from "@/components/Combobox";
 import { toast } from "sonner";
 
 interface ComboboxProps<T> {
   data: T[];
   displayField: keyof T;
   value: T | null;
-  onChange: (item: T | null) => void;
+  onChange: (item: T) => void;
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
@@ -32,43 +32,45 @@ interface ComboboxProps<T> {
   dropdownClassName?: string;
 }
 
-interface AvailableField {
-  value: string;
-  label: string;
-  type: string;
-}
-
-interface TypeOption {
-  value: string;
-  label: string;
-}
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const fieldSchema = z.object({
-  key: z.string().min(1, "Chave do campo é obrigatória"),
-  label: z.string().min(1, "Rótulo é obrigatório").refine((val) => val !== "Sem nome", {
-    message: "Rótulo não pode ser 'Sem nome'"
-  }),
-  type: z.enum(["text", "number", "date"], {
+  name: z.string().min(1, "Nome do campo é obrigatório"),
+  label: z.string().min(1, "Rótulo é obrigatório"),
+  type: z.enum(["text", "select", "date", "number"], {
     errorMap: () => ({ message: "Tipo de campo inválido" })
   }),
   required: z.boolean().optional(),
-  placeholder: z.string().optional()
+  options: z
+    .array(
+      z.object({
+        value: z.string().min(1, "Valor da opção é obrigatório"),
+        label: z.string().min(1, "Rótulo da opção é obrigatório")
+      })
+    )
+    .optional()
+});
+
+const sectionSchema = z.object({
+  section: z.enum(["DadosSimulacao", "ResultadoSimulacao"], {
+    errorMap: () => ({ message: "Seção inválida" })
+  }),
+  fields: z.array(fieldSchema).min(1, "Pelo menos um campo é obrigatório")
 });
 
 const schema = z.object({
   produto_hash: z.string().min(1, "Produto é obrigatório"),
-  title: z.string().min(1, "Título é obrigatório"),
-  items: z.array(fieldSchema).min(1, "Pelo menos um item é obrigatório"),
-  fields: z.array(fieldSchema).min(1, "Pelo menos um campo é obrigatório")
-}).refine(
-  (data) => {
-    const allLabels = [...data.items, ...data.fields].map((field) => field.label);
-    return allLabels.length === new Set(allLabels).size;
-  },
-  { message: "Os rótulos dos campos devem ser únicos" }
-);
+  sections: z
+    .array(sectionSchema)
+    .min(1, "Pelo menos uma seção é obrigatória")
+    .refine(
+      (sections) => {
+        const sectionNames = sections.map((s) => s.section);
+        return sectionNames.length === new Set(sectionNames).size;
+      },
+      { message: "Não são permitidas seções duplicadas" }
+    )
+});
 
 type FormData = z.infer<typeof schema>;
 
@@ -83,6 +85,11 @@ type CadastroCamposModalProps = {
   onRefresh?: () => void;
 };
 
+const sectionOptions = [
+  { value: "DadosSimulacao", label: "Dados da Simulação" },
+  { value: "ResultadoSimulacao", label: "Resultado da Simulação" }
+] as const;
+
 export default function CadastroInputProduto({
   isOpen,
   onClose,
@@ -92,23 +99,10 @@ export default function CadastroInputProduto({
     resolver: zodResolver(schema),
     defaultValues: {
       produto_hash: "",
-      title: "Dados da Simulação",
-      items: [
+      sections: [
         {
-          key: "",
-          label: "",
-          type: "text",
-          required: false,
-          placeholder: ""
-        }
-      ],
-      fields: [
-        {
-          key: "",
-          label: "",
-          type: "text",
-          required: false,
-          placeholder: ""
+          section: "DadosSimulacao",
+          fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
         }
       ]
     }
@@ -116,25 +110,106 @@ export default function CadastroInputProduto({
 
   const { token } = useAuth();
   const [produtos, setProdutos] = useState<ProdutoOption[]>([]);
-  const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | null>(null);
-  const [availableFields] = useState<AvailableField[]>([
-    { value: "cpf", label: "CPF", type: "text" },
-    { value: "saldo", label: "Saldo FGTS", type: "text" },
-    { value: "mes_aniversario", label: "Mês Aniversário", type: "number" },
-    { value: "juros", label: "Taxa de Juros", type: "text" },
-    { value: "parcelas_adiantadas", label: "Parcelas Adiantadas", type: "number" },
-    { value: "data_inicio", label: "Data de Início", type: "date" }
+  const [produtoSelect, setProdutoSelect] = useState<ProdutoOption | any>(null);
+  const [availableFields] = useState([
+    { value: "cpf", label: "CPF", section: "DadosSimulacao" },
+    { value: "saldo", label: "Saldo FGTS", section: "DadosSimulacao" },
+    { value: "mes_aniversario", label: "Mês Aniversário", section: "DadosSimulacao" },
+    { value: "juros", label: "Taxa de Juros", section: "DadosSimulacao" },
+    { value: "parcelas_adiantadas", label: "Parcelas Adiantadas", section: "DadosSimulacao" },
+    { value: "data_inicio", label: "Data de Início", section: "DadosSimulacao" },
+    { value: "valor_liberado", label: "Valor Liberado", section: "ResultadoSimulacao" },
+    { value: "valor_parcela", label: "Valor Parcela", section: "ResultadoSimulacao" },
+    { value: "quantidade_parcelas", label: "Quantidade de Parcelas", section: "ResultadoSimulacao" },
+    { value: "cet", label: "CET", section: "ResultadoSimulacao" },
+    { value: "taxa_juros", label: "Taxa de Juros", section: "ResultadoSimulacao" }
   ]);
 
-  const { fields: items, append: appendItem, remove: removeItem } = useFieldArray({
+  const {
+    fields: sections,
+    append: appendSection,
+    remove: removeSection
+  } = useFieldArray({
     control: methods.control,
-    name: "items"
+    name: "sections"
   });
 
-  const { fields: fields, append: appendField, remove: removeField } = useFieldArray({
-    control: methods.control,
-    name: "fields"
-  });
+  const getAvailableSectionOptions = () => {
+    const selectedSections = methods.getValues("sections").map((s) => s.section);
+    return sectionOptions.filter((option) => !selectedSections.includes(option.value));
+  };
+
+  // AJUSTE AQUI: Converte o retorno do endpoint para o formato do formulário
+  const transformApiData = (apiData: any): FormData['sections'] => {
+    if (!Array.isArray(apiData) || apiData.length === 0) {
+      return [{
+        section: "DadosSimulacao",
+        fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+      }];
+    }
+
+    // O endpoint retorna um array. Vamos assumir que cada item é uma seção (pode adaptar se vier mais de uma seção)
+    // Aqui, exemplos para 'DadosSimulacao' e 'ResultadoSimulacao'. Adapte se vier mais seções.
+    const sections: FormData['sections'] = [];
+
+    // Exemplo: pegar sempre a seção "DadosSimulacao" se tiver
+    const dadosSimulacao = apiData.find(
+      (item: any) =>
+        item.simulacao_campos_produtos_title === "Dados da Simulação" ||
+        item.simulacao_campos_produtos_title?.toLowerCase().includes("simulação")
+    );
+    if (dadosSimulacao && dadosSimulacao.simulacao_campos_produtos_fields) {
+      let fieldsArr: any[] = [];
+      try {
+        fieldsArr = JSON.parse(dadosSimulacao.simulacao_campos_produtos_fields);
+      } catch {}
+      sections.push({
+        section: "DadosSimulacao",
+        fields: fieldsArr.map((f) => ({
+          name: f.key || f.name || "",
+          label: f.label || "",
+          type: (f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select") ? f.type : "text",
+          required: typeof f.required === "boolean" ? f.required : false,
+          options: f.options || []
+        }))
+      });
+    }
+
+    // Caso venha uma seção de resultado
+    const resultadoSimulacao = apiData.find(
+      (item: any) =>
+        item.simulacao_campos_produtos_title === "Resultado da Simulação" ||
+        item.simulacao_campos_produtos_title?.toLowerCase().includes("resultado")
+    );
+    if (resultadoSimulacao && resultadoSimulacao.simulacao_campos_produtos_fields) {
+      let fieldsArr: any[] = [];
+      try {
+        fieldsArr = JSON.parse(resultadoSimulacao.simulacao_campos_produtos_fields);
+      } catch {}
+      sections.push({
+        section: "ResultadoSimulacao",
+        fields: fieldsArr.map((f) => ({
+          name: f.key || f.name || "",
+          label: f.label || "",
+          type: (f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select") ? f.type : "text",
+          required: typeof f.required === "boolean" ? f.required : false,
+          options: f.options || []
+        }))
+      });
+    }
+
+    // fallback se não achar nenhuma seção
+    if (sections.length === 0) {
+      return [
+        {
+          section: "DadosSimulacao",
+          fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+        }
+      ];
+    }
+
+    return sections;
+  };
 
   useEffect(() => {
     if (!token || !isOpen) return;
@@ -153,6 +228,7 @@ export default function CadastroInputProduto({
         if (!response.ok) throw new Error("Erro ao buscar produtos");
 
         const data = await response.json();
+
         const options = data.map((produto: any) => ({
           id: produto.relacionamento_hash,
           name: `${produto.convenio_nome} - ${produto.modalidade_credito_nome} - ${produto.tipo_operacao_nome}`
@@ -171,9 +247,13 @@ export default function CadastroInputProduto({
       }
     }
 
-    async function fetchConfig() {
-      if (!produtoSelect?.id) return;
+    fetchProdutos();
+  }, [token, isOpen]);
 
+  useEffect(() => {
+    if (!token || !isOpen || !produtoSelect?.id) return;
+
+    async function fetchConfig() {
       try {
         const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/listar?produto_hash=${produtoSelect.id}`, {
           method: "GET",
@@ -188,25 +268,10 @@ export default function CadastroInputProduto({
           if (response.status === 404) {
             methods.reset({
               produto_hash: produtoSelect.id,
-              title: "Dados da Simulação",
-              items: [
-                {
-                  key: "",
-                  label: `Campo ${items.length + 1}`,
-                  type: "text",
-                  required: false,
-                  placeholder: ""
-                }
-              ],
-              fields: [
-                {
-                  key: "",
-                  label: `Campo ${fields.length + 1}`,
-                  type: "text",
-                  required: false,
-                  placeholder: ""
-                }
-              ]
+              sections: [{
+                section: "DadosSimulacao",
+                fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+              }]
             });
             return;
           }
@@ -214,89 +279,90 @@ export default function CadastroInputProduto({
         }
 
         const apiData = await response.json();
-        const transformedData = {
-          produto_hash: apiData.produto_hash || produtoSelect.id,
-          title: apiData.title || "Dados da Simulação",
-          items: apiData.items?.map((item: any, index: number) => ({
-            key: item.key,
-            label: item.label || `Campo ${index + 1}`,
-            type: item.type,
-            required: item.required || false,
-            placeholder: item.placeholder || ""
-          })) || [
-            {
-              key: "",
-              label: `Campo ${items.length + 1}`,
-              type: "text",
-              required: false,
-              placeholder: ""
-            }
-          ],
-          fields: apiData.fields?.map((field: any, index: number) => ({
-            key: field.key,
-            label: field.label || `Campo ${index + 1}`,
-            type: field.type,
-            required: field.required || false,
-            placeholder: field.placeholder || ""
-          })) || [
-            {
-              key: "",
-              label: `Campo ${fields.length + 1}`,
-              type: "text",
-              required: false,
-              placeholder: ""
-            }
-          ]
-        };
-
-        methods.reset(transformedData);
+        const transformedData = transformApiData(apiData);
+        methods.reset({ produto_hash: produtoSelect.id, sections: transformedData });
       } catch (error) {
-        console.error("Erro ao buscar configuração:", error);
-        toast.error("Erro ao buscar configuração", {
+        console.error("Erro ao carregar configuração:", error);
+        toast.error("Erro ao carregar configuração", {
           style: {
             background: 'var(--toast-error)',
             color: 'var(--toast-error-foreground)',
             boxShadow: 'var(--toast-shadow)'
           }
         });
+        methods.reset({
+          produto_hash: produtoSelect.id,
+          sections: [{
+            section: "DadosSimulacao",
+            fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+          }]
+        });
       }
     }
 
-    fetchProdutos();
     fetchConfig();
-  }, [token, isOpen, produtoSelect, methods, items.length, fields.length]);
+  }, [token, isOpen, produtoSelect, methods]);
+
+  useEffect(() => {
+    methods.setValue("produto_hash", produtoSelect?.id ?? "");
+  }, [produtoSelect, methods]);
 
   const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      return;
+    }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos`, {
+      const payload = data.sections.map((section) => ({
+        produto_hash: data.produto_hash,
+        section: section.section,
+        fields: section.fields.map((field) => ({
+          name: field.name,
+          label: field.label,
+          type: field.type,
+          required: field.required,
+          ...(field.type === "select" && field.options ? { options: field.options } : {})
+        }))
+      }));
+
+      const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          produto_hash: data.produto_hash,
-          simulacao_campos_produtos_type: "fgts",
-          simulacao_campos_produtos_title: data.title,
-          simulacao_campos_produtos_items: JSON.stringify(data.items),
-          simulacao_campos_produtos_fields: JSON.stringify(data.fields)
-        })
+        body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error("Erro ao salvar configuração");
+      const responseData = await response.json();
 
-      toast.success("Configuração salva com sucesso!", {
+      if (!response.ok) {
+        throw new Error(responseData.message || "Erro ao salvar configuração");
+      }
+
+      toast.success("Configuração de campos da simulação salva com sucesso!", {
         style: {
           background: 'var(--toast-success)',
           color: 'var(--toast-success-foreground)',
           boxShadow: 'var(--toast-shadow)'
         }
       });
-      if (onRefresh) onRefresh();
+      methods.reset();
+      setProdutoSelect(null);
+      if (onRefresh) {
+        await onRefresh();
+      }
       onClose();
     } catch (error: any) {
-      console.error("Erro ao salvar configuração:", error);
-      toast.error(`Erro ao salvar configuração: ${error.message}`, {
+      console.error("Erro ao cadastrar configuração de campos:", error);
+      toast.error(`Erro ao cadastrar configuração: ${error.message}`, {
         style: {
           background: 'var(--toast-error)',
           color: 'var(--toast-error-foreground)',
@@ -306,22 +372,37 @@ export default function CadastroInputProduto({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
+      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+
       <aside
-        className={clsx(
-          "fixed inset-y-0 right-0 z-50 h-screen w-full max-w-2xl border-l bg-background p-6 shadow-lg transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "translate-x-full"
-        )}>
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-              <Card>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Configurar Campos da Simulação</h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-2xl font-bold hover:text-gray-900"
+                  aria-label="Fechar">
+                  ×
+                </button>
+              </div>
+
+              <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Cadastro de Campos da Simulação</CardTitle>
+                  <CardTitle>Configuração dos Campos</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
+
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={methods.control}
                       name="produto_hash"
@@ -332,11 +413,8 @@ export default function CadastroInputProduto({
                             <Combobox
                               data={produtos}
                               displayField="name"
-                              value={produtos.find((p) => p.id === field.value) || null}
-                              onChange={(selected: ProdutoOption | null) => {
-                                field.onChange(selected?.id || "");
-                                setProdutoSelect(selected);
-                              }}
+                              value={produtoSelect}
+                              onChange={setProdutoSelect}
                               searchFields={["name"]}
                               placeholder="Selecione um produto"
                             />
@@ -346,29 +424,65 @@ export default function CadastroInputProduto({
                       )}
                     />
 
-                    <FormField
-                      control={methods.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Título</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite o título" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {sections.map((section, sectionIndex) => (
+                      <div key={section.id} className="rounded-md border p-4">
+                        <FormField
+                          control={methods.control}
+                          name={`sections.${sectionIndex}.section`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Seção</FormLabel>
+                              <FormControl>
+                                <Combobox
+                                  data={getAvailableSectionOptions()}
+                                  displayField="label"
+                                  value={
+                                    sectionOptions.find((opt) => opt.value === field.value) || null
+                                  }
+                                  onChange={(selected) => field.onChange(selected?.value || "")}
+                                  searchFields={["label"]}
+                                  placeholder="Selecione uma seção"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    <div className="rounded-md border p-4">
-                      <h3 className="text-lg font-medium">Itens</h3>
-                      <FieldArray arrayName="items" availableFields={availableFields} append={appendItem} remove={removeItem} fields={items} />
-                    </div>
+                        <div className="mt-4">
+                          <h3 className="text-lg font-medium">Campos</h3>
+                          <FieldArray
+                            sectionIndex={sectionIndex}
+                            availableFields={availableFields}
+                          />
+                        </div>
 
-                    <div className="rounded-md border p-4">
-                      <h3 className="text-lg font-medium">Campos</h3>
-                      <FieldArray arrayName="fields" availableFields={availableFields} append={appendField} remove={removeField} fields={fields} />
-                    </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => removeSection(sectionIndex)}
+                          className="mt-4">
+                          Remover Seção
+                        </Button>
+                      </div>
+                    ))}
+
+                    {sections.length < sectionOptions.length && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          appendSection({
+                            section: getAvailableSectionOptions()[0]?.value || "DadosSimulacao",
+                            fields: [
+                              { name: "", label: "", type: "text", required: false, options: [] }
+                            ]
+                          })
+                        }
+                        className="mt-4">
+                        Adicionar Seção
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -388,54 +502,38 @@ export default function CadastroInputProduto({
 }
 
 type FieldArrayProps = {
-  arrayName: "items" | "fields";
-  availableFields: AvailableField[];
-  append: (value: any) => void;
-  remove: (index: number) => void;
-  fields: any[];
+  sectionIndex: number;
+  availableFields: { value: string; label: string; section: string }[];
   className?: string;
 };
 
-function FieldArray({ arrayName, availableFields, append, remove, fields, className }: FieldArrayProps) {
+function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProps) {
   const { control, watch, setValue } = useFormContext();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `sections.${sectionIndex}.fields`
+  });
 
-  const generateUniqueLabel = (baseLabel: string, existingLabels: string[]) => {
-    let newLabel = baseLabel;
-    let counter = 1;
-    while (existingLabels.includes(newLabel)) {
-      newLabel = `${baseLabel} ${counter}`;
-      counter++;
-    }
-    return newLabel;
-  };
-
-  const existingLabels = watch(`${arrayName}`).map((field: any) => field.label);
+  const currentSection = watch(`sections.${sectionIndex}.section`);
+  const filteredFields = availableFields.filter(field => field.section === currentSection);
 
   return (
     <div className={clsx("grid gap-4", className)}>
       {fields.map((field, fieldIndex) => (
-        <div key={field.id} className="rounded-md border p-4">
+        <div key={field.id} className="rounded-md border p-4 bg-[var(--secondary-50)]">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}
-              name={`${arrayName}.${fieldIndex}.key`}
+              name={`sections.${sectionIndex}.fields.${fieldIndex}.name`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chave do Campo</FormLabel>
+                  <FormLabel>Nome do Campo</FormLabel>
                   <FormControl>
-                    <Combobox<AvailableField>
-                      data={availableFields}
+                    <Combobox
+                      data={filteredFields}
                       displayField="label"
-                      value={availableFields.find((f) => f.value === field.value) || null}
-                      onChange={(selected: AvailableField | null) => {
-                        field.onChange(selected?.value || "");
-                        setValue(`${arrayName}.${fieldIndex}.type`, selected?.type || "text");
-                        const newLabel = generateUniqueLabel(
-                          selected?.label || `Campo ${fieldIndex + 1}`,
-                          existingLabels.filter((_: string, idx: number) => idx !== fieldIndex)
-                        );
-                        setValue(`${arrayName}.${fieldIndex}.label`, newLabel);
-                      }}
+                      value={filteredFields.find((f) => f.value === field.value) || null}
+                      onChange={(selected) => field.onChange(selected?.value || "")}
                       searchFields={["label"]}
                       placeholder="Selecione um campo"
                     />
@@ -447,22 +545,12 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
 
             <FormField
               control={control}
-              name={`${arrayName}.${fieldIndex}.label`}
+              name={`sections.${sectionIndex}.fields.${fieldIndex}.label`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rótulo</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Digite o rótulo do campo"
-                      {...field}
-                      onChange={(e) => {
-                        const newLabel = generateUniqueLabel(
-                          e.target.value || `Campo ${fieldIndex + 1}`,
-                          existingLabels.filter((_: string, idx: number) => idx !== fieldIndex)
-                        );
-                        field.onChange(newLabel);
-                      }}
-                    />
+                    <Input placeholder="Digite o rótulo do campo" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -471,16 +559,17 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
 
             <FormField
               control={control}
-              name={`${arrayName}.${fieldIndex}.type`}
+              name={`sections.${sectionIndex}.fields.${fieldIndex}.type`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo</FormLabel>
                   <FormControl>
-                    <Combobox<TypeOption>
+                    <Combobox
                       data={[
                         { value: "text", label: "Texto" },
-                        { value: "number", label: "Número" },
-                        { value: "date", label: "Data" }
+                        { value: "select", label: "Seleção" },
+                        { value: "date", label: "Data" },
+                        { value: "number", label: "Número" }
                       ]}
                       displayField="label"
                       value={{
@@ -488,11 +577,13 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                         label:
                           field.value === "text"
                             ? "Texto"
-                            : field.value === "number"
-                              ? "Número"
-                              : "Data"
+                            : field.value === "select"
+                              ? "Seleção"
+                              : field.value === "date"
+                                ? "Data"
+                                : "Número"
                       }}
-                      onChange={(selected: TypeOption | null) => field.onChange(selected?.value || "text")}
+                      onChange={(selected) => field.onChange(selected?.value || "text")}
                       searchFields={["label"]}
                       placeholder="Selecione o tipo"
                     />
@@ -502,43 +593,32 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
               )}
             />
 
-            {arrayName === "items" && (
-              <FormField
-                control={control}
-                name={`${arrayName}.${fieldIndex}.placeholder`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Placeholder</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o placeholder" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {arrayName === "fields" && (
-              <FormField
-                control={control}
-                name={`${arrayName}.${fieldIndex}.required`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Obrigatório</FormLabel>
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                        className="h-4 w-4"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={control}
+              name={`sections.${sectionIndex}.fields.${fieldIndex}.required`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Obrigatório</FormLabel>
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+
+          {watch(`sections.${sectionIndex}.fields.${fieldIndex}.type`) === "select" && (
+            <OptionArray
+              sectionIndex={sectionIndex}
+              fieldIndex={fieldIndex}
+            />
+          )}
 
           <Button
             type="button"
@@ -553,12 +633,73 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
       <Button
         type="button"
         variant="outline"
-        onClick={() => {
-          const newLabel = generateUniqueLabel(`Campo ${fields.length + 1}`, existingLabels);
-          append({ key: "", label: newLabel, type: "text", required: false, placeholder: "" });
-        }}
+        onClick={() => append({ name: "", label: "", type: "text", required: false, options: [] })}
         className="mt-4">
         Adicionar Campo
+      </Button>
+    </div>
+  );
+}
+
+type OptionArrayProps = {
+  sectionIndex: number;
+  fieldIndex: number;
+};
+
+function OptionArray({ sectionIndex, fieldIndex }: OptionArrayProps) {
+  const { control } = useFormContext();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `sections.${sectionIndex}.fields.${fieldIndex}.options`
+  });
+
+  return (
+    <div className="mt-4">
+      <h4 className="text-md font-medium">Opções do Campo Select</h4>
+      {fields.map((option, optionIndex) => (
+        <div key={option.id} className="mt-2 flex gap-2 rounded-md border p-2">
+          <FormField
+            control={control}
+            name={`sections.${sectionIndex}.fields.${fieldIndex}.options.${optionIndex}.value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor</FormLabel>
+                <FormControl>
+                  <Input placeholder="Digite o valor" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name={`sections.${sectionIndex}.fields.${fieldIndex}.options.${optionIndex}.label`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rótulo</FormLabel>
+                <FormControl>
+                  <Input placeholder="Digite o rótulo" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="button"
+            variant="destructive"
+            className="self-end"
+            onClick={() => remove(optionIndex)}>
+            Remover
+          </Button>
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-4"
+        onClick={() => append({ value: "", label: "" })}>
+        Adicionar Opção
       </Button>
     </div>
   );
