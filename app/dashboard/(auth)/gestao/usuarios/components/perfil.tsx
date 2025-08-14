@@ -31,7 +31,7 @@ import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export type Equipe = {
+export type PerfilType = {
   id?: string;
   nome: string;
   id_relacionamento: any;
@@ -40,22 +40,22 @@ export type Equipe = {
 type Option = {
   id?: string;
   nome?: any;
-  equipes?: any;
-  equipe?: Equipe;
+  perfis?: any;
+  perfil?: PerfilType;
   usuario: Usuario;
   hash?: string;
   status_relacionamento?: any;
   id_relacionamento?: any;
   onClose: () => void;
-    onRefresh?: () => void; // Adicione esta linha
+  onRefresh?: () => void; // Adicione esta linha
 
 };
 
-export default function Perfil({ usuario, equipes, onClose }: Option) {
+export default function Perfil({ usuario, perfis, onClose }: Option) {
   const [loading, setLoading] = useState(false);
-  const [equipe, setEquipe] = React.useState<Option[]>([]);
-  const [equipesDisponiveis, setEquipesDisponiveis] = React.useState<Option[]>([]);
-  const [equipesSelect, setEquipesSelect] = useState<Option | null>(null);
+  const [perfil, setPerfil] = React.useState<Option[]>([]);
+  const [perfisDisponiveis, setPerfisDisponiveis] = React.useState<Option[]>([]);
+  const [perfisSelect, setPerfisSelect] = useState<Option | null>(null);
   const { token } = useAuth();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -64,7 +64,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const equipeColumns = React.useMemo<ColumnDef<Option>[]>(
+  const perfilColumns = React.useMemo<ColumnDef<Option>[]>(
     () => [
       { accessorKey: "nome", header: "Nome" },
       {
@@ -78,7 +78,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
               const novoStatus = ativo ? 0 : 1;
 
               await axios.put(
-                `${API_BASE_URL}/rel_usuario_equipe/atualizar`,
+                `${API_BASE_URL}/rel_usuario_perfil/atualizar`,
                 {
                   id: row.original.id_relacionamento,
                   status: novoStatus
@@ -91,7 +91,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
                 }
               );
 
-              setEquipe((prev) =>
+              setPerfil((prev) =>
                 prev.map((item) =>
                   item.id_relacionamento === row.original.id_relacionamento
                     ? { ...item, status_relacionamento: novoStatus }
@@ -134,9 +134,9 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
     [token]
   );
 
-  // Fetch todas as equipes para o Combobox
+  // Fetch todos os perfis para o Combobox
   useEffect(() => {
-    async function fetchEquipesDisponiveis() {
+    async function fetchPerfisDisponiveis() {
       try {
         if (!token) {
           throw new Error("Token de autenticação não encontrado");
@@ -152,9 +152,9 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
           id: p.id,
           nome: p.nome
         }));
-        setEquipesDisponiveis(data);
+        setPerfisDisponiveis(data);
       } catch (error: any) {
-        console.error("Erro ao carregar equipes disponíveis", error);
+        console.error("Erro ao carregar perfis disponíveis", error);
         toast.error(`Erro ao carregar perfis: ${error.message}`, {
           style: {
             background: 'var(--toast-error)',
@@ -165,11 +165,11 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
         });
       }
     }
-    fetchEquipesDisponiveis();
+    fetchPerfisDisponiveis();
   }, [token]);
 
-  async function relacionarEquipe() {
-    if (!equipesSelect) {
+  async function relacionarPerfil() {
+    if (!perfisSelect) {
       toast.error("Selecione um perfil para vincular", {
         style: {
           background: 'var(--toast-error)',
@@ -189,9 +189,9 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
       }
 
       await axios.post(
-        `${API_BASE_URL}/rel_usuario_equipe/criar`,
+        `${API_BASE_URL}/rel_usuario_perfil/criar`,
         {
-          nome: equipesSelect.nome,
+          nome: perfisSelect.nome,
           email: usuario.email
         },
         {
@@ -210,7 +210,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
         }
       });
       setRefreshKey((prev) => prev + 1);
-      setEquipesSelect(null);
+      setPerfisSelect(null);
     } catch (error: any) {
       console.error(error);
       toast.error(`Erro ao vincular perfil: ${error.response?.data?.detail || error.message}`, {
@@ -227,8 +227,8 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
   }
 
   const table = useReactTable({
-    data: equipe,
-    columns: equipeColumns,
+    data: perfil,
+    columns: perfilColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
@@ -268,15 +268,15 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
           <div className="space-y-2">
             <span className="text-muted-foreground text-sm">Perfil</span>
             <Combobox
-              data={equipesDisponiveis}
+              data={perfisDisponiveis}
               displayField="nome"
-              value={equipesSelect}
-              onChange={setEquipesSelect}
+              value={perfisSelect}
+              onChange={setPerfisSelect}
               searchFields={["nome"]}
               placeholder="Selecione um Perfil"
               className="w-full"
             />
-            <Button onClick={relacionarEquipe} disabled={loading} className="mt-2">
+            <Button onClick={relacionarPerfil} disabled={loading} className="mt-2">
               {loading ? "Salvando..." : "Relacionar Perfil"}
             </Button>
           </div>
@@ -323,7 +323,7 @@ export default function Perfil({ usuario, equipes, onClose }: Option) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={equipeColumns.length} className="h-24 text-center">
+                <TableCell colSpan={perfilColumns.length} className="h-24 text-center">
                   Nenhum perfil vinculado
                 </TableCell>
               </TableRow>
