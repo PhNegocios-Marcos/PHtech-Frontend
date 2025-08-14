@@ -57,6 +57,7 @@ export default function SimuladorFgts({
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [abrirCadastro, setAbrirCadastro] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
+  const [produtoHash, setProdutoHash] = useState<Section[]>([]);
   const [simulacaoSelecionadaKey, setSimulacaoSelecionadaKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showSimulateButton, setShowSimulateButton] = useState(true);
@@ -92,6 +93,7 @@ export default function SimuladorFgts({
         }));
 
         setSections(parsedSections);
+        setProdutoHash(arrData[0].simulacao_campos_produtos_produto_id);
         setErrorMessage("");
         setShowSimulateButton(true);
 
@@ -109,9 +111,9 @@ export default function SimuladorFgts({
           setShowSimulateButton(false);
           toast.error("Produto não possui campos configurados para a simulação", {
             style: {
-              background: 'var(--toast-error)',
-              color: 'var(--toast-error-foreground)',
-              boxShadow: 'var(--toast-shadow)'
+              background: "var(--toast-error)",
+              color: "var(--toast-error-foreground)",
+              boxShadow: "var(--toast-shadow)"
             }
           });
         } else {
@@ -119,9 +121,9 @@ export default function SimuladorFgts({
           setShowSimulateButton(false);
           toast.error("Erro ao carregar campos da simulação", {
             style: {
-              background: 'var(--toast-error)',
-              color: 'var(--toast-error-foreground)',
-              boxShadow: 'var(--toast-shadow)'
+              background: "var(--toast-error)",
+              color: "var(--toast-error-foreground)",
+              boxShadow: "var(--toast-shadow)"
             }
           });
         }
@@ -196,18 +198,18 @@ export default function SimuladorFgts({
 
       toast.success("Simulação realizada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (err) {
       console.error("Erro na simulação FGTS:", err);
       toast.error("Erro ao realizar simulação", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } finally {
@@ -221,9 +223,9 @@ export default function SimuladorFgts({
     if (!cpf) {
       toast.error("CPF não informado", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -241,9 +243,9 @@ export default function SimuladorFgts({
       if (!response.ok) {
         toast.error("Erro ao verificar cliente", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         return;
@@ -267,9 +269,9 @@ export default function SimuladorFgts({
       console.error("Erro ao verificar cliente:", error);
       toast.error("Erro na verificação. Tente novamente.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -285,9 +287,9 @@ export default function SimuladorFgts({
         } else {
           toast.error("Selecione uma simulação antes de montar a proposta!", {
             style: {
-              background: 'var(--toast-error)',
-              color: 'var(--toast-error-foreground)',
-              boxShadow: 'var(--toast-shadow)'
+              background: "var(--toast-error)",
+              color: "var(--toast-error-foreground)",
+              boxShadow: "var(--toast-shadow)"
             }
           });
         }
@@ -351,20 +353,14 @@ export default function SimuladorFgts({
   if (
     cpfProposta &&
     resultado?.mensagem &&
-    (
-      (Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey !== null) ||
-      (!Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey === "0")
-    )
+    ((Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey !== null) ||
+      (!Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey === "0"))
   ) {
     const simulacaoEscolhida = Array.isArray(resultado.mensagem)
       ? resultado.mensagem[Number(simulacaoSelecionadaKey)]
       : resultado.mensagem;
     return (
-      <PropostaCliente
-        cpf={cpfProposta}
-        modalidadeHash={modalidadeHash}
-        simulacao={simulacaoEscolhida}
-      />
+      <PropostaCliente cpf={cpfProposta} proutoName={proutoName} produtoHash={produtoHash} simulacao={simulacaoEscolhida} />
     );
   }
 
@@ -385,12 +381,7 @@ export default function SimuladorFgts({
         {resultado?.mensagem && (
           <Button
             onClick={handleMontarProposta}
-            disabled={
-              Array.isArray(resultado.mensagem)
-                ? simulacaoSelecionadaKey === null
-                : false
-            }
-          >
+            disabled={Array.isArray(resultado.mensagem) ? simulacaoSelecionadaKey === null : false}>
             Montar proposta
           </Button>
         )}
@@ -416,8 +407,7 @@ export default function SimuladorFgts({
                       ? "border-blue-600 bg-blue-50"
                       : "border-gray-300"
                   }`}
-                  onClick={() => setSimulacaoSelecionadaKey(i.toString())}
-                >
+                  onClick={() => setSimulacaoSelecionadaKey(i.toString())}>
                   <CardHeader>
                     <CardTitle>Simulação {i + 1}</CardTitle>
                   </CardHeader>
@@ -468,11 +458,8 @@ export default function SimuladorFgts({
             // Apenas uma simulação (selecionada por padrão)
             <Card
               className={`mb-6 border ${
-                simulacaoSelecionadaKey === "0"
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-300"
-              }`}
-            >
+                simulacaoSelecionadaKey === "0" ? "border-blue-600 bg-blue-50" : "border-gray-300"
+              }`}>
               <CardHeader>
                 <CardTitle>Simulação</CardTitle>
               </CardHeader>
@@ -501,10 +488,12 @@ export default function SimuladorFgts({
                     <strong>IOF:</strong> R$ {(resultado.mensagem as Simulacao).iof.toFixed(2)}
                   </p>
                   <p>
-                    <strong>Taxa Cadastro:</strong> {(resultado.mensagem as Simulacao).taxaCadastro.toFixed(2)}
+                    <strong>Taxa Cadastro:</strong>{" "}
+                    {(resultado.mensagem as Simulacao).taxaCadastro.toFixed(2)}
                   </p>
                   <p>
-                    <strong>Valor Cliente:</strong> R$ {(resultado.mensagem as Simulacao).valorCliente.toFixed(2)}
+                    <strong>Valor Cliente:</strong> R${" "}
+                    {(resultado.mensagem as Simulacao).valorCliente.toFixed(2)}
                   </p>
                   <p>
                     <strong>CET:</strong> {(resultado.mensagem as Simulacao).CET.toFixed(2)}%

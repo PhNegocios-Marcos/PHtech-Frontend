@@ -90,7 +90,8 @@ interface ClienteApiResponse {
 interface PropostaClienteProps {
   cpf: string;
   simulacao?: Simulacao | undefined;
-  modalidadeHash: string;
+  proutoName: string;
+  produtoHash: any;
 }
 
 const pixKeyTypeOptions = [
@@ -100,7 +101,7 @@ const pixKeyTypeOptions = [
   { id: "4", name: "Chave Aleatória" }
 ];
 
-export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: PropostaClienteProps) {
+export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHash }: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -195,7 +196,7 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
     try {
       const body = {
         cliente_hash: cliente?.hash,
-        produto_hash: modalidadeHash,
+        produto_hash: produtoHash,
         promotora_hash: selectedPromotoraId,
         responsavel_hash: idUser,
         cliente_banco_hash: cliente?.dados_bancarios?.[0]?.id ?? null,
