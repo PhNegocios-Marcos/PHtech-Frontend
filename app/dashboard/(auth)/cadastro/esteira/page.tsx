@@ -22,7 +22,7 @@ export default function Page() {
   };
 
   return (
-    <ProtectedRoute requiredPermission="Subprodutos_ver">
+    <ProtectedRoute requiredPermission="Esteira_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 

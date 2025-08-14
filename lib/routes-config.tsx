@@ -39,31 +39,31 @@ export const page_routes: PageRoutesType[] = [
         icon: "Package",
         items: [
           {
-            id: "TipoOperacao_Ver",
+            id: "TipoOperacao_ver",
             title: "Tipo de Operação",
             href: "/dashboard/cadastro/tipo_operacao"
             // icon: "ChartPie"
           },
           {
-            id: "Averbador_Ver",
+            id: "Averbador_ver",
             title: "Averbador",
             href: "/dashboard/cadastro/averbador"
             // icon: "ChartPie"
           },
           {
-            id: "Orgao_Ver",
+            id: "Orgao_ver",
             title: "Orgão",
             href: "/dashboard/cadastro/orgao"
             // icon: "ChartPie"
           },
           {
-            id: "Convenio_Ver",
+            id: "Convenio_ver",
             title: "Convenio",
             href: "/dashboard/cadastro/convenio"
             // icon: "ChartPie"
           },
           {
-            id: "Produto_Ver",
+            id: "Produto_ver",
             title: "Modalidade",
             href: "/dashboard/cadastro/modalidade"
             // icon: "ChartPie"
@@ -81,31 +81,31 @@ export const page_routes: PageRoutesType[] = [
           //   // icon: "ChartPie"
           // },
           {
-            id: "Produto_Ver",
+            id: "Produto_ver",
             title: "Produto",
             href: "/dashboard/cadastro/produto"
             // icon: "ChartPie"
           },
           {
-            id: "Esteria_Ver",
+            id: "Esteria_ver",
             title: "Esteira",
             href: "/dashboard/cadastro/esteira"
             // icon: "ChartPie"
           },
           {
-            id: "Seguradora_Ver",
+            id: "Seguradora_ver",
             title: "Seguradora",
             href: "/dashboard/cadastro/seguradora"
             // icon: "ChartPie"
           },
           {
-            id: "Seguro_Ver",
+            id: "Seguro_ver",
             title: "Seguro",
             href: "/dashboard/cadastro/seguro"
             // icon: "ChartPie"
           },
           {
-            id: "TaxaCadastro_Ver",
+            id: "TaxaCadastro_ver",
             title: "Taxa Cadastro",
             href: "/dashboard/cadastro/taxaCadastro"
             // icon: "ChartPie"
@@ -125,7 +125,7 @@ export const page_routes: PageRoutesType[] = [
           //   // icon: "Trash"
           // },
           {
-            id: "Credito_Operações",
+            id: "Operacoes_ver",
             title: "Operações",
             href: "/dashboard/credito/operacoes"
             // icon: "Handshake"

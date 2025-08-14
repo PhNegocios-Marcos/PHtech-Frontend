@@ -16,7 +16,7 @@ export default function Page() {
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
-    <ProtectedRoute requiredPermission="Subprodutos_ver">
+    <ProtectedRoute requiredPermission="Produto_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
