@@ -56,6 +56,7 @@ import {
 } from "@tanstack/react-table";
 import { useForm, FormProvider } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -157,8 +158,23 @@ export default function TabelaProduto({ produto, onClose }: Props) {
                 return item;
               })
             );
-          } catch (error) {
+
+            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
+              style: {
+                background: 'var(--toast-success)',
+                color: 'var(--toast-success-foreground)',
+                boxShadow: 'var(--toast-shadow)'
+              }
+            });
+          } catch (error: any) {
             console.error("Erro ao atualizar status", error);
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: 'var(--toast-error)',
+                color: 'var(--toast-error-foreground)',
+                boxShadow: 'var(--toast-shadow)'
+              }
+            });
           }
         };
 
@@ -191,29 +207,6 @@ export default function TabelaProduto({ produto, onClose }: Props) {
 
   const { inicio, fim } = form.getValues();
 
-  // useEffect(() => {
-  //   async function fetchConvenios() {
-  //     try {
-  //       const res = await axios.get(`${API_BASE_URL}/config_Tabelas_prazos/listar`, {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       });
-
-  //       const data = res.data.map((c: any) => ({
-  //         id: c.produtos_config_Tabela_prazo_id,
-  //         nome: c.produtos_config_Tabela_prazo_nome
-  //       }));
-  //       setTabela(data);
-  //     } catch (error) {
-  //       console.error("Erro ao carregar convênios", error);
-  //     }
-  //   }
-
-  //   fetchConvenios();
-  // }, [token]);
-
   async function salvarTabela() {
     try {
       await axios.post(
@@ -232,10 +225,24 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    } catch (error: any) {
       console.error(error);
-      //   setMessage("Erro ao criar relação com convênio");
-      //   setMessageType("error");
+      setMessage("Erro ao criar relação com convênio");
+      setMessageType("error");
+      toast.error(`Erro ao criar relação: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -250,10 +257,16 @@ export default function TabelaProduto({ produto, onClose }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
-        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -281,10 +294,24 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    } catch (error: any) {
       console.error(error);
       setMessage("Erro ao criar relação com convênio");
       setMessageType("error");
+      toast.error(`Erro ao criar relação: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }

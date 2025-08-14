@@ -8,7 +8,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { Combobox } from "@/components/Combobox";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Form,
@@ -35,11 +34,6 @@ type SeguroEditProps = {
   onClose: () => void;
 };
 
-type SeguradoraOption = {
-  id: string;
-  name: string;
-};
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
@@ -49,36 +43,10 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
   });
 
   const { token } = useAuth();
-  const [seguradoras, setSeguradoras] = React.useState<SeguradoraOption[]>([]);
 
   useEffect(() => {
     methods.reset(seguro);
   }, [seguro, methods]);
-
-  useEffect(() => {
-    async function fetchSeguradoras() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/seguradoras/listar`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
-        if (!response.ok) throw new Error("Erro ao buscar seguradoras");
-
-        const data = await response.json();
-        const options = data.map((seguradora: any) => ({
-          id: seguradora.hash,
-          name: seguradora.nome
-        }));
-        setSeguradoras(options);
-      } catch (error) {
-        console.error("Erro ao listar seguradoras:", error);
-      }
-    }
-
-    fetchSeguradoras();
-  }, [token]);
 
   const onSubmit = async (data: SeguroFormValues) => {
     try {

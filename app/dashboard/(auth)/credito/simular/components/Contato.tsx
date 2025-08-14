@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface FormField {
   name: string;
@@ -21,7 +22,6 @@ interface ContatoProps {
 }
 
 export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProps, ref) => {
-  // Criar schema dinamicamente
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
 
@@ -58,7 +58,6 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
     }
   });
 
-  // Observa os valores e sincroniza com onChange externo
   const watchedValues = watch();
 
   useEffect(() => {
@@ -82,7 +81,19 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
   }, [watchedValues.email]);
 
   useImperativeHandle(ref, () => ({
-    validate: () => trigger()
+    validate: async () => {
+      const result = await trigger();
+      if (!result) {
+        toast.warning("Preencha os campos obrigatórios corretamente", {
+          style: {
+            background: 'var(--toast-warning)',
+            color: 'var(--toast-warning-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      }
+      return result;
+    }
   }));
 
   const renderField = (field: FormField) => {
@@ -106,7 +117,11 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
           }}
           className="mt-1"
         />
-        {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+        {isErrorString && (
+          <p className="text-sm text-red-600">
+            {errorMessage}
+          </p>
+        )}
       </div>
     );
   };

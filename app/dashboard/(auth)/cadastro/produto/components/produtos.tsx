@@ -39,6 +39,7 @@ import {
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -149,8 +150,11 @@ export default function Produto({ produto }: Props) {
                   : item
               )
             );
-          } catch (error) {
+
+            toast.success("Status atualizado com sucesso!");
+          } catch (error: any) {
             console.error("Erro ao atualizar status", error);
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
           }
         };
 
@@ -190,10 +194,10 @@ export default function Produto({ produto }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
-        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`);
       }
     }
 
@@ -238,89 +242,87 @@ export default function Produto({ produto }: Props) {
             <CardTitle>Produtos</CardTitle>
           </CardHeader>
           <CardContent>
-            <>
-              <div className="mb-4 flex items-center gap-2">
-                <Input
-                  placeholder="Filtrar por qualquer campo..."
-                  value={globalFilter}
-                  onChange={(event) => setGlobalFilter(event.target.value)}
-                  className="max-w-sm"
-                />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="ml-auto">
-                      Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {table
-                      .getAllColumns()
-                      .filter((column) => column.getCanHide())
-                      .map((column) => (
-                        <DropdownMenuCheckboxItem
-                          key={column.id}
-                          className="capitalize"
-                          checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                          {column.id}
-                        </DropdownMenuCheckboxItem>
+            <div className="mb-4 flex items-center gap-2">
+              <Input
+                placeholder="Filtrar por qualquer campo..."
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+                className="max-w-sm"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="mt-10 rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
                       ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-10 rounded-md border">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <TableHead key={header.id}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </TableHead>
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
                         ))}
                       </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <CarregandoTable />
-                    )}
-                  </TableBody>
-                </Table>
+                    ))
+                  ) : (
+                    <CarregandoTable />
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
               </div>
-              <div className="flex items-center justify-end space-x-2 pt-4">
-                <div className="text-muted-foreground flex-1 text-sm">
-                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                  {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}>
-                    <ChevronLeft />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}>
-                    <ChevronRight />
-                  </Button>
-                </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
               </div>
-            </>
+            </div>
           </CardContent>
         </Card>
       )}

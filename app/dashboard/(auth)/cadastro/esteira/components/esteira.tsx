@@ -39,6 +39,8 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { generateMeta } from "@/lib/utils";
 import VerEsteira from "./verEsteira";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Esteira = {
@@ -68,19 +70,16 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
-  // Função para fechar o componente VerEsteira
   const handleClose = () => {
-    setSelectedTaxa(null); // Reseta a seleção para fechar o VerEsteira
-    setIsCadastroOpen(false); // Opcional: reseta o estado isCadastroOpen
-    onClose(); // Chama a função onClose passada pelo componente pai, se necessário
+    setSelectedTaxa(null);
+    setIsCadastroOpen(false);
+    onClose();
   };
 
   const handleSelectTaxa = (taxa: Esteira) => {
-    setSelectedTaxa(taxa); // Define o item selecionado
-    setIsCadastroOpen(true); // Abre o componente VerEsteira
+    setSelectedTaxa(taxa);
+    setIsCadastroOpen(true);
   };
-
-  // console.log("esteiraData: ", esteiraData);
 
   const columns: ColumnDef<Esteira>[] = [
     { accessorKey: "esteira_nome", header: "Nome" },
@@ -115,16 +114,37 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
                   : item
               )
             );
-          } catch (error) {
+
+            toast.success(
+              `Status do produto "${row.original.esteira_nome}" atualizado com sucesso!`,
+              {
+                style: {
+                  background: "var(--toast-success)",
+                  color: "var(--toast-success-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          } catch (error: any) {
             console.error("Erro ao atualizar status", error);
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
           }
         };
 
         return (
           <Badge
             onClick={toggleStatus}
-            className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
-            variant={ativo ? "default" : "outline"}>
+            className={`w-24 cursor-pointer ${
+              ativo ? "" : "border border-red-500 bg-transparent text-red-500"
+            }`}
+            variant={ativo ? "default" : "outline"}
+          >
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
@@ -138,7 +158,8 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
           variant="ghost"
           size="icon"
           onClick={() => handleSelectTaxa(row.original)}
-          title="Editar produto">
+          title="Editar produto"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -156,10 +177,16 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
-        // console.log("data: ", res.data);
         setEsteiraData(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`, {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
       }
     }
 
@@ -168,7 +195,7 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
 
   useEffect(() => {
     async function fetchRelacionamentos() {
-      if (!selectedTaxa) return; // Só faz a requisição se houver um item selecionado
+      if (!selectedTaxa) return;
 
       try {
         const res = await axios.get(
@@ -180,14 +207,20 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
             }
           }
         );
-        // setTodo(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error(`Erro ao carregar dados da esteira: ${error.response?.data?.detail || error.message}`, {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
       }
     }
 
     fetchRelacionamentos();
-  }, [token, selectedTaxa]); // Adicione selectedTaxa como dependência
+  }, [token, selectedTaxa]);
 
   const table = useReactTable({
     data: esteiraData,
@@ -218,8 +251,8 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
       {selectedTaxa ? (
         <VerEsteira
           isOpen={isCadastroOpen}
-          esteiraHash={selectedTaxa.esteira_hash} // Use selectedTaxa.esteira_hash
-          esteiraData={selectedTaxa.esteira_nome} // Pass the nome as a string
+          esteiraHash={selectedTaxa.esteira_hash}
+          esteiraData={selectedTaxa.esteira_nome}
           onClose={handleClose}
         />
       ) : (
@@ -251,7 +284,8 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
                           key={column.id}
                           className="capitalize"
                           checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                        >
                           {column.id}
                         </DropdownMenuCheckboxItem>
                       ))}
@@ -298,14 +332,16 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
                     variant="outline"
                     size="icon"
                     onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}>
+                    disabled={!table.getCanPreviousPage()}
+                  >
                     <ChevronLeft />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}>
+                    disabled={!table.getCanNextPage()}
+                  >
                     <ChevronRight />
                   </Button>
                 </div>

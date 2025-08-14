@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Convenio } from "./convenios";
+import { toast } from "sonner";
 
 type Option = {
   id: string;
@@ -30,9 +31,6 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [loading02, setLoading02] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-
   const { token } = useAuth();
 
   useEffect(() => {
@@ -51,6 +49,13 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
         setAverbador(data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -73,6 +78,13 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
         setProdutos(data);
       } catch (error) {
         console.error("Erro ao carregar produtos", error);
+        toast.error("Erro ao carregar produtos", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -81,14 +93,17 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
 
   async function handleRelacionarCategoria() {
     if (!selectedSubProduto) {
-      setMessage("Selecione convênio");
-      setMessageType("error");
+      toast.error("Selecione convênio", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
     setLoading(true);
-    setMessage("");
-    setMessageType("");
 
     try {
       await axios.post(
@@ -105,12 +120,22 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
           }
         }
       );
-      setMessage("Relação com convênio criada com sucesso!");
-      setMessageType("success");
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    } catch (error: any) {
       console.error(error);
-      setMessage("Erro ao criar relação com convênio");
-      setMessageType("error");
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -165,16 +190,6 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
             {loading02 ? "Salvando..." : "Relacionar Tipo de Operacao"}
           </Button>
         </div>
-
-        {/* Mensagem de sucesso ou erro */}
-        {message && (
-          <p
-            className={`mt-4 text-sm ${
-              messageType === "success" ? "text-green-600" : "text-red-600"
-            }`}>
-            {message}
-          </p>
-        )}
       </CardContent>
     </Card>
   );

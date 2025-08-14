@@ -35,6 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import ProdutoDetalhesTabs from "./editSubproduto";
+import { toast } from "sonner"; // ✅ adicionado
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -73,7 +74,8 @@ export function SubprodutosTable() {
           variant="ghost"
           size="icon"
           onClick={() => setSelectedSubproduto(row.original)}
-          title="Editar subproduto">
+          title="Editar subproduto"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -100,10 +102,16 @@ export function SubprodutosTable() {
         }
 
         const data = await response.json();
-        // console.log("data: ", data)
         setSubprodutos(data);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
+        toast.error(`Erro ao buscar subprodutos: ${error.message || error}`, {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
       }
     }
 
@@ -178,7 +186,8 @@ export function SubprodutosTable() {
                           key={column.id}
                           className="capitalize"
                           checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                        >
                           {column.id}
                         </DropdownMenuCheckboxItem>
                       ))}
@@ -226,14 +235,16 @@ export function SubprodutosTable() {
                     variant="outline"
                     size="icon"
                     onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}>
+                    disabled={!table.getCanPreviousPage()}
+                  >
                     <ChevronLeft />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}>
+                    disabled={!table.getCanNextPage()}
+                  >
                     <ChevronRight />
                   </Button>
                 </div>

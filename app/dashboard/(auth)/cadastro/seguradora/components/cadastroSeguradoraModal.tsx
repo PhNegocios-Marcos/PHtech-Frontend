@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormField,
@@ -15,7 +16,7 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -46,7 +47,7 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.");
       return;
     }
 
@@ -65,11 +66,11 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Seguradora cadastrada com sucesso!");
+      toast.success("Seguradora cadastrada com sucesso!");
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar seguradora:", error);
-      alert("Erro ao cadastrar seguradora: " + error);
+      toast.error("Erro ao cadastrar seguradora: " + error);
     }
   };
 

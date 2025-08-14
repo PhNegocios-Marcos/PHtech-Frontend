@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -92,8 +93,6 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
   const [convenioSelecionado, setConvenioSelecionado] = useState<any>(null);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -150,8 +149,9 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
           nome: c.convenio_nome
         }));
         setConvenio(data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios: " + (error.message || "Erro desconhecido"));
       }
     }
 
@@ -172,13 +172,14 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         }));
 
         setModalidade(formatado);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar convênios:", error);
+        toast.error("Erro ao buscar convênios: " + (error.message || "Erro desconhecido"));
       }
     };
 
     fetchConvenios();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -193,16 +194,17 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         }));
 
         setProdutos(formatado);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar produtos:", error);
+        toast.error("Erro ao buscar produtos: " + (error.message || "Erro desconhecido"));
       }
     };
 
     fetchProdutos();
-  }, []);
+  }, [token]);
 
   async function salvarProduto() {
-    setLoading(true); // Geralmente você inicia o loading antes da requisição
+    setLoading(true);
     try {
       const response = await axios.post(
         `${API_BASE_URL}/rel-produto-sub-produto-convenio/criar`,
@@ -219,16 +221,11 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         }
       );
 
-      console.log("Resposta da API:", response);
-
-      setMessage("Relação com convênio criada com sucesso!");
-      setMessageType("success");
-
-      setIdProduto(response);
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!");
+      setIdProduto(response.data);
+    } catch (error: any) {
       console.error("Erro ao salvar produto:", error);
-      setMessage("Erro ao criar relação com convênio");
-      setMessageType("error");
+      toast.error("Erro ao criar relação com convênio: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
@@ -236,12 +233,12 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.");
       return;
     }
 
     const payload = {
-      relacionamento_produto: idProduto.rel_produto_subproduto_convenio_convenio_id,
+      relacionamento_produto: idProduto?.rel_produto_subproduto_convenio_convenio_id,
       nome_tabela: data.nome_taxa,
       prazo_minimo: data.prazo_minimo,
       prazo_maximo: data.prazo_maximo,
@@ -268,12 +265,12 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Tabela cadastrada com sucesso!");
-      reset(); // limpa o formulário
+      toast.success("Tabela cadastrada com sucesso!");
+      reset();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Erro ao cadastrar usuário: " + error);
+      toast.error("Erro ao cadastrar usuário: " + (error.message || "Erro desconhecido"));
     }
   };
 

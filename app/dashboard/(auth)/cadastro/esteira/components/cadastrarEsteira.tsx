@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { toast } from "sonner";
 
 import {
   Form,
@@ -157,6 +158,13 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
         setAlcadasList(alcadasRes.data);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
+        toast.error("Erro ao carregar dados", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } finally {
         setLoading(false);
       }
@@ -166,7 +174,13 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -216,11 +230,23 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
         }
       }
 
-      alert("Esteira e ações cadastradas com sucesso!");
+      toast.success("Esteira e ações cadastradas com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
-      alert("Erro ao cadastrar: " + error);
+      toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : String(error)}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

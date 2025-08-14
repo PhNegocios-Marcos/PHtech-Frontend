@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { SeguradorasCarregando } from "./leads_carregando";
@@ -25,27 +25,28 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { SeguradoraModal } from "./SeguradoraModal";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type SeguradoraLinha = {
   id: string;
-  seguradora_hash: string; // Added to match Seguradora type
+  seguradora_hash: string;
   nome: string;
   razao_social: string;
   cnpj: string;
-  status: number; // Changed to required to align with Seguradora type
+  status: number;
 };
 
 export function SeguradorasTable() {
   const { token } = useAuth();
-  const [seguradoras, setSeguradoras] = React.useState<SeguradoraLinha[]>([]);
-  const [filtro, setFiltro] = React.useState("");
-  const [globalFilter, setGlobalFilter] = React.useState("");
-  const [selectedSeguradora, setSelectedSeguradora] = React.useState<SeguradoraLinha | null>(null);
-  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [seguradoras, setSeguradoras] = useState<SeguradoraLinha[]>([]);
+  const [filtro, setFiltro] = useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraLinha | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchSeguradoras() {
       if (!token) return;
 
@@ -59,9 +60,10 @@ export function SeguradorasTable() {
         if (!res.ok) throw new Error("Erro ao buscar seguradoras");
 
         const data = await res.json();
-        setSeguradoras(data); // Assumindo que a API retorna um array de objetos no formato SeguradoraLinha
+        setSeguradoras(data);
       } catch (error) {
         console.error("Erro ao carregar seguradoras:", error);
+        toast.error("Erro ao carregar seguradoras.");
       }
     }
 
@@ -80,11 +82,6 @@ export function SeguradorasTable() {
   }, [filtro, seguradoras]);
 
   const columns: ColumnDef<SeguradoraLinha>[] = [
-    // {
-    //   accessorKey: "seguradora_hash",
-    //   header: "Hash da Seguradora",
-    //   cell: (info) => <strong>{info.getValue() as string}</strong>
-    // },
     {
       accessorKey: "nome",
       header: "Nome"

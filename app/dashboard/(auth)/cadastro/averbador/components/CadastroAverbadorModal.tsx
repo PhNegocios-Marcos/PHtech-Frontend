@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -43,7 +44,13 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -62,11 +69,23 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Convênio cadastrado com sucesso!");
+      toast.success("Averbador cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error) {
-      console.error("Erro ao cadastrar convênio:", error);
-      alert("Erro ao cadastrar convênio: " + error);
+      console.error("Erro ao cadastrar averbador:", error);
+      toast.error(`Erro ao cadastrar averbador: ${error instanceof Error ? error.message : String(error)}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -84,7 +103,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Convênio</h2>
+                <h2 className="text-xl font-semibold">Cadastrar Novo Averbador</h2>
                 <button
                   type="button"
                   onClick={onClose}
@@ -96,7 +115,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados do Convênio</CardTitle>
+                  <CardTitle>Dados do Averbador</CardTitle>
                 </CardHeader>
 
                 <CardContent>

@@ -17,6 +17,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -81,7 +82,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
         setSeguradoras(options);
       } catch (error) {
         console.error("Erro ao listar seguradoras:", error);
-        alert("Erro ao listar seguradoras.");
+        toast.error("Erro ao listar seguradoras");
       }
     }
 
@@ -90,18 +91,15 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
 
   useEffect(() => {
     methods.setValue("seguradora_hash", seguradoraSelect?.id ?? "");
-    console.log("Seguradora selecionada:", seguradoraSelect);
-    console.log("Valor do campo seguradora_hash:", methods.watch("seguradora_hash"));
   }, [seguradoraSelect, methods]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.");
       return;
     }
 
     try {
-      console.log("Dados enviados:", data);
       const response = await fetch(`${API_BASE_URL}/seguro-faixas/criar`, {
         method: "POST",
         headers: {
@@ -116,17 +114,16 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Faixa de seguro cadastrada com sucesso!");
+      toast.success("Faixa de seguro cadastrada com sucesso!");
       methods.reset();
       setSeguradoraSelect(null);
       if (onRefresh) {
-        console.log("Chamando onRefresh...");
-        await onRefresh(); // Aguarda a conclusão do refresh
+        await onRefresh();
       }
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar faixa de seguro:", error);
-      alert("Erro ao cadastrar faixa de seguro: " + error);
+      toast.error("Erro ao cadastrar faixa de seguro: " + error.message || error);
     }
   };
 

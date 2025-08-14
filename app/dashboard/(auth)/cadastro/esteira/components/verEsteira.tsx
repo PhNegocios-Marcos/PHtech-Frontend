@@ -34,7 +34,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -174,7 +174,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
   const findStatusByTruncatedText = (texto: string) => {
     return (
       statusList.find((status) => status.status_nome.slice(0, 20) === texto.slice(0, 20))
-        ?.status_hash || ""
+      ?.status_hash || ""
     );
   };
 
@@ -249,6 +249,13 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
     } catch (err) {
       setError("Erro ao carregar etapas");
       console.error(err);
+      toast.error("Erro ao carregar etapas", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -265,6 +272,13 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
       setStatusList(res.data);
     } catch (error) {
       console.error("Erro ao carregar lista de status", error);
+      toast.error("Erro ao carregar lista de status", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -304,15 +318,21 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
           nova_ordem: e.indice_etapa
         }))
       });
-      toast({
-        title: "Ordem salva com sucesso!",
-        variant: "default"
+      toast.success("Ordem salva com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
       });
     } catch (error) {
       console.error("Erro ao salvar ordem:", error);
-      toast({
-        title: "Erro ao salvar ordem",
-        variant: "destructive"
+      toast.error("Erro ao salvar ordem", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
       });
     }
   };

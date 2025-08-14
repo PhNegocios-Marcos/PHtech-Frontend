@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -59,7 +60,13 @@ export default function CadastroConvenioModal({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -78,11 +85,23 @@ export default function CadastroConvenioModal({
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Convênio cadastrado com sucesso!");
+      toast.success("Convênio cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar convênio:", error);
-      alert("Erro ao cadastrar convênio: " + error);
+      toast.error(`Erro ao cadastrar convênio: ${error instanceof Error ? error.message : String(error)}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

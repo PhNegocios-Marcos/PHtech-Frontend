@@ -12,6 +12,7 @@ import { DadosBancarios } from "./DadosBancarios";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Produto } from "../../../cadastro/produto/components/ProdutoModal";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -37,7 +38,6 @@ interface FormSection {
   fields: FormField[];
 }
 
-// Interface para tipar as refs
 interface TabRef {
   validate: () => Promise<boolean>;
 }
@@ -61,7 +61,6 @@ export default function Cadastrar({
   const enderecosRef = useRef<TabRef | null>(null);
   const bancariosRef = useRef<TabRef | null>(null);
 
-  // Definir tabRefs com tipagem correta
   const tabRefs: Record<string, React.RefObject<TabRef | null>> = {
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
@@ -69,12 +68,10 @@ export default function Cadastrar({
     DadosBancarios: bancariosRef
   };
 
-  // Function to get fields for a specific section
   const getFields = (sectionName: string): FormField[] => {
     if (!formSections) return [];
     const section = formSections.find((s) => s.section === sectionName);
     if (!section) return [];
-    // Para a seção Enderecos, garantir que os nomes dos campos sejam prefixados com "enderecos.0."
     if (sectionName === "Enderecos") {
       return section.fields.map((field) => ({
         ...field,
@@ -84,9 +81,8 @@ export default function Cadastrar({
     return section.fields;
   };
 
-  // Initial form state
   const [formData, setFormData] = useState({
-    produtoId: produtoId || "", // Adicione o produtoId aqui
+    produtoId: produtoId || "",
     nome: "",
     nome_pai: "",
     nome_mae: "",
@@ -141,7 +137,6 @@ export default function Cadastrar({
     }
   }, [produtoId]);
 
-  // Fetch form sections and fields
   useEffect(() => {
     const fetchDefaultSections = async () => {
       try {
@@ -151,25 +146,28 @@ export default function Cadastrar({
           return;
         }
 
-        // Fetch all sections at once
         const response = await axios.get(`${API_BASE_URL}/produto-config-campos-cadastro/listar`, {
           headers: { Authorization: `Bearer ${token}` },
           params: { produto_hash: produtoId }
         });
 
-        // Transform API response into FormSection[]
         const sectionsData: FormSection[] = Object.keys(response.data).map((sectionName) => ({
           section: sectionName,
           fields: response.data[sectionName].map((item: any) => item.fields)
         }));
 
-        // Filter only sections in tabOrder
         const validSections = sectionsData.filter((section) => tabOrder.includes(section.section));
         setFormSections(validSections);
-        console.log("formSections:", JSON.stringify(validSections, null, 2)); // Debug log
       } catch (error) {
         console.error("Erro ao buscar seções:", error);
         setFormSections([]);
+        toast.error("Erro ao carregar configurações do formulário", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } finally {
         setLoading(false);
       }
@@ -178,37 +176,39 @@ export default function Cadastrar({
     fetchDefaultSections();
   }, [token, produtoId]);
 
-  // Handle form field changes
   const handleChange = (path: string, value: any) => {
-    console.log("handleChange chamado:", { path, value }); // Log para depuração
     const keys = path.split(".");
     setFormData((prev) => {
       const updated = structuredClone(prev);
       let obj: any = updated;
 
-      // Iterar pelas chaves, criando objetos/arrays intermediários se necessário
       for (let i = 0; i < keys.length - 1; i++) {
         const key = keys[i];
-        // Se a chave não existe ou é undefined, criar um objeto ou array
         if (!obj[key]) {
-          // Se a próxima chave for numérica, criar um array; senão, criar um objeto
           obj[key] = /^\d+$/.test(keys[i + 1]) ? [] : {};
         }
         obj = obj[key];
       }
 
-      // Definir o valor na última chave
       obj[keys[keys.length - 1]] = value;
       return updated;
     });
   };
 
-  // Handle navigation to the next tab
   const handleNext = async () => {
     const ref = tabRefs[activeTab];
     if (ref?.current?.validate) {
       const isValid = await ref.current.validate();
-      if (!isValid) return;
+      if (!isValid) {
+        toast.warning("Preencha todos os campos obrigatórios antes de continuar", {
+          style: {
+            background: 'var(--toast-warning)',
+            color: 'var(--toast-warning-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        return;
+      }
     }
     const currentIndex = tabOrder.indexOf(activeTab);
     const nextTab = tabOrder[currentIndex + 1];
@@ -217,7 +217,6 @@ export default function Cadastrar({
     }
   };
 
-  // Sanitize form data before submission
   const sanitizeFormData = (data: any): any => {
     const clone = structuredClone(data);
 
@@ -247,7 +246,6 @@ export default function Cadastrar({
     return clone;
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     for (const tab of tabOrder) {
       const ref = tabRefs[tab];
@@ -255,16 +253,20 @@ export default function Cadastrar({
         const valid = await ref.current.validate();
         if (!valid) {
           setActiveTab(tab);
-          return alert("Preencha os campos obrigatórios.");
+          toast.warning("Preencha todos os campos obrigatórios", {
+            style: {
+              background: 'var(--toast-warning)',
+              color: 'var(--toast-warning-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          });
+          return;
         }
       }
     }
 
     try {
       const sanitizedData = sanitizeFormData(formData);
-
-      // Adicione logs para depuração
-      console.log("Dados sendo enviados:", sanitizedData);
 
       const response = await axios.post(`${API_BASE_URL}/cliente`, sanitizedData, {
         headers: {
@@ -273,14 +275,26 @@ export default function Cadastrar({
       });
 
       if (response.status === 200) {
-        alert("Cliente cadastrado com sucesso!");
+        toast.success("Cliente cadastrado com sucesso!", {
+          style: {
+            background: 'var(--toast-success)',
+            color: 'var(--toast-success-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
         if (onCadastrado) {
           onCadastrado(formData.cpf, simulacao);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao cadastrar cliente:", err);
-      alert("Erro inesperado.");
+      toast.error(`Erro ao cadastrar cliente: ${err.response?.data?.message || err.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

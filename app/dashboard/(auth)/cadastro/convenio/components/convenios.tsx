@@ -36,6 +36,7 @@ import { CarregandoTable } from "./leads_carregando";
 import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import ConvenioEdit from "./editConvenio";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -97,7 +98,16 @@ export function ConveniosTable() {
 
   useEffect(() => {
     async function fetchConvenios() {
-      if (!token) return;
+      if (!token) {
+        toast.error("Token de autenticação não encontrado.", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        return;
+      }
       try {
         const response = await fetch(`${API_BASE_URL}/convenio`, {
           method: "GET",
@@ -116,6 +126,13 @@ export function ConveniosTable() {
         setConvenios(data);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
+        toast.error(`Erro: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 

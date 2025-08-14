@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Produto } from "./produtos";
+import { toast } from "sonner";
 
 type Option = {
   id: string;
@@ -30,9 +31,6 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [loading02, setLoading02] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-
   const { token } = useAuth();
 
   useEffect(() => {
@@ -51,6 +49,7 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
         setConvenios(data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios");
       }
     }
 
@@ -73,6 +72,7 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
         setProdutos(data);
       } catch (error) {
         console.error("Erro ao carregar produtos", error);
+        toast.error("Erro ao carregar produtos");
       }
     }
 
@@ -81,14 +81,11 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
 
   async function handleRelacionarConvenio() {
     if (!selectedConvenio) {
-      setMessage("Selecione convênio");
-      setMessageType("error");
+      toast.error("Selecione um convênio");
       return;
     }
 
     setLoading(true);
-    setMessage("");
-    setMessageType("");
 
     try {
       await axios.post(
@@ -103,12 +100,10 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
           }
         }
       );
-      setMessage("Relação com convênio criada com sucesso!");
-      setMessageType("success");
+      toast.success("Relação com convênio criada com sucesso!");
     } catch (error) {
       console.error(error);
-      setMessage("Erro ao criar relação com convênio");
-      setMessageType("error");
+      toast.error("Erro ao criar relação com convênio");
     } finally {
       setLoading(false);
     }
@@ -116,14 +111,11 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
 
   async function handleRelacionarCategoria() {
     if (!selectedSubProduto) {
-      setMessage("Selecione um Tipo de Operacao");
-      setMessageType("error");
+      toast.error("Selecione um Tipo de Operacao");
       return;
     }
 
     setLoading02(true);
-    setMessage("");
-    setMessageType("");
 
     try {
       await axios.post(
@@ -138,12 +130,10 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
           }
         }
       );
-      setMessage("Relação com Tipo de Operacao criada com sucesso!");
-      setMessageType("success");
+      toast.success("Relação com Tipo de Operacao criada com sucesso!");
     } catch (error) {
       console.error(error);
-      setMessage("Erro ao criar relação com Tipo de Operacao");
-      setMessageType("error");
+      toast.error("Erro ao criar relação com Tipo de Operacao");
     } finally {
       setLoading02(false);
     }
@@ -196,16 +186,6 @@ export default function RelacaoProdutoConvenio({ produto, onClose }: Props) {
             </Button>
           </div>
         </div>
-
-        {/* Mensagem de sucesso ou erro */}
-        {message && (
-          <p
-            className={`mt-4 text-sm ${
-              messageType === "success" ? "text-green-600" : "text-red-600"
-            }`}>
-            {message}
-          </p>
-        )}
       </CardContent>
     </Card>
   );

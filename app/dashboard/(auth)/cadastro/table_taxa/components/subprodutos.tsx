@@ -66,7 +66,7 @@ export function SubprodutosTable() {
   const [selectedSubproduto, setSelectedSubproduto] = useState<Subproduto | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useAuth();
-  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const columns: ColumnDef<Subproduto>[] = [
     { accessorKey: "produtos_subprodutos_nome", header: "Nome" },
@@ -111,7 +111,6 @@ export function SubprodutosTable() {
         }
 
         const data = await response.json();
-        // console.log("data: ", data)
         setSubprodutos(data);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
@@ -133,11 +132,8 @@ export function SubprodutosTable() {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      return String(row.getValue(columnId))
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
-    },
+    globalFilterFn: (row, columnId, filterValue) =>
+      String(row.getValue(columnId)).toLowerCase().includes(String(filterValue).toLowerCase()),
     state: {
       sorting,
       columnFilters,
@@ -147,9 +143,7 @@ export function SubprodutosTable() {
     }
   });
 
-  const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  const handleRefresh = () => setRefreshKey((prev) => prev + 1);
 
   return (
     <>
@@ -169,7 +163,7 @@ export function SubprodutosTable() {
               <Input
                 placeholder="Filtrar por qualquer campo..."
                 value={globalFilter}
-                onChange={(event) => setGlobalFilter(event.target.value)}
+                onChange={(e) => setGlobalFilter(e.target.value)}
                 className="max-w-sm"
               />
               <DropdownMenu>
@@ -181,14 +175,14 @@ export function SubprodutosTable() {
                 <DropdownMenuContent align="end">
                   {table
                     .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
+                    .filter((col) => col.getCanHide())
+                    .map((col) => (
                       <DropdownMenuCheckboxItem
-                        key={column.id}
+                        key={col.id}
                         className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
+                        checked={col.getIsVisible()}
+                        onCheckedChange={(value) => col.toggleVisibility(!!value)}>
+                        {col.id}
                       </DropdownMenuCheckboxItem>
                     ))}
                 </DropdownMenuContent>
@@ -225,6 +219,7 @@ export function SubprodutosTable() {
                 </TableBody>
               </Table>
             </div>
+
             <div className="flex items-center justify-end space-x-2 pt-4">
               <div className="text-muted-foreground flex-1 text-sm">
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}

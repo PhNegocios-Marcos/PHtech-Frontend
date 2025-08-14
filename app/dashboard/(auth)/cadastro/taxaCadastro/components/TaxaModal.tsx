@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { TaxaEditForm } from "./editarTaxa";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export type Taxa = {
   cad_tac_id: number;
@@ -30,8 +31,25 @@ export function TaxaModal({ isOpen, onClose, taxa, onRefresh }: TaxaDrawerProps)
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
+    toast.success("Taxa atualizada com sucesso!", {
+      style: {
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
     onRefresh?.();
     onClose();
+  };
+
+  const handleError = (msg: string) => {
+    toast.error(`Erro ao atualizar taxa: ${msg}`, {
+      style: {
+        background: "var(--toast-error)",
+        color: "var(--toast-error-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
   };
 
   return (

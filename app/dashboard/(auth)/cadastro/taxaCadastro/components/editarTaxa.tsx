@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const taxaSchema = z.object({
   cad_tac_id: z.number(),
@@ -63,10 +64,12 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
           "Content-Type": "application/json"
         }
       });
+
+      toast.success("Faixa de taxa atualizada com sucesso!");
       onClose();
     } catch (error: any) {
       const msg = error?.response?.data?.erro || "Erro ao atualizar faixa de taxa";
-      alert(msg);
+      toast.error(msg);
       console.error("Erro ao atualizar faixa de taxa:", error);
     }
   };
@@ -80,8 +83,7 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
               <div className="flex items-center justify-between">
                 <CardTitle>
                   <h2>
-                    Editar Faixa de Taxa:{" "}
-                    <span className="text-primary">{taxa.cad_tac_id}</span>
+                    Editar Faixa de Taxa: <span className="text-primary">{taxa.cad_tac_id}</span>
                   </h2>
                 </CardTitle>
                 <Button onClick={onClose} variant="outline">

@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const roteiroSchema = z
   .object({
@@ -172,7 +173,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
 
   const onSubmit = async (data: Roteiro) => {
     if (!token) {
-      console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado.");
       return;
     }
 
@@ -186,11 +187,12 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/rotina-operacional/atualizar`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success("Roteiro atualizado com sucesso!");
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar roteiro:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -273,19 +275,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                           <FormControl>
                             <Select
                               value={field.value ? "true" : "false"}
-                              onValueChange={(value) => {
-                                const booleanValue = value === "true";
-                                field.onChange(booleanValue);
-                                if (fieldConfig.name === "usa_limite_proposta") {
-                                  setShowLimiteProposta(booleanValue);
-                                  if (!booleanValue)
-                                    methods.setValue("valor_limite_proposta", undefined);
-                                } else if (fieldConfig.name === "usa_margem_seguranca") {
-                                  setShowMargemSeguranca(booleanValue);
-                                  if (!booleanValue)
-                                    methods.setValue("valor_margem_seguranca", undefined);
-                                }
-                              }}>
+                              onValueChange={(value) => handleSelectChange(fieldConfig.name, value)}>
                               <SelectTrigger>
                                 <SelectValue placeholder={fieldConfig.placeholder} />
                               </SelectTrigger>

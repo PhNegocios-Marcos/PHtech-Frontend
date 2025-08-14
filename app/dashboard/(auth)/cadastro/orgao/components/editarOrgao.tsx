@@ -19,6 +19,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner"; // <- adicionado
 
 // Schema com coerção para number
 const usuarioSchema = z.object({
@@ -66,13 +67,26 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
   const onSubmit = async (data: Orgao) => {
     if (!token) {
       console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
     const payload = getModifiedFields(orgao, data);
 
     if (Object.keys(payload).length === 0) {
-      alert("Nenhuma alteração detectada.");
+      toast("Nenhuma alteração detectada.", {
+        style: {
+          background: 'var(--toast-warning)',
+          color: 'var(--toast-warning-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -80,11 +94,24 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/orgaos/${orgao.orgao_hash}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success("Órgão atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar órgão:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

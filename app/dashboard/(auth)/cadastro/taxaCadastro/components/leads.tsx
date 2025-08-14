@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { TaxaModal } from "./TaxaModal";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -41,28 +42,21 @@ export function TaxaCadastroTable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [selectedTaxa, setSelectedTaxa] = React.useState<TaxaLinha | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
-  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     async function fetchTaxas() {
       if (!token) {
-        setError("Token não encontrado. Faça login.");
-        console.error("No token found");
+        toast.error("Token não encontrado. Faça login.");
         return;
       }
 
       if (!API_BASE_URL) {
-        setError("API_BASE_URL não configurado.");
-        console.error("API_BASE_URL is not defined");
+        toast.error("API_BASE_URL não configurado.");
         return;
       }
 
-      const url = `${API_BASE_URL}/faixa-valor-cobrado/listar`;
-      // console.log("Fetching from URL:", url);
-      // console.log("Using token:", token);
-
       try {
-        const res = await fetch(url, {
+        const res = await fetch(`${API_BASE_URL}/faixa-valor-cobrado/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -71,21 +65,18 @@ export function TaxaCadastroTable() {
           }
         });
 
-        console.log("Response status:", res.status);
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           const errorMessage = errorData?.erro || `Erro ${res.status}: ${res.statusText}`;
-          setError(errorMessage);
+          toast.error(errorMessage);
           throw new Error(errorMessage);
         }
 
         const data = await res.json();
-        console.log("Fetched data:", data);
         setTaxas(data);
-        setError(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar faixas de taxa:", error);
-        setError("Erro ao carregar faixas de taxa: " + error);
+        toast.error("Erro ao carregar faixas de taxa: " + (error?.message || error));
       }
     }
 
@@ -107,18 +98,9 @@ export function TaxaCadastroTable() {
       header: "ID",
       cell: (info) => <strong>{info.getValue() as number}</strong>
     },
-    {
-      accessorKey: "cad_tac_valor_minimo",
-      header: "Valor Mínimo"
-    },
-    {
-      accessorKey: "cad_tac_valor_maximo",
-      header: "Valor Máximo"
-    },
-    {
-      accessorKey: "cad_tac_valor_cobrado",
-      header: "Valor Cobrado"
-    },
+    { accessorKey: "cad_tac_valor_minimo", header: "Valor Mínimo" },
+    { accessorKey: "cad_tac_valor_maximo", header: "Valor Máximo" },
+    { accessorKey: "cad_tac_valor_cobrado", header: "Valor Cobrado" },
     {
       id: "editar",
       header: "Editar",
@@ -141,42 +123,26 @@ export function TaxaCadastroTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      return String(row.getValue(columnId))
+    globalFilterFn: (row, columnId, filterValue) =>
+      String(row.getValue(columnId))
         .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
-    },
-    state: {
-      globalFilter
-    }
+        .includes(String(filterValue).toLowerCase()),
+    state: { globalFilter }
   });
 
-  const handleRowDoubleClick = (taxa: TaxaLinha) => {
-    setSelectedTaxa(taxa);
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedTaxa(null);
-  };
-
-  const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  const handleRowDoubleClick = (taxa: TaxaLinha) => setSelectedTaxa(taxa);
+  const handleCloseDrawer = () => setSelectedTaxa(null);
+  const handleRefresh = () => setRefreshKey((prev) => prev + 1);
 
   return (
     <>
       {!selectedTaxa ? (
         <Card className="col-span-2">
-          <CardHeader className="flex flex-col justify-between">
+          <CardHeader>
             <CardTitle>Faixas de Taxa</CardTitle>
           </CardHeader>
 
           <CardContent>
-            {error && (
-              <div className="mb-4 text-red-500">
-                {error}
-              </div>
-            )}
             <div className="mb-4 flex items-center gap-2">
               <Input
                 placeholder="Filtrar por qualquer campo..."
@@ -228,7 +194,7 @@ export function TaxaCadastroTable() {
                   {table.getRowModel().rows.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="p-4 text-center">
-                        {error ? "Erro ao carregar dados" : <TaxaCarregando />}
+                        <TaxaCarregando />
                       </TableCell>
                     </TableRow>
                   ) : (

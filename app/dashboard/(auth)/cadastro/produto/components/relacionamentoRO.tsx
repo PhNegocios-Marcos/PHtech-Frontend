@@ -27,6 +27,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,7 +43,7 @@ type Option = {
   equipes?: any;
   ro?: Ro;
   produto: Produto;
-  hash?: string; // opcional
+  hash?: string;
   status_relacionamento?: any;
   id_relacionamento?: any;
 };
@@ -50,8 +51,8 @@ type Option = {
 export default function RelRO({ produto, equipes }: Option) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [ro, setRo] = React.useState<Option[]>([]); // para tabela: equipes vinculadas ao usuário
-  const [equipesDisponiveis, setEquipesDisponiveis] = React.useState<Option[]>([]); // para combobox: todas as equipes disponíveis
+  const [ro, setRo] = React.useState<Option[]>([]);
+  const [equipesDisponiveis, setEquipesDisponiveis] = React.useState<Option[]>([]);
   const [equipesSelect, setEquipesSelect] = useState<Option | null>(null);
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const { token } = useAuth();
@@ -59,105 +60,87 @@ export default function RelRO({ produto, equipes }: Option) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedUser, setSelectedUser] = React.useState<Produto | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const equipeColumns = React.useMemo<ColumnDef<Option>[]>(
-    () => [
-      { accessorKey: "nome", header: "Nome" },
-      {
-        id: "status_relacionamento",
-        header: "Status",
-        cell: ({ row }) => {
-          const ativo = row.original.status_relacionamento === 1;
+  const equipeColumns = React.useMemo<ColumnDef<Option>[]>(() => [
+    { accessorKey: "nome", header: "Nome" },
+    {
+      id: "status_relacionamento",
+      header: "Status",
+      cell: ({ row }) => {
+        const ativo = row.original.status_relacionamento === 1;
 
-          const toggleStatus = async () => {
-            try {
-              const novoStatus = ativo ? 0 : 1;
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+            await axios.put(
+              `${API_BASE_URL}/rel_usuario_equipe/atualizar`,
+              { id: row.original.id_relacionamento, status: novoStatus },
+              { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+            );
 
-              await axios.put(
-                `${API_BASE_URL}/rel_usuario_equipe/atualizar`,
-                {
-                  id: row.original.id_relacionamento,
-                  status: novoStatus
-                },
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                  }
-                }
-              );
+            setRo((prev) =>
+              prev.map((item) =>
+                item.id_relacionamento === row.original.id_relacionamento
+                  ? { ...item, status_relacionamento: novoStatus }
+                  : item
+              )
+            );
 
-              setRo((prev) =>
-                prev.map((item) =>
-                  item.id_relacionamento === row.original.id_relacionamento
-                    ? { ...item, status_relacionamento: novoStatus }
-                    : item
-                )
-              );
-            } catch (error) {
-              console.error("Erro ao atualizar status", error);
-            }
-          };
+            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`);
+          } catch (error: any) {
+            console.error("Erro ao atualizar status", error);
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
+          }
+        };
 
-          return (
-            <Badge
-              onClick={toggleStatus}
-              className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
-              variant={ativo ? "default" : "outline"}>
-              {ativo ? "Ativo" : "Inativo"}
-            </Badge>
-          );
-        }
+        return (
+          <Badge
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+            variant={ativo ? "default" : "outline"}
+          >
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
       }
-    ],
-    []
-  );
+    }
+  ], []);
 
-  // Fetch todas as equipes para o Combobox
   useEffect(() => {
     async function fetchEquipesDisponiveis() {
       try {
         const res = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         });
-        const data = res.data.map((p: any) => ({
-          id: p.rotina_operacional_hash,
-          nome: p.nome
-        }));
+        const data = res.data.map((p: any) => ({ id: p.rotina_operacional_hash, nome: p.nome }));
         setEquipesDisponiveis(data);
       } catch (error) {
         console.error("Erro ao carregar equipes disponíveis", error);
+        toast.error("Erro ao carregar equipes disponíveis");
       }
     }
     fetchEquipesDisponiveis();
   }, [token]);
 
-  // Fetch equipes vinculadas ao usuário para a tabela
   useEffect(() => {
     async function fetchProduto() {
       try {
         const res = await axios.get(`${API_BASE_URL}/rel-rotina-operacional-prod-convenio/listar`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         });
 
         const data = res.data.map((p: any) => ({
           id: p.rel_rotina_operacional_prod_convenio_id,
           nome: p.equipe.nome,
-          status_relacionamento: p.status_relacionamento // <- ADICIONE ISSO
+          status_relacionamento: p.status_relacionamento,
+          id_relacionamento: p.rel_rotina_operacional_prod_convenio_id
         }));
-
         setRo(data);
       } catch (error) {
         console.error("Erro ao carregar equipes do usuário", error);
+        toast.error("Erro ao carregar equipes do usuário");
       }
     }
     fetchProduto();
@@ -167,33 +150,26 @@ export default function RelRO({ produto, equipes }: Option) {
     if (!equipesSelect) {
       setMessage("Selecione convênio");
       setMessageType("error");
+      toast.error("Selecione convênio");
       return;
     }
 
     setLoading(true);
-    setMessage("");
-    setMessageType("");
-
     try {
       await axios.post(
         `${API_BASE_URL}/rel-rotina-operacional-prod-convenio/criar`,
-        {
-          rotina_operacional_hash: equipesSelect.id,
-          relacionamento_hash: produto.relacionamento_hash
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { rotina_operacional_hash: equipesSelect.id, relacionamento_hash: produto.relacionamento_hash },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
-      setRefreshKey((prev) => prev + 1); // Atualiza tabela após criar
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!");
+      setRefreshKey((prev) => prev + 1);
+    } catch (error: any) {
       console.error(error);
       setMessage("Erro ao criar relação com convênio");
       setMessageType("error");
+      toast.error(`Erro ao criar relação: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -209,18 +185,9 @@ export default function RelRO({ produto, equipes }: Option) {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      return String(row.getValue(columnId))
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
-    },
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-      globalFilter
-    }
+    globalFilterFn: (row, columnId, filterValue) =>
+      String(row.getValue(columnId)).toLowerCase().includes(String(filterValue).toLowerCase()),
+    state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter }
   });
 
   return (
@@ -230,35 +197,29 @@ export default function RelRO({ produto, equipes }: Option) {
       </CardHeader>
 
       <CardContent>
-        <div className="">
-          {/* Coluna 1 - Convênio */}
-          <div className="">
-            <span className="text-muted-foreground text-sm">Roteiros Operacionais</span>
-            <Combobox
-              data={equipesDisponiveis}
-              displayField="nome"
-              value={equipesSelect}
-              onChange={setEquipesSelect}
-              searchFields={["nome"]}
-              placeholder="Selecione uma Equipe"
-              className="w-full"
-            />
-            <Button onClick={relacionarProRO} disabled={loading} className="mt-2">
-              {loading ? "Salvando..." : "Relacionar Equipe"}
-            </Button>
-          </div>
-        </div>
+        <div>
+          <span className="text-muted-foreground text-sm">Roteiros Operacionais</span>
+          <Combobox
+            data={equipesDisponiveis}
+            displayField="nome"
+            value={equipesSelect}
+            onChange={setEquipesSelect}
+            searchFields={["nome"]}
+            placeholder="Selecione uma Equipe"
+            className="w-full"
+          />
+          <Button onClick={relacionarProRO} disabled={loading} className="mt-2">
+            {loading ? "Salvando..." : "Relacionar Equipe"}
+          </Button>
 
-        {/* Mensagem de sucesso ou erro */}
-        {message && (
-          <p
-            className={`mt-4 text-sm ${
-              messageType === "success" ? "text-green-600" : "text-red-600"
-            }`}>
-            {message}
-          </p>
-        )}
+          {message && (
+            <p className={`mt-4 text-sm ${messageType === "success" ? "text-green-600" : "text-red-600"}`}>
+              {message}
+            </p>
+          )}
+        </div>
       </CardContent>
+
       <CardContent>
         <div className="rounded-md border px-6">
           <Table>
@@ -270,9 +231,8 @@ export default function RelRO({ produto, equipes }: Option) {
                     return (
                       <TableHead
                         key={header.id}
-                        className={`truncate overflow-hidden whitespace-nowrap ${
-                          isLast ? "w-16" : "w-auto"
-                        }`}>
+                        className={`truncate overflow-hidden whitespace-nowrap ${isLast ? "w-16" : "w-auto"}`}
+                      >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     );
@@ -289,9 +249,8 @@ export default function RelRO({ produto, equipes }: Option) {
                       return (
                         <TableCell
                           key={cell.id}
-                          className={`truncate overflow-hidden whitespace-nowrap ${
-                            isLast ? "w-16" : "w-auto"
-                          }`}>
+                          className={`truncate overflow-hidden whitespace-nowrap ${isLast ? "w-16" : "w-auto"}`}
+                        >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       );

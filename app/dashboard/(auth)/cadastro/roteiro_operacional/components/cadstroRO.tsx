@@ -24,6 +24,7 @@ import {
   SelectContent,
   SelectItem
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -52,7 +53,7 @@ export type CreateFormData = z.infer<typeof createSchema>;
 type CadastroRoteiroModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void; // Adicionado callback para sucesso
+  onSuccess?: () => void;
 };
 
 type FormFieldConfig = {
@@ -66,7 +67,7 @@ type FormFieldConfig = {
     fieldName: keyof CreateFormData;
     label: string;
     placeholder: string;
-    type?: "text" | "number"; // Adicione esta linha
+    type?: "text" | "number";
   };
 };
 
@@ -161,8 +162,12 @@ export default function CadastroRoteiroModal({
   ];
 
   const onSubmit = async (data: CreateFormData) => {
+    if (!token) {
+      toast.error("Token de autenticação não encontrado.");
+      return;
+    }
+
     try {
-      // Transformar os dados para o formato esperado pela API
       const payload = {
         nome: data.nome,
         descricao: data.descricao,
@@ -195,18 +200,19 @@ export default function CadastroRoteiroModal({
 
       if (response.status === 200 || response.status === 201) {
         methods.reset();
+        toast.success("Roteiro cadastrado com sucesso!");
         onClose();
         if (onSuccess) onSuccess();
       } else {
         console.error("Erro na resposta da API:", response.data);
-        // Você pode adicionar um toast de erro aqui
+        toast.error("Erro ao cadastrar roteiro.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar roteiro:", error);
       if (axios.isAxiosError(error)) {
         console.error("Detalhes do erro:", error.response?.data);
       }
-      // Você pode adicionar um toast de erro aqui
+      toast.error("Erro ao cadastrar roteiro.");
     }
   };
 
@@ -290,7 +296,6 @@ export default function CadastroRoteiroModal({
                 console.log("Erros de validação:", errors);
               })}
               className="flex h-full flex-col">
-              {" "}
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar Novo Roteiro</h2>
                 <button

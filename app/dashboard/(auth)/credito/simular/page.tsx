@@ -1,3 +1,4 @@
+// Arquivo: src/app/CreditSimular/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroInputUser from "./components/cadastroInputUser";
 import CadastroInputProduto from "./components/cadastroCampoProduto";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,7 +33,7 @@ export default function CreditSimular() {
   const [selectedCategoria, setSelectedCategoria] = useState<Modalidade | null>(null);
   const [cpfProposta, setCpfProposta] = useState<string | null>(null);
   const [simulacao, setSimulacao] = useState<any>(null);
-  const [simuladorKey, setSimuladorKey] = useState<number>(0); // Nova chave para forçar remontagem
+  const [simuladorKey, setSimuladorKey] = useState<number>(0);
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const handleCloseCadastro = () => setIsCadastroOpen(false);
@@ -42,7 +44,6 @@ export default function CreditSimular() {
   const { token } = useAuth();
   const podeCriar = useHasPermission("Input_Campos_Cadastro_Cliente_Criar");
 
-  // Carrega os convenios ao iniciar
   useEffect(() => {
     const fetchConvenios = async () => {
       try {
@@ -58,13 +59,19 @@ export default function CreditSimular() {
         setConvenios(formatado);
       } catch (error) {
         console.error("Erro ao buscar convênios:", error);
+        toast.error("Erro ao carregar convênios", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     };
 
     fetchConvenios();
   }, []);
 
-  // Carrega produtos ao selecionar convenio
   useEffect(() => {
     if (!selectedConvenio) return;
 
@@ -90,13 +97,19 @@ export default function CreditSimular() {
         setSelectedCategoria(null);
       } catch (error) {
         console.error("Erro ao buscar produtos:", error);
+        toast.error("Erro ao carregar modalidades", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     };
 
     fetchModalidades();
   }, [selectedConvenio]);
 
-  // Carrega categorias ao selecionar produto
   useEffect(() => {
     if (!selectedModalidade) return;
 
@@ -119,9 +132,16 @@ export default function CreditSimular() {
 
         setCategorias(formatado);
         setSelectedCategoria(null);
-        setSimuladorKey((prev) => prev + 1); // Incrementa a chave quando novas categorias são carregadas
+        setSimuladorKey((prev) => prev + 1);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
+        toast.error("Erro ao carregar categorias", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     };
 
@@ -131,6 +151,13 @@ export default function CreditSimular() {
   const handleAbrirCadastro = (cpf: string, dadosSimulacao: any) => {
     setCpfProposta(cpf);
     setSimulacao(dadosSimulacao);
+    toast.success("Cliente encontrado, montando proposta...", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   return (
@@ -138,7 +165,6 @@ export default function CreditSimular() {
       <div className="flex flex-row justify-between">
         <CampoBoasVindas />
         <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
-          {" "}
           {podeCriar && (
             <Button onClick={() => setIsCadastroOpen(true)}>Campos Usuario</Button>
           )}
@@ -191,7 +217,7 @@ export default function CreditSimular() {
                   value={selectedCategoria}
                   onChange={(val) => {
                     setSelectedCategoria(val);
-                    setSimuladorKey((prev) => prev + 1); // Incrementa a chave quando nova categoria é selecionada
+                    setSimuladorKey((prev) => prev + 1);
                   }}
                   label="Tipo de Operação"
                   placeholder="Selecione o Tipo de Operação"
@@ -201,7 +227,7 @@ export default function CreditSimular() {
             </div>
             {selectedCategoria && selectedModalidade && (
               <SimuladorFgts
-                key={`simulador-${simuladorKey}`} // Chave única que força remontagem
+                key={`simulador-${simuladorKey}`}
                 convenioHash={selectedConvenio?.hash}
                 modalidadeHash={selectedModalidade.id}
                 categoriaHash={selectedCategoria.id}

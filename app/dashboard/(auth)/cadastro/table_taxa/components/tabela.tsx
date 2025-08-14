@@ -32,6 +32,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -142,8 +143,9 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
           nome: c.nome_tabela
         }));
         setTaxa(data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error(`Erro ao carregar convênios: ${error.message || "Desconhecido"}`);
       }
     }
 
@@ -164,8 +166,9 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
         }));
 
         setConvenios(formatado);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar convênios:", error);
+        toast.error(`Erro ao buscar convênios: ${error.message || "Desconhecido"}`);
       }
     };
 
@@ -196,8 +199,9 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
         setProdutos(formatado);
         setSelectedProduto(null);
         setSelectedCategoria(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar produtos:", error);
+        toast.error(`Erro ao buscar produtos: ${error.message || "Desconhecido"}`);
       }
     };
 
@@ -217,10 +221,6 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
           }
         );
 
-        console.log("Resposta de produtos:", response.data);
-        console.log("selectedProduto.id: ", selectedProduto.id);
-        console.log("selectedConvenio.id: ", selectedConvenio.id);
-
         // Extrair categoriasHash
         const categoriasHash = response.data?.mensagem?.categoriasHash ?? [];
 
@@ -235,8 +235,9 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
         // Atualizar o estado
         setCategorias(formatado);
         setSelectedCategoria(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar categorias:", error);
+        toast.error(`Erro ao buscar categorias: ${error.message || "Desconhecido"}`);
       }
     };
 
@@ -264,10 +265,12 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
-    } catch (error) {
+      toast.success("Relação com convênio criada com sucesso!");
+    } catch (error: any) {
       console.error(error);
       setMessage("Erro ao criar relação com convênio");
       setMessageType("error");
+      toast.error(`Erro ao criar relação: ${error.message || "Desconhecido"}`);
     } finally {
       setLoading(false);
     }
@@ -282,10 +285,10 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
-        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
+        toast.error(`Erro ao carregar convênios: ${error.message || "Desconhecido"}`);
       }
     }
 
@@ -318,110 +321,108 @@ export default function TaxaProduto({ onSelectTaxa }: Props) {
       ) : (
         <Card className="">
           <CardContent>
-            <>
-              <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Tabela Taxa</span>
-                  <Combobox
-                    data={taxa}
-                    displayField="nome"
-                    value={taxaSelecionado}
-                    onChange={setTaxaSelecionado}
-                    searchFields={["nome"]}
-                    placeholder="Selecione uma Taxa"
-                  />
-                </div>
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Convenio</span>
-                  <Combobox
-                    data={convenios}
-                    displayField="name"
-                    value={selectedConvenio}
-                    onChange={(val) => setSelectedConvenio(val)}
-                    searchFields={["name"]}
-                    placeholder="Selecione uma Taxa"
-                  />
-                </div>
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Produto</span>
-                  <Combobox
-                    data={produtos}
-                    displayField="name"
-                    value={selectedProduto}
-                    onChange={(val) => setSelectedProduto(val)}
-                    placeholder="Selecione o produto"
-                    searchFields={["name"]}
-                  />
-                </div>
-                <div className="max-w-[400px] space-y-2">
-                  <span className="text-muted-foreground text-sm">Tipos de Operação</span>
-                  <Combobox
-                    data={categorias}
-                    displayField="nome"
-                    value={selectedCategoria}
-                    onChange={(val) => setSelectedCategoria(val)}
-                    placeholder="Selecione a categoria"
-                    searchFields={["nome"]}
-                  />
-                </div>
+            <div className="mt-5 mb-5 grid grid-cols-1 gap-6 md:grid-cols-4">
+              <div className="max-w-[400px] space-y-2">
+                <span className="text-muted-foreground text-sm">Tabela Taxa</span>
+                <Combobox
+                  data={taxa}
+                  displayField="nome"
+                  value={taxaSelecionado}
+                  onChange={setTaxaSelecionado}
+                  searchFields={["nome"]}
+                  placeholder="Selecione uma Taxa"
+                />
               </div>
-              <div className="flex items-center justify-end">
-                <Button onClick={salvarTaxa}>Salvar</Button>
+              <div className="max-w-[400px] space-y-2">
+                <span className="text-muted-foreground text-sm">Convenio</span>
+                <Combobox
+                  data={convenios}
+                  displayField="name"
+                  value={selectedConvenio}
+                  onChange={(val) => setSelectedConvenio(val)}
+                  searchFields={["name"]}
+                  placeholder="Selecione uma Taxa"
+                />
               </div>
+              <div className="max-w-[400px] space-y-2">
+                <span className="text-muted-foreground text-sm">Produto</span>
+                <Combobox
+                  data={produtos}
+                  displayField="name"
+                  value={selectedProduto}
+                  onChange={(val) => setSelectedProduto(val)}
+                  placeholder="Selecione o produto"
+                  searchFields={["name"]}
+                />
+              </div>
+              <div className="max-w-[400px] space-y-2">
+                <span className="text-muted-foreground text-sm">Tipos de Operação</span>
+                <Combobox
+                  data={categorias}
+                  displayField="nome"
+                  value={selectedCategoria}
+                  onChange={(val) => setSelectedCategoria(val)}
+                  placeholder="Selecione a categoria"
+                  searchFields={["nome"]}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end">
+              <Button onClick={salvarTaxa}>Salvar</Button>
+            </div>
 
-              <div className="mt-10 rounded-md border">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <TableHead key={header.id}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </TableHead>
+            <div className="mt-10 rounded-md border">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
                         ))}
                       </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <CarregandoTable />
-                    )}
-                  </TableBody>
-                </Table>
+                    ))
+                  ) : (
+                    <CarregandoTable />
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-4">
+              <div className="text-muted-foreground flex-1 text-sm">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
               </div>
-              <div className="flex items-center justify-end space-x-2 pt-4">
-                <div className="text-muted-foreground flex-1 text-sm">
-                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                  {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}>
-                    <ChevronLeft />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}>
-                    <ChevronRight />
-                  </Button>
-                </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}>
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}>
+                  <ChevronRight />
+                </Button>
               </div>
-            </>
+            </div>
           </CardContent>
         </Card>
       )}

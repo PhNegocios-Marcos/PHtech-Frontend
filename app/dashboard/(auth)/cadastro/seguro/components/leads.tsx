@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { SeguroCarregando } from "./leads_carregando";
@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { SeguroModal } from "./SeguroModal";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -39,13 +40,13 @@ type SeguroLinha = {
 
 export function SeguroTable() {
   const { token } = useAuth();
-  const [seguros, setSeguros] = React.useState<SeguroLinha[]>([]);
-  const [filtro, setFiltro] = React.useState("");
-  const [globalFilter, setGlobalFilter] = React.useState("");
-  const [selectedSeguro, setSelectedSeguro] = React.useState<SeguroLinha | null>(null);
-  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [seguros, setSeguros] = useState<SeguroLinha[]>([]);
+  const [filtro, setFiltro] = useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [selectedSeguro, setSelectedSeguro] = useState<SeguroLinha | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchSeguros() {
       if (!token) return;
 
@@ -59,9 +60,16 @@ export function SeguroTable() {
         if (!res.ok) throw new Error("Erro ao buscar faixas de seguro");
 
         const data = await res.json();
-        setSeguros(data); // Assumindo que a API retorna um array de objetos no formato SeguroLinha
-      } catch (error) {
+        setSeguros(data);
+      } catch (error: any) {
         console.error("Erro ao carregar faixas de seguro:", error);
+        toast.error(`Erro ao carregar faixas: ${error.message || error}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -126,9 +134,7 @@ export function SeguroTable() {
         .toLowerCase()
         .includes(String(filterValue).toLowerCase());
     },
-    state: {
-      globalFilter
-    }
+    state: { globalFilter }
   });
 
   const handleRowDoubleClick = (seguro: SeguroLinha) => {

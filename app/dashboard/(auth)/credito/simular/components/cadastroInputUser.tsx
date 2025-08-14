@@ -17,11 +17,9 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
-
-// Import Combobox from separate file
 import { Combobox } from "@/components/Combobox";
+import { toast } from "sonner";
 
-// Define ComboboxProps interface to match the Combobox component
 interface ComboboxProps<T> {
   data: T[];
   displayField: keyof T;
@@ -36,7 +34,6 @@ interface ComboboxProps<T> {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Esquema de validação para um único campo
 const fieldSchema = z.object({
   name: z.string().min(1, "Nome do campo é obrigatório"),
   label: z.string().min(1, "Rótulo é obrigatório"),
@@ -54,7 +51,6 @@ const fieldSchema = z.object({
     .optional()
 });
 
-// Esquema de validação para uma seção
 const sectionSchema = z.object({
   section: z.enum(["DadosPessoais", "Contato", "Enderecos", "DadosBancarios"], {
     errorMap: () => ({ message: "Seção inválida" })
@@ -62,7 +58,6 @@ const sectionSchema = z.object({
   fields: z.array(fieldSchema).min(1, "Pelo menos um campo é obrigatório")
 });
 
-// Esquema principal
 const schema = z.object({
   produto_hash: z.string().min(1, "Produto é obrigatório"),
   sections: z
@@ -97,7 +92,6 @@ const sectionOptions = [
   { value: "DadosBancarios", label: "Dados Bancários" }
 ] as const;
 
-// Opções fixas para o campo tipo_pix
 const tipoPixOptions = [
   { value: "email", label: "E-mail" },
   { value: "cpf", label: "CPF" },
@@ -182,7 +176,6 @@ export default function CadastroCamposModal({
 
     const sections: FormData['sections'] = [];
 
-    // Iterate over each section in the API response
     Object.keys(apiData).forEach((sectionName) => {
       const sectionData = apiData[sectionName];
       if (Array.isArray(sectionData)) {
@@ -233,7 +226,13 @@ export default function CadastroCamposModal({
         setProdutos(options);
       } catch (error) {
         console.error("Erro ao listar produtos:", error);
-        alert("Erro ao listar produtos.");
+        toast.error("Erro ao listar produtos", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -256,7 +255,6 @@ export default function CadastroCamposModal({
 
         if (!response.ok) {
           if (response.status === 404) {
-            // No configuration found for this produto_hash, reset to default
             methods.reset({
               produto_hash: produtoSelect.id,
               sections: [{
@@ -274,6 +272,13 @@ export default function CadastroCamposModal({
         methods.reset({ produto_hash: produtoSelect.id, sections: transformedData });
       } catch (error) {
         console.error("Erro ao carregar configuração:", error);
+        toast.error("Erro ao carregar configuração", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
         methods.reset({
           produto_hash: produtoSelect.id,
           sections: [{
@@ -293,7 +298,13 @@ export default function CadastroCamposModal({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -310,8 +321,6 @@ export default function CadastroCamposModal({
         }))
       }));
 
-      console.log("Payload enviado:", JSON.stringify(payload, null, 2));
-
       const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/criar`, {
         method: "POST",
         headers: {
@@ -322,22 +331,33 @@ export default function CadastroCamposModal({
       });
 
       const responseData = await response.json();
-      console.log("Resposta da API:", JSON.stringify(responseData, null, 2));
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(responseData));
+        throw new Error(responseData.message || "Erro ao salvar configuração");
       }
 
-      alert("Configuração de campos cadastrada com sucesso!");
+      toast.success("Configuração de campos cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       methods.reset();
       setProdutoSelect(null);
       if (onRefresh) {
         await onRefresh();
       }
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar configuração de campos:", error);
-      alert("Erro ao cadastrar configuração de campos: " + error);
+      toast.error(`Erro ao cadastrar configuração: ${error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

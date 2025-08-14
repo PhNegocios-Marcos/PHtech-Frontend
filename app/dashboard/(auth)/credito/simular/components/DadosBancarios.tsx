@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/Combobox";
+import { toast } from "sonner";
 
 interface FormField {
   name: string;
@@ -25,12 +26,10 @@ export const DadosBancarios = forwardRef<
   { validate: () => Promise<boolean> },
   DadosBancariosProps
 >(({ formData, onChange, fields }, ref) => {
-  // Deduplicate fields by name to avoid rendering duplicates
   const uniqueFields = Array.from(
     new Map(fields.map((field) => [field.name, field])).values()
   );
 
-  // Create schema dynamically for validation
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
     uniqueFields.forEach((field) => {
@@ -67,9 +66,20 @@ export const DadosBancarios = forwardRef<
     )
   });
 
-  // Expose validate function via ref
   useImperativeHandle(ref, () => ({
-    validate: () => trigger()
+    validate: async () => {
+      const result = await trigger();
+      if (!result) {
+        toast.warning("Preencha os campos obrigatórios corretamente", {
+          style: {
+            background: 'var(--toast-warning)',
+            color: 'var(--toast-warning-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      }
+      return result;
+    }
   }));
 
   const renderField = (field: FormField) => {
@@ -91,7 +101,11 @@ export const DadosBancarios = forwardRef<
             }}
             searchFields={["label"]}
           />
-          {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+          {isErrorString && (
+            <p className="text-sm text-red-600">
+              {errorMessage}
+            </p>
+          )}
         </div>
       );
     }
@@ -109,7 +123,11 @@ export const DadosBancarios = forwardRef<
           }}
           className="mt-1"
         />
-        {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+        {isErrorString && (
+          <p className="text-sm text-red-600">
+            {errorMessage}
+          </p>
+        )}
       </div>
     );
   };

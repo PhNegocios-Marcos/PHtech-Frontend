@@ -34,6 +34,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { AverbadorPerfil } from "./averbadorModal";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Averbador = {
@@ -117,6 +118,13 @@ export function AverbadorTable() {
         );
       } catch (error: any) {
         console.error("Erro ao buscar usuários:", error.message);
+        toast.error(`Erro ao buscar averbadores: ${error.message}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -149,6 +157,13 @@ export function AverbadorTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
+    toast.success("Tabela de averbadores atualizada!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
   };
 
   return (

@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { toast } from "sonner"; // ✅ adicionado
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -55,10 +56,14 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
   ];
 
   const onSubmit = async (data: Subproduto) => {
-    // console.log("subpro: ", data);
-
     if (!token) {
-      console.error("Token global não definido!");
+      toast.error("Token global não definido!", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       return;
     }
 
@@ -69,17 +74,30 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
       status: data.produtos_subprodutos_status
     };
 
-    // console.log("payload", payload);
-
     try {
       await axios.put(`${API_BASE_URL}/subprodutos/atualizar`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      toast.success("Subproduto atualizado com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar subproduto:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 
@@ -89,7 +107,8 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
         onSubmit={methods.handleSubmit(onSubmit, (errors) => {
           console.warn("Erros de validação:", errors);
         })}
-        className="grid grid-cols-2 gap-4">
+        className="grid grid-cols-2 gap-4"
+      >
         <Card className="col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between">

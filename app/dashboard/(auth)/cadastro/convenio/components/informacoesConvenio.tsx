@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -57,6 +58,13 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
   const onSubmit = async (data: Convenio) => {
     if (!token) {
       console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -73,11 +81,24 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
       await axios.put(`${API_BASE_URL}/convenio/${data.convenio_hash}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success("Convênio atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar convênio:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

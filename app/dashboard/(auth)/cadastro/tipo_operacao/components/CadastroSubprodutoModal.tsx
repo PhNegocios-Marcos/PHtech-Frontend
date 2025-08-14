@@ -1,3 +1,4 @@
+// Arquivo: src/components/CadastroSubprodutoModal.tsx
 "use client";
 
 import React from "react";
@@ -8,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -55,7 +58,13 @@ export default function CadastroSubprodutoModal({
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -74,11 +83,23 @@ export default function CadastroSubprodutoModal({
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Subproduto cadastrado com sucesso!");
+      toast.success("Subproduto cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar subproduto:", error);
-      alert("Erro ao cadastrar subproduto: " + error);
+      toast.error("Erro ao cadastrar subproduto", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

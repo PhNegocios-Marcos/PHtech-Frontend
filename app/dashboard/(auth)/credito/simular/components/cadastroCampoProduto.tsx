@@ -18,13 +18,13 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
+import { toast } from "sonner";
 
-// Define ComboboxProps interface to match the Combobox component
 interface ComboboxProps<T> {
   data: T[];
   displayField: keyof T;
   value: T | null;
-  onChange: (item: T | null) => void; // Ajustado para aceitar null
+  onChange: (item: T | null) => void;
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
@@ -32,14 +32,12 @@ interface ComboboxProps<T> {
   dropdownClassName?: string;
 }
 
-// Tipo para os itens de availableFields
 interface AvailableField {
   value: string;
   label: string;
   type: string;
 }
 
-// Tipo para os itens de tipos de campo
 interface TypeOption {
   value: string;
   label: string;
@@ -47,7 +45,6 @@ interface TypeOption {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Esquema de validação para um único campo
 const fieldSchema = z.object({
   key: z.string().min(1, "Chave do campo é obrigatória"),
   label: z.string().min(1, "Rótulo é obrigatório").refine((val) => val !== "Sem nome", {
@@ -60,7 +57,6 @@ const fieldSchema = z.object({
   placeholder: z.string().optional()
 });
 
-// Esquema principal
 const schema = z.object({
   produto_hash: z.string().min(1, "Produto é obrigatório"),
   title: z.string().min(1, "Título é obrigatório"),
@@ -165,7 +161,13 @@ export default function CadastroInputProduto({
         setProdutos(options);
       } catch (error) {
         console.error("Erro ao listar produtos:", error);
-        alert("Erro ao listar produtos.");
+        toast.error("Erro ao listar produtos", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -184,7 +186,6 @@ export default function CadastroInputProduto({
 
         if (!response.ok) {
           if (response.status === 404) {
-            // No configuration found for this produto_hash, reset to default
             methods.reset({
               produto_hash: produtoSelect.id,
               title: "Dados da Simulação",
@@ -213,7 +214,6 @@ export default function CadastroInputProduto({
         }
 
         const apiData = await response.json();
-        // Transform API data to match FormData structure
         const transformedData = {
           produto_hash: apiData.produto_hash || produtoSelect.id,
           title: apiData.title || "Dados da Simulação",
@@ -252,7 +252,13 @@ export default function CadastroInputProduto({
         methods.reset(transformedData);
       } catch (error) {
         console.error("Erro ao buscar configuração:", error);
-        alert("Erro ao buscar configuração.");
+        toast.error("Erro ao buscar configuração", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -262,7 +268,7 @@ export default function CadastroInputProduto({
 
   const onSubmit = async (data: FormData) => {
     try {
-      await fetch(`${API_BASE_URL}/simulacao-campos-produtos`, {
+      const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -277,12 +283,26 @@ export default function CadastroInputProduto({
         })
       });
 
-      alert("Configuração salva com sucesso!");
+      if (!response.ok) throw new Error("Erro ao salvar configuração");
+
+      toast.success("Configuração salva com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       if (onRefresh) onRefresh();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao salvar configuração:", error);
-      alert("Erro ao salvar configuração.");
+      toast.error(`Erro ao salvar configuração: ${error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -379,7 +399,6 @@ type FieldArrayProps = {
 function FieldArray({ arrayName, availableFields, append, remove, fields, className }: FieldArrayProps) {
   const { control, watch, setValue } = useFormContext();
 
-  // Função para gerar um label único
   const generateUniqueLabel = (baseLabel: string, existingLabels: string[]) => {
     let newLabel = baseLabel;
     let counter = 1;
@@ -390,7 +409,6 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
     return newLabel;
   };
 
-  // Obter labels existentes para evitar duplicatas
   const existingLabels = watch(`${arrayName}`).map((field: any) => field.label);
 
   return (
@@ -412,7 +430,6 @@ function FieldArray({ arrayName, availableFields, append, remove, fields, classN
                       onChange={(selected: AvailableField | null) => {
                         field.onChange(selected?.value || "");
                         setValue(`${arrayName}.${fieldIndex}.type`, selected?.type || "text");
-                        // Atualizar o label automaticamente com base na seleção
                         const newLabel = generateUniqueLabel(
                           selected?.label || `Campo ${fieldIndex + 1}`,
                           existingLabels.filter((_: string, idx: number) => idx !== fieldIndex)

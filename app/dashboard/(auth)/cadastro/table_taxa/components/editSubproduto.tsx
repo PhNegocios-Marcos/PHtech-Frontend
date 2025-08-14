@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SubprodutoEdit } from "./informacoes";
 import { Subproduto } from "./subprodutos"
 import { Button } from "@/components/ui/button";
-import TabelaProduto from "./tabela"
+import TabelaProduto from "./tabela";
+import { toast } from "sonner";
 
 type Props = {
   subproduto: Subproduto;
@@ -15,6 +16,16 @@ type Props = {
 };
 
 export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: Props) {
+  const handleRefreshFallback = () => {
+    toast.info("Atualização não configurada", {
+      style: {
+        background: 'var(--toast-info)',
+        color: 'var(--toast-info-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+  };
+
   return (
     <div className="space-y-4 rounded-md border p-4 shadow-sm">
       <div className="flex items-center justify-between border-b pb-2">
@@ -34,12 +45,18 @@ export default function ProdutoDetalhesTabs({ subproduto, onClose, onRefresh }: 
           <SubprodutoEdit
             subproduto={subproduto}
             onClose={onClose}
-            onRefresh={onRefresh ?? (() => {})} // caso onRefresh não exista, passa uma função vazia
+            onRefresh={onRefresh ?? handleRefreshFallback} // fallback usando toast
           />
         </TabsContent>
 
         <TabsContent value="Tabela">
-          <TabelaProduto onClose={() => console.log("Fechar aba")}/>
+          <TabelaProduto onClose={() => toast.info("Fechar aba", {
+            style: {
+              background: 'var(--toast-info)',
+              color: 'var(--toast-info-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          })}/>
         </TabsContent>
       </Tabs>
     </div>

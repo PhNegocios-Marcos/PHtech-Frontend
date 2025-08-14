@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { SeguradoraEditForm } from "./editarSeguradora";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export type Seguradora = {
   id: string;
@@ -33,6 +34,7 @@ export function SeguradoraModal({ isOpen, onClose, seguradora, onRefresh }: Segu
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
+    toast.success("Seguradora atualizada com sucesso!");
     onRefresh?.();
     onClose();
   };

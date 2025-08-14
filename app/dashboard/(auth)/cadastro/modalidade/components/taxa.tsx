@@ -46,6 +46,7 @@ import {
 } from "@tanstack/react-table";
 import { useForm, FormProvider } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner"; // <- adicionado
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -136,8 +137,23 @@ export default function TabelaProduto({ produto }: Props) {
                 return item;
               })
             );
+
+            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
+              style: {
+                background: 'var(--toast-success)',
+                color: 'var(--toast-success-foreground)',
+                boxShadow: 'var(--toast-shadow)'
+              }
+            });
           } catch (error) {
             console.error("Erro ao atualizar status", error);
+            toast.error("Erro ao atualizar status", {
+              style: {
+                background: 'var(--toast-error)',
+                color: 'var(--toast-error-foreground)',
+                boxShadow: 'var(--toast-shadow)'
+              }
+            });
           }
         };
 
@@ -151,21 +167,6 @@ export default function TabelaProduto({ produto }: Props) {
         );
       }
     }
-    // {
-    //   id: "editar",
-    //   header: "Editar",
-    //   cell: ({ row }) => (
-    //     <Button
-    //       variant="ghost"
-    //       size="icon"
-    //       onClick={() => handleSelectTaxa(row.original)}
-    //       title="Editar produto">
-    //       <Pencil className="h-4 w-4" />
-    //     </Button>
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false
-    // }
   ];
 
   const { inicio, fim } = form.getValues();
@@ -187,6 +188,13 @@ export default function TabelaProduto({ produto }: Props) {
         setTabela(data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 
@@ -211,10 +219,24 @@ export default function TabelaProduto({ produto }: Props) {
       );
       setMessage("Relação com convênio criada com sucesso!");
       setMessageType("success");
+      toast.success("Relação com convênio criada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (error) {
       console.error(error);
-      //   setMessage("Erro ao criar relação com convênio");
-      //   setMessageType("error");
+      toast.error("Erro ao criar relação com convênio", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+      setMessage("Erro ao criar relação com convênio");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -229,10 +251,16 @@ export default function TabelaProduto({ produto }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
-        // console.log("data: ", res.data);
         setProdutosRelacionados(res.data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
+        toast.error("Erro ao carregar convênios", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       }
     }
 

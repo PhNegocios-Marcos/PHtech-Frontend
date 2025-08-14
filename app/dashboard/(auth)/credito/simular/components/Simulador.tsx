@@ -1,3 +1,4 @@
+// Arquivo: src/components/SimuladorFgts.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import PropostaCliente, { Simulacao, Parcela } from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface SimuladorFgtsProps {
   modalidadeHash: any;
@@ -25,7 +27,7 @@ interface SimuladorFgtsProps {
   convenioHash: any;
   onCadastrarCliente: (cpf: string, dadosSimulacao: any) => void;
   proutoName: string;
-  onProdutoIdReceived?: (produtoId: string) => void; // Nova prop opcional
+  onProdutoIdReceived?: (produtoId: string) => void;
 }
 
 interface ResultadoSimulacao {
@@ -47,7 +49,7 @@ export default function SimuladorFgts({
   convenioHash,
   categoriaHash,
   proutoName,
-  onProdutoIdReceived // Adicione aqui na desestruturação das props
+  onProdutoIdReceived
 }: SimuladorFgtsProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [resultado, setResultado] = useState<ResultadoSimulacao | null>(null);
@@ -93,7 +95,6 @@ export default function SimuladorFgts({
         setErrorMessage("");
         setShowSimulateButton(true);
 
-        // Captura o simulacao_campos_produtos_produto_id
         if (arrData.length > 0 && arrData[0].simulacao_campos_produtos_produto_id) {
           const id = arrData[0].simulacao_campos_produtos_produto_id;
           setProdutoId(id);
@@ -103,12 +104,26 @@ export default function SimuladorFgts({
         }
       } catch (error: any) {
         console.error("Erro ao carregar campos da simulação:", error);
-        if (error.response && error.response.data && error.response.data === null) {
+        if (error.response?.data === null) {
           setErrorMessage("Produto não possui campos configurados para a simulação");
           setShowSimulateButton(false);
+          toast.error("Produto não possui campos configurados para a simulação", {
+            style: {
+              background: 'var(--toast-error)',
+              color: 'var(--toast-error-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          });
         } else {
           setErrorMessage("Ocorreu um erro ao carregar os campos da simulação");
           setShowSimulateButton(false);
+          toast.error("Erro ao carregar campos da simulação", {
+            style: {
+              background: 'var(--toast-error)',
+              color: 'var(--toast-error-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          });
         }
       }
     }
@@ -168,9 +183,23 @@ export default function SimuladorFgts({
       });
       const data = await response.json();
       setResultado(data);
-      setSimulacaoSelecionadaKey(null); // resetar seleção a cada simulação nova
+      setSimulacaoSelecionadaKey(null);
+      toast.success("Simulação realizada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (err) {
       console.error("Erro na simulação FGTS:", err);
+      toast.error("Erro ao realizar simulação", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -180,7 +209,13 @@ export default function SimuladorFgts({
     const cpfRaw = formValues.cpf;
     const cpf = cpfRaw?.replace(/\D/g, "");
     if (!cpf) {
-      alert("CPF não informado");
+      toast.error("CPF não informado", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -194,7 +229,13 @@ export default function SimuladorFgts({
       });
 
       if (!response.ok) {
-        alert("Erro ao verificar cliente.");
+        toast.error("Erro ao verificar cliente", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
         return;
       }
 
@@ -214,7 +255,13 @@ export default function SimuladorFgts({
       setAbrirCadastro(true);
     } catch (error) {
       console.error("Erro ao verificar cliente:", error);
-      alert("Erro na verificação. Tente novamente.");
+      toast.error("Erro na verificação. Tente novamente.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -248,13 +295,12 @@ export default function SimuladorFgts({
     );
   };
 
-  // Cadastro aberto
   if (abrirCadastro && formValues.cpf && produtoId) {
     return (
       <Cadastrar
         cpf={formValues.cpf}
         simulacao={resultado?.mensagem}
-        produtoId={produtoId} // Passe o produtoId aqui
+        produtoId={produtoId}
         onCadastrado={(cpf, simulacao) => {
           setCpfProposta(cpf);
           setAbrirCadastro(false);
@@ -268,7 +314,6 @@ export default function SimuladorFgts({
     );
   }
 
-  // Quando há cpfProposta e simulação selecionada, abre PropostaCliente só com aquela simulação
   if (cpfProposta && simulacaoSelecionadaKey && resultado?.mensagem) {
     const simulacaoEscolhida = resultado.mensagem[simulacaoSelecionadaKey];
     return (
@@ -369,7 +414,6 @@ export default function SimuladorFgts({
               <p>Nenhuma simulação encontrada.</p>
             )
           ) : (
-            // Se mensagem for um único objeto
             <Card
               className={`mb-6 cursor-pointer border ${
                 simulacaoSelecionadaKey === "0" ? "border-blue-600 bg-blue-50" : "border-gray-300"

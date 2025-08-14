@@ -4,7 +4,8 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import TabelaProduto from "./tableProduto";
-import RelRO from "./relacionamentoRO"
+import RelRO from "./relacionamentoRO";
+import { toast } from "sonner";
 
 export type Produto = {
   id: string;
@@ -39,15 +40,33 @@ export type Tabela = {
 
 type produtoProps = {
   produto: Produto;
-
   onClose: () => void;
   onRefresh: () => void;
 };
 
 export function ModalProduto({ onClose, onRefresh, produto }: produtoProps) {
+  const handleError = (message: string) => {
+    toast.error(message, {
+      style: {
+        background: "var(--toast-error)",
+        color: "var(--toast-error-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
+  };
+
+  const handleSuccess = (message: string) => {
+    toast.success(message, {
+      style: {
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
+  };
+
   return (
     <div className="space-y-4 p-4">
-
       <Tabs defaultValue="Tabela" className="space-y-4">
         <TabsList>
           <TabsTrigger value="Tabela">Tabela</TabsTrigger>
@@ -55,7 +74,10 @@ export function ModalProduto({ onClose, onRefresh, produto }: produtoProps) {
         </TabsList>
 
         <TabsContent value="Tabela">
-          <TabelaProduto onClose={onClose} produto={produto} />
+          <TabelaProduto
+            produto={produto}
+            onClose={onClose}
+          />
         </TabsContent>
         <TabsContent value="RO">
           <RelRO produto={produto} />

@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const seguradoraSchema = z.object({
   seguradora_hash: z.string(),
@@ -54,6 +55,11 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
   ];
 
   const onSubmit = async (data: SeguradoraFormValues) => {
+    if (!token) {
+      toast.error("Token de autenticação não encontrado.");
+      return;
+    }
+
     try {
       const payload: Partial<SeguradoraFormValues> = { seguradora_hash: data.seguradora_hash };
 
@@ -68,6 +74,8 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
           "Content-Type": "application/json"
         }
       });
+
+      toast.success("Seguradora atualizada com sucesso!");
       onClose();
     } catch (error: any) {
       const msg = error?.response?.data?.erro || "Erro ao atualizar seguradora";
@@ -77,7 +85,7 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
           message: msg
         });
       } else {
-        alert(msg);
+        toast.error(msg);
       }
       console.error("Erro ao atualizar seguradora:", error);
     }

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Cleave from "cleave.js/react";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "./Combobox";
+import { toast } from "sonner";
 
 interface FormField {
   name: string;
@@ -26,15 +27,12 @@ export const DadosPessoais = forwardRef<
   { validate: () => Promise<boolean> },
   DadosPessoaisProps
 >(({ formData, onChange, fields }, ref) => {
-  // Deduplicate fields by name to avoid rendering duplicates
   const uniqueFields = Array.from(
     new Map(fields.map((field) => [field.name, field])).values()
   );
 
-  // Criar schema dinamicamente com base nos campos
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
-
     uniqueFields.forEach((field) => {
       if (field.required) {
         schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
@@ -42,7 +40,6 @@ export const DadosPessoais = forwardRef<
         schemaObj[field.name] = z.string().optional();
       }
     });
-
     return z.object(schemaObj);
   };
 
@@ -66,7 +63,19 @@ export const DadosPessoais = forwardRef<
   });
 
   useImperativeHandle(ref, () => ({
-    validate: () => trigger()
+    validate: async () => {
+      const result = await trigger();
+      if (!result) {
+        toast.warning("Preencha os campos obrigatórios corretamente", {
+          style: {
+            background: 'var(--toast-warning)',
+            color: 'var(--toast-warning-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      }
+      return result;
+    }
   }));
 
   const renderField = (field: FormField) => {
@@ -88,7 +97,11 @@ export const DadosPessoais = forwardRef<
               value={formData[field.name] || ""}
               className="mt-1"
             />
-            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+            {isErrorString && (
+              <p className="text-sm text-red-600">
+                {errorMessage}
+              </p>
+            )}
           </div>
         );
 
@@ -108,7 +121,11 @@ export const DadosPessoais = forwardRef<
               searchFields={["label"]}
               className="mt-1"
             />
-            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+            {isErrorString && (
+              <p className="text-sm text-red-600">
+                {errorMessage}
+              </p>
+            )}
           </div>
         );
 
@@ -126,7 +143,11 @@ export const DadosPessoais = forwardRef<
               value={formData[field.name] || ""}
               className="mt-1"
             />
-            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+            {isErrorString && (
+              <p className="text-sm text-red-600">
+                {errorMessage}
+              </p>
+            )}
           </div>
         );
 

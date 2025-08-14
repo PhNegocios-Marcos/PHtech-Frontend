@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,8 +26,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   getFilteredRowModel,
   useReactTable,
   SortingState,
@@ -38,6 +35,7 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Badge } from "@/components/ui/badge";
 import { ModalRO } from "./modalRO";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,7 +63,6 @@ type Props = {
 };
 
 export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) {
-  const { toast } = useToast();
   const { token } = useAuth();
 
   const [roteiros, setRoteiros] = useState<RoteiroOperacional[]>([]);
@@ -82,7 +79,6 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
   useEffect(() => {
     async function fetchRoteiros() {
       try {
-        // Chamada para API fake - na prática, substitua por sua chamada real
         const response = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
           headers: {
             "Content-Type": "application/json",
@@ -90,11 +86,13 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
           }
         });
         setRoteiros(response.data);
-      } catch (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os roteiros operacionais",
-          variant: "destructive"
+      } catch (error: any) {
+        toast.error("Não foi possível carregar os roteiros operacionais: " + (error.response?.data?.detail || error.message), {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
         });
         console.error("Erro ao buscar roteiros:", error);
       } finally {
@@ -103,7 +101,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
     }
 
     fetchRoteiros();
-  }, [toast, token, refreshKey]);
+  }, [token, refreshKey]);
 
   const columns: ColumnDef<RoteiroOperacional>[] = [
     {
@@ -148,16 +146,12 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
     {
       accessorKey: "tac_min",
       header: "TAC Mínima",
-      cell: ({ row }) => (
-        <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
-      )
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
     },
     {
       accessorKey: "tac_max",
       header: "TAC Máxima",
-      cell: ({ row }) => (
-        <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
-      )
+      cell: ({ row }) => <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
     },
     {
       accessorKey: "usa_limite_proposta",
@@ -227,7 +221,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
     <>
       {selectedRO ? (
         <ModalRO
-          roteiro={selectedRO} // Passe o roteiro selecionado
+          roteiro={selectedRO}
           onClose={() => setSelectedRO(null)}
           onRefresh={handleRefresh}
         />
@@ -279,7 +273,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
                             <TableHead
                               key={header.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                                isLast ? "w-16" : "w-auto"
                               }`}>
                               {flexRender(header.column.columnDef.header, header.getContext())}
                             </TableHead>
@@ -301,7 +295,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
                               <TableCell
                                 key={cell.id}
                                 className={`truncate overflow-hidden whitespace-nowrap ${
-                                  isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                  isLast ? "w-16" : "w-auto"
                                 }`}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                               </TableCell>

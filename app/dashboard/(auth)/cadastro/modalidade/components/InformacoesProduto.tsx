@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const produtoSchema = z.object({
   id: z.string(),
@@ -67,6 +68,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   const onSubmit = async (data: Produto) => {
     if (!token) {
       console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado.");
       return;
     }
 
@@ -83,7 +85,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
     }
 
     if (Object.keys(updatedFields).length === 1) {
-      alert("Nenhuma alteração detectada.");
+      toast("Nenhuma alteração detectada.");
       return;
     }
 
@@ -91,11 +93,12 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/produtos/atualizar`, updatedFields, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success("Produto atualizado com sucesso!");
       if (onClose) onClose();
       if (onRefresh) onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -106,13 +109,13 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-              <CardTitle>
-                Editar Modalidade: <span className="text-primary">{produto.nome}</span>
-              </CardTitle>
-              <Button onClick={onClose} variant="outline">
-                Voltar
-              </Button>
-            </div>
+                <CardTitle>
+                  Editar Modalidade: <span className="text-primary">{produto.nome}</span>
+                </CardTitle>
+                <Button onClick={onClose} variant="outline">
+                  Voltar
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

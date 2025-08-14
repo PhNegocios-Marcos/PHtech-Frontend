@@ -16,6 +16,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Produto } from "./produtos";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -133,7 +134,13 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       return;
     }
 
@@ -166,12 +173,25 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Tabela cadastrada com sucesso!");
+      toast.success("Tabela cadastrada com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+
       methods.reset();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Erro ao cadastrar usuário: " + error);
+      toast.error("Erro ao cadastrar usuário: " + (error.message || error), {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 

@@ -1,3 +1,4 @@
+// Arquivo: PropostaCliente.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import InputMask from "react-input-mask";
 import axios from "axios";
+import { toast } from "sonner";
 
 import {
   Table,
@@ -26,7 +28,7 @@ export interface Parcela {
 }
 
 export interface Simulacao {
-  parcelas: Parcela[] ;
+  parcelas: Parcela[];
   iof: number;
   TabelaCadastro: number;
   valorCliente: number;
@@ -104,28 +106,20 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
 
-  console.log("produto 1: ", modalidadeHash);
-
-  // console.log("cliente", cliente);
-
-  // console.log("promotoras: ", selectedPromotoraId)
-  // console.log("id: ", (userData as any)?.id ?? "Usuário")
-
   const idUser = (userData as any)?.id ?? "null";
 
-  const [tipoPix, setTipoPix] = useState("1"); // default CPF
+  const [tipoPix, setTipoPix] = useState("1");
   const [pixValue, setPixValue] = useState("");
 
-  // Máscaras para cada tipo PIX
   const getMask = () => {
     switch (tipoPix) {
-      case "1": // CPF
+      case "1":
         return "999.999.999-99";
-      case "2": // Telefone (celular brasileiro)
+      case "2":
         return "+55 (99) 99999-9999";
-      case "3": // E-mail não tem máscara, retorna null
+      case "3":
         return null;
-      case "4": // Chave aleatória: sem máscara
+      case "4":
         return null;
       default:
         return null;
@@ -133,14 +127,12 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
   };
 
   const mask = getMask();
-
-  const cleanCPF = cpf.replace(/\D/g, ""); // Remove tudo que não for número
+  const cleanCPF = cpf.replace(/\D/g, "");
 
   useEffect(() => {
     async function fetchCliente() {
       setLoading(true);
       setError(null);
-      // console.log("cpf: ", cpf);
       try {
         const res = await fetch(`${API_BASE_URL}/cliente/${cleanCPF}`, {
           headers: {
@@ -156,6 +148,13 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
           if (data.length === 0) {
             setError("Nenhum cliente encontrado");
             setCliente(null);
+            toast.error("Nenhum cliente encontrado", {
+              style: {
+                background: 'var(--toast-error)',
+                color: 'var(--toast-error-foreground)',
+                boxShadow: 'var(--toast-shadow)'
+              }
+            });
           } else {
             setCliente(data[0]);
           }
@@ -164,10 +163,24 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
         } else {
           setError("Nenhum cliente encontrado");
           setCliente(null);
+          toast.error("Nenhum cliente encontrado", {
+            style: {
+              background: 'var(--toast-error)',
+              color: 'var(--toast-error-foreground)',
+              boxShadow: 'var(--toast-shadow)'
+            }
+          });
         }
       } catch (e: any) {
         setError(e.message || "Erro ao buscar cliente");
         setCliente(null);
+        toast.error(e.message || "Erro ao buscar cliente", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       } finally {
         setLoading(false);
       }
@@ -178,54 +191,41 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
     }
   }, [cpf, token]);
 
-  if (loading) return <p>Carregando dados do cliente...</p>;
-  if (error) return <p className="text-red-600">Erro: {error}</p>;
-  if (!cliente) return <p>Cliente não encontrado.</p>;
-
-  const telefonesAtivos = Object.values(cliente.telefones || {})
-    .filter((t) => t.status_telefone === 1)
-    .slice(0, 2);
-  const endereco = Object.values(cliente.enderecos || {})[0];
-
-  console.log("produto 2: ", modalidadeHash);
-
   const gerarProposta = async () => {
     try {
       const body = {
-        cliente_hash: cliente.hash,
-        produto_hash: modalidadeHash, // precisa ser definido em algum lugar (ex: dropdown selecionado)
-        promotora_hash: selectedPromotoraId, // idem
-        responsavel_hash: idUser, // idem
-        cliente_banco_hash: cliente.dados_bancarios?.[0]?.id ?? null, // primeiro dado bancário
-        banco_hash: cliente.dados_bancarios?.[0]?.id_banco ?? null,
-        proposta_nome: cliente.nome,
-        proposta_email: cliente.emails?.email ?? "", // pode ser undefined
-        proposta_telefone: cliente.telefones?.[0]?.numero ?? "", // você pode mapear melhor isso se quiser
-        proposta_numero_documento: cliente.numero_documento,
-        proposta_tipo_documento: cliente.tipo_documento,
-        proposta_cpf: cliente.cpf,
-        proposta_sexo: "", // ❌ não informado no ClienteApiResponse, precisa ser preenchido manualmente
-        proposta_nome_mae: cliente.nome_mae,
-        proposta_nome_pai: cliente.nome_pai,
-        proposta_estado_civil: "", // ❌ não informado, precisa ser preenchido
-        proposta_naturalidade: "", // ❌ não informado, precisa ser preenchido
-        proposta_data_nascimento: "", // ❌ não informado, precisa ser preenchido
-
-        proposta_endereco_cep: cliente.enderecos?.[0]?.cep ?? "",
-        proposta_enderco_logradouro: cliente.enderecos?.[0]?.logradouro ?? "",
-        proposta_endereco_numero: cliente.enderecos?.[0]?.numero ?? "",
-        proposta_endereco_complemento: cliente.enderecos?.[0]?.complemento ?? "",
-        proposta_endereco_bairro: cliente.enderecos?.[0]?.bairro ?? "",
-        proposta_endereco_cidade: cliente.enderecos?.[0]?.cidade ?? "",
-        proposta_endereco_estado: cliente.enderecos?.[0]?.estado ?? "",
-        proposta_endereco_uf: cliente.enderecos?.[0]?.uf ?? "",
-
-        proposta_valor_solicitado: simulacao?.valorCliente ?? 0, // vindo do `PropostaClienteProps.simulacao`
-        proposta_banco_agencia: cliente.dados_bancarios?.[0]?.agencia ?? "",
-        proposta_banco_conta: cliente.dados_bancarios?.[0]?.conta ?? "",
-        proposta_banco_pix: "", // ❌ não informado
-        proposta_banco_tipo_chave_pix: "", // ❌ não informado
-        proposta_status: "EM ANALISE" // ou o status padrão que a sua API espera
+        cliente_hash: cliente?.hash,
+        produto_hash: modalidadeHash,
+        promotora_hash: selectedPromotoraId,
+        responsavel_hash: idUser,
+        cliente_banco_hash: cliente?.dados_bancarios?.[0]?.id ?? null,
+        banco_hash: cliente?.dados_bancarios?.[0]?.id_banco ?? null,
+        proposta_nome: cliente?.nome,
+        proposta_email: cliente?.emails?.email ?? "",
+        proposta_telefone: cliente?.telefones?.[0]?.numero ?? "",
+        proposta_numero_documento: cliente?.numero_documento,
+        proposta_tipo_documento: cliente?.tipo_documento,
+        proposta_cpf: cliente?.cpf,
+        proposta_sexo: "",
+        proposta_nome_mae: cliente?.nome_mae,
+        proposta_nome_pai: cliente?.nome_pai,
+        proposta_estado_civil: "",
+        proposta_naturalidade: "",
+        proposta_data_nascimento: "",
+        proposta_endereco_cep: cliente?.enderecos?.[0]?.cep ?? "",
+        proposta_enderco_logradouro: cliente?.enderecos?.[0]?.logradouro ?? "",
+        proposta_endereco_numero: cliente?.enderecos?.[0]?.numero ?? "",
+        proposta_endereco_complemento: cliente?.enderecos?.[0]?.complemento ?? "",
+        proposta_endereco_bairro: cliente?.enderecos?.[0]?.bairro ?? "",
+        proposta_endereco_cidade: cliente?.enderecos?.[0]?.cidade ?? "",
+        proposta_endereco_estado: cliente?.enderecos?.[0]?.estado ?? "",
+        proposta_endereco_uf: cliente?.enderecos?.[0]?.uf ?? "",
+        proposta_valor_solicitado: simulacao?.valorCliente ?? 0,
+        proposta_banco_agencia: cliente?.dados_bancarios?.[0]?.agencia ?? "",
+        proposta_banco_conta: cliente?.dados_bancarios?.[0]?.conta ?? "",
+        proposta_banco_pix: "",
+        proposta_banco_tipo_chave_pix: "",
+        proposta_status: "EM ANALISE"
       };
 
       const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
@@ -235,13 +235,33 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
         }
       });
 
-      const data = response.data;
-
-      // console.log(data);
+      toast.success("Proposta gerada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (error) {
       console.error("erro ao gerar proposta", error);
+      toast.error("Erro ao gerar proposta", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
+
+  if (loading) return <p>Carregando dados do cliente...</p>;
+  if (error) return <p className="text-red-600">Erro: {error}</p>;
+  if (!cliente) return <p>Cliente não encontrado.</p>;
+
+  const telefonesAtivos = Object.values(cliente.telefones || {})
+    .filter((t) => t.status_telefone === 1)
+    .slice(0, 2);
+  const endereco = Object.values(cliente.enderecos || {})[0];
 
   return (
     <>
@@ -301,7 +321,6 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
                 <div className="grid grid-cols-2 gap-3">
                   <div className="mb-4">
                     <Label htmlFor="tipoPix">Tipo de Chave PIX</Label>
-
                     <Input
                       id="tipoPixInput"
                       value={pixKeyTypeOptions.find((option) => option.id === tipoPix)?.name || ""}
@@ -312,16 +331,7 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
 
                   <div>
                     <Label htmlFor="pixValue">Valor da Chave PIX</Label>
-                    {/* {mask ? (
-                    <InputMask
-                      mask={mask}
-                      value={pixValue}
-                      onChange={(e) => setPixValue(e.target.value)}>
-                      {(inputProps: any) => <Input {...inputProps} id="pixValue" />}
-                    </InputMask>
-                  ) : ( */}
                     <Input id="pixValue" value={cliente.dados_bancarios[0].pix} />
-                    {/* )} */}
                   </div>
                 </div>
               </div>

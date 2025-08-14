@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { toast } from "sonner"; // <- adicionado
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -82,13 +83,25 @@ export default function CadastroOrgao({ isOpen, onClose }: CadastroProdutoModalP
       })
       .catch((error) => {
         console.error("Erro ao listar convênios:", error);
-        alert("Erro ao listar convênios: " + error);
+        toast.error("Erro ao listar convênios: " + error, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
       });
   }, [token, isOpen]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -107,11 +120,23 @@ export default function CadastroOrgao({ isOpen, onClose }: CadastroProdutoModalP
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Órgão cadastrado com sucesso!");
+      toast.success("Órgão cadastrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar órgão:", error);
-      alert("Erro ao cadastrar órgão: " + error);
+      toast.error("Erro ao cadastrar órgão: " + error, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

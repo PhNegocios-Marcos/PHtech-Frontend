@@ -6,8 +6,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -43,10 +43,7 @@ type CadastroProdutoModalProps = {
   onClose: () => void;
 };
 
-export default function CadastroProdutoModal({
-  isOpen,
-  onClose,
-}: CadastroProdutoModalProps) {
+export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdutoModalProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -61,11 +58,10 @@ export default function CadastroProdutoModal({
   });
 
   const { token } = useAuth();
-  const router = useRouter();
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.");
       return;
     }
 
@@ -81,14 +77,14 @@ export default function CadastroProdutoModal({
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err?.detail || "Erro desconhecido");
       }
 
-      alert("Produto cadastrado com sucesso!");
+      toast.success("Produto cadastrado com sucesso!");
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar produto:", error);
-      alert("Erro ao cadastrar produto: " + error);
+      toast.error("Erro ao cadastrar produto: " + (error.message || error));
     }
   };
 
@@ -146,10 +142,10 @@ export default function CadastroProdutoModal({
                         <FormItem>
                           <FormLabel>Idade Mínima</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="Idade mínima" 
-                              {...field} 
+                            <Input
+                              type="number"
+                              placeholder="Idade mínima"
+                              {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
@@ -165,10 +161,10 @@ export default function CadastroProdutoModal({
                         <FormItem>
                           <FormLabel>Idade Máxima</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="Idade máxima" 
-                              {...field} 
+                            <Input
+                              type="number"
+                              placeholder="Idade máxima"
+                              {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
@@ -184,10 +180,10 @@ export default function CadastroProdutoModal({
                         <FormItem>
                           <FormLabel>Prazo Mínimo</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="Prazo mínimo" 
-                              {...field} 
+                            <Input
+                              type="number"
+                              placeholder="Prazo mínimo"
+                              {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
@@ -203,10 +199,10 @@ export default function CadastroProdutoModal({
                         <FormItem>
                           <FormLabel>Prazo Máximo</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="Prazo máximo" 
-                              {...field} 
+                            <Input
+                              type="number"
+                              placeholder="Prazo máximo"
+                              {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>

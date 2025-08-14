@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
 const averbadorSchema = z.object({
   averbador_hash: z.string(),
@@ -53,6 +54,13 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
   const onSubmit = async (data: Averbador) => {
     if (!token) {
       console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -66,8 +74,13 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
     });
 
     if (Object.keys(changedFields).length === 0) {
-      // Nenhuma alteração detectada
-      console.log("Nenhuma alteração detectada.");
+      toast.info("Nenhuma alteração detectada", {
+        style: {
+          background: 'var(--toast-info)',
+          color: 'var(--toast-info-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       return;
     }
@@ -81,11 +94,25 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/averbador/atualizar`, changedFields, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      toast.success("Averbador atualizado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       onClose();
       onRefresh();
     } catch (error: any) {
       console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
-      alert(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

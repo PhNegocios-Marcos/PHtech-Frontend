@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -47,12 +48,11 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.");
       return;
     }
 
     try {
-      console.log("Dados enviados:", data);
       const response = await fetch(`${API_BASE_URL}/faixa-valor-cobrado/criar`, {
         method: "POST",
         headers: {
@@ -63,20 +63,18 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        const err = await response.json().catch(() => ({}));
+        const msg = err?.erro || `Erro ${response.status}: ${response.statusText}`;
+        throw new Error(msg);
       }
 
-      alert("Faixa de taxa cadastrada com sucesso!");
+      toast.success("Faixa de taxa cadastrada com sucesso!");
       methods.reset();
-      if (onRefresh) {
-        console.log("Chamando onRefresh...");
-        await onRefresh();
-      }
+      if (onRefresh) await onRefresh();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar faixa de taxa:", error);
-      alert("Erro ao cadastrar faixa de taxa: " + error);
+      toast.error("Erro ao cadastrar faixa de taxa: " + error.message || error);
     }
   };
 

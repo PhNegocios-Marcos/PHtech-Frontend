@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner"; // ✅ adicionado
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -80,7 +81,13 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       return;
     }
 
@@ -111,12 +118,24 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Tabela cadastrada com sucesso!");
-      reset(); // limpa o formulário
+      toast.success("Tabela cadastrada com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+      reset();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Erro ao cadastrar usuário: " + error);
+      toast.error(`Erro ao cadastrar usuário: ${error.message || error}`, {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 
@@ -129,7 +148,8 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg"
+      >
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
@@ -139,7 +159,8 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                   type="button"
                   onClick={onClose}
                   className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
+                  aria-label="Fechar"
+                >
                   ×
                 </button>
               </div>
@@ -236,6 +257,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                         </FormItem>
                       )}
                     />
+
                     <div>
                       <FormProvider {...form}>
                         <Form {...form}>
@@ -254,7 +276,8 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                                           className={cn(
                                             "w-[240px] pl-3 text-left font-normal",
                                             !field.value && "text-muted-foreground"
-                                          )}>
+                                          )}
+                                        >
                                           {field.value ? (
                                             format(field.value, "PPP")
                                           ) : (
@@ -282,6 +305,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                         </Form>
                       </FormProvider>
                     </div>
+
                     <div>
                       <FormProvider {...form}>
                         <Form {...form}>
@@ -300,7 +324,8 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                                           className={cn(
                                             "w-[240px] pl-3 text-left font-normal",
                                             !field.value && "text-muted-foreground"
-                                          )}>
+                                          )}
+                                        >
                                           {field.value ? (
                                             format(field.value, "PPP")
                                           ) : (

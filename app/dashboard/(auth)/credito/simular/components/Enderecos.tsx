@@ -1,3 +1,4 @@
+// Arquivo: Enderecos.tsx
 "use client";
 
 import React, { forwardRef, useImperativeHandle, useEffect } from "react";
@@ -5,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface FormField {
   name: string;
@@ -92,7 +94,13 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
       const data = await res.json();
 
       if (data.erro) {
-        alert("CEP não encontrado");
+        toast.error("CEP não encontrado", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
         return;
       }
 
@@ -108,9 +116,23 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
         setValue(key as keyof EnderecoFormData, val);
         onChange(`enderecos.0.${key}`, val);
       });
+
+      toast.success("Endereço encontrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
-      alert("Não foi possível buscar o endereço. Verifique sua conexão.");
+      toast.error("Não foi possível buscar o endereço. Verifique sua conexão.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 

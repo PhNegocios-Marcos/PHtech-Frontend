@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -80,7 +81,13 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      alert("Token não encontrado. Faça login.");
+      toast.error("Token não encontrado. Faça login.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       return;
     }
 
@@ -96,7 +103,6 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
       vigencia_fim: format(fim ?? new Date(), "yyyy-MM-dd")
     };
 
-
     try {
       const response = await fetch(`${API_BASE_URL}/produtos-config-tabelas/criar`, {
         method: "POST",
@@ -107,18 +113,29 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
         body: JSON.stringify(payload)
       });
 
-
       if (!response.ok) {
         const err = await response.json();
         throw new Error(JSON.stringify(err));
       }
 
-      alert("Tabela cadastrada com sucesso!");
+      toast.success("Tabela cadastrada com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
       reset(); // limpa o formulário
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
-      alert("Erro ao cadastrar usuário: " + error);
+      toast.error("Erro ao cadastrar usuário: " + (error?.message ?? error), {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
     }
   };
 
@@ -238,98 +255,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                         </FormItem>
                       )}
                     />
-                    <div>
-                      <FormProvider {...form}>
-                        <Form {...form}>
-                          <div className="space-y-8">
-                            <FormField
-                              control={form.control}
-                              name="inicio"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Inicio da vigência</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                          )}>
-                                          {field.value ? (
-                                            format(field.value, "PPP")
-                                          ) : (
-                                            <span>Selecione uma data</span>
-                                          )}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        disabled={(date) => date < new Date()}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </Form>
-                      </FormProvider>
-                    </div>
-                    <div>
-                      <FormProvider {...form}>
-                        <Form {...form}>
-                          <div className="space-y-8">
-                            <FormField
-                              control={form.control}
-                              name="fim"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Fim da vigência</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                          )}>
-                                          {field.value ? (
-                                            format(field.value, "PPP")
-                                          ) : (
-                                            <span>Selecione uma data</span>
-                                          )}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        disabled={(date) => date < new Date()}
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </Form>
-                      </FormProvider>
-                    </div>
+                    {/* Campos de data */}
                   </div>
                 </CardContent>
               </Card>

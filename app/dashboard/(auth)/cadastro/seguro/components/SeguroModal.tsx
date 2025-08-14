@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { SeguroEditForm } from "./editarSeguro";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export type Seguro = {
   id: string;
@@ -33,6 +34,13 @@ export function SeguroModal({ isOpen, onClose, seguro, onRefresh }: SeguroDrawer
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
+    toast.success("Operação realizada com sucesso!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
     onRefresh?.();
     onClose();
   };
