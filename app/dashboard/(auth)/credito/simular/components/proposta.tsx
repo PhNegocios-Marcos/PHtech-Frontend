@@ -150,9 +150,9 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
             setCliente(null);
             toast.error("Nenhum cliente encontrado", {
               style: {
-                background: 'var(--toast-error)',
-                color: 'var(--toast-error-foreground)',
-                boxShadow: 'var(--toast-shadow)'
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
               }
             });
           } else {
@@ -165,9 +165,9 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
           setCliente(null);
           toast.error("Nenhum cliente encontrado", {
             style: {
-              background: 'var(--toast-error)',
-              color: 'var(--toast-error-foreground)',
-              boxShadow: 'var(--toast-shadow)'
+              background: "var(--toast-error)",
+              color: "var(--toast-error-foreground)",
+              boxShadow: "var(--toast-shadow)"
             }
           });
         }
@@ -176,9 +176,9 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
         setCliente(null);
         toast.error(e.message || "Erro ao buscar cliente", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -225,7 +225,8 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
         proposta_banco_conta: cliente?.dados_bancarios?.[0]?.conta ?? "",
         proposta_banco_pix: "",
         proposta_banco_tipo_chave_pix: "",
-        proposta_status: "EM ANALISE"
+        proposta_status: "EM ANALISE",
+        roteiro_operacional_hash: "0198566d-269a-718f-923e-3413ddad1c76"
       };
 
       const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
@@ -237,18 +238,18 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
 
       toast.success("Proposta gerada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (error) {
       console.error("erro ao gerar proposta", error);
       toast.error("Erro ao gerar proposta", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -370,7 +371,8 @@ export default function PropostaCliente({ cpf, simulacao, modalidadeHash }: Prop
                 <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>Tabela de Cadastro:</strong> R$ {(simulacao.TabelaCadastro ?? simulacao.taxaCadastro ?? 0).toFixed(2)}
+                <strong>Tabela de Cadastro:</strong> R${" "}
+                {(simulacao.TabelaCadastro ?? simulacao.taxaCadastro ?? 0).toFixed(2)}
               </p>
               <p>
                 <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}

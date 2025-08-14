@@ -95,10 +95,10 @@ export default function Page() {
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");
       } else {
-        if (data.usa_2fa === 0 && data?.tipo_usuario === "Promotora") {
-          setUsa2faModal("usa_2fa");
-        } else {
+        if (data.usa_2fa === 1) {
           setCurrentModal("2FA");
+        } else {
+          setUsa2faModal("usa_2fa");
         }
       }
     } catch (error: any) {
@@ -188,8 +188,10 @@ export default function Page() {
 
         {currentModal === "2FA" ? (
           <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-        ) : promotorasModal === "promotoras" || usa2faModal === "usa_2fa" ? (
+        ) : promotorasModal === "promotoras" ? (
           <Promotoras onNext={() => setCurrentModal("modal2")} onClose={closeModalPromotoras} />
+        ) : usa2faModal === "usa_2fa" ? (
+          <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
         ) : null}
       </div>
     </div>
