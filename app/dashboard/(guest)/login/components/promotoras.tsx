@@ -58,23 +58,17 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
       setSelectedPromotoraLogo(tema?.image ?? "/logo.png");
       setSelectedPromotoraNome(selectedPromotora.nome ?? "Ph tech"); // ✅ salva o nome
 
-      setCurrentModal("2FA");
+      if (usa_2fa === 0) {
+        setUsa2faModal("usa_2fa");
+      } else {
+        setCurrentModal("2FA");
+      }
     } else {
       alert("Selecione uma promotora primeiro.");
     }
   };
 
   const closeModal = () => setCurrentModal("none");
-
-  // console.log("usa_2fa: ", usa_2fa);
-
-  useEffect(() => {
-    if (usa_2fa === 0) {
-      setUsa2faModal("usa_2fa");
-    } else {
-      setCurrentModal("2FA");
-    }
-  }, [usa_2fa]);
 
   return (
     <div>
@@ -113,7 +107,7 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
         <FA onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
       ) : usa2faModal === "usa_2fa" ? (
         <Login onNext={() => setCurrentModal("modal2")} onClose={closeModal} />
-       ) : null}
+      ) : null}
     </div>
   );
 }
