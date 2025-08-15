@@ -197,6 +197,12 @@ export const page_routes: PageRoutesType[] = [
             title: "Cadastro Usuario",
             href: "/dashboard/gestao/usuario"
             // icon: "ChartPie"
+          },
+          {
+            id: "Clientes_ver",
+            title: "Clientes",
+            href: "/dashboard/gestao/clientes"
+            // icon: "ChartPie"
           }
         ]
       }

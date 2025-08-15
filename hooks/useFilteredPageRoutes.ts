@@ -85,7 +85,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Modalidade_ver",
       "RoteiroOperacional_ver",
       "Alcadas_ver",
-      "Tipo_de_Acesso_criar"
+      "Tipo_de_Acesso_criar",
+      "Clientes_ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
