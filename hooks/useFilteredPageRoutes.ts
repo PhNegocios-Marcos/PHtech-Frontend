@@ -74,7 +74,7 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Taxa_ver",
       "Orgaos_criar",
       "Produto_ver",
-      "Produto_Roteiro_Operacional",
+      "RO_ver",
       "Esteria_ver",
       "Seguro_ver",
       "Seguradora_ver",

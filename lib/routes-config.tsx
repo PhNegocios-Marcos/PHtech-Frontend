@@ -69,7 +69,7 @@ export const page_routes: PageRoutesType[] = [
             // icon: "ChartPie"
           },
            {
-            id: "Produto_Roteiro_Operacional",
+            id: "RO_ver",
             title: "Roteiro Operacional (RO)",
             href: "/dashboard/cadastro/roteiro_operacional"
             // icon: "ChartPie"

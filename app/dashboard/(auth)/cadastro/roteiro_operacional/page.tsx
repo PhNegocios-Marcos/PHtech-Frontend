@@ -15,7 +15,7 @@ export default function RoteiroOperacionalPage() {
   const handleCloseModal = () => setIsModalOpen(false);
 
   return (
-    <ProtectedRoute requiredPermission="RoteiroOperacional_ver">
+    <ProtectedRoute requiredPermission="RO_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
         {podeCriar && (
