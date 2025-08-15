@@ -61,11 +61,11 @@ export function Combobox<T extends Record<string, any>>({
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <PopoverContent className="h-50 w-[var(--radix-popover-trigger-width)] p-0">
           <Command>
             <CommandInput placeholder="Buscar..." value={search} onValueChange={setSearch} />
             <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup className="max-h-50 overflow-y-auto">
               {filteredData.map((item) => (
                 <CommandItem
                   key={item[displayField]}

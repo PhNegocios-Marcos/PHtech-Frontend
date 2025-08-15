@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Cleave from "cleave.js/react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+import { Combobox } from "./Combobox";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -62,9 +64,9 @@ function validarCPF(cpf: string) {
   const segundoDigito = restoSegundo < 2 ? 0 : 11 - restoSegundo;
 
   if (primeiroDigito !== penultimoNum || segundoDigito !== ultimoNum) {
-    return false
+    return false;
   } else {
-    return true
+    return true;
   }
 }
 
@@ -82,12 +84,19 @@ const schema = z
     endereco: z.string().min(1, "Endereço é obrigatório"),
     senha: z.string().min(6, "Senha deve ter ao menos 6 caracteres"),
     confirmar_senha: z.string().min(6, "Confirmação deve ter ao menos 6 caracteres"),
-    tipo_acesso: z.enum(["externo", "interno"])
+    tipo_acesso: z.enum(["externo", "interno"]),
+    promotora: z.string().min(1, "Promotora é obrigatória"),
+    usa_2fa: z.enum(["0", "1"])
   })
   .refine((data) => data.senha === data.confirmar_senha, {
     message: "As senhas não conferem",
     path: ["confirmar_senha"]
   });
+
+type Promotora = {
+  id: string;
+  nome: string;
+};
 
 type FormData = z.infer<typeof schema>;
 
@@ -107,21 +116,45 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
       nome: "",
       endereco: "",
       senha: "",
-      confirmar_senha: ""
+      confirmar_senha: "",
+      promotora: "",
+      usa_2fa: "0"
     }
   });
 
+  const [promotoras, setPromotoras] = useState<Promotora[]>([]);
+  const [promotoraSelecionada, setPromotoraSelecionada] = useState<Promotora | null>(null);
   const { token } = useAuth();
   const router = useRouter();
+  const podeCriar = useHasPermission("Tipo_de_Acesso_criar");
+
+  useEffect(() => {
+    async function fetchPromotoras() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/promotora/listar`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPromotoras(data.map((p: any) => ({ id: p.id, nome: p.nome })));
+        }
+      } catch (err) {
+        // erro silencioso
+      }
+    }
+    if (isOpen) fetchPromotoras();
+  }, [isOpen, token]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Token de autenticação não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -135,7 +168,9 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
       endereco: data.endereco,
       senha: data.senha,
       confirmar_senha: data.confirmar_senha,
-      tipo_acesso: data.tipo_acesso
+      tipo_acesso: data.tipo_acesso,
+      promotora: data.promotora,
+      usa_2fa: data.usa_2fa
     };
 
     try {
@@ -155,10 +190,10 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
 
       toast.success("Usuário cadastrado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -166,10 +201,10 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
       console.error("Erro ao cadastrar usuário:", error);
       toast.error(`Erro ao cadastrar usuário: ${error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -322,12 +357,60 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
                       )}
                     />
 
+                    {podeCriar && (
+                      <FormField
+                        control={methods.control}
+                        name="promotora"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Atribuir Promotora</FormLabel>
+                            <Combobox
+                              data={promotoras}
+                              displayField="nome"
+                              value={promotoras.find((p) => p.id === field.value) || null}
+                              onChange={(item) => {
+                                field.onChange(item.id);
+                                setPromotoraSelecionada(item);
+                              }}
+                              placeholder="Selecione a promotora"
+                              label={undefined}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {podeCriar && (
+                      <FormField
+                        control={methods.control}
+                        name="tipo_acesso"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo de Acesso</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="externo">Promotora</SelectItem>
+                                <SelectItem value="interno">Banco</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     <FormField
                       control={methods.control}
-                      name="tipo_acesso"
+                      name="usa_2fa"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo de Acesso</FormLabel>
+                          <FormLabel>Usa 2FA?</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -335,8 +418,8 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="externo">Externo</SelectItem>
-                              <SelectItem value="interno">Interno</SelectItem>
+                              <SelectItem value="1">Sim</SelectItem>
+                              <SelectItem value="0">Não</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
