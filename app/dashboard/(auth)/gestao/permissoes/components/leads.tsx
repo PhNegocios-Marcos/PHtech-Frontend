@@ -82,14 +82,14 @@ export function PermissoesTable() {
         }
 
         setPermissoes(arr);
-        toast.success("Permissões carregadas", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          },
-          description: `${arr.length} permissões encontradas`
-        });
+        // toast.success("Permissões carregadas", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `${arr.length} permissões encontradas`
+        // });
       } catch (error) {
         console.error("Erro ao carregar permissões:", error);
         toast.error("Falha ao carregar permissões", {

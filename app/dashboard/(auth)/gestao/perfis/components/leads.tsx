@@ -142,14 +142,14 @@ export function EquipesTable() {
         }));
 
         setEquipes(equipesArray);
-        toast.success("Equipes carregadas com sucesso", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          },
-          description: `${equipesArray.length} equipes encontradas`
-        });
+        // toast.success("Equipes carregadas com sucesso", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `${equipesArray.length} equipes encontradas`
+        // });
       } catch (error: any) {
         console.error("Erro ao buscar equipes:", error.message || error);
         toast.error("Falha ao carregar equipes", {

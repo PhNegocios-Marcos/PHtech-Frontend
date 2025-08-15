@@ -25,7 +25,7 @@ import {
 // Validação com Zod
 const perfilSchema = z.object({
   id: z.string(),
-  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }).optional(),
   descricao: z.string().optional(),
   status: z.number()
 });
@@ -50,9 +50,9 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
       methods.reset(perfil);
       toast.info("Dados do perfil carregados", {
         style: {
-          background: 'var(--toast-info)',
-          color: 'var(--toast-info-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-info)",
+          color: "var(--toast-info-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: `Editando: ${perfil.nome}`
       });
@@ -64,52 +64,60 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: Perfil) => {
-    if (!token) {
-      toast.error("Autenticação necessária", {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        },
-        description: "Faça login para continuar"
-      });
-      return;
-    }
+const onSubmit = async (data: Perfil) => {
+  if (!token) {
+    toast.error("Autenticação necessária", {
+      style: {
+        background: 'var(--toast-error)',
+        color: 'var(--toast-error-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      },
+      description: "Faça login para continuar"
+    });
+    return;
+  }
 
-    try {
-      await axios.put(`${API_BASE_URL}/perfil/atualizar`, data, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  // Cria uma cópia dos dados para enviar
+  const payload = { ...data };
 
-      toast.success("Perfil atualizado com sucesso!", {
-        style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
-      onClose();
-      window.location.reload();
-    } catch (error: any) {
-      console.error("Erro ao atualizar perfil:", error.response?.data || error.message);
-      toast.error("Falha ao atualizar perfil", {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        },
-        description: error.response?.data?.message || "Erro desconhecido"
-      });
-    }
-  };
+  // Remove o campo 'nome' se não foi alterado
+  if (perfil && data.nome === perfil.nome) {
+    delete payload.nome;
+  }
+
+  try {
+    await axios.put(`${API_BASE_URL}/perfil/atualizar`, payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    toast.success("Perfil atualizado com sucesso!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
+    onClose();
+    window.location.reload();
+  } catch (error: any) {
+    console.error("Erro ao atualizar perfil:", error.response?.data || error.message);
+    toast.error("Falha ao atualizar perfil", {
+      style: {
+        background: 'var(--toast-error)',
+        color: 'var(--toast-error-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      },
+      description: error.response?.data?.message || "Erro desconhecido"
+    });
+  }
+};
 
   const handleClose = () => {
     toast.info("Edição cancelada", {
       style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
     onClose();

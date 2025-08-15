@@ -129,13 +129,13 @@ export function EquipesTable() {
 
         const data = await response.json();
         setEquipes(data);
-        toast.success("Equipes carregadas com sucesso", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
-        });
+        // toast.success("Equipes carregadas com sucesso", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   }
+        // });
       } catch (error: any) {
         console.error("Erro ao carregar equipes:", error.message || error);
         toast.error("Falha ao carregar equipes", {
