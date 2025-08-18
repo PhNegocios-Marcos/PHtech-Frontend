@@ -25,7 +25,7 @@ export default function Header() {
           <PanelLeftIcon />
         </Button>
         <Search />
-        {/* <Notifications /> */}
+        <Notifications />
         {/* <ThemeCustomizerPanel /> */}
         <ThemeSwitch />
         <UserMenu />
