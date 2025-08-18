@@ -22,6 +22,7 @@ export const page_routes: PageRoutesType[] = [
     title: "Authentication",
     items: [{ id: "login", title: "Login", href: "/dashboard/login" }]
   },
+
   {
     id: "Dashboards",
     title: "Dashboards",
@@ -31,86 +32,6 @@ export const page_routes: PageRoutesType[] = [
         title: "Home",
         href: "/dashboard/default",
         icon: "House"
-      },
-      {
-        id: "Cadastro_ver",
-        title: "Config do Banco",
-        href: "/dashboard/cadastro",
-        icon: "Package",
-        items: [
-          {
-            id: "TipoOperacao_ver",
-            title: "Tipo de Operação",
-            href: "/dashboard/cadastro/tipo_operacao"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Averbador_ver",
-            title: "Averbador",
-            href: "/dashboard/cadastro/averbador"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Orgao_ver",
-            title: "Orgão",
-            href: "/dashboard/cadastro/orgao"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Convenio_ver",
-            title: "Convenio",
-            href: "/dashboard/cadastro/convenio"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Produto_ver",
-            title: "Modalidade",
-            href: "/dashboard/cadastro/modalidade"
-            // icon: "ChartPie"
-          },
-           {
-            id: "RO_ver",
-            title: "Roteiro Operacional (RO)",
-            href: "/dashboard/cadastro/roteiro_operacional"
-            // icon: "ChartPie"
-          },
-          // {
-          //   id: "Taxa_Ver",
-          //   title: "Tabela Taxa",
-          //   href: "/dashboard/cadastro/table_taxa"
-          //   // icon: "ChartPie"
-          // },
-          {
-            id: "Produto_ver",
-            title: "Produto",
-            href: "/dashboard/cadastro/produto"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Esteria_ver",
-            title: "Esteira",
-            href: "/dashboard/cadastro/esteira"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Seguradora_ver",
-            title: "Seguradora",
-            href: "/dashboard/cadastro/seguradora"
-            // icon: "ChartPie"
-          },
-          {
-            id: "Seguro_ver",
-            title: "Seguro",
-            href: "/dashboard/cadastro/seguro"
-            // icon: "ChartPie"
-          },
-          {
-            id: "TaxaCadastro_ver",
-            title: "Taxa Cadastro",
-            href: "/dashboard/cadastro/taxaCadastro"
-            // icon: "ChartPie"
-          }
-        ]
       },
       {
         id: "Credito",
@@ -202,6 +123,102 @@ export const page_routes: PageRoutesType[] = [
             id: "Clientes_ver",
             title: "Clientes",
             href: "/dashboard/gestao/clientes"
+            // icon: "ChartPie"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "Config_Banco_ver",
+    title: "Config do Banco",
+    items: [
+      {
+        id: "Esteria_ver",
+        title: "Esteira",
+        href: "/dashboard/cadastro/esteira",
+        icon: "Network"
+      },
+
+      {
+        id: "Operacoes_ver",
+        title: "Operações",
+        href: "/dashboard/operacoes",
+        icon: "Handshake",
+        items: [
+          {
+            id: "TipoOperacao_ver",
+            title: "Tipo de Operação",
+            href: "/dashboard/operacoes/tipo_operacao"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Modalidade_ver",
+            title: "Modalidade",
+            href: "/dashboard/operacoes/modalidade"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Produto_ver",
+            title: "Produto",
+            href: "/dashboard/operacoes/produto"
+            // icon: "ChartPie"
+          },
+          {
+            id: "RO_ver",
+            title: "Roteiro Operacional (RO)",
+            href: "/dashboard/operacoes/roteiro_operacional"
+            // icon: "ChartPie"
+          },
+          {
+            id: "TaxaCadastro_ver",
+            title: "Taxa Cadastro",
+            href: "/dashboard/cadastro/taxaCadastro",
+          }
+        ]
+      },
+      {
+        id: "Seguradora_ver",
+        title: "Seguradora",
+        href: "/dashboard/seguradora",
+        icon: "ShieldUser",
+        items: [
+          {
+            id: "Seguradora_ver",
+            title: "Cadastro",
+            href: "/dashboard/seguradora/cadastro"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Seguro_ver",
+            title: "Seguro",
+            href: "/dashboard/seguradora/seguro"
+            // icon: "ChartPie"
+          }
+        ]
+      },
+      {
+        id: "Convenio_ver",
+        title: "Convenio",
+        href: "/dashboard/convenio",
+        icon: "ChartPie",
+        items: [
+          {
+            id: "Averbador_ver",
+            title: "Averbador",
+            href: "/dashboard/convenio/averbador"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Convenio_ver",
+            title: "Cadastrar",
+            href: "/dashboard/convenio/cadastrar"
+            // icon: "ChartPie"
+          },
+          {
+            id: "Orgao_ver",
+            title: "Orgão",
+            href: "/dashboard/cadastro/orgao"
             // icon: "ChartPie"
           }
         ]

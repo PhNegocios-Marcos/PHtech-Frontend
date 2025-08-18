@@ -73,7 +73,6 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Orgao_ver",
       "Taxa_ver",
       "Orgaos_criar",
-      "Produto_ver",
       "RO_ver",
       "Esteria_ver",
       "Seguro_ver",
@@ -86,7 +85,9 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "RoteiroOperacional_ver",
       "Alcadas_ver",
       "Tipo_de_Acesso_criar",
-      "Clientes_ver"
+      "Clientes_ver",
+      "Modalidade_ver",
+      "Config_Banco_ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
