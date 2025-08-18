@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, FileText, PenTool, History, Info, Calculator, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  FileText,
+  PenTool,
+  History,
+  Info,
+  Calculator,
+  ArrowLeft,
+  ArrowRight
+} from "lucide-react";
 import AjusteOperacaoModal from "./AjusteOperacaoModal"; // novo arquivo/modal
 
 // API PAYLOAD EXEMPLO (TIPO):
@@ -108,7 +118,7 @@ const formatToBRL = (value: number | string | null | undefined): string => {
     style: "currency",
     currency: "BRL",
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(numericValue);
 };
 
@@ -125,7 +135,7 @@ const formatToBrazilianDate = (date: string | null | undefined): string => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: false,
+      hour12: false
     }).format(dateTime);
   } catch {
     return "Data inválida";
@@ -155,39 +165,41 @@ const ProcessStepper = ({ status }: { status?: number }) => {
     { label: "Análise", status: status === 2 ? "current" : "pending" },
     { label: "Aprovação", status: "pending" },
     { label: "Assinatura", status: "pending" },
-    { label: "Liberação", status: "pending" },
+    { label: "Liberação", status: "pending" }
   ];
 
   return (
-    <div className="flex items-center justify-between w-full max-w-4xl mx-auto mb-6">
+    <div className="mx-auto mb-6 flex w-full max-w-4xl items-center justify-between">
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div className="flex flex-col items-center">
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${
                 step.status === "completed"
                   ? "bg-primary text-primary-foreground"
                   : step.status === "current"
-                  ? "bg-secondary text-secondary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-muted text-muted-foreground"
+              }`}>
               {step.status === "completed" ? (
-                <CheckCircle className="w-5 h-5" />
+                <CheckCircle className="h-5 w-5" />
               ) : (
                 <span className="text-sm font-medium">{index + 1}</span>
               )}
             </div>
-            <span className={`text-xs mt-2 font-medium ${step.status === "current" ? "text-foreground" : "text-muted-foreground"}`}>
+            <span
+              className={`mt-2 text-xs font-medium ${step.status === "current" ? "text-foreground" : "text-muted-foreground"}`}>
               {step.label}
             </span>
           </div>
           {index < steps.length - 1 && (
-            <div className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
-              steps[index + 1].status === "completed" || step.status === "completed"
-                ? "bg-primary"
-                : "bg-muted"
-            }`} />
+            <div
+              className={`mx-4 h-0.5 w-16 transition-all duration-300 ${
+                steps[index + 1].status === "completed" || step.status === "completed"
+                  ? "bg-primary"
+                  : "bg-muted"
+              }`}
+            />
           )}
         </div>
       ))}
@@ -196,16 +208,16 @@ const ProcessStepper = ({ status }: { status?: number }) => {
 };
 
 const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
-  <div className="space-y-6 w-full">
+  <div className="w-full space-y-6">
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Info className="w-5 h-5" />
+          <Info className="h-5 w-5" />
           Dados da Proposta
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
           {[
             { label: "Produto", value: proposta.produto },
             { label: "Modo de Liquidação", value: proposta.informacoes.modoLiquidacao },
@@ -215,10 +227,10 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Código IPOC", value: proposta.informacoes.codigoIpoc },
             { label: "Valor", value: formatToBRL(proposta.valor) },
             { label: "Data de Início", value: formatToBrazilianDate(proposta.data) },
-            { label: "Observações", value: proposta.informacoes.observacoes },
+            { label: "Observações", value: proposta.informacoes.observacoes }
           ].map((item, index) => (
-            <div key={index} className="space-y-2 w-full">
-              <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+            <div key={index} className="w-full space-y-2">
+              <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
               <p className="text-lg font-medium">{item.value}</p>
             </div>
           ))}
@@ -229,54 +241,61 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 );
 
 const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
-  const [pendenciaModal, setPendenciaModal] = useState<{ open: boolean; evento: any | null }>({ open: false, evento: null });
+  const [pendenciaModal, setPendenciaModal] = useState<{ open: boolean; evento: any | null }>({
+    open: false,
+    evento: null
+  });
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <History className="w-5 h-5" />
+          <History className="h-5 w-5" />
           Andamento da Operação
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="w-full space-y-6">
+          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
             {[
               { label: "Correspondente", value: proposta.historico.correspondente },
               { label: "Operador", value: proposta.historico.operador },
               { label: "Grupo", value: proposta.historico.grupo },
-              { label: "Data da Última Atualização", value: proposta.historico.dataUltimaAtualizacao },
-              { label: "Última Atualização Feita Por", value: proposta.historico.ultimaAtualizacaoPor },
+              {
+                label: "Data da Última Atualização",
+                value: proposta.historico.dataUltimaAtualizacao
+              },
+              {
+                label: "Última Atualização Feita Por",
+                value: proposta.historico.ultimaAtualizacaoPor
+              }
             ].map((item, index) => (
-              <div key={index} className="space-y-2 w-full">
-                <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+              <div key={index} className="w-full space-y-2">
+                <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
                 <p className="text-lg font-medium">{item.value}</p>
               </div>
             ))}
           </div>
           <div className="relative w-full">
-            <div className="absolute left-3 top-0 w-0.5 h-full bg-border" />
+            <div className="bg-border absolute top-0 left-3 h-full w-0.5" />
             {proposta.historico.eventos.map((item, index) => (
-              <div key={index} className="relative flex items-start gap-4 mb-6 w-full">
+              <div key={index} className="relative mb-6 flex w-full items-start gap-4">
                 <div
-                  className={`absolute w-6 h-6 rounded-full flex items-center justify-center left-0 mt-1 ${
+                  className={`absolute left-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full ${
                     item.status === "completed" ? "bg-primary" : "bg-destructive"
-                  }`}
-                >
-                  <CheckCircle className="w-4 h-4 text-primary-foreground" />
+                  }`}>
+                  <CheckCircle className="text-primary-foreground h-4 w-4" />
                 </div>
                 <div className="ml-10 w-full">
                   <p className="text-lg font-semibold">{item.event}</p>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                  <p className="text-sm text-muted-foreground mt-1">Iniciado: {item.iniciado}</p>
-                  <p className="text-sm text-muted-foreground">Finalizado: {item.finalizado}</p>
+                  <p className="text-muted-foreground text-sm">{item.description}</p>
+                  <p className="text-muted-foreground mt-1 text-sm">Iniciado: {item.iniciado}</p>
+                  <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
                   {item.status === "pending" && (
                     <Button
                       size="sm"
                       className="mt-2"
-                      onClick={() => setPendenciaModal({ open: true, evento: item })}
-                    >
+                      onClick={() => setPendenciaModal({ open: true, evento: item })}>
                       Resolver Pendência
                     </Button>
                   )}
@@ -296,19 +315,23 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
 };
 
 const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
-  <div className="space-y-8 w-full">
+  <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Calculator className="w-5 h-5" />
+          <Calculator className="h-5 w-5" />
           Parâmetros da Operação
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {proposta.operacaoParametros.map((item, index) => (
-            <div key={index} className={`p-4 rounded-lg border ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">{item.valorParcela ? "Valor da Parcela" : "Parâmetro"}</p>
+            <div
+              key={index}
+              className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">
+                {item.valorParcela ? "Valor da Parcela" : "Parâmetro"}
+              </p>
               <p className="text-lg font-bold">{item.valorParcela || "-"}</p>
               {/* Adicione mais campos conforme necessário */}
             </div>
@@ -319,15 +342,19 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="h-5 w-5" />
           Resultados da Operação
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {proposta.operacaoResultados.map((item, index) => (
-            <div key={index} className={`p-4 rounded-lg border ${item.valorContrato ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">{item.valorContrato ? "Valor do Contrato" : "Resultado"}</p>
+            <div
+              key={index}
+              className={`rounded-lg border p-4 ${item.valorContrato ? "bg-secondary" : "bg-muted"} w-full`}>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">
+                {item.valorContrato ? "Valor do Contrato" : "Resultado"}
+              </p>
               <p className="text-lg font-bold">{item.valorContrato || "-"}</p>
               {/* Adicione mais campos conforme necessário */}
             </div>
@@ -340,7 +367,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
         <CardTitle className="text-lg">Detalhes das Parcelas</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto w-full">
+        <div className="w-full overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">
@@ -354,7 +381,9 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             </thead>
             <tbody>
               {proposta.operacaoParcelas.map((row, index) => (
-                <tr key={index} className={`transition-colors hover:bg-muted ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+                <tr
+                  key={index}
+                  className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
                   <td className="px-4 py-3 font-medium">{row.parcela}</td>
                   <td className="px-4 py-3">{row.vencimento}</td>
                   <td className="px-4 py-3 font-mono">{row.saldo}</td>
@@ -369,11 +398,15 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
                 <td className="px-4 py-3" colSpan={5}>
                   Total
                 </td>
-                <td className="px-4 py-3 font-mono text-primary">
-                  {proposta.operacaoParcelas.reduce((acc, curr) => {
-                    const pag = parseFloat((curr.pagamento || "0").replace(/[^\d,.-]/g, "").replace(",", "."));
-                    return acc + (isNaN(pag) ? 0 : pag);
-                  }, 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                <td className="text-primary px-4 py-3 font-mono">
+                  {proposta.operacaoParcelas
+                    .reduce((acc, curr) => {
+                      const pag = parseFloat(
+                        (curr.pagamento || "0").replace(/[^\d,.-]/g, "").replace(",", ".")
+                      );
+                      return acc + (isNaN(pag) ? 0 : pag);
+                    }, 0)
+                    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </td>
               </tr>
             </tfoot>
@@ -385,16 +418,16 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 );
 
 const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
-  <div className="space-y-8 w-full">
+  <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <FileText className="w-5 h-5" />
+          <FileText className="h-5 w-5" />
           Documentos da Operação
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto w-full">
+        <div className="w-full overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">
@@ -408,13 +441,17 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             </thead>
             <tbody>
               {proposta.documentos.map((row, index) => (
-                <tr key={index} className={`transition-colors hover:bg-muted ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+                <tr
+                  key={index}
+                  className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
                   <td className="px-4 py-3 font-medium">{row.nome}</td>
                   <td className="px-4 py-3">{row.tipo}</td>
                   <td className="px-4 py-3">{row.signatarios}</td>
                   <td className="px-4 py-3">{row.data}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={row.status === "Concluído" ? "default" : "secondary"}>{row.status}</Badge>
+                    <Badge variant={row.status === "Concluído" ? "default" : "secondary"}>
+                      {row.status}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <Button variant="ghost" size="sm">
@@ -426,20 +463,21 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             </tbody>
           </table>
         </div>
-        <div className="mt-4 text-sm text-muted-foreground">
-          Linhas por página: {proposta.documentos.length} | 1–{proposta.documentos.length} de {proposta.documentos.length}
+        <div className="text-muted-foreground mt-4 text-sm">
+          Linhas por página: {proposta.documentos.length} | 1–{proposta.documentos.length} de{" "}
+          {proposta.documentos.length}
         </div>
       </CardContent>
     </Card>
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <FileText className="w-5 h-5" />
+          <FileText className="h-5 w-5" />
           Documentos - {proposta.tomador}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">Nenhum documento encontrado</p>
+        <p className="text-muted-foreground text-sm">Nenhum documento encontrado</p>
       </CardContent>
     </Card>
   </div>
@@ -449,12 +487,12 @@ const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <Card className="w-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
-        <PenTool className="w-5 h-5" />
+        <PenTool className="h-5 w-5" />
         Status das Assinaturas
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="overflow-x-auto w-full">
+      <div className="w-full overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted">
@@ -467,7 +505,9 @@ const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
           </thead>
           <tbody>
             {proposta.assinaturas.map((row, index) => (
-              <tr key={index} className={`transition-colors hover:bg-muted ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+              <tr
+                key={index}
+                className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
                 <td className="px-4 py-3 font-medium">{row.signatario}</td>
                 <td className="px-4 py-3">{row.telefone}</td>
                 <td className="px-4 py-3">{row.email}</td>
@@ -492,7 +532,7 @@ const sections = [
   { id: "historico", label: "Histórico", component: Historico, icon: History },
   { id: "operacao", label: "Operação", component: Operacao, icon: Calculator },
   { id: "documentos", label: "Documentos", component: Documentos, icon: FileText },
-  { id: "assinaturas", label: "Assinaturas", component: Assinaturas, icon: PenTool },
+  { id: "assinaturas", label: "Assinaturas", component: Assinaturas, icon: PenTool }
 ];
 
 export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps) {
@@ -528,7 +568,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
           modoLiquidacao: "Débito em Conta",
           contaLiquidacao: "123456-7 / Banco XYZ",
           codigoIpoc: "IPOC-2025-001",
-          observacoes: "Nenhuma observação adicional",
+          observacoes: "Nenhuma observação adicional"
         },
         historico: {
           correspondente: "PH Negócios",
@@ -542,7 +582,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
               description: "Registro criado",
               iniciado: "30/07/2025 - 15:23:20 por PhNegociosAPI",
               finalizado: "30/07/2025 - 15:23:22 por PhNegociosAPI",
-              status: "completed",
+              status: "completed"
             },
             {
               event: "Pendência - Enviar Documento",
@@ -551,9 +591,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
               finalizado: "",
               status: "pending",
               tipoPendencia: "upload", // custom field
-              campos: [
-                { name: "documento", label: "Dcumenoto", type: "file" }
-              ]
+              campos: [{ name: "documento", label: "Dcumenoto", type: "file" }]
             },
             {
               event: "Pendência - Ajustar Dados",
@@ -566,9 +604,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                 { name: "cpf", label: "CPF", type: "text", value: "" },
                 { name: "nome", label: "Nome", type: "text", value: "" }
               ]
-            },
+            }
             // ... outros eventos
-          ],
+          ]
         },
         operacaoParametros: [
           {
@@ -581,8 +619,8 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             dataInicio: "30/07/2025",
             dataPrimeiroPagamento: "21/10/2025",
             corban: "0,00000000",
-            ajustarVencimentos: "Dias Úteis",
-          },
+            ajustarVencimentos: "Dias Úteis"
+          }
         ],
         operacaoResultados: [
           {
@@ -595,12 +633,26 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             iof: "R$ 152,43",
             valorLiquido: "R$ 3.702,74",
             valorFuturo: "R$ 10.440,00",
-            cetAA: "107,1710%",
-          },
+            cetAA: "107,1710%"
+          }
         ],
         operacaoParcelas: [
-          { parcela: 0, vencimento: "30/07/2025", saldo: "R$ 4.380,87", amortizacao: "R$ 0,00", juros: "R$ 0,00", pagamento: "R$ 0,00" },
-          { parcela: 1, vencimento: "21/10/2025", saldo: "R$ 4.712,17", amortizacao: "R$ 49,03", juros: "R$ 240,97", pagamento: "R$ 290,00" },
+          {
+            parcela: 0,
+            vencimento: "30/07/2025",
+            saldo: "R$ 4.380,87",
+            amortizacao: "R$ 0,00",
+            juros: "R$ 0,00",
+            pagamento: "R$ 0,00"
+          },
+          {
+            parcela: 1,
+            vencimento: "21/10/2025",
+            saldo: "R$ 4.712,17",
+            amortizacao: "R$ 49,03",
+            juros: "R$ 240,97",
+            pagamento: "R$ 290,00"
+          }
           // ... outras parcelas
         ],
         documentos: [
@@ -609,8 +661,8 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             tipo: "Documento de Identificação com Foto",
             signatarios: "Tiago Silva Oliveira",
             data: "30/07/2025, 15:36:21",
-            status: "Concluído",
-          },
+            status: "Concluído"
+          }
           // ... outros documentos
         ],
         documentosSignatario: [],
@@ -619,9 +671,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             signatario: "Tiago Silva Oliveira",
             telefone: "(75) 99143-4902",
             email: "traquino.silva12@gmail.com",
-            data: "30/07/2025, 19:07",
-          },
-        ],
+            data: "30/07/2025, 19:07"
+          }
+        ]
       });
     }
     fetchProposta();
@@ -633,7 +685,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
     const observerOptions = {
       root: null,
       rootMargin: "0px 0px -60% 0px",
-      threshold: Array.from({ length: 11 }, (_, i) => i / 10),
+      threshold: Array.from({ length: 11 }, (_, i) => i / 10)
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -677,7 +729,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth",
+        behavior: "smooth"
       });
 
       setActiveSection(sectionId);
@@ -690,17 +742,13 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
   if (!proposta) return <div>Carregando...</div>;
 
   return (
-    <div className="w-full min-h-[900px] overflow-hidden">
+    <div className="min-h-[900px] w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-6 mb-2">
+      <div className="mb-2 flex items-center justify-between border-b px-6">
         <div>
           <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
           <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
         </div>
-        <Button onClick={() => router.back()} variant="outline" size="sm">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
       </div>
       {/* Main Content */}
       <div className="flex">
@@ -713,17 +761,16 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             {sections.map((section) => (
               <section
                 key={section.id}
-                ref={el => {
+                ref={(el) => {
                   sectionRefs.current[section.id] = el as HTMLDivElement | null;
                 }}
                 id={section.id}
-                className="scroll-mt-28"
-              >
-                <div className="flex items-center gap-3 mb-6 pb-3 border-b">
-                  <section.icon className="w-6 h-6" />
+                className="scroll-mt-28">
+                <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                  <section.icon className="h-6 w-6" />
                   <h3 className="text-2xl font-bold">{section.label}</h3>
                 </div>
-                <div className="space-y-8 w-full">
+                <div className="w-full space-y-8">
                   {/* @ts-ignore */}
                   <section.component proposta={proposta} />
                 </div>
@@ -732,22 +779,24 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
           </div>
         </div>
         {/* Sticky lateral */}
-        <div className="w-80 border-l min-h-[100vh]">
-          <div style={{position: "fixed", marginTop: "131px"}} className="sticky top-0 w-80 p-8 flex flex-col justify-between bg-white z-30">
+        <div className="min-h-[100vh] w-80 border-l">
+          <div
+            style={{ position: "fixed", marginTop: "131px" }}
+            className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8">
             <div>
               <div className="mb-8">
-                <h4 className="text-sm font-bold text-muted-foreground mb-3 uppercase tracking-wide">
+                <h4 className="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase">
                   Progresso da Navegação
                 </h4>
-                <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+                <div className="bg-muted mb-2 h-2.5 w-full rounded-full">
                   <div
                     className="bg-primary h-2.5 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">{Math.round(progress)}% concluído</p>
+                <p className="text-muted-foreground text-xs">{Math.round(progress)}% concluído</p>
               </div>
-              <nav className="space-y-3 flex-1">
+              <nav className="flex-1 space-y-3">
                 {sections.map((section, index) => {
                   const Icon = section.icon;
                   const isActive = activeSection === section.id;
@@ -755,32 +804,46 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                   return (
                     <div key={section.id} className="relative">
                       {index !== sections.length - 1 && (
-                        <div className={`absolute left-6 top-14 w-0.5 h-10 transition-all duration-300 ${
-                          isCompleted || isActive ? "bg-primary" : "bg-border"
-                        }`} />
+                        <div
+                          className={`absolute top-14 left-6 h-10 w-0.5 transition-all duration-300 ${
+                            isCompleted || isActive ? "bg-primary" : "bg-border"
+                          }`}
+                        />
                       )}
                       <button
                         onClick={() => scrollToSection(section.id)}
-                        className={`flex items-center w-full text-left px-4 py-4 rounded-lg text-sm transition-all duration-300 ${
-                          isActive ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:bg-muted"
-                        }`}
-                      >
+                        className={`flex w-full items-center rounded-lg px-4 py-4 text-left text-sm transition-all duration-300 ${
+                          isActive
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "text-muted-foreground hover:bg-muted"
+                        }`}>
                         <div className="relative">
                           <div
-                            className={`w-5 h-5 rounded-full flex items-center justify-center mr-4 transition-all duration-300 ${
-                              isActive ? "bg-primary-foreground/20" : isCompleted ? "bg-primary text-primary-foreground" : "bg-muted"
-                            }`}
-                          >
-                            {isCompleted ? <CheckCircle className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
+                            className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full transition-all duration-300 ${
+                              isActive
+                                ? "bg-primary-foreground/20"
+                                : isCompleted
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted"
+                            }`}>
+                            {isCompleted ? (
+                              <CheckCircle className="h-3 w-3" />
+                            ) : (
+                              <Icon className="h-3 w-3" />
+                            )}
                           </div>
                         </div>
                         <span className="flex-1 font-medium">{section.label}</span>
-                        {isActive && <ArrowRight className="w-4 h-4 ml-2" />}
+                        {isActive && <ArrowRight className="ml-2 h-4 w-4" />}
                       </button>
                     </div>
                   );
                 })}
               </nav>
+              <Button onClick={() => router.back()} size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar
+              </Button>
             </div>
           </div>
         </div>
