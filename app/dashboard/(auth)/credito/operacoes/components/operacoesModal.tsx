@@ -840,7 +840,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                   );
                 })}
               </nav>
-              <Button onClick={() => router.back()} size="sm">
+              <Button className="mt-20 right-0" onClick={() => router.back()} size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar
               </Button>
