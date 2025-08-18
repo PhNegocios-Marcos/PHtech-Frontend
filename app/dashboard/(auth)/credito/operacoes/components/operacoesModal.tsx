@@ -630,37 +630,33 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
   }, [propostaId]);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+
     const observerOptions = {
-      // root: containerRef.current, // Remova ou ajuste esta linha!
-      rootMargin: "-50% 0px -50% 0px",
-      threshold: [0, 0.1, 0.5, 0.9, 1],
+      root: containerRef.current,
+      rootMargin: "0px 0px -60% 0px", // Ajusta para considerar o topo do container
+      threshold: Array.from({ length: 11 }, (_, i) => i / 10), // 0, 0.1, ..., 1
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let topmostSection: string | null = null;
-        let minTop = Infinity;
+    const observer = new IntersectionObserver((entries) => {
+      // Encontra a seção mais visível (maior intersectionRatio)
+      let mostVisibleSection: string | null = null;
+      let maxRatio = 0;
 
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const rect = entry.target.getBoundingClientRect();
-            const topPosition = rect.top;
-            if (topPosition < minTop && entry.intersectionRatio >= 0.5) {
-              minTop = topPosition;
-              topmostSection = entry.target.id;
-            }
-          }
-        });
-
-        if (topmostSection && topmostSection !== activeSection) {
-          setActiveSection(topmostSection);
-          const sectionIndex = sections.findIndex((s) => s.id === topmostSection);
-          const newProgress = ((sectionIndex + 1) / sections.length) * 100;
-          setProgress(newProgress);
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          mostVisibleSection = entry.target.id;
         }
-      },
-      observerOptions
-    );
+      });
+
+      if (mostVisibleSection && mostVisibleSection !== activeSection) {
+        setActiveSection(mostVisibleSection);
+        const sectionIndex = sections.findIndex((s) => s.id === mostVisibleSection);
+        const newProgress = ((sectionIndex + 1) / sections.length) * 100;
+        setProgress(newProgress);
+      }
+    }, observerOptions);
 
     const currentSections = Object.values(sectionRefs.current);
     currentSections.forEach((section) => {
@@ -671,8 +667,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
       currentSections.forEach((section) => {
         if (section) observer.unobserve(section);
       });
+      observer.disconnect();
     };
-  }, [activeSection]);
+  }, [proposta, activeSection]);
 
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current[sectionId];
@@ -716,7 +713,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
           <div className="py-6">
             <ProcessStepper status={proposta.status} />
           </div>
-          <div className="space-y-20 py-10">
+          <div className="space-y-10">
             {sections.map((section) => (
               <section
                 key={section.id}
@@ -789,7 +786,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                 })}
               </nav>
             </div>
-            <div className="mt-8 space-y-3">
+            {/* <div className="mt-8 space-y-3">
               <Button className="w-full">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Aprovar Operação
@@ -798,7 +795,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                 <Clock className="w-4 h-4 mr-2" />
                 Solicitar Revisão
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
