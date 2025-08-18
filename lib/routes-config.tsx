@@ -186,7 +186,7 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Seguradora_ver",
             title: "Cadastro",
-            href: "/dashboard/seguradora/cadastro"
+            href: "/dashboard/seguradora/seguradora"
             // icon: "ChartPie"
           },
           {
@@ -212,7 +212,7 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Convenio_ver",
             title: "Cadastrar",
-            href: "/dashboard/convenio/cadastrar"
+            href: "/dashboard/convenio/convenio"
             // icon: "ChartPie"
           },
           {
