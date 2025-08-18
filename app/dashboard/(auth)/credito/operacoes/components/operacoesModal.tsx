@@ -630,16 +630,13 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
   }, [propostaId]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
     const observerOptions = {
-      root: containerRef.current,
-      rootMargin: "0px 0px -60% 0px", // Ajusta para considerar o topo do container
-      threshold: Array.from({ length: 11 }, (_, i) => i / 10), // 0, 0.1, ..., 1
+      root: null,
+      rootMargin: "0px 0px -60% 0px",
+      threshold: Array.from({ length: 11 }, (_, i) => i / 10),
     };
 
     const observer = new IntersectionObserver((entries) => {
-      // Encontra a seção mais visível (maior intersectionRatio)
       let mostVisibleSection: string | null = null;
       let maxRatio = 0;
 
@@ -673,13 +670,12 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
 
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current[sectionId];
-    if (element && containerRef.current) {
-      const container = containerRef.current;
-      const offset = 120; // Ajuste conforme o header
-      const elementPosition = element.getBoundingClientRect().top + container.scrollTop;
+    if (element) {
+      const offset = 120;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - offset;
 
-      container.scrollTo({
+      window.scrollTo({
         top: offsetPosition,
         behavior: "smooth",
       });
@@ -694,7 +690,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
   if (!proposta) return <div>Carregando...</div>;
 
   return (
-    <div className="w-full h-screen overflow-hidden">
+    <div className="w-full min-h-[900px] overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b px-6 mb-2">
         <div>
@@ -707,9 +703,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
         </Button>
       </div>
       {/* Main Content */}
-      <div className="flex h-[calc(100%-120px)]">
-        {/* Scrollable Content */}
-        <div ref={containerRef} className="flex-1 px-8 pb-16 overflow-y-auto" style={{ scrollBehavior: "smooth" }}>
+      <div className="flex">
+        {/* Conteúdo principal SEM scroll interno */}
+        <div ref={containerRef} className="flex-1 px-8 pb-16">
           <div className="py-6">
             <ProcessStepper status={proposta.status} />
           </div>
@@ -717,9 +713,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             {sections.map((section) => (
               <section
                 key={section.id}
-                    ref={el => {
-                      sectionRefs.current[section.id] = el as HTMLDivElement | null;
-                    }}
+                ref={el => {
+                  sectionRefs.current[section.id] = el as HTMLDivElement | null;
+                }}
                 id={section.id}
                 className="scroll-mt-28"
               >
@@ -735,9 +731,9 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
             ))}
           </div>
         </div>
-        {/* Timeline Navigation */}
-        <div className="w-80 border-l h-full">
-          <div className="sticky top-6 p-8 h-full flex flex-col justify-between">
+        {/* Sticky lateral */}
+        <div className="w-80 border-l min-h-[100vh]">
+          <div style={{position: "fixed", marginTop: "131px"}} className="sticky top-0 w-80 p-8 flex flex-col justify-between bg-white z-30">
             <div>
               <div className="mb-8">
                 <h4 className="text-sm font-bold text-muted-foreground mb-3 uppercase tracking-wide">
@@ -786,16 +782,6 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                 })}
               </nav>
             </div>
-            {/* <div className="mt-8 space-y-3">
-              <Button className="w-full">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Aprovar Operação
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Clock className="w-4 h-4 mr-2" />
-                Solicitar Revisão
-              </Button>
-            </div> */}
           </div>
         </div>
       </div>
