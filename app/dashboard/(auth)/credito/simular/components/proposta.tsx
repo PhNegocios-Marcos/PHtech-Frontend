@@ -1,4 +1,3 @@
-// Arquivo: PropostaCliente.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -194,6 +193,32 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
 
   const gerarProposta = async () => {
     try {
+      // Preparar dados da simulação no formato esperado
+      const simulacaoData = simulacao ? {
+        VALOR_FINANCIADO: simulacao.valorCliente?.toFixed(2) || "0.00",
+        VALOR_PRESTACAO: simulacao.parcelas[0]?.valor_parcela?.toFixed(2) || "0.00",
+        PRAZO: simulacao.parcelas.length,
+        VALOR_LIQUIDO: (simulacao.valorCliente - (simulacao.iof || 0) - (simulacao.TabelaCadastro || simulacao.taxaCadastro || 0)).toFixed(2),
+        IOF: {
+          IOF_OPERACAO: "0.00", // Valor precisa ser calculado ou obtido da simulação
+          IOF_TEMPO_CONTRATO: "0.00", // Valor precisa ser calculado ou obtido da simulação
+          TOTAL_IOF: (simulacao.iof || 0).toFixed(2)
+        },
+        VALOR_BRUTO: simulacao.valorCliente,
+        PARCELAS: simulacao.parcelas.reduce((acc, parcela, index) => {
+          acc[(index + 1).toString()] = {
+            VENCIMENTO: new Date(Date.now() + (index + 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Data aproximada
+            SALDO_DEVEDOR: "0.00", // Precisa ser calculado
+            AMORTIZACAO: (parcela.valor_parcela - parcela.valor_juros).toFixed(2),
+            JUROS: parcela.valor_juros.toFixed(2),
+            PRESTACAO: parcela.valor_parcela.toFixed(2)
+          };
+          return acc;
+        }, {} as Record<string, any>),
+        NOME_TABELA: proutoName,
+        TAXA_MENSAL: simulacao.CET ? (simulacao.CET / 12).toFixed(2) : "0.00"
+      } : {};
+
       const body = {
         cliente_hash: cliente?.hash,
         produto_hash: produtoHash,
@@ -201,33 +226,41 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         responsavel_hash: idUser,
         cliente_banco_hash: cliente?.dados_bancarios?.[0]?.id ?? null,
         banco_hash: cliente?.dados_bancarios?.[0]?.id_banco ?? null,
+        endereco_hash: null,
         proposta_nome: cliente?.nome,
         proposta_email: cliente?.emails?.email ?? "",
-        proposta_telefone: cliente?.telefones?.[0]?.numero ?? "",
+        proposta_telefone: Object.values(cliente?.telefones || {})
+          .filter(t => t.status_telefone === 1)
+          .map(t => `${t.ddd}${t.numero}`)
+          .join(';'),
         proposta_numero_documento: cliente?.numero_documento,
         proposta_tipo_documento: cliente?.tipo_documento,
         proposta_cpf: cliente?.cpf,
-        proposta_sexo: "",
+        proposta_sexo: "", // Precisa ser obtido do cliente
         proposta_nome_mae: cliente?.nome_mae,
-        proposta_nome_pai: cliente?.nome_pai,
-        proposta_estado_civil: "",
-        proposta_naturalidade: "",
-        proposta_data_nascimento: "",
+        proposta_nome_pai: cliente?.nome_pai || "",
+        proposta_estado_civil: "", // Precisa ser obtido do cliente
+        proposta_naturalidade: "", // Precisa ser obtido do cliente
+        proposta_data_nascimento: "", // Precisa ser obtido do cliente
         proposta_endereco_cep: cliente?.enderecos?.[0]?.cep ?? "",
         proposta_enderco_logradouro: cliente?.enderecos?.[0]?.logradouro ?? "",
         proposta_endereco_numero: cliente?.enderecos?.[0]?.numero ?? "",
         proposta_endereco_complemento: cliente?.enderecos?.[0]?.complemento ?? "",
         proposta_endereco_bairro: cliente?.enderecos?.[0]?.bairro ?? "",
         proposta_endereco_cidade: cliente?.enderecos?.[0]?.cidade ?? "",
-        proposta_endereco_estado: cliente?.enderecos?.[0]?.estado ?? "",
+        proposta_endereco_estado: cliente?.enderecos?.[0]?.estado ?? cliente?.enderecos?.[0]?.uf ?? "",
         proposta_endereco_uf: cliente?.enderecos?.[0]?.uf ?? "",
-        proposta_valor_solicitado: simulacao?.valorCliente ?? 0,
+        proposta_valor_solicitado: simulacao?.valorCliente?.toFixed(2) || "0.00",
         proposta_banco_agencia: cliente?.dados_bancarios?.[0]?.agencia ?? "",
         proposta_banco_conta: cliente?.dados_bancarios?.[0]?.conta ?? "",
-        proposta_banco_pix: "",
-        proposta_banco_tipo_chave_pix: "",
-        proposta_status: "EM ANALISE",
-        roteiro_operacional_hash: "0198566d-269a-718f-923e-3413ddad1c76"
+        proposta_banco_pix: cliente?.dados_bancarios?.[0]?.pix ?? "",
+        proposta_banco_tipo_chave_pix: cliente?.dados_bancarios?.[0]?.tipo_pix ?? "",
+        proposta_status: 1, // EM ANALISE
+        proposta_tipo_liquidacao: 1,
+        roteiro_operacional_hash: "0198566d-269a-718f-923e-3413ddad1c76",
+        simulacao: simulacao ? {
+          [produtoHash]: simulacaoData
+        } : {}
       };
 
       const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
