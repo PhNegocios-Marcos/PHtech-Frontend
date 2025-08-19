@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CarregandoTable } from "./tabela_carregando";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import CadastroTabelaModal from "./modalNovaTable";
+import CadastroTabelaModal from "./cadastroNovoProduto";
 import { Produto } from "./ProdutoModal";
 import { Input } from "@/components/ui/input";
 import {
@@ -66,7 +66,7 @@ type Option = {
 };
 
 export type Props = {
-  produto: Produto;
+  produto?: Produto;
   onClose: () => void;
 };
 
@@ -348,7 +348,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
           <div className="flex flex-row justify-between">
             <div>
               <CardTitle>
-                Detalhes do Produto: <span className="text-primary">{produto.nome}</span>
+                Detalhes do Produto: <span className="text-primary">{produto?.nome}</span>
               </CardTitle>
             </div>
             <div className="flex flex-row gap-3">
@@ -448,7 +448,6 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         </CardContent>
       </Card>
       <CadastroTabelaModal
-        produto={produto}
         isOpen={isCadastroOpen}
         onClose={handleCloseCadastro}
       />

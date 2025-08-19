@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import TaxaProduto from "./components/produtos";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroTabelaModal from "./components/cadastroNovoProduto";
 import CampoBoasVindas from "@/components/boasvindas";
+import TabelaProduto from "./components/tableProduto";
 
 
 export default function Page() {
@@ -25,7 +25,7 @@ export default function Page() {
         </Button>
       </div>
 
-      {!isCadastroOpen && <TaxaProduto onClose={handleCloseCadastro} />}
+      {!isCadastroOpen && <TabelaProduto onClose={handleCloseCadastro} />}
 
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

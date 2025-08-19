@@ -12,10 +12,11 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CarregandoTable } from "./tabela_carregando";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
-import CadastroTabelaModal from "./modalNovaTable";
+import { ChevronLeft, ChevronRight, Pencil, Search } from "lucide-react";
+import CadastroTabelaModal from "./cadastroNovoProduto";
 import { Produto } from "./ProdutoModal";
 import { Input } from "@/components/ui/input";
+import AtualizarProdutoModal from "./atualizarProduto";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -66,7 +67,7 @@ type Option = {
 };
 
 export type Props = {
-  produto: Produto;
+  produto?: Produto;
   onClose: () => void;
 };
 
@@ -102,6 +103,8 @@ export default function TabelaProduto({ produto, onClose }: Props) {
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const [taxa, setTaxa] = useState<Option[]>([]);
   const [taxaSelecionado, setTaxaSelecionado] = useState<Option | null>(null);
+  const [isEditarOpen, setIsEditarOpen] = useState(false);
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
 
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
@@ -161,20 +164,23 @@ export default function TabelaProduto({ produto, onClose }: Props) {
 
             toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
               style: {
-                background: 'var(--toast-success)',
-                color: 'var(--toast-success-foreground)',
-                boxShadow: 'var(--toast-shadow)'
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
               }
             });
           } catch (error: any) {
             console.error("Erro ao atualizar status", error);
-            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
-              style: {
-                background: 'var(--toast-error)',
-                color: 'var(--toast-error-foreground)',
-                boxShadow: 'var(--toast-shadow)'
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
               }
-            });
+            );
           }
         };
 
@@ -187,22 +193,25 @@ export default function TabelaProduto({ produto, onClose }: Props) {
           </Badge>
         );
       }
+    },
+    {
+      id: "editar",
+      header: "Ver",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setProdutoSelecionado(row.original);
+            setIsEditarOpen(true);
+          }}
+          title="Editar produto">
+          <Search className="h-4 w-4" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
     }
-    // {
-    //   id: "editar",
-    //   header: "Editar",
-    //   cell: ({ row }) => (
-    //     <Button
-    //       variant="ghost"
-    //       size="icon"
-    //       onClick={() => handleSelectTaxa(row.original)}
-    //       title="Editar produto">
-    //       <Pencil className="h-4 w-4" />
-    //     </Button>
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false
-    // }
   ];
 
   const { inicio, fim } = form.getValues();
@@ -227,9 +236,9 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       setMessageType("success");
       toast.success("Relação com convênio criada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (error: any) {
@@ -238,9 +247,9 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       setMessageType("error");
       toast.error(`Erro ao criar relação: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } finally {
@@ -262,9 +271,9 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         console.error("Erro ao carregar convênios", error);
         toast.error("Erro ao carregar convênios", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -296,9 +305,9 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       setMessageType("success");
       toast.success("Relação com convênio criada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (error: any) {
@@ -307,9 +316,9 @@ export default function TabelaProduto({ produto, onClose }: Props) {
       setMessageType("error");
       toast.error(`Erro ao criar relação: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } finally {
@@ -347,18 +356,16 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         <CardHeader>
           <div className="flex flex-row justify-between">
             <div>
-              <CardTitle>
-                Detalhes do Produto: <span className="text-primary">{produto.nome}</span>
-              </CardTitle>
+              <CardTitle>Produtos</CardTitle>
             </div>
-            <div className="flex flex-row gap-3">
+            {/* <div className="flex flex-row gap-3">
               <Button id="" onClick={() => setIsCadastroOpen(true)}>
                 Nova Tabela
               </Button>
               <Button onClick={onClose} variant="outline">
                 Voltar
               </Button>
-            </div>
+            </div> */}
           </div>
         </CardHeader>
 
@@ -447,10 +454,18 @@ export default function TabelaProduto({ produto, onClose }: Props) {
           </div>
         </CardContent>
       </Card>
-      <CadastroTabelaModal
-        produto={produto}
-        isOpen={isCadastroOpen}
-        onClose={handleCloseCadastro}
+      <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
+      <AtualizarProdutoModal
+        isOpen={isEditarOpen}
+        onClose={() => {
+          setIsEditarOpen(false);
+          setProdutoSelecionado(null);
+        }}
+        produto={produtoSelecionado}
+        onUpdate={() => {
+          // Recarregar os dados após a atualização
+          // Você pode implementar uma função para recarregar os produtos relacionados
+        }}
       />
     </div>
   );
