@@ -211,7 +211,7 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "Convenio_ver",
-            title: "Cadastrar",
+            title: "Cadastro",
             href: "/dashboard/convenio/convenio"
             // icon: "ChartPie"
           },

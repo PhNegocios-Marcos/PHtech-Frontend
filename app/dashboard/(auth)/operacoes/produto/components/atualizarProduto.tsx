@@ -32,12 +32,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 // Schema de validação
 const schema = z.object({
-  nome_tabela: z.string().min(1, "Nome da tabela é obrigatório"),
-  prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
-  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
-  taxa_mensal: z.string().min(1, "Taxa mensal é obrigatória"),
-  incrementador: z.string().min(1, "Incrementador é obrigatório"),
-  periodicidade: z.string().min(1, "Periodicidade é obrigatória"),
+  nome_tabela: z.string().optional(),
+  prazo_minimo: z.string().optional(),
+  prazo_maximo: z.string().optional(),
+  taxa_mensal: z.string().optional(),
+  incrementador: z.string().optional(),
+  periodicidade: z.string().optional(),
   vigencia_inicio: z.date({ required_error: "Data de início é obrigatória" }),
   vigencia_fim: z.date({ required_error: "Data de fim é obrigatória" })
 });
@@ -97,15 +97,7 @@ export default function AtualizarProdutoModal({
     try {
       const payload = {
         config_tabela_hash: produto.tabela_hash,
-        nome_tabela: data.nome_tabela,
-        prazo_minimo: parseInt(data.prazo_minimo),
-        prazo_maximo: parseInt(data.prazo_maximo),
-        taxa_mensal: parseFloat(data.taxa_mensal),
-        incrementador: data.incrementador,
-        periodicidade: parseInt(data.periodicidade),
-        vigencia_inicio: format(data.vigencia_inicio, "yyyy-MM-dd"),
         vigencia_fim: format(data.vigencia_fim, "yyyy-MM-dd"),
-        usuario_atualizacao: userData.id
       };
 
       await axios.put(`${API_BASE_URL}/produtos-config-tabelas/atualizar`, payload, {
