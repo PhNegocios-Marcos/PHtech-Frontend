@@ -87,7 +87,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Tipo_de_Acesso_criar",
       "Clientes_ver",
       "Modalidade_ver",
-      "Config_Banco_ver"
+      "Config_Banco_ver",
+      "Operacoes_Banco_ver"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
