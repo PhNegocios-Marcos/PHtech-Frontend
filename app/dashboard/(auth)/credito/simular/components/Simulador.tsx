@@ -92,6 +92,7 @@ export default function SimuladorFgts({
           fields: JSON.parse(item.simulacao_campos_produtos_fields)
         }));
 
+
         setSections(parsedSections);
         setProdutoHash(arrData[0].simulacao_campos_produtos_produto_id);
         setErrorMessage("");
@@ -142,7 +143,7 @@ export default function SimuladorFgts({
 
     const fields = sections[0].fields;
     const body: Record<string, any> = {
-      produto_hash: modalidadeHash,
+      produto_hash: produtoHash,
       taxa_banco: "20"
     };
 
