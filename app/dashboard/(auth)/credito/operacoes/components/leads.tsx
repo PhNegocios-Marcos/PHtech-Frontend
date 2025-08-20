@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+import { ChevronLeft, ChevronRight, Ellipsis, Search } from "lucide-react";
 import { Pencil } from "lucide-react";
 
 import {
@@ -51,7 +51,7 @@ const formatToBRL = (value: number | string | null | undefined): string => {
     style: "currency",
     currency: "BRL",
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(numericValue);
 };
 
@@ -72,7 +72,7 @@ const formatToBrazilianDate = (date: string | null | undefined): string => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: false,
+      hour12: false
     }).format(dateTime);
   } catch {
     return "Data inválida";
@@ -128,31 +128,31 @@ export function OperacoesTable() {
     {
       accessorKey: "CPF",
       header: "CPF/CNPJ",
-      cell: ({ row }) => <span>{formatCpfOrCnpj(row.original.CPF)}</span>,
+      cell: ({ row }) => <span>{formatCpfOrCnpj(row.original.CPF)}</span>
     },
     {
       accessorKey: "Valor",
       header: "Valor principal",
-      cell: ({ row }) => <span>{formatToBRL(row.original.Valor)}</span>,
+      cell: ({ row }) => <span>{formatToBRL(row.original.Valor)}</span>
     },
     {
       accessorKey: "Data",
       header: "Data de início",
-      cell: ({ row }) => <span>{formatToBrazilianDate(row.original.Data)}</span>,
+      cell: ({ row }) => <span>{formatToBrazilianDate(row.original.Data)}</span>
     },
     { accessorKey: "status", header: "Status" },
     { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
     // { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSelectedUser(row.original)}
           title="Editar usuário">
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -215,10 +215,14 @@ export function OperacoesTable() {
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
       // Adjust global filter to handle formatted values
-      const value = columnId === "CPF" ? formatCpfOrCnpj(row.getValue(columnId)) :
-                    columnId === "Valor" ? formatToBRL(row.getValue(columnId)) :
-                    columnId === "Data" ? formatToBrazilianDate(row.getValue(columnId)) :
-                    String(row.getValue(columnId));
+      const value =
+        columnId === "CPF"
+          ? formatCpfOrCnpj(row.getValue(columnId))
+          : columnId === "Valor"
+            ? formatToBRL(row.getValue(columnId))
+            : columnId === "Data"
+              ? formatToBrazilianDate(row.getValue(columnId))
+              : String(row.getValue(columnId));
       return value.toLowerCase().includes(String(filterValue).toLowerCase());
     },
     state: {
@@ -238,10 +242,9 @@ export function OperacoesTable() {
       <CardContent>
         {selectedUser ? (
           <OperacoesDrawer
-          /* @ts-ignore */
             isOpen={true}
             onClose={() => setSelectedUser(null)}
-            Proposta={selectedUser}
+            propostaId={selectedUser.id} // ← CORRETO: Usar propostaId
           />
         ) : (
           <>

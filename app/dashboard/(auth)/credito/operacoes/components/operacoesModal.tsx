@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   CheckCircle,
   Clock,
@@ -14,12 +15,14 @@ import {
   Info,
   Calculator,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from "lucide-react";
-import AjusteOperacaoModal from "./AjusteOperacaoModal"; // novo arquivo/modal
+import { Skeleton } from "@/components/ui/skeleton";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // API PAYLOAD EXEMPLO (TIPO):
-// Este é o payload que você DEVE esperar da API para preencher o componente abaixo:
 export type ApiPropostaPayload = {
   id: string;
   correspondente: string;
@@ -28,12 +31,12 @@ export type ApiPropostaPayload = {
   tomador: string;
   cpf: string;
   valor: string | number;
-  data: string; // "2025-07-30 15:23:20"
-  status: number;
+  data: string;
+  status: string; // Alterado de number para string
   roteiro: string;
-  tabela: string;
+  taxa: string; // Adicionado campo que existe no JSON
   informacoes: {
-    modoLiquidacao: string;
+    modoLiquidacao: string | number;
     contaLiquidacao: string;
     codigoIpoc: string;
     observacoes: string;
@@ -55,18 +58,19 @@ export type ApiPropostaPayload = {
     }[];
   };
   operacaoParametros: {
-    valorParcela: string;
+    valorParcela: string | null;
     taxaJurosAM: string;
-    quantidadeParcelas: string;
+    quantidadeParcelas: number;
     carenciaPrincipal: string;
     baseCalculo: string;
     periodicidadePagamento: string;
-    dataInicio: string;
-    dataPrimeiroPagamento: string;
+    dataInicio: string | null;
+    dataPrimeiroPagamento: string | null;
     corban: string;
     ajustarVencimentos: string;
   }[];
-  operacaoResultados: {
+  operacaoResultados?: {
+    // Tornado opcional
     dataEmissao: string;
     dataVencimento: string;
     prazo: string;
@@ -79,34 +83,43 @@ export type ApiPropostaPayload = {
     cetAA: string;
   }[];
   operacaoParcelas: {
-    parcela: number;
+    parcela: string;
     vencimento: string;
     saldo: string;
     amortizacao: string;
     juros: string;
     pagamento: string;
   }[];
-  documentos: {
+  documentos?: {
+    // Tornado opcional
     nome: string;
     tipo: string;
     signatarios: string;
     data: string;
     status: string;
   }[];
-  documentosSignatario: {
+  documentosSignatario?: {
+    // Tornado opcional
     nome: string;
     tipo: string;
     signatarios: string;
     data: string;
     status: string;
   }[];
-  assinaturas: {
+  assinaturas?: {
+    // Tornado opcional
     signatario: string;
     telefone: string;
     email: string;
     data: string;
   }[];
 };
+
+interface OperacoesDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  propostaId: string; // ← Receber o ID em vez do objeto completo
+}
 
 // Função para formatar número/string para BRL
 const formatToBRL = (value: number | string | null | undefined): string => {
@@ -154,15 +167,22 @@ const formatCpfOrCnpj = (value: string | null | undefined): string => {
 };
 
 type OperacoesDetalhesProps = {
-  propostaId: string; // Você vai receber só o ID da proposta como prop
+  propostaId?: string;
 };
 
-const ProcessStepper = ({ status }: { status?: number }) => {
-  // Você pode usar status para marcar qual step está ativo baseado no status da proposta
+const ProcessStepper = ({ status }: { status?: string }) => {
+  const statusMap: Record<string, number> = {
+    "Não iniciado": 0,
+    "Em análise": 2
+    // Adicione outros mapeamentos conforme necessário
+  };
+
+  const statusNumber = status ? statusMap[status] || 0 : 0;
+
   const steps = [
     { label: "Criação", status: "completed" },
     { label: "Documentação", status: "completed" },
-    { label: "Análise", status: status === 2 ? "current" : "pending" },
+    { label: "Análise", status: statusNumber === 2 ? "current" : "pending" },
     { label: "Aprovação", status: "pending" },
     { label: "Assinatura", status: "pending" },
     { label: "Liberação", status: "pending" }
@@ -305,11 +325,6 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
           </div>
         </div>
       </CardContent>
-      <AjusteOperacaoModal
-        isOpen={pendenciaModal.open}
-        evento={pendenciaModal.evento}
-        onClose={() => setPendenciaModal({ open: false, evento: null })}
-      />
     </Card>
   );
 };
@@ -329,39 +344,40 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             <div
               key={index}
               className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-muted-foreground mb-1 text-sm font-medium">
-                {item.valorParcela ? "Valor da Parcela" : "Parâmetro"}
-              </p>
-              <p className="text-lg font-bold">{item.valorParcela || "-"}</p>
-              {/* Adicione mais campos conforme necessário */}
+              <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de Juros AM</p>
+              <p className="text-lg font-bold">{item.taxaJurosAM || "-"}</p>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <ArrowRight className="h-5 w-5" />
-          Resultados da Operação
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {proposta.operacaoResultados.map((item, index) => (
-            <div
-              key={index}
-              className={`rounded-lg border p-4 ${item.valorContrato ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-muted-foreground mb-1 text-sm font-medium">
-                {item.valorContrato ? "Valor do Contrato" : "Resultado"}
-              </p>
-              <p className="text-lg font-bold">{item.valorContrato || "-"}</p>
-              {/* Adicione mais campos conforme necessário */}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+
+    {/* Adicionar verificação para operacaoResultados */}
+    {proposta.operacaoResultados && proposta.operacaoResultados.length > 0 && (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ArrowRight className="h-5 w-5" />
+            Resultados da Operação
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {proposta.operacaoResultados.map((item, index) => (
+              <div
+                key={index}
+                className={`rounded-lg border p-4 ${item.valorContrato ? "bg-secondary" : "bg-muted"} w-full`}>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">
+                  {item.valorContrato ? "Valor do Contrato" : "Resultado"}
+                </p>
+                <p className="text-lg font-bold">{item.valorContrato || "-"}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )}
+
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">Detalhes das Parcelas</CardTitle>
@@ -393,23 +409,6 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="bg-muted font-bold">
-                <td className="px-4 py-3" colSpan={5}>
-                  Total
-                </td>
-                <td className="text-primary px-4 py-3 font-mono">
-                  {proposta.operacaoParcelas
-                    .reduce((acc, curr) => {
-                      const pag = parseFloat(
-                        (curr.pagamento || "0").replace(/[^\d,.-]/g, "").replace(",", ".")
-                      );
-                      return acc + (isNaN(pag) ? 0 : pag);
-                    }, 0)
-                    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </CardContent>
@@ -427,48 +426,22 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-muted">
-                <th className="px-4 py-3 text-left font-semibold">Nome</th>
-                <th className="px-4 py-3 text-left font-semibold">Tipo de Documento</th>
-                <th className="px-4 py-3 text-left font-semibold">Signatários</th>
-                <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
-                <th className="px-4 py-3 text-left font-semibold">Status da Assinatura</th>
-                <th className="px-4 py-3 text-left font-semibold">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {proposta.documentos.map((row, index) => (
-                <tr
-                  key={index}
-                  className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
-                  <td className="px-4 py-3 font-medium">{row.nome}</td>
-                  <td className="px-4 py-3">{row.tipo}</td>
-                  <td className="px-4 py-3">{row.signatarios}</td>
-                  <td className="px-4 py-3">{row.data}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant={row.status === "Concluído" ? "default" : "secondary"}>
-                      {row.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="sm">
-                      Visualizar
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="text-muted-foreground mt-4 text-sm">
-          Linhas por página: {proposta.documentos.length} | 1–{proposta.documentos.length} de{" "}
-          {proposta.documentos.length}
-        </div>
+        {proposta.documentos && proposta.documentos.length > 0 ? (
+          <>
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm">{/* Renderizar tabela de documentos */}</table>
+            </div>
+            <div className="text-muted-foreground mt-4 text-sm">
+              Linhas por página: {proposta.documentos.length} | 1–{proposta.documentos.length} de{" "}
+              {proposta.documentos.length}
+            </div>
+          </>
+        ) : (
+          <p className="text-muted-foreground text-sm">Nenhum documento encontrado</p>
+        )}
       </CardContent>
     </Card>
+
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
@@ -492,39 +465,54 @@ const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="w-full overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-muted">
-              <th className="px-4 py-3 text-left font-semibold">Signatário</th>
-              <th className="px-4 py-3 text-left font-semibold">Telefone</th>
-              <th className="px-4 py-3 text-left font-semibold">Email</th>
-              <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
-              <th className="px-4 py-3 text-left font-semibold">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {proposta.assinaturas.map((row, index) => (
-              <tr
-                key={index}
-                className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
-                <td className="px-4 py-3 font-medium">{row.signatario}</td>
-                <td className="px-4 py-3">{row.telefone}</td>
-                <td className="px-4 py-3">{row.email}</td>
-                <td className="px-4 py-3">{row.data}</td>
-                <td className="px-4 py-3">
-                  <Button variant="ghost" size="sm">
-                    Reenviar
-                  </Button>
-                </td>
+      {proposta.assinaturas && proposta.assinaturas.length > 0 ? (
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted">
+                <th className="px-4 py-3 text-left font-semibold">Signatário</th>
+                <th className="px-4 py-3 text-left font-semibold">Telefone</th>
+                <th className="px-4 py-3 text-left font-semibold">Email</th>
+                <th className="px-4 py-3 text-left font-semibold">Data de Criação</th>
+                <th className="px-4 py-3 text-left font-semibold">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {proposta.assinaturas.map((row, index) => (
+                <tr
+                  key={index}
+                  className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
+                  <td className="px-4 py-3 font-medium">{row.signatario}</td>
+                  <td className="px-4 py-3">{row.telefone}</td>
+                  <td className="px-4 py-3">{row.email}</td>
+                  <td className="px-4 py-3">{row.data}</td>
+                  <td className="px-4 py-3">
+                    <Button variant="ghost" size="sm">
+                      Reenviar
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-sm">Nenhuma assinatura encontrada</p>
+      )}
     </CardContent>
   </Card>
 );
+
+const transformApiData = (apiData: any): ApiPropostaPayload => {
+  return {
+    ...apiData,
+    // Garantir que arrays opcionais existam
+    operacaoResultados: apiData.operacaoResultados || [],
+    documentos: apiData.documentos || [],
+    documentosSignatario: apiData.documentosSignatario || [],
+    assinaturas: apiData.assinaturas || []
+  };
+};
 
 // Seções para navegação
 const sections = [
@@ -535,151 +523,146 @@ const sections = [
   { id: "assinaturas", label: "Assinaturas", component: Assinaturas, icon: PenTool }
 ];
 
-export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps) {
+const LoadingSkeleton = () => (
+  <div className="min-h-[900px] w-full overflow-hidden">
+    <div className="mb-2 flex items-center justify-between border-b px-6 py-4">
+      <div>
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="mt-2 h-4 w-48" />
+      </div>
+    </div>
+    <div className="flex">
+      <div className="flex-1 px-8 pb-16">
+        <div className="py-6">
+          <div className="mx-auto mb-6 flex w-full max-w-4xl items-center justify-between">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="mt-2 h-4 w-16" />
+                </div>
+                {i < 6 && <Skeleton className="mx-4 h-0.5 w-16" />}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-10">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="scroll-mt-28">
+              <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <Skeleton className="h-7 w-48" />
+              </div>
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="min-h-[100vh] w-80 border-l">
+        <div
+          className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8"
+          style={{ marginTop: "131px" }}>
+          <div>
+            <div className="mb-8">
+              <Skeleton className="mb-3 h-4 w-40" />
+              <Skeleton className="mb-2 h-2.5 w-full" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <nav className="flex-1 space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="relative">
+                  {i !== 5 && <Skeleton className="absolute top-14 left-6 h-10 w-0.5" />}
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ))}
+            </nav>
+            <Skeleton className="mt-20 h-9 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ErrorDisplay = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
+  <div className="flex min-h-[500px] flex-col items-center justify-center p-8">
+    <AlertCircle className="text-destructive mb-4 h-16 w-16" />
+    <h3 className="mb-2 text-xl font-semibold">Erro ao carregar proposta</h3>
+    <p className="text-muted-foreground mb-6 text-center">{message}</p>
+    <Button onClick={onRetry}>Tentar novamente</Button>
+  </div>
+);
+
+export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: OperacoesDrawerProps) {
   const [proposta, setProposta] = useState<ApiPropostaPayload | null>(null);
   const [activeSection, setActiveSection] = useState<string>("informacoes");
   const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const { token } = useAuth();
 
   // Busca da proposta na API
   useEffect(() => {
-    // Substitua por sua chamada real de API (Exemplo fictício):
-    async function fetchProposta() {
-      // const response = await fetch(`/api/propostas/${propostaId}`);
-      // const data = await response.json();
-      // setProposta(data);
+    // Obter o valor do parâmetro de busca de forma estável
+    const idFromParams = searchParams.get("id");
 
-      // MOCK EXEMPLO:
-      setProposta({
-        id: "OP-2025-001",
-        correspondente: "PH Negócios",
-        operacao: "Crédito Pessoal",
-        produto: "Empréstimo",
-        tomador: "Tiago Silva Oliveira",
-        cpf: "12345678901",
-        valor: "3702.74",
-        data: "2025-07-30 15:23:20",
-        status: 2,
-        roteiro: "Análise",
-        tabela: "Tabela A",
-        informacoes: {
-          modoLiquidacao: "Débito em Conta",
-          contaLiquidacao: "123456-7 / Banco XYZ",
-          codigoIpoc: "IPOC-2025-001",
-          observacoes: "Nenhuma observação adicional"
-        },
-        historico: {
-          correspondente: "PH Negócios",
-          operador: "PhNegociosAPI",
-          grupo: "Admin",
-          dataUltimaAtualizacao: "30/07/2025",
-          ultimaAtualizacaoPor: "PhNegociosAPI",
-          eventos: [
-            {
-              event: "Rascunho",
-              description: "Registro criado",
-              iniciado: "30/07/2025 - 15:23:20 por PhNegociosAPI",
-              finalizado: "30/07/2025 - 15:23:22 por PhNegociosAPI",
-              status: "completed"
-            },
-            {
-              event: "Pendência - Enviar Documento",
-              description: "Envie o documento solicitado",
-              iniciado: "31/07/2025 - 10:00:00 por Sistema",
-              finalizado: "",
-              status: "pending",
-              tipoPendencia: "upload", // custom field
-              campos: [{ name: "documento", label: "Dcumenoto", type: "file" }]
-            },
-            {
-              event: "Pendência - Ajustar Dados",
-              description: "Ajuste os dados informados",
-              iniciado: "31/07/2025 - 11:00:00 por Sistema",
-              finalizado: "",
-              status: "pending",
-              tipoPendencia: "edit", // custom field
-              campos: [
-                { name: "cpf", label: "CPF", type: "text", value: "" },
-                { name: "nome", label: "Nome", type: "text", value: "" }
-              ]
-            }
-            // ... outros eventos
-          ]
-        },
-        operacaoParametros: [
-          {
-            valorParcela: "R$ 290,00",
-            taxaJurosAM: "4,9900%",
-            quantidadeParcelas: "36",
-            carenciaPrincipal: "0",
-            baseCalculo: "Base 365 - Meses",
-            periodicidadePagamento: "1 Mês",
-            dataInicio: "30/07/2025",
-            dataPrimeiroPagamento: "21/10/2025",
-            corban: "0,00000000",
-            ajustarVencimentos: "Dias Úteis"
+    async function fetchProposta() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Se não temos um propostaId, tentamos obter da URL
+        const idToUse = propostaId || idFromParams;
+
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado");
+        }
+
+        if (!idToUse) {
+          throw new Error("ID da proposta não encontrado");
+        }
+
+        // Substitua por sua chamada real de API
+        const response = await fetch(`${API_BASE_URL}/proposta/${idToUse}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
           }
-        ],
-        operacaoResultados: [
-          {
-            dataEmissao: "30/07/2025",
-            dataVencimento: "21/09/2028",
-            prazo: "3 anos e 1 mês",
-            indexador: "Sem indexador pós-fixado",
-            valorContrato: "R$ 4.380,87",
-            custoEmissao: "R$ 525,70",
-            iof: "R$ 152,43",
-            valorLiquido: "R$ 3.702,74",
-            valorFuturo: "R$ 10.440,00",
-            cetAA: "107,1710%"
-          }
-        ],
-        operacaoParcelas: [
-          {
-            parcela: 0,
-            vencimento: "30/07/2025",
-            saldo: "R$ 4.380,87",
-            amortizacao: "R$ 0,00",
-            juros: "R$ 0,00",
-            pagamento: "R$ 0,00"
-          },
-          {
-            parcela: 1,
-            vencimento: "21/10/2025",
-            saldo: "R$ 4.712,17",
-            amortizacao: "R$ 49,03",
-            juros: "R$ 240,97",
-            pagamento: "R$ 290,00"
-          }
-          // ... outras parcelas
-        ],
-        documentos: [
-          {
-            nome: "FotoRG_3e5eb5bc-ab55-4896-a93c-9dc4ec1b5f79.pdf",
-            tipo: "Documento de Identificação com Foto",
-            signatarios: "Tiago Silva Oliveira",
-            data: "30/07/2025, 15:36:21",
-            status: "Concluído"
-          }
-          // ... outros documentos
-        ],
-        documentosSignatario: [],
-        assinaturas: [
-          {
-            signatario: "Tiago Silva Oliveira",
-            telefone: "(75) 99143-4902",
-            email: "traquino.silva12@gmail.com",
-            data: "30/07/2025, 19:07"
-          }
-        ]
-      });
+        });
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        }
+
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setProposta(transformApiData(data)); // Usar a função de transformação
+      } catch (err) {
+        console.error("Erro ao carregar proposta:", err);
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchProposta();
-    setActiveSection("informacoes");
-    setProgress(0);
-  }, [propostaId]);
+
+    // Só executar se temos um ID para buscar
+    if (propostaId || idFromParams) {
+      fetchProposta();
+      setActiveSection("informacoes");
+      setProgress(0);
+    } else {
+      setError("ID da proposta não fornecido");
+      setLoading(false);
+    }
+  }, [propostaId, searchParams]); // Mantenha searchParams aqui
 
   useEffect(() => {
     const observerOptions = {
@@ -739,7 +722,36 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
     }
   };
 
-  if (!proposta) return <div>Carregando...</div>;
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    // Recarregar a proposta
+    setTimeout(() => {
+      const idToUse = propostaId || searchParams.get("id");
+      if (idToUse) {
+        // Refazer a chamada à API
+        fetch(`/api/propostas/${idToUse}`)
+          .then((response) => {
+            if (!response.ok) throw new Error(`Erro ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            setProposta(data);
+            setError(null);
+          })
+          .catch((err) => {
+            setError(err.message);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }, 1000);
+  };
+
+  if (loading) return <LoadingSkeleton />;
+  if (error) return <ErrorDisplay message={error} onRetry={handleRetry} />;
+  if (!proposta) return <ErrorDisplay message="Proposta não encontrada" onRetry={handleRetry} />;
 
   return (
     <div className="min-h-[900px] w-full overflow-hidden">
@@ -840,7 +852,7 @@ export default function OperacoesDetalhes({ propostaId }: OperacoesDetalhesProps
                   );
                 })}
               </nav>
-              <Button className="mt-20 right-0" onClick={() => router.back()} size="sm">
+              <Button className="right-0 mt-20" onClick={() => router.back()} size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar
               </Button>
