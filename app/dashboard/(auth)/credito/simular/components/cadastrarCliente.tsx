@@ -6,7 +6,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DadosPessoais } from "./DadosPessoais";
-import { Telefones } from "./Contato";
+import { Contato } from "./Contato";
 import { Enderecos } from "./Enderecos";
 import { DadosBancarios } from "./DadosBancarios";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -324,7 +324,7 @@ export default function Cadastrar({
             />
           </TabsContent>
           <TabsContent value="Contato">
-            <Telefones
+            <Contato
               ref={telefonesRef}
               formData={formData}
               onChange={handleChange}

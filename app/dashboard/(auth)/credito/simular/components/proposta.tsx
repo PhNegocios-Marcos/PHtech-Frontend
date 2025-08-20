@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import InputMask from "react-input-mask";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -21,19 +20,20 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export interface Parcela {
-  valor_parcela: number;
-  valor_juros: number;
-}
-
 export interface Simulacao {
-  parcelas: Parcela[];
+  PARCELAS: Array<{
+    PRESTACAO: number;
+    JUROS: number;
+    AMORTIZACAO: number;
+    SALDO_DEVEDOR: number;
+  }>;
   iof: number;
-  TabelaCadastro: number;
+  taxaCadastro: number;
   valorCliente: number;
   CET: number;
-  taxaCadastro: number;
-  toFixed: any;
+  PRAZO: number;
+  TAXA_MENSAL: number;
+  VALOR_FINANCIADO: number;
 }
 
 interface Telefone {
@@ -91,6 +91,7 @@ interface PropostaClienteProps {
   simulacao?: Simulacao | undefined;
   proutoName: string;
   produtoHash: any;
+  simulacaoSelecionadaKey: string; // Adicionar esta linha
 }
 
 const pixKeyTypeOptions = [
@@ -100,7 +101,7 @@ const pixKeyTypeOptions = [
   { id: "4", name: "Chave Aleatória" }
 ];
 
-export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHash }: PropostaClienteProps) {
+export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHash, simulacaoSelecionadaKey }: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,22 +112,6 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
   const [tipoPix, setTipoPix] = useState("1");
   const [pixValue, setPixValue] = useState("");
 
-  const getMask = () => {
-    switch (tipoPix) {
-      case "1":
-        return "999.999.999-99";
-      case "2":
-        return "+55 (99) 99999-9999";
-      case "3":
-        return null;
-      case "4":
-        return null;
-      default:
-        return null;
-    }
-  };
-
-  const mask = getMask();
   const cleanCPF = cpf.replace(/\D/g, "");
 
   useEffect(() => {
@@ -195,28 +180,28 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
     try {
       // Preparar dados da simulação no formato esperado
       const simulacaoData = simulacao ? {
-        VALOR_FINANCIADO: simulacao.valorCliente?.toFixed(2) || "0.00",
-        VALOR_PRESTACAO: simulacao.parcelas[0]?.valor_parcela?.toFixed(2) || "0.00",
-        PRAZO: simulacao.parcelas.length,
-        VALOR_LIQUIDO: (simulacao.valorCliente - (simulacao.iof || 0) - (simulacao.TabelaCadastro || simulacao.taxaCadastro || 0)).toFixed(2),
+        VALOR_FINANCIADO: simulacao.VALOR_FINANCIADO?.toFixed(2) || "0.00",
+        VALOR_PRESTACAO: simulacao.PARCELAS[0]?.PRESTACAO?.toFixed(2) || "0.00",
+        PRAZO: simulacao.PRAZO || simulacao.PARCELAS.length,
+        VALOR_LIQUIDO: (simulacao.valorCliente - (simulacao.iof || 0) - (simulacao.taxaCadastro || 0)).toFixed(2),
         IOF: {
-          IOF_OPERACAO: "0.00", // Valor precisa ser calculado ou obtido da simulação
-          IOF_TEMPO_CONTRATO: "0.00", // Valor precisa ser calculado ou obtido da simulação
+          IOF_OPERACAO: "0.00",
+          IOF_TEMPO_CONTRATO: "0.00",
           TOTAL_IOF: (simulacao.iof || 0).toFixed(2)
         },
-        VALOR_BRUTO: simulacao.valorCliente,
-        PARCELAS: simulacao.parcelas.reduce((acc, parcela, index) => {
+        VALOR_BRUTO: simulacao.valorCliente?.toFixed(2),
+        PARCELAS: simulacao.PARCELAS.reduce((acc, parcela, index) => {
           acc[(index + 1).toString()] = {
-            VENCIMENTO: new Date(Date.now() + (index + 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Data aproximada
-            SALDO_DEVEDOR: "0.00", // Precisa ser calculado
-            AMORTIZACAO: (parcela.valor_parcela - parcela.valor_juros).toFixed(2),
-            JUROS: parcela.valor_juros.toFixed(2),
-            PRESTACAO: parcela.valor_parcela.toFixed(2)
+            VENCIMENTO: new Date(Date.now() + (index + 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            SALDO_DEVEDOR: "0.00",
+            AMORTIZACAO: (parcela.PRESTACAO - parcela.JUROS).toFixed(2),
+            JUROS: parcela.JUROS.toFixed(2),
+            PRESTACAO: parcela.PRESTACAO.toFixed(2)
           };
           return acc;
         }, {} as Record<string, any>),
         NOME_TABELA: proutoName,
-        TAXA_MENSAL: simulacao.CET ? (simulacao.CET / 12).toFixed(2) : "0.00"
+        TAXA_MENSAL: simulacao.TAXA_MENSAL?.toFixed(2) || "0.00"
       } : {};
 
       const body = {
@@ -259,7 +244,7 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         proposta_tipo_liquidacao: 1,
         roteiro_operacional_hash: "0198566d-269a-718f-923e-3413ddad1c76",
         simulacao: simulacao ? {
-          [produtoHash]: simulacaoData
+          [simulacaoSelecionadaKey]: simulacaoData
         } : {}
       };
 
@@ -366,7 +351,7 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
 
                   <div>
                     <Label htmlFor="pixValue">Valor da Chave PIX</Label>
-                    <Input id="pixValue" value={cliente.dados_bancarios[0].pix} />
+                    <Input id="pixValue" value={cliente.dados_bancarios[0].pix} readOnly />
                   </div>
                 </div>
               </div>
@@ -390,11 +375,11 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {simulacao.parcelas.map((p, i) => (
+                {simulacao.PARCELAS.map((p, i) => (
                   <TableRow key={i}>
                     <TableCell>{i + 1}</TableCell>
-                    <TableCell>R$ {(p.valor_parcela ?? 0).toFixed(2)}</TableCell>
-                    <TableCell>R$ {(p.valor_juros ?? 0).toFixed(2)}</TableCell>
+                    <TableCell>R$ {(p.PRESTACAO ?? 0).toFixed(2)}</TableCell>
+                    <TableCell>R$ {(p.JUROS ?? 0).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -405,8 +390,8 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
                 <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>Tabela de Cadastro:</strong> R${" "}
-                {(simulacao.TabelaCadastro ?? simulacao.taxaCadastro ?? 0).toFixed(2)}
+                <strong>Taxa de Cadastro:</strong> R${" "}
+                {(simulacao.taxaCadastro ?? 0).toFixed(2)}
               </p>
               <p>
                 <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}

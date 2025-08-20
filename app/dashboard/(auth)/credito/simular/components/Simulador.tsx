@@ -16,7 +16,7 @@ import {
   TableHead
 } from "@/components/ui/table";
 import { useAuth } from "@/contexts/AuthContext";
-import PropostaCliente, { Simulacao, Parcela } from "./proposta";
+import PropostaCliente, { Simulacao } from "./proposta";
 import Cadastrar from "./cadastrarCliente";
 import axios from "axios";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ interface SimuladorFgtsProps {
 }
 
 interface ResultadoSimulacao {
-  mensagem: Record<string, Simulacao> | Simulacao;
+  mensagem: Record<string, Simulacao>; // Apenas objeto com chaves UUID
 }
 
 interface Section {
@@ -91,7 +91,6 @@ export default function SimuladorFgts({
           items: JSON.parse(item.simulacao_campos_produtos_items),
           fields: JSON.parse(item.simulacao_campos_produtos_fields)
         }));
-
 
         setSections(parsedSections);
         setProdutoHash(arrData[0].simulacao_campos_produtos_produto_id);
@@ -189,11 +188,10 @@ export default function SimuladorFgts({
 
       // Seleciona automaticamente a simulação ao simular
       // se for apenas uma simulação, seleciona "0"
-      if (data && data.mensagem) {
-        if (Array.isArray(data.mensagem)) {
-          setSimulacaoSelecionadaKey(null); // usuário deve escolher
-        } else {
-          setSimulacaoSelecionadaKey("0");
+      if (data && data.mensagem && typeof data.mensagem === "object") {
+        const keys = Object.keys(data.mensagem);
+        if (keys.length > 0) {
+          setSimulacaoSelecionadaKey(keys[0]); // Seleciona a primeira chave UUID
         }
       }
 
@@ -218,73 +216,67 @@ export default function SimuladorFgts({
     }
   };
 
-  const handleCadastrarCliente = async () => {
-    const cpfRaw = formValues.cpf;
-    const cpf = cpfRaw?.replace(/\D/g, "");
-    if (!cpf) {
-      toast.error("CPF não informado", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/cliente`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        toast.error("Erro ao verificar cliente", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
-        return;
-      }
-
-      const data = await response.json();
-
-      const clienteExiste = data?.some((cliente: any) => {
-        const clienteCpf = cliente.cpf?.replace(/\D/g, "");
-        return clienteCpf === cpf;
-      });
-
-      if (clienteExiste) {
-        setCpfProposta(cpf);
-        setAbrirCadastro(false);
-        return;
-      }
-
-      setAbrirCadastro(true);
-    } catch (error) {
-      console.error("Erro ao verificar cliente:", error);
-      toast.error("Erro na verificação. Tente novamente.", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
-    }
-  };
-
-  const handleMontarProposta = () => {
-    // Se resultado.mensagem for array, verificar se selecionou alguma simulação
-    // Se resultado.mensagem NÃO for array, usar a única simulação
+  const handleMontarProposta = async () => {
     if (resultado?.mensagem) {
       if (Array.isArray(resultado.mensagem)) {
         if (simulacaoSelecionadaKey !== null) {
-          setCpfProposta(formValues.cpf);
+          const cpfRaw = formValues.cpf;
+          const cpf = cpfRaw?.replace(/\D/g, "");
+          if (!cpf) {
+            toast.error("CPF não informado", {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+            return;
+          }
+
+          try {
+            const response = await fetch(`${API_BASE_URL}/cliente`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            if (!response.ok) {
+              toast.error("Erro ao verificar cliente", {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              });
+              return;
+            }
+
+            const data = await response.json();
+
+            const clienteExiste = data?.some((cliente: any) => {
+              const clienteCpf = cliente.cpf?.replace(/\D/g, "");
+              return clienteCpf === cpf;
+            });
+
+            if (clienteExiste) {
+              setCpfProposta(cpf);
+              setAbrirCadastro(false);
+              return;
+            }
+
+            setAbrirCadastro(true);
+          } catch (error) {
+            console.error("Erro ao verificar cliente:", error);
+            toast.error("Erro na verificação. Tente novamente.", {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          }
         } else {
           toast.error("Selecione uma simulação antes de montar a proposta!", {
             style: {
@@ -351,17 +343,22 @@ export default function SimuladorFgts({
   }
 
   // Exibir a proposta selecionada
+  // Exibir a proposta selecionada
   if (
     cpfProposta &&
     resultado?.mensagem &&
-    ((Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey !== null) ||
-      (!Array.isArray(resultado.mensagem) && simulacaoSelecionadaKey === "0"))
+    simulacaoSelecionadaKey &&
+    resultado.mensagem[simulacaoSelecionadaKey]
   ) {
-    const simulacaoEscolhida = Array.isArray(resultado.mensagem)
-      ? resultado.mensagem[Number(simulacaoSelecionadaKey)]
-      : resultado.mensagem;
+    const simulacaoEscolhida = resultado.mensagem[simulacaoSelecionadaKey];
     return (
-      <PropostaCliente cpf={cpfProposta} proutoName={proutoName} produtoHash={produtoHash} simulacao={simulacaoEscolhida} />
+      <PropostaCliente
+        cpf={cpfProposta}
+        proutoName={proutoName}
+        produtoHash={produtoHash}
+        simulacao={simulacaoEscolhida}
+        simulacaoSelecionadaKey={simulacaoSelecionadaKey}
+      />
     );
   }
 
@@ -397,111 +394,58 @@ export default function SimuladorFgts({
 
       {resultado?.mensagem && (
         <div className="space-y-6">
-          {/* Múltiplas simulações */}
-          {Array.isArray(resultado.mensagem) ? (
-            resultado.mensagem.length > 0 ? (
-              resultado.mensagem.map((simulacao, i) => (
-                <Card
-                  key={i}
-                  className={`mb-6 cursor-pointer border ${
-                    simulacaoSelecionadaKey === i.toString()
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-300"
-                  }`}
-                  onClick={() => setSimulacaoSelecionadaKey(i.toString())}>
-                  <CardHeader>
-                    <CardTitle>Simulação {i + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="mt-10 rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Parcela</TableHead>
-                            <TableHead>Valor</TableHead>
-                            <TableHead>Juros</TableHead>
+          {Object.keys(resultado.mensagem).length > 0 ? (
+            Object.entries(resultado.mensagem).map(([uuid, simulacao], i) => (
+              <Card
+                key={uuid}
+                className={`mb-6 cursor-pointer border ${
+                  simulacaoSelecionadaKey === uuid
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-300"
+                }`}
+                onClick={() => setSimulacaoSelecionadaKey(uuid)}>
+                <CardHeader>
+                  <CardTitle>Simulação {i + 1}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parcela</TableHead>
+                        <TableHead>Valor</TableHead>
+                        <TableHead>Juros</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Array.isArray(simulacao.PARCELAS) &&
+                        simulacao.PARCELAS.map((p, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>{idx + 1}</TableCell>
+                            <TableCell>R$ {p.PRESTACAO?.toFixed(2)}</TableCell>
+                            <TableCell>R$ {p.JUROS?.toFixed(2)}</TableCell>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {Array.isArray(simulacao.parcelas) &&
-                            simulacao.parcelas.map((p: Parcela, idx: number) => (
-                              <TableRow key={idx}>
-                                <TableCell>{idx + 1}</TableCell>
-                                <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
-                                <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    <div className="flex flex-wrap justify-around gap-4">
-                      <p>
-                        <strong>IOF:</strong> R$ {simulacao.iof.toFixed(2)}
-                      </p>
-                      <p>
-                        <strong>Taxa Cadastro:</strong> R$ {simulacao.taxaCadastro.toFixed(2)}
-                      </p>
-                      <p>
-                        <strong>Valor Cliente:</strong> R$ {simulacao.valorCliente.toFixed(2)}
-                      </p>
-                      <p>
-                        <strong>CET:</strong> {simulacao.CET.toFixed(2)}%
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <p>Nenhuma simulação encontrada.</p>
-            )
+                        ))}
+                    </TableBody>
+                  </Table>
+                  <div className="flex flex-wrap justify-around gap-4">
+                    <p>
+                      <strong>IOF:</strong> R$ {simulacao.iof?.toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Taxa Cadastro:</strong> R$ {simulacao.taxaCadastro?.toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Valor Cliente:</strong> R$ {simulacao.valorCliente?.toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>CET:</strong> {simulacao.CET?.toFixed(2)}%
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
           ) : (
-            // Apenas uma simulação (selecionada por padrão)
-            <Card
-              className={`mb-6 border ${
-                simulacaoSelecionadaKey === "0" ? "border-blue-600 bg-blue-50" : "border-gray-300"
-              }`}>
-              <CardHeader>
-                <CardTitle>Simulação</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Parcela</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Juros</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Array.isArray((resultado.mensagem as Simulacao).parcelas) &&
-                      (resultado.mensagem as Simulacao).parcelas.map((p, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell>{idx + 1}</TableCell>
-                          <TableCell>R$ {p.valor_parcela.toFixed(2)}</TableCell>
-                          <TableCell>R$ {p.valor_juros.toFixed(2)}</TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-                <div className="flex flex-wrap justify-around gap-4">
-                  <p>
-                    <strong>IOF:</strong> R$ {(resultado.mensagem as Simulacao).iof.toFixed(2)}
-                  </p>
-                  <p>
-                    <strong>Taxa Cadastro:</strong>{" "}
-                    {(resultado.mensagem as Simulacao).taxaCadastro.toFixed(2)}
-                  </p>
-                  <p>
-                    <strong>Valor Cliente:</strong> R${" "}
-                    {(resultado.mensagem as Simulacao).valorCliente.toFixed(2)}
-                  </p>
-                  <p>
-                    <strong>CET:</strong> {(resultado.mensagem as Simulacao).CET.toFixed(2)}%
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <p>Nenhuma simulação encontrada.</p>
           )}
         </div>
       )}

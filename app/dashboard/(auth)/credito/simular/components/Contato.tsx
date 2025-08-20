@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle, useEffect } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,20 @@ interface ContatoProps {
   fields: FormField[];
 }
 
-export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProps, ref) => {
+export const Contato = forwardRef(({ formData, onChange, fields }: ContatoProps, ref) => {
+  const [emailValue, setEmailValue] = useState(formData.emails?.[0]?.email || "");
+  const [dddValue, setDddValue] = useState(formData.telefones?.[0]?.ddd || "");
+  const [telefoneValue, setTelefoneValue] = useState(formData.telefones?.[0]?.numero || "");
+
+  // Criar valores padrão baseados nos campos recebidos
+  const defaultValues: Record<string, any> = {};
+  
+  fields.forEach(field => {
+    if (field.name === 'emails.0.email') {
+      defaultValues[field.name] = formData.emails?.[0]?.email || '';
+    }
+  });
+
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
 
@@ -46,39 +59,38 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
     register,
     watch,
     formState: { errors },
-    trigger
+    trigger,
+    setValue
   } = useForm<ContatoFormData>({
     resolver: zodResolver(contatoSchema),
-    defaultValues: {
-      ddd1: formData.telefones[0].ddd,
-      numero1: formData.telefones[0].numero,
-      ddd2: formData.telefones[1].ddd,
-      numero2: formData.telefones[1].numero,
-      email: formData.emails[0].email
-    }
+    defaultValues
   });
 
   const watchedValues = watch();
 
+  // Atualizar o formData quando os valores mudarem
   useEffect(() => {
-    onChange("telefones.0.ddd", watchedValues.ddd1);
-  }, [watchedValues.ddd1]);
+    fields.forEach(field => {
+      if (watchedValues[field.name] !== undefined) {
+        onChange(field.name, watchedValues[field.name]);
+      }
+    });
+  }, [watchedValues]);
 
+  // Atualizar o email no formData quando mudar
   useEffect(() => {
-    onChange("telefones.0.numero", watchedValues.numero1);
-  }, [watchedValues.numero1]);
+    onChange('emails.0.email', emailValue);
+  }, [emailValue]);
 
+  // Atualizar o DDD no formData quando mudar
   useEffect(() => {
-    onChange("telefones.1.ddd", watchedValues.ddd2);
-  }, [watchedValues.ddd2]);
+    onChange('telefones.0.ddd', dddValue);
+  }, [dddValue]);
 
+  // Atualizar o telefone no formData quando mudar
   useEffect(() => {
-    onChange("telefones.1.numero", watchedValues.numero2);
-  }, [watchedValues.numero2]);
-
-  useEffect(() => {
-    onChange("emails.0.email", watchedValues.email);
-  }, [watchedValues.email]);
+    onChange('telefones.0.numero', telefoneValue);
+  }, [telefoneValue]);
 
   useImperativeHandle(ref, () => ({
     validate: async () => {
@@ -97,28 +109,50 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
   }));
 
   const renderField = (field: FormField) => {
-    const fieldName = field.name;
-    const value = watchedValues[fieldName] || "";
     const errorMessage = errors[field.name]?.message;
     const isErrorString = typeof errorMessage === "string";
 
+    if (field.name === 'emails.0.email') {
+      return (
+        <div key={field.name} className="col-span-2">
+          <label className="block text-sm font-medium mb-1">
+            {field.label}
+            {field.required && <span className="text-red-500">*</span>}
+          </label>
+          <Input
+            value={emailValue}
+            onChange={(e) => setEmailValue(e.target.value)}
+            type={field.type}
+            placeholder={field.label}
+            className="mt-1"
+          />
+          {isErrorString && (
+            <p className="text-sm text-red-600 mt-1">
+              {errorMessage}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     return (
-      <div key={field.name} className={field.name.includes("ddd") ? "col-span-1" : "col-span-3"}>
-        <span>{field.label}</span>
+      <div key={field.name} className="col-span-2">
+        <label className="block text-sm font-medium mb-1">
+          {field.label}
+          {field.required && <span className="text-red-500">*</span>}
+        </label>
         <Input
-          {...register(fieldName)}
+          {...register(field.name)}
+          type={field.type}
           placeholder={field.label}
-          value={value}
-          onChange={(e) => {
-            onChange(
-              `telefones.${fieldName.includes("1") ? "0" : "1"}.${fieldName.includes("ddd") ? "ddd" : "numero"}`,
-              e.target.value
-            );
-          }}
           className="mt-1"
+          onChange={(e) => {
+            setValue(field.name, e.target.value);
+            onChange(field.name, e.target.value);
+          }}
         />
         {isErrorString && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-red-600 mt-1">
             {errorMessage}
           </p>
         )}
@@ -127,16 +161,55 @@ export const Telefones = forwardRef(({ formData, onChange, fields }: ContatoProp
   };
 
   return (
-    <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
-      <div className="grid grid-cols-4 gap-2">
-        {fields.filter((f) => f.name.includes("1")).map(renderField)}
+    <form className="m-10 grid grid-cols-1 gap-5" onSubmit={(e) => e.preventDefault()}>
+      {fields.map(renderField)}
+      
+      {/* Campos de telefone fixos */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-1">
+          <label className="block text-sm font-medium mb-1">
+            DDD
+            <span className="text-red-500">*</span>
+          </label>
+          <Input
+            value={dddValue}
+            onChange={(e) => setDddValue(e.target.value.replace(/\D/g, '').slice(0, 2))}
+            placeholder="DDD"
+            className="mt-1"
+            maxLength={2}
+          />
+        </div>
+        <div className="col-span-1">
+          <label className="block text-sm font-medium mb-1">
+            Telefone
+            <span className="text-red-500">*</span>
+          </label>
+          <Input
+            value={telefoneValue}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '');
+              let formattedValue = value;
+              
+              if (value.length <= 11) {
+                if (value.length <= 6) {
+                  formattedValue = value.replace(/(\d{0,4})/, '$1');
+                } else if (value.length <= 10) {
+                  formattedValue = value.replace(/(\d{4})(\d{0,4})/, '$1-$2');
+                } else {
+                  formattedValue = value.replace(/(\d{5})(\d{0,4})/, '$1-$2');
+                }
+              }
+              
+              setTelefoneValue(formattedValue);
+            }}
+            placeholder="Número do telefone"
+            className="mt-1"
+            maxLength={11}
+          />
+        </div>
       </div>
-      <div className="grid grid-cols-4 gap-2">
-        {fields.filter((f) => f.name.includes("2")).map(renderField)}
-      </div>
-      <div>{fields.filter((f) => f.name === "email").map(renderField)}</div>
     </form>
   );
 });
 
-Telefones.displayName = "Telefones";
+Contato.displayName = "Contato";
