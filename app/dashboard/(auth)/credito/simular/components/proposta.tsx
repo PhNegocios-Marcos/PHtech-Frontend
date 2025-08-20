@@ -184,11 +184,7 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         VALOR_PRESTACAO: simulacao.PARCELAS[0]?.PRESTACAO?.toFixed(2) || "0.00",
         PRAZO: simulacao.PRAZO || simulacao.PARCELAS.length,
         VALOR_LIQUIDO: (simulacao.valorCliente - (simulacao.iof || 0) - (simulacao.taxaCadastro || 0)).toFixed(2),
-        IOF: {
-          IOF_OPERACAO: "0.00",
-          IOF_TEMPO_CONTRATO: "0.00",
-          TOTAL_IOF: (simulacao.iof || 0).toFixed(2)
-        },
+        IOF:  (simulacao.iof || 0).toFixed(2),
         VALOR_BRUTO: simulacao.valorCliente?.toFixed(2),
         PARCELAS: simulacao.PARCELAS.reduce((acc, parcela, index) => {
           acc[(index + 1).toString()] = {
