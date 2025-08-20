@@ -217,79 +217,55 @@ export default function SimuladorFgts({
   };
 
   const handleMontarProposta = async () => {
-    if (resultado?.mensagem) {
-      if (Array.isArray(resultado.mensagem)) {
-        if (simulacaoSelecionadaKey !== null) {
-          const cpfRaw = formValues.cpf;
-          const cpf = cpfRaw?.replace(/\D/g, "");
-          if (!cpf) {
-            toast.error("CPF não informado", {
-              style: {
-                background: "var(--toast-error)",
-                color: "var(--toast-error-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
-            return;
-          }
-
-          try {
-            const response = await fetch(`${API_BASE_URL}/cliente`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-              }
-            });
-
-            if (!response.ok) {
-              toast.error("Erro ao verificar cliente", {
-                style: {
-                  background: "var(--toast-error)",
-                  color: "var(--toast-error-foreground)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              });
-              return;
-            }
-
-            const data = await response.json();
-
-            const clienteExiste = data?.some((cliente: any) => {
-              const clienteCpf = cliente.cpf?.replace(/\D/g, "");
-              return clienteCpf === cpf;
-            });
-
-            if (clienteExiste) {
-              setCpfProposta(cpf);
-              setAbrirCadastro(false);
-              return;
-            }
-
-            setAbrirCadastro(true);
-          } catch (error) {
-            console.error("Erro ao verificar cliente:", error);
-            toast.error("Erro na verificação. Tente novamente.", {
-              style: {
-                background: "var(--toast-error)",
-                color: "var(--toast-error-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
-          }
-        } else {
-          toast.error("Selecione uma simulação antes de montar a proposta!", {
-            style: {
-              background: "var(--toast-error)",
-              color: "var(--toast-error-foreground)",
-              boxShadow: "var(--toast-shadow)"
-            }
-          });
+    if (!simulacaoSelecionadaKey) {
+      toast.error("Selecione uma simulação antes de montar a proposta!", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
-      } else {
-        setSimulacaoSelecionadaKey("0");
-        setCpfProposta(formValues.cpf);
-      }
+      });
+      return;
+    }
+
+    const cpfRaw = formValues.cpf;
+    const cpf = cpfRaw?.replace(/\D/g, "");
+    if (!cpf) {
+      toast.error("CPF não informado", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/cliente`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error("Erro ao verificar cliente");
+
+      const data = await response.json();
+      const clienteExiste = data?.some((cliente: any) => cliente.cpf?.replace(/\D/g, "") === cpf);
+
+      setCpfProposta(cpf);
+      setAbrirCadastro(!clienteExiste);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro na verificação. Tente novamente.", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 
@@ -377,9 +353,7 @@ export default function SimuladorFgts({
           </Button>
         )}
         {resultado?.mensagem && (
-          <Button
-            onClick={handleMontarProposta}
-            disabled={Array.isArray(resultado.mensagem) ? simulacaoSelecionadaKey === null : false}>
+          <Button onClick={handleMontarProposta} disabled={!simulacaoSelecionadaKey}>
             Montar proposta
           </Button>
         )}
