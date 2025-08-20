@@ -81,6 +81,13 @@ export default function Cadastrar({
     return section.fields;
   };
 
+  const pixOptions = [
+    { value: "1", label: "Chave CPF" },
+    { value: "2", label: "Chave CNPJ" },
+    { value: "3", label: "Chave E-mail" },
+    { value: "4", label: "Chave Celular" }
+  ];
+
   const [formData, setFormData] = useState({
     produtoId: produtoId || "",
     nome: "",
@@ -95,8 +102,7 @@ export default function Cadastrar({
     naturalidade: "",
     nacionalidade: "Brasileira",
     telefones: {
-      0: { ddd: "", numero: "" },
-      1: { ddd: "", numero: "" }
+      0: { ddd: "", numero: "" }
     },
     enderecos: {
       0: {
@@ -163,9 +169,9 @@ export default function Cadastrar({
         setFormSections([]);
         toast.error("Erro ao carregar configurações do formulário", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -190,8 +196,13 @@ export default function Cadastrar({
         obj = obj[key];
       }
 
-      obj[keys[keys.length - 1]] = value;
-      return updated;
+      // Só atualiza se o valor for diferente
+      if (obj[keys[keys.length - 1]] !== value) {
+        obj[keys[keys.length - 1]] = value;
+        return updated;
+      }
+
+      return prev; // Retorna o estado anterior se não houver alteração
     });
   };
 
@@ -202,9 +213,9 @@ export default function Cadastrar({
       if (!isValid) {
         toast.warning("Preencha todos os campos obrigatórios antes de continuar", {
           style: {
-            background: 'var(--toast-warning)',
-            color: 'var(--toast-warning-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-warning)",
+            color: "var(--toast-warning-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         return;
@@ -255,9 +266,9 @@ export default function Cadastrar({
           setActiveTab(tab);
           toast.warning("Preencha todos os campos obrigatórios", {
             style: {
-              background: 'var(--toast-warning)',
-              color: 'var(--toast-warning-foreground)',
-              boxShadow: 'var(--toast-shadow)'
+              background: "var(--toast-warning)",
+              color: "var(--toast-warning-foreground)",
+              boxShadow: "var(--toast-shadow)"
             }
           });
           return;
@@ -277,9 +288,9 @@ export default function Cadastrar({
       if (response.status === 200) {
         toast.success("Cliente cadastrado com sucesso!", {
           style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-success)",
+            color: "var(--toast-success-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         if (onCadastrado) {
@@ -290,9 +301,9 @@ export default function Cadastrar({
       console.error("Erro ao cadastrar cliente:", err);
       toast.error(`Erro ao cadastrar cliente: ${err.response?.data?.message || err.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -301,6 +312,10 @@ export default function Cadastrar({
   if (loading) {
     return <div>Carregando formulário...</div>;
   }
+
+  const bancariosFields = getFields("DadosBancarios").map((f) =>
+    f.name === "dados_bancarios.0.tipo_pix" ? { ...f, options: pixOptions } : f
+  );
 
   return (
     <div>
@@ -344,7 +359,7 @@ export default function Cadastrar({
               ref={bancariosRef}
               formData={formData}
               onChange={handleChange}
-              fields={getFields("DadosBancarios")}
+              fields={bancariosFields}
             />
           </TabsContent>
         </Tabs>

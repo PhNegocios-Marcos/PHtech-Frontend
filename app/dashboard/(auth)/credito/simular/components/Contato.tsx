@@ -26,10 +26,20 @@ export const Contato = forwardRef(({ formData, onChange, fields }: ContatoProps,
   const [dddValue, setDddValue] = useState(formData.telefones?.[0]?.ddd || "");
   const [telefoneValue, setTelefoneValue] = useState(formData.telefones?.[0]?.numero || "");
 
+  // Garantir que o campo de email exista
+  const allFields: FormField[] = [...fields];
+  if (!allFields.some(f => f.name === "emails.0.email")) {
+    allFields.push({
+      name: "emails.0.email",
+      label: "Email",
+      type: "email",
+      required: true
+    });
+  }
+
   // Criar valores padrão baseados nos campos recebidos
   const defaultValues: Record<string, any> = {};
-  
-  fields.forEach(field => {
+  allFields.forEach(field => {
     if (field.name === 'emails.0.email') {
       defaultValues[field.name] = formData.emails?.[0]?.email || '';
     }
@@ -38,7 +48,7 @@ export const Contato = forwardRef(({ formData, onChange, fields }: ContatoProps,
   const createSchema = () => {
     const schemaObj: Record<string, any> = {};
 
-    fields.forEach((field) => {
+    allFields.forEach((field) => {
       if (field.required) {
         schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
         if (field.name.includes("email")) {
@@ -70,7 +80,7 @@ export const Contato = forwardRef(({ formData, onChange, fields }: ContatoProps,
 
   // Atualizar o formData quando os valores mudarem
   useEffect(() => {
-    fields.forEach(field => {
+    allFields.forEach(field => {
       if (watchedValues[field.name] !== undefined) {
         onChange(field.name, watchedValues[field.name]);
       }
@@ -162,7 +172,7 @@ export const Contato = forwardRef(({ formData, onChange, fields }: ContatoProps,
 
   return (
     <form className="m-10 grid grid-cols-1 gap-5" onSubmit={(e) => e.preventDefault()}>
-      {fields.map(renderField)}
+      {allFields.map(renderField)}
       
       {/* Campos de telefone fixos */}
       <div className="grid grid-cols-2 gap-4">
