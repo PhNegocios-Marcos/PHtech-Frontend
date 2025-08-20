@@ -852,7 +852,10 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   );
                 })}
               </nav>
-              <Button className="right-0 mt-20" onClick={() => router.back()} size="sm">
+              <Button
+                className="right-0 mt-20"
+                onClick={onClose}
+                size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar
               </Button>
