@@ -126,6 +126,12 @@ export const page_routes: PageRoutesType[] = [
             // icon: "ChartPie"
           }
         ]
+      },
+      {
+        id: "Chat_ai",
+        title: "Chat ai",
+        href: "/dashboard/ai-chat",
+        icon: "Brain"
       }
     ]
   },
@@ -173,7 +179,7 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "TaxaCadastro_ver",
             title: "Taxa Cadastro",
-            href: "/dashboard/cadastro/taxaCadastro",
+            href: "/dashboard/cadastro/taxaCadastro"
           }
         ]
       },

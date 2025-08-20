@@ -88,7 +88,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Clientes_ver",
       "Modalidade_ver",
       "Config_Banco_ver",
-      "Operacoes_Banco_ver"
+      "Operacoes_Banco_ver",
+      "Chat_ai"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
