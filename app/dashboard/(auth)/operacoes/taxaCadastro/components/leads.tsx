@@ -29,10 +29,10 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type TaxaLinha = {
-  cad_tac_id: number;
-  cad_tac_valor_minimo: string;
-  cad_tac_valor_maximo: string;
-  cad_tac_valor_cobrado: string;
+  id: number;
+  valor_minimo: string;
+  valor_maximo: string;
+  valor_cobrado: string;
 };
 
 export function TaxaCadastroTable() {
@@ -86,7 +86,7 @@ export function TaxaCadastroTable() {
   const filteredTaxas = React.useMemo(() => {
     const filtroLower = filtro.toLowerCase();
     return taxas.filter((s) =>
-      [s.cad_tac_valor_minimo, s.cad_tac_valor_maximo, s.cad_tac_valor_cobrado].some((campo) =>
+      [s.valor_minimo, s.valor_maximo, s.valor_cobrado].some((campo) =>
         (campo || "").toLowerCase().includes(filtroLower)
       )
     );
@@ -94,13 +94,13 @@ export function TaxaCadastroTable() {
 
   const columns: ColumnDef<TaxaLinha>[] = [
     {
-      accessorKey: "cad_tac_id",
+      accessorKey: "id",
       header: "ID",
       cell: (info) => <strong>{info.getValue() as number}</strong>
     },
-    { accessorKey: "cad_tac_valor_minimo", header: "Valor Mínimo" },
-    { accessorKey: "cad_tac_valor_maximo", header: "Valor Máximo" },
-    { accessorKey: "cad_tac_valor_cobrado", header: "Valor Cobrado" },
+    { accessorKey: "valor_minimo", header: "Valor Mínimo" },
+    { accessorKey: "valor_maximo", header: "Valor Máximo" },
+    { accessorKey: "valor_cobrado", header: "Valor Cobrado" },
     {
       id: "editar",
       header: "Editar",

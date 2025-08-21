@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export type Taxa = {
-  cad_tac_id: number;
-  cad_tac_valor_minimo: string;
-  cad_tac_valor_maximo: string;
-  cad_tac_valor_cobrado: string;
+  id: number;
+  valor_minimo: string;
+  valor_maximo: string;
+  valor_cobrado: string;
 };
 
 type TaxaDrawerProps = {
