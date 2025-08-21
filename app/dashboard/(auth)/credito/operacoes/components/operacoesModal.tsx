@@ -304,8 +304,11 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                 <div key={index} className="relative mb-6 flex w-full items-start gap-4">
                   <div
                     className={`absolute left-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full ${
-                      item.status === "completed" ? "bg-primary" : 
-                      item.status === "failed" ? "bg-[var(--primary-300)]" : "bg-[var(--primary-300)]"
+                      item.status === "completed"
+                        ? "bg-primary"
+                        : item.status === "failed"
+                          ? "bg-[var(--primary-300)]"
+                          : "bg-[var(--primary-300)]"
                     }`}>
                     {item.status === "completed" ? (
                       <CheckCircle className="text-primary-foreground h-4 w-4" />
@@ -320,7 +323,7 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                     <p className="text-muted-foreground text-sm">{item.description}</p>
                     <p className="text-muted-foreground mt-1 text-sm">Iniciado: {item.iniciado}</p>
                     <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
-                    
+
                     {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
                     {(item.status === "pending" || item.status === "failed") && (
                       <Button
@@ -337,12 +340,11 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
           </div>
         </CardContent>
       </Card>
-
-      {/* ADICIONE ESTE MODAL */}
       <AjusteOperacaoModal
         isOpen={pendenciaModal.open}
         evento={pendenciaModal.evento}
         onClose={() => setPendenciaModal({ open: false, evento: null })}
+        propostaId={proposta.id} // ← Passe o ID da proposta
       />
     </>
   );
