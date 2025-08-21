@@ -202,7 +202,7 @@ export function OperacoesTable() {
   }, [token]);
 
   const table = useReactTable({
-    data: equipes,
+    data: equipes.reverse(),
     columns: equipeColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
