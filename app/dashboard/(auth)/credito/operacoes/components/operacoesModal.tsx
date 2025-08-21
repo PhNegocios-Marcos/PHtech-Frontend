@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import AjusteOperacaoModal from "./AjusteOperacaoModal";
 import {
   CheckCircle,
   Clock,
@@ -267,65 +268,83 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
   });
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <History className="h-5 w-5" />
-          Andamento da Operação
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="w-full space-y-6">
-          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-            {[
-              { label: "Correspondente", value: proposta.historico.correspondente },
-              { label: "Operador", value: proposta.historico.operador },
-              { label: "Grupo", value: proposta.historico.grupo },
-              {
-                label: "Data da Última Atualização",
-                value: proposta.historico.dataUltimaAtualizacao
-              },
-              {
-                label: "Última Atualização Feita Por",
-                value: proposta.historico.ultimaAtualizacaoPor
-              }
-            ].map((item, index) => (
-              <div key={index} className="w-full space-y-2">
-                <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
-                <p className="text-lg font-medium">{item.value}</p>
-              </div>
-            ))}
-          </div>
-          <div className="relative w-full">
-            <div className="bg-border absolute top-0 left-3 h-full w-0.5" />
-            {proposta.historico.eventos.map((item, index) => (
-              <div key={index} className="relative mb-6 flex w-full items-start gap-4">
-                <div
-                  className={`absolute left-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full ${
-                    item.status === "completed" ? "bg-primary" : "bg-[var(--primary-300)]"
-                  }`}>
-                  <CheckCircle className="text-primary-foreground h-4 w-4" />
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <History className="h-5 w-5" />
+            Andamento da Operação
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full space-y-6">
+            <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+              {[
+                { label: "Correspondente", value: proposta.historico.correspondente },
+                { label: "Operador", value: proposta.historico.operador },
+                { label: "Grupo", value: proposta.historico.grupo },
+                {
+                  label: "Data da Última Atualização",
+                  value: proposta.historico.dataUltimaAtualizacao
+                },
+                {
+                  label: "Última Atualização Feita Por",
+                  value: proposta.historico.ultimaAtualizacaoPor
+                }
+              ].map((item, index) => (
+                <div key={index} className="w-full space-y-2">
+                  <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
+                  <p className="text-lg font-medium">{item.value}</p>
                 </div>
-                <div className="ml-10 w-full">
-                  <p className="text-lg font-semibold">{item.event}</p>
-                  <p className="text-muted-foreground text-sm">{item.description}</p>
-                  <p className="text-muted-foreground mt-1 text-sm">Iniciado: {item.iniciado}</p>
-                  <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
-                  {item.status === "pending" && (
-                    <Button
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => setPendenciaModal({ open: true, evento: item })}>
-                      Resolver Pendência
-                    </Button>
-                  )}
+              ))}
+            </div>
+            <div className="relative w-full">
+              <div className="bg-border absolute top-0 left-3 h-full w-0.5" />
+              {proposta.historico.eventos.map((item, index) => (
+                <div key={index} className="relative mb-6 flex w-full items-start gap-4">
+                  <div
+                    className={`absolute left-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full ${
+                      item.status === "completed" ? "bg-primary" : 
+                      item.status === "failed" ? "bg-[var(--primary-300)]" : "bg-[var(--primary-300)]"
+                    }`}>
+                    {item.status === "completed" ? (
+                      <CheckCircle className="text-primary-foreground h-4 w-4" />
+                    ) : item.status === "failed" ? (
+                      <AlertCircle className="text-destructive-foreground h-4 w-4" />
+                    ) : (
+                      <Clock className="text-primary-foreground h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="ml-10 w-full">
+                    <p className="text-lg font-semibold">{item.event}</p>
+                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                    <p className="text-muted-foreground mt-1 text-sm">Iniciado: {item.iniciado}</p>
+                    <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
+                    
+                    {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
+                    {(item.status === "pending" || item.status === "failed") && (
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => setPendenciaModal({ open: true, evento: item })}>
+                        Resolver Pendência
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* ADICIONE ESTE MODAL */}
+      <AjusteOperacaoModal
+        isOpen={pendenciaModal.open}
+        evento={pendenciaModal.evento}
+        onClose={() => setPendenciaModal({ open: false, evento: null })}
+      />
+    </>
   );
 };
 
