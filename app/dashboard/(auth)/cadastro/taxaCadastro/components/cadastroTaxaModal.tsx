@@ -21,9 +21,9 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const schema = z.object({
-  cad_tac_valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
-  cad_tac_valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
-  cad_tac_valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
+  valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
+  valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
+  valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
 });
 
 type FormData = z.infer<typeof schema>;
@@ -38,9 +38,9 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      cad_tac_valor_minimo: "",
-      cad_tac_valor_maximo: "",
-      cad_tac_valor_cobrado: ""
+      valor_minimo: "",
+      valor_maximo: "",
+      valor_cobrado: ""
     }
   });
 
@@ -111,7 +111,7 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                   <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={methods.control}
-                      name="cad_tac_valor_minimo"
+                      name="valor_minimo"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Valor Mínimo</FormLabel>
@@ -124,7 +124,7 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                     />
                     <FormField
                       control={methods.control}
-                      name="cad_tac_valor_maximo"
+                      name="valor_maximo"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Valor Máximo</FormLabel>
@@ -137,7 +137,7 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                     />
                     <FormField
                       control={methods.control}
-                      name="cad_tac_valor_cobrado"
+                      name="valor_cobrado"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Valor Cobrado</FormLabel>
