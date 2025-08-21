@@ -141,7 +141,7 @@ export function OperacoesTable() {
       cell: ({ row }) => <span>{formatToBrazilianDate(row.original.Data)}</span>
     },
     { accessorKey: "status", header: "Status" },
-    { accessorKey: "roteiro", header: "Status do roteiro de liquidação" },
+    { accessorKey: "roteiro", header: "RO liquidação" },
     // { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",

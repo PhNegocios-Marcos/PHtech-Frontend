@@ -302,7 +302,7 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
               <div key={index} className="relative mb-6 flex w-full items-start gap-4">
                 <div
                   className={`absolute left-0 mt-1 flex h-6 w-6 items-center justify-center rounded-full ${
-                    item.status === "completed" ? "bg-primary" : "bg-destructive"
+                    item.status === "completed" ? "bg-primary" : "bg-[var(--primary-300)]"
                   }`}>
                   <CheckCircle className="text-primary-foreground h-4 w-4" />
                 </div>
@@ -327,6 +327,31 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
       </CardContent>
     </Card>
   );
+};
+
+const formatarData = (dataString: string): string => {
+  const data = new Date(dataString);
+
+  // Verifica se a data é válida
+  if (isNaN(data.getTime())) {
+    return "Data inválida";
+  }
+
+  const dia = String(data.getDate()).padStart(2, "0");
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const ano = data.getFullYear();
+
+  return `${dia}/${mes}/${ano}`;
+};
+
+const formatarStringNumerica = (valor: string) => {
+  const numero = parseFloat(valor);
+  return isNaN(numero)
+    ? valor
+    : numero.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
 };
 
 const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
@@ -400,12 +425,14 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
                 <tr
                   key={index}
                   className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
-                  <td className="px-4 py-3 font-medium">{row.parcela}</td>
-                  <td className="px-4 py-3">{row.vencimento}</td>
-                  <td className="px-4 py-3 font-mono">{row.saldo}</td>
-                  <td className="px-4 py-3 font-mono">{row.amortizacao}</td>
-                  <td className="px-4 py-3 font-mono">{row.juros}</td>
-                  <td className="px-4 py-3 font-mono font-semibold">{row.pagamento}</td>
+                  <td className="px-4 py-3">{formatarStringNumerica(row.parcela)}</td>
+                  <td className="px-4 py-3">{formatarData(row.vencimento)}</td>
+                  <td className="px-4 py-3">{formatarStringNumerica(row.saldo)}</td>
+                  <td className="px-4 py-3">{formatarStringNumerica(row.amortizacao)}</td>
+                  <td className="px-4 py-3">{formatarStringNumerica(row.juros)}</td>
+                  <td className="px-4 py-3 font-semibold">
+                    {formatarStringNumerica(row.pagamento)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -852,10 +879,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   );
                 })}
               </nav>
-              <Button
-                className="right-0 mt-20"
-                onClick={onClose}
-                size="sm">
+              <Button className="right-0 mt-20" onClick={onClose} size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar
               </Button>
