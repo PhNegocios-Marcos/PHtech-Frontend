@@ -806,112 +806,114 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
   if (!proposta) return <ErrorDisplay message="Proposta não encontrada" onRetry={handleRetry} />;
 
   return (
-    <div className="min-h-[900px] w-full overflow-hidden">
-      {/* Header */}
-      <div className="mb-2 flex items-center justify-between border-b px-6">
-        <div>
-          <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
-          <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
-        </div>
-      </div>
-      {/* Main Content */}
-      <div className="flex">
-        {/* Conteúdo principal SEM scroll interno */}
-        <div ref={containerRef} className="flex-1 px-8 pb-16">
-          <div className="py-6">
-            <ProcessStepper status={proposta.status} />
-          </div>
-          <div className="space-y-10">
-            {sections.map((section) => (
-              <section
-                key={section.id}
-                ref={(el) => {
-                  sectionRefs.current[section.id] = el as HTMLDivElement | null;
-                }}
-                id={section.id}
-                className="scroll-mt-28">
-                <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                  <section.icon className="h-6 w-6" />
-                  <h3 className="text-2xl font-bold">{section.label}</h3>
-                </div>
-                <div className="w-full space-y-8">
-                  {/* @ts-ignore */}
-                  <section.component proposta={proposta} />
-                </div>
-              </section>
-            ))}
+    <Card>
+      <div className="min-h-[900px] w-full overflow-hidden">
+        {/* Header */}
+        <div className="mb-2 flex items-center justify-between border-b px-6">
+          <div>
+            <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
+            <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
           </div>
         </div>
-        {/* Sticky lateral */}
-        <div className="min-h-[100vh] w-80 border-l">
-          <div
-            style={{ position: "fixed", marginTop: "131px" }}
-            className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8">
-            <div>
-              <div className="mb-8">
-                <h4 className="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase">
-                  Progresso da Navegação
-                </h4>
-                <div className="bg-muted mb-2 h-2.5 w-full rounded-full">
-                  <div
-                    className="bg-primary h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
+        {/* Main Content */}
+        <div className="flex">
+          {/* Conteúdo principal SEM scroll interno */}
+          <div ref={containerRef} className="flex-1 px-8 pb-16">
+            <div className="pt-6">
+              <ProcessStepper status={proposta.status} />
+            </div>
+            <div className="space-y-10">
+              {sections.map((section) => (
+                <section
+                  key={section.id}
+                  ref={(el) => {
+                    sectionRefs.current[section.id] = el as HTMLDivElement | null;
+                  }}
+                  id={section.id}
+                  className="scroll-mt-28">
+                  <div className="mb-6 flex items-center gap-3 border-b pb-3">
+                    <section.icon className="h-6 w-6" />
+                    <h3 className="text-2xl font-bold">{section.label}</h3>
+                  </div>
+                  <div className="w-full space-y-8">
+                    {/* @ts-ignore */}
+                    <section.component proposta={proposta} />
+                  </div>
+                </section>
+              ))}
+            </div>
+          </div>
+          {/* Sticky lateral */}
+          <div className="min-h-[100vh] w-80 border-l">
+            <div
+              style={{ position: "fixed", marginTop: "131px" }}
+              className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8">
+              <div>
+                <div className="mb-8">
+                  <h4 className="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase">
+                    Progresso da Navegação
+                  </h4>
+                  <div className="bg-muted mb-2 h-2.5 w-full rounded-full">
+                    <div
+                      className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="text-muted-foreground text-xs">{Math.round(progress)}% concluído</p>
                 </div>
-                <p className="text-muted-foreground text-xs">{Math.round(progress)}% concluído</p>
-              </div>
-              <nav className="flex-1 space-y-3">
-                {sections.map((section, index) => {
-                  const Icon = section.icon;
-                  const isActive = activeSection === section.id;
-                  const isCompleted = sections.findIndex((s) => s.id === activeSection) > index;
-                  return (
-                    <div key={section.id} className="relative">
-                      {index !== sections.length - 1 && (
-                        <div
-                          className={`absolute top-14 left-6 h-10 w-0.5 transition-all duration-300 ${
-                            isCompleted || isActive ? "bg-primary" : "bg-border"
-                          }`}
-                        />
-                      )}
-                      <button
-                        onClick={() => scrollToSection(section.id)}
-                        className={`flex w-full items-center rounded-lg px-4 py-4 text-left text-sm transition-all duration-300 ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-medium"
-                            : "text-muted-foreground hover:bg-muted"
-                        }`}>
-                        <div className="relative">
+                <nav className="flex-1 space-y-3">
+                  {sections.map((section, index) => {
+                    const Icon = section.icon;
+                    const isActive = activeSection === section.id;
+                    const isCompleted = sections.findIndex((s) => s.id === activeSection) > index;
+                    return (
+                      <div key={section.id} className="relative">
+                        {index !== sections.length - 1 && (
                           <div
-                            className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full transition-all duration-300 ${
-                              isActive
-                                ? "bg-primary-foreground/20"
-                                : isCompleted
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted"
-                            }`}>
-                            {isCompleted ? (
-                              <CheckCircle className="h-3 w-3" />
-                            ) : (
-                              <Icon className="h-3 w-3" />
-                            )}
+                            className={`absolute top-14 left-6 h-10 w-0.5 transition-all duration-300 ${
+                              isCompleted || isActive ? "bg-primary" : "bg-border"
+                            }`}
+                          />
+                        )}
+                        <button
+                          onClick={() => scrollToSection(section.id)}
+                          className={`flex w-full items-center rounded-lg px-4 py-4 text-left text-sm transition-all duration-300 ${
+                            isActive
+                              ? "bg-primary text-primary-foreground font-medium"
+                              : "text-muted-foreground hover:bg-muted"
+                          }`}>
+                          <div className="relative">
+                            <div
+                              className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full transition-all duration-300 ${
+                                isActive
+                                  ? "bg-primary-foreground/20"
+                                  : isCompleted
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted"
+                              }`}>
+                              {isCompleted ? (
+                                <CheckCircle className="h-3 w-3" />
+                              ) : (
+                                <Icon className="h-3 w-3" />
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <span className="flex-1 font-medium">{section.label}</span>
-                        {isActive && <ArrowRight className="ml-2 h-4 w-4" />}
-                      </button>
-                    </div>
-                  );
-                })}
-              </nav>
-              <Button className="right-0 mt-20" onClick={onClose} size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
-              </Button>
+                          <span className="flex-1 font-medium">{section.label}</span>
+                          {isActive && <ArrowRight className="ml-2 h-4 w-4" />}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </nav>
+                <Button className="right-0 mt-20" onClick={onClose} size="sm">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
