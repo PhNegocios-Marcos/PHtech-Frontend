@@ -103,7 +103,7 @@ export function AlcadasTable() {
     {
       accessorKey: "valor",
       header: "Valor",
-      cell: ({ getValue }) => `R$ ${getValue<number>().toLocaleString('pt-BR')}`
+      cell: ({ getValue }) => `${getValue<number>().toLocaleString('pt-BR')}`
     },
     {
       accessorKey: "descricao",

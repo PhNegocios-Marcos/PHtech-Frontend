@@ -1,0 +1,230 @@
+"use client";
+
+import React from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+
+// ✅ Novo schema de validação para Alçada
+const schema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  descricao: z.string().min(1, "Descrição é obrigatória"),
+  valor: z
+    .string()
+    .min(1, "Valor é obrigatório")
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Valor deve ser um número válido",
+    }),
+});
+
+type FormData = z.infer<typeof schema>;
+
+type CadastroAlcadaModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export default function CadastroAlcadaModal({
+  isOpen,
+  onClose,
+}: CadastroAlcadaModalProps) {
+  const methods = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      nome: "",
+      descricao: "",
+      valor: "",
+    },
+  });
+
+  const { token } = useAuth();
+
+  const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        description: "Faça login para continuar",
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)",
+        },
+      });
+      return;
+    }
+
+    const payload = {
+      nome: data.nome,
+      descricao: data.descricao,
+      valor: Number(data.valor),
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/alcada/criar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Erro ao cadastrar alçada");
+      }
+
+      toast.success("Alçada cadastrada com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)",
+        },
+      });
+      onClose();
+      methods.reset();
+    } catch (error: any) {
+      console.error("Erro ao cadastrar alçada:", error);
+      toast.error("Erro ao cadastrar alçada", {
+        description: error.message || "Tente novamente mais tarde",
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)",
+        },
+      });
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/50"
+        aria-hidden="true"
+      />
+
+      <aside
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-white shadow-lg overflow-auto p-6"
+      >
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <form
+              onSubmit={methods.handleSubmit(onSubmit)}
+              className="flex flex-col h-full"
+            >
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  Cadastrar Nova Alçada
+                </h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-2xl font-bold hover:text-gray-900"
+                  aria-label="Fechar"
+                >
+                  ×
+                </button>
+              </div>
+
+              <Card className="flex-grow overflow-auto">
+                <CardHeader>
+                  <CardTitle>Dados da Alçada</CardTitle>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4">
+                    <FormField
+                      control={methods.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome da Alçada</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Digite o nome da alçada"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="descricao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Descreva a alçada"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="valor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="Digite o valor"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="mt-6 flex justify-end gap-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Cadastrar Alçada</Button>
+              </div>
+            </form>
+          </Form>
+        </FormProvider>
+      </aside>
+    </>
+  );
+}
