@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -34,6 +35,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export type Produto = {
   id: string;
@@ -62,19 +65,80 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+
   const { token } = useAuth();
 
   const columns: ColumnDef<Produto>[] = [
     { accessorKey: "nome", header: "Nome" },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-    },
     { accessorKey: "idade_minima", header: "Idade Mínima" },
     { accessorKey: "idade_maxima", header: "Idade Máxima" },
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
     { accessorKey: "prazo_maximo", header: "Prazo Máximo" },
+    {
+      accessorKey: "status_toggle",
+      header: "Alterar Status",
+      cell: ({ row }) => {
+        const ativo = row.original.status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/produtos/atualizar`,
+              {
+                id: row.original.id,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            // 🔥 Atualiza diretamente no estado produtos
+            setProdutos((prev) =>
+              prev.map((item) =>
+                item.id === row.original.id ? { ...item, status: novoStatus } : item
+              )
+            );
+
+            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            console.error("Erro ao atualizar status", error);
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          }
+        };
+
+        return (
+          <Badge
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${
+              ativo ? "" : "border border-red-500 bg-transparent text-red-500"
+            }`}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
+    },
     {
       id: "editar",
       header: "Editar",

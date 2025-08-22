@@ -67,30 +67,44 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
   const onSubmit = async (data: Produto) => {
     if (!token) {
-      console.error("Token global não definido!");
       toast.error("Token de autenticação não encontrado.");
       return;
     }
 
     const updatedFields: Partial<Produto> = { id: data.id };
 
-    for (const key in data) {
-      if (key === "id") continue;
-      const newValue = data[key as keyof Produto];
-      const oldValue = originalData.current[key as keyof Produto];
-      const hasChanged = JSON.stringify(newValue) !== JSON.stringify(oldValue);
-      if (hasChanged && newValue !== undefined) {
-        updatedFields[key as keyof Produto] = newValue as any;
-      }
-    }
+    // Check each field for changes
+    Object.keys(data).forEach((key) => {
+      const fieldKey = key as keyof Produto;
+      const newValue = data[fieldKey];
+      const oldValue = originalData.current[fieldKey];
 
+      // Handle null/undefined normalization
+      const normalizedNewValue = newValue === null ? undefined : newValue;
+      const normalizedOldValue = oldValue === null ? undefined : oldValue;
+
+      // Compare values (including type conversion for numbers from strings)
+      if (normalizedNewValue !== normalizedOldValue) {
+        // For number fields that might come as strings from input
+        if (typeof normalizedOldValue === 'number' && typeof normalizedNewValue === 'string') {
+          const numValue = parseInt(normalizedNewValue);
+          if (numValue !== normalizedOldValue) {
+            updatedFields[fieldKey] = numValue as any;
+          }
+        } else {
+          updatedFields[fieldKey] = normalizedNewValue as any;
+        }
+      }
+    });
+
+    // If only ID was added (no changes)
     if (Object.keys(updatedFields).length === 1) {
       toast("Nenhuma alteração detectada.");
       return;
     }
 
     try {
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/produtos/atualizar`, updatedFields, {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/rel-rotina-operacional-prod-convenio/atualizar`, updatedFields, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Produto atualizado com sucesso!");
@@ -118,7 +132,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={methods.control}
                   name="nome"

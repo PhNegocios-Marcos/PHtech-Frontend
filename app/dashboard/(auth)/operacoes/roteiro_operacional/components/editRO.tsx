@@ -37,20 +37,20 @@ const roteiroSchema = z
     prazo_maximo: z.number(),
     valor_bruto_minimo: z.number(),
     valor_bruto_maximo: z.number(),
-    tac_min: z.number(),
-    tac_max: z.number(),
+    taxa_minima: z.number(),
+    taxa_maxima: z.number(),
     usuario_atualizacao: z.string().optional(),
-    usa_limite_proposta: z.boolean().default(false),
+    usa_limite_proposta: z.number().int().min(0).max(1).default(0),
     valor_limite_proposta: z.number().optional(),
-    usa_margem_seguranca: z.boolean().default(false),
+    usa_margem_seguranca: z.number().int().min(0).max(1).default(0),
     valor_margem_seguranca: z.number().optional()
   })
-  .refine((data) => !data.usa_limite_proposta || data.valor_limite_proposta !== undefined, {
+  .refine((data) => data.usa_limite_proposta === 0 || data.valor_limite_proposta !== undefined, {
     message:
       "Valor do limite de proposta é obrigatório quando 'Usa Limite de Proposta' está ativado",
     path: ["valor_limite_proposta"]
   })
-  .refine((data) => !data.usa_margem_seguranca || data.valor_margem_seguranca !== undefined, {
+  .refine((data) => data.usa_margem_seguranca === 0 || data.valor_margem_seguranca !== undefined, {
     message:
       "Valor da margem de segurança é obrigatório quando 'Usa Margem de Segurança' está ativado",
     path: ["valor_margem_seguranca"]
@@ -89,28 +89,29 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
   const { token } = useAuth();
 
   const [showLimiteProposta, setShowLimiteProposta] = useState(
-    roteiro?.usa_limite_proposta || false
+    roteiro?.usa_limite_proposta === 1
   );
   const [showMargemSeguranca, setShowMargemSeguranca] = useState(
-    roteiro?.usa_margem_seguranca || false
+    roteiro?.usa_margem_seguranca === 1
   );
 
   useEffect(() => {
     if (roteiro) {
       const initialValues = {
         ...roteiro,
-        usa_limite_proposta: Boolean(roteiro.usa_limite_proposta),
-        usa_margem_seguranca: Boolean(roteiro.usa_margem_seguranca),
+        usa_limite_proposta: roteiro.usa_limite_proposta ? 1 : 0,
+        usa_margem_seguranca: roteiro.usa_margem_seguranca ? 1 : 0,
         valor_limite_proposta: roteiro.usa_limite_proposta
           ? roteiro.valor_limite_proposta
           : undefined,
         valor_margem_seguranca: roteiro.usa_margem_seguranca
           ? roteiro.valor_margem_seguranca
-          : undefined
+          : undefined,
+        relacionamento_hash: ""
       };
       methods.reset(initialValues);
-      setShowLimiteProposta(initialValues.usa_limite_proposta);
-      setShowMargemSeguranca(initialValues.usa_margem_seguranca);
+      setShowLimiteProposta(initialValues.usa_limite_proposta === 1);
+      setShowMargemSeguranca(initialValues.usa_margem_seguranca === 1);
     }
   }, [roteiro, methods]);
 
@@ -132,8 +133,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       placeholder: "15500.50",
       type: "number"
     },
-    { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
-    { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" }
+    { name: "taxa_minima", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
+    { name: "taxa_maxima", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -143,8 +144,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "false", label: "Não" },
-        { value: "true", label: "Sim" }
+        { value: "0", label: "Não" },
+        { value: "1", label: "Sim" }
       ],
       showInputOnTrue: {
         fieldName: "valor_limite_proposta",
@@ -159,8 +160,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "false", label: "Não" },
-        { value: "true", label: "Sim" }
+        { value: "0", label: "Não" },
+        { value: "1", label: "Sim" }
       ],
       showInputOnTrue: {
         fieldName: "valor_margem_seguranca",
@@ -179,8 +180,9 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
 
     const payload = {
       ...data,
-      valor_limite_proposta: data.usa_limite_proposta ? data.valor_limite_proposta : undefined,
-      valor_margem_seguranca: data.usa_margem_seguranca ? data.valor_margem_seguranca : undefined
+      valor_limite_proposta: data.usa_limite_proposta === 1 ? data.valor_limite_proposta : undefined,
+      valor_margem_seguranca:
+        data.usa_margem_seguranca === 1 ? data.valor_margem_seguranca : undefined
     };
 
     try {
@@ -197,17 +199,17 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
   };
 
   const handleSelectChange = (fieldName: keyof Roteiro, value: string) => {
-    const booleanValue = value === "true";
-    methods.setValue(fieldName, booleanValue);
+    const intValue = value === "1" ? 1 : 0;
+    methods.setValue(fieldName, intValue);
 
     if (fieldName === "usa_limite_proposta") {
-      setShowLimiteProposta(booleanValue);
-      if (!booleanValue) {
+      setShowLimiteProposta(intValue === 1);
+      if (intValue === 0) {
         methods.setValue("valor_limite_proposta", undefined);
       }
     } else if (fieldName === "usa_margem_seguranca") {
-      setShowMargemSeguranca(booleanValue);
-      if (!booleanValue) {
+      setShowMargemSeguranca(intValue === 1);
+      if (intValue === 0) {
         methods.setValue("valor_margem_seguranca", undefined);
       }
     }
@@ -222,7 +224,9 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex justify-between">
-                <CardTitle>Editar Roteiro:{" "}<span>{roteiro.nome}</span></CardTitle>
+                <CardTitle>
+                  Editar Roteiro: <span>{roteiro.nome}</span>
+                </CardTitle>
                 <Button onClick={onClose} variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
@@ -251,7 +255,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                             onChange={(e) => {
                               if (fieldConfig.type === "number") {
                                 const numValue = e.target.value ? Number(e.target.value) : null;
-                                field.onChange(numValue); // Permite null para campos opcionais
+                                field.onChange(numValue);
                               } else {
                                 field.onChange(e.target.value);
                               }
@@ -274,14 +278,14 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                           <FormLabel>{fieldConfig.label}</FormLabel>
                           <FormControl>
                             <Select
-                              value={field.value ? "true" : "false"}
+                              value={String(field.value ?? "0")}
                               onValueChange={(value) => handleSelectChange(fieldConfig.name, value)}>
                               <SelectTrigger>
                                 <SelectValue placeholder={fieldConfig.placeholder} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="true">Sim</SelectItem>
-                                <SelectItem value="false">Não</SelectItem>
+                                <SelectItem value="1">Sim</SelectItem>
+                                <SelectItem value="0">Não</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -292,9 +296,9 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
 
                     {fieldConfig.showInputOnTrue &&
                       ((fieldConfig.name === "usa_limite_proposta" &&
-                        methods.watch("usa_limite_proposta")) ||
+                        methods.watch("usa_limite_proposta") === 1) ||
                         (fieldConfig.name === "usa_margem_seguranca" &&
-                          methods.watch("usa_margem_seguranca"))) && (
+                          methods.watch("usa_margem_seguranca") === 1)) && (
                         <FormField
                           control={methods.control}
                           name={fieldConfig.showInputOnTrue!.fieldName}
