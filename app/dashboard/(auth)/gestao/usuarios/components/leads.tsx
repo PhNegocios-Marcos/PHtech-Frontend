@@ -50,6 +50,29 @@ export type Usuario = {
   cnpj: string;
 };
 
+// Função para formatar telefone
+function formatTelefone(telefone: string): string {
+  if (!telefone) return "";
+
+  // Remove tudo que não for número
+  let digits = telefone.replace(/\D/g, "");
+
+  // Remove o código do Brasil se tiver
+  if (digits.startsWith("55")) {
+    digits = digits.slice(2);
+  }
+
+  // Aplica máscara
+  if (digits.length <= 10) {
+    // Telefone fixo (xx) xxxx-xxxx
+    return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "");
+  } else {
+    // Celular (xx) xxxxx-xxxx
+    return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "");
+  }
+}
+
+
 export function UsuariosTable() {
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -68,7 +91,11 @@ export function UsuariosTable() {
       { accessorKey: "nome", header: "Nome" },
       { accessorKey: "cpf", header: "CPF" },
       { accessorKey: "email", header: "Email" },
-      { accessorKey: "telefone", header: "Telefone" },
+      {
+        accessorKey: "telefone",
+        header: "Telefone",
+        cell: ({ getValue }) => formatTelefone(String(getValue()))
+      },
       { accessorKey: "endereco", header: "Endereço" },
       { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
       {
@@ -182,14 +209,6 @@ export function UsuariosTable() {
   });
 
   const handleRefresh = () => {
-    // toast.info("Atualizando lista de usuários...", {
-    //   style: {
-    //     background: 'var(--toast-info)',
-    //     color: 'var(--toast-info-foreground)',
-    //     border: '1px solid var(--toast-border)',
-    //     boxShadow: 'var(--toast-shadow)'
-    //   }
-    // });
     setRefreshKey((prev) => prev + 1);
   };
 

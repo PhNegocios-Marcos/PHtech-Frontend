@@ -45,6 +45,18 @@ type PromotorasTableProps = {
   onSelectPromotora: (promotora: Promotora) => void;
 };
 
+// Função de máscara de CNPJ
+function formatCNPJ(value: any) {
+  if (!value) return "";
+  const str = String(value).replace(/\D/g, "");
+  return str
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2")
+    .replace(/(-\d{2})\d+?$/, "$1");
+}
+
 export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const [promotoras, setPromotoras] = React.useState<Promotora[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -64,21 +76,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
     {
       accessorKey: "cnpj",
       header: "CNPJ",
-      cell: ({ getValue }) => {
-        const cnpj = getValue<string>() || "";
-        // Função simples para formatar CNPJ
-        const formatCNPJ = (value: string) => {
-          return value
-            .replace(/\D/g, "") // remove tudo que não é número
-            .replace(/^(\d{2})(\d)/, "$1.$2")
-            .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-            .replace(/\.(\d{3})(\d)/, ".$1/$2")
-            .replace(/(\d{4})(\d)/, "$1-$2")
-            .replace(/(-\d{2})\d+?$/, "$1"); // impede inserir mais que 14 números
-        };
-
-        return formatCNPJ(cnpj);
-      }
+      cell: ({ getValue }) => formatCNPJ(getValue())
     },
     { accessorKey: "representante", header: "Representante" },
     { accessorKey: "master", header: "É Master?" },
