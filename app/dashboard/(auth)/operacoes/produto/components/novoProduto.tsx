@@ -36,7 +36,7 @@ const schema = z.object({
   convenio_hash: z.string().min(1, "Convênio é obrigatório"),
   modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
   tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
-  
+  RO: z.string().min(1, "RO é obrigatório"),
   // Dados da taxa
   nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
   prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
@@ -62,11 +62,21 @@ type Option = {
   name?: string;
 };
 
+// Campos de texto repetidos (para reduzir código)
+const textFields = [
+  { name: "nome_taxa", label: "Nome Tabela", placeholder: "Digite o nome" },
+  { name: "prazo_minimo", label: "Prazo mínimo", placeholder: "12" },
+  { name: "prazo_maximo", label: "Prazo máximo", placeholder: "64" },
+  { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6" },
+  { name: "periodiciade", label: "Periodicidade", placeholder: "12" }
+] as const;
+
 export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompletoModalProps) {
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
   const [modalidade, setModalidade] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
+  const [RO, setRO] = useState<Option[]>([]);
 
   const { token, userData } = useAuth();
   const router = useRouter();
@@ -84,7 +94,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       incrementador: "",
       periodiciade: "",
       inicio: undefined,
-      fim: undefined
+      fim: undefined,
+      RO: ""
     }
   });
 
@@ -166,10 +177,36 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
     }
   }, [isOpen, token]);
 
+  // Carrega Rotina Operacional
+  useEffect(() => {
+    const fetchRO = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const formatado = response.data.map((item: any) => ({
+          id: item.rotina_operacional_hash,
+          name: item.nome,
+          nome: item.nome
+        }));
+
+        setRO(formatado);
+      } catch (error: any) {
+        console.error("Erro ao buscar RO:", error);
+        toast.error("Erro ao buscar RO: " + (error.message || "Erro desconhecido"));
+      }
+    };
+
+    if (isOpen && token) {
+      fetchRO();
+    }
+  }, [isOpen, token]);
+
   // Função para salvar tudo de uma vez
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    
+
     try {
       // Primeiro: Criar o relacionamento do produto
       const produtoResponse = await axios.post(
@@ -188,7 +225,22 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       );
 
       const relacionamentoId = produtoResponse.data.rel_produto_subproduto_convenio_id;
-      
+
+      // Criar relação com rotina operacional
+      await axios.post(
+        `${API_BASE_URL}/rel-rotina-operacional-prod-convenio/criar`,
+        {
+          rotina_operacional_hash: data.RO, // agora pega do campo certo
+          relacionamento_hash: relacionamentoId
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
       // Segundo: Criar a taxa com o relacionamento
       const taxaPayload = {
         relacionamento_produto_hash: relacionamentoId,
@@ -220,7 +272,6 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       toast.success("Produto e taxa cadastrados com sucesso!");
       methods.reset();
       onClose();
-      
     } catch (error: any) {
       console.error("Erro ao cadastrar:", error);
       toast.error("Erro ao cadastrar: " + (error.message || "Erro desconhecido"));
@@ -269,7 +320,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                           <Combobox
                             data={convenio}
                             displayField="nome"
-                            value={convenio.find(c => c.id === field.value) || null}
+                            value={convenio.find((c) => c.id === field.value) || null}
                             onChange={(selected) => field.onChange(selected?.id || "")}
                             searchFields={["nome"]}
                             placeholder="Selecione um Convênio"
@@ -290,7 +341,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                           <Combobox
                             data={modalidade}
                             displayField="nome"
-                            value={modalidade.find(m => m.id === field.value) || null}
+                            value={modalidade.find((m) => m.id === field.value) || null}
                             onChange={(selected) => field.onChange(selected?.id || "")}
                             searchFields={["nome"]}
                             placeholder="Selecione uma Modalidade"
@@ -311,7 +362,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                           <Combobox
                             data={produtos}
                             displayField="nome"
-                            value={produtos.find(p => p.id === field.value) || null}
+                            value={produtos.find((p) => p.id === field.value) || null}
                             onChange={(selected) => field.onChange(selected?.id || "")}
                             searchFields={["nome"]}
                             placeholder="Selecione o Tipo de Operação"
@@ -330,83 +381,29 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                   <CardTitle>Tabela Taxa</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {/* Nome da Tabela */}
-                  <FormField
-                    control={methods.control}
-                    name="nome_taxa"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Tabela</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Digite o nome" 
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Prazo Mínimo */}
-                  <FormField
-                    control={methods.control}
-                    name="prazo_minimo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prazo mínimo</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="12" 
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Prazo Máximo */}
-                  <FormField
-                    control={methods.control}
-                    name="prazo_maximo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prazo máximo</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="64" 
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Taxa Mensal */}
-                  <FormField
-                    control={methods.control}
-                    name="taxa_mensal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Taxa mensal</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="1.6" 
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Campos de texto mapeados */}
+                  {textFields.map((conf) => (
+                    <FormField
+                      key={conf.name}
+                      control={methods.control}
+                      name={conf.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{conf.label}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={conf.placeholder} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
 
                   {/* Incrementador */}
                   <FormField
                     control={methods.control}
                     name="incrementador"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>Incrementador</FormLabel>
                         <FormControl>
@@ -417,30 +414,17 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               <Combobox
                                 data={[{ id: "PERSONALIZADO", name: "PERSONALIZADO" }]}
                                 displayField="name"
-                                value={{ id: controllerField.value, name: controllerField.value }}
-                                onChange={(selected) => controllerField.onChange(selected?.id || "")}
+                                value={{
+                                  id: controllerField.value,
+                                  name: controllerField.value
+                                }}
+                                onChange={(selected) =>
+                                  controllerField.onChange(selected?.id || "")
+                                }
                                 searchFields={["name"]}
                                 placeholder="Selecione o incrementador"
                               />
                             )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Periodicidade */}
-                  <FormField
-                    control={methods.control}
-                    name="periodiciade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Periodicidade</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="12" 
-                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -529,6 +513,35 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                   />
                 </CardContent>
               </Card>
+
+              {/* Seção do RO */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Roteiro Operacional</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={methods.control}
+                    name="RO"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de RO</FormLabel>
+                        <FormControl>
+                          <Combobox
+                            data={RO}
+                            displayField="nome"
+                            value={RO.find((p) => p.id === field.value) || null}
+                            onChange={(selected) => field.onChange(selected?.id || "")}
+                            searchFields={["nome"]}
+                            placeholder="Selecione o Tipo de RO"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             </div>
 
             <div className="mt-6 flex justify-end gap-4">
@@ -537,6 +550,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading ? "Cadastrando..." : "Cadastrar Produto e Taxa"}
+
               </Button>
             </div>
           </form>
