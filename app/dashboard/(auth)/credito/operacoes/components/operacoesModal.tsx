@@ -325,14 +325,18 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                     <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
 
                     {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
-                    {(item.status === "pending" || item.status === "failed") && (
-                      <Button
-                        size="sm"
-                        className="mt-2"
-                        onClick={() => setPendenciaModal({ open: true, evento: item })}>
-                        Resolver Pendência
-                      </Button>
-                    )}
+                    {(item.status === "pending" || item.status === "failed") &&
+                      item.tipoPendencia &&
+                      Object.keys(item.tipoPendencia).length > 0 &&
+                      item.campos &&
+                      Object.keys(item.campos).length > 0 && (
+                        <Button
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => setPendenciaModal({ open: true, evento: item })}>
+                          Resolver Pendência
+                        </Button>
+                      )}
                   </div>
                 </div>
               ))}
