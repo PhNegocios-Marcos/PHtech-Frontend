@@ -32,7 +32,7 @@ export default function Page() {
           )}
         </div>
 
-        {!isCadastroOpen && <OperacoesTable />}
+         <OperacoesTable />
     </ProtectedRoute>
   );
 }

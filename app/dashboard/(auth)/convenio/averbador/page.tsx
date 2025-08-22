@@ -26,7 +26,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isCadastroOpen && <AverbadorTable />}
+       <AverbadorTable />
 
       <CadastroAverbadorModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

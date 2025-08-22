@@ -60,7 +60,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isCadastroOpen && <EquipesTable />}
+       <EquipesTable />
       
       <CadastroUsuarioModal 
         isOpen={isCadastroOpen} 

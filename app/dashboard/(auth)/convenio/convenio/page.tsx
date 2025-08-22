@@ -26,7 +26,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isCadastroOpen && <ConveniosTable />}
+       <ConveniosTable />
 
       <CadastroConvenioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

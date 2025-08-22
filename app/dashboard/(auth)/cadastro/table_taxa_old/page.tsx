@@ -25,7 +25,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isCadastroOpen && <TaxaProduto onClose={handleCloseCadastro} />}
+       <TaxaProduto onClose={handleCloseCadastro} />
 
       <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

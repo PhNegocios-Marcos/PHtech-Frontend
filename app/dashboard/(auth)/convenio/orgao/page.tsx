@@ -26,7 +26,7 @@ export default function Page() {
         )}
       </div>
 
-      {!isCadastroOpen && <OrgaoModal />}
+       <OrgaoModal />
 
       <CadastroOrgao isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>

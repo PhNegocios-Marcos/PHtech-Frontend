@@ -33,7 +33,7 @@ export default function Page() {
           )}
         </div>
 
-        {!isCadastroOpen && <UsuariosTable />}
+         <UsuariosTable />
 
         {/* Modal de cadastro novo usuário */}
         <CadastroUsuarioModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />

@@ -25,7 +25,7 @@ export default function Page() {
           )}
         </div>
 
-        {!isCadastroOpen && <SubprodutosTable />}
+         <SubprodutosTable />
 
         <CadastroSubprodutoModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
