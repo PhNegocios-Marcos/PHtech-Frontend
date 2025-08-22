@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 import {
   Table,
@@ -101,7 +102,13 @@ const pixKeyTypeOptions = [
   { id: "4", name: "Chave Aleatória" }
 ];
 
-export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHash, simulacaoSelecionadaKey }: PropostaClienteProps) {
+export default function PropostaCliente({
+  cpf,
+  simulacao,
+  proutoName,
+  produtoHash,
+  simulacaoSelecionadaKey
+}: PropostaClienteProps) {
   const [cliente, setCliente] = useState<ClienteApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +120,8 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
   const [pixValue, setPixValue] = useState("");
 
   const cleanCPF = cpf.replace(/\D/g, "");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchCliente() {
@@ -179,26 +188,37 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
   const gerarProposta = async () => {
     try {
       // Preparar dados da simulação no formato esperado
-      const simulacaoData = simulacao ? {
-        VALOR_FINANCIADO: simulacao.VALOR_FINANCIADO?.toFixed(2) || "0.00",
-        VALOR_PRESTACAO: simulacao.PARCELAS[0]?.PRESTACAO?.toFixed(2) || "0.00",
-        PRAZO: simulacao.PRAZO || simulacao.PARCELAS.length,
-        VALOR_LIQUIDO: (simulacao.valorCliente - (simulacao.iof || 0) - (simulacao.taxaCadastro || 0)).toFixed(2),
-        IOF:  (simulacao.iof || 0).toFixed(2),
-        VALOR_BRUTO: simulacao.valorCliente?.toFixed(2),
-        PARCELAS: simulacao.PARCELAS.reduce((acc, parcela, index) => {
-          acc[(index + 1).toString()] = {
-            VENCIMENTO: new Date(Date.now() + (index + 1) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            SALDO_DEVEDOR: "0.00",
-            AMORTIZACAO: (parcela.PRESTACAO - parcela.JUROS).toFixed(2),
-            JUROS: parcela.JUROS.toFixed(2),
-            PRESTACAO: parcela.PRESTACAO.toFixed(2)
-          };
-          return acc;
-        }, {} as Record<string, any>),
-        NOME_TABELA: proutoName,
-        TAXA_MENSAL: simulacao.TAXA_MENSAL?.toFixed(2) || "0.00"
-      } : {};
+      const simulacaoData = simulacao
+        ? {
+            VALOR_FINANCIADO: simulacao.VALOR_FINANCIADO?.toFixed(2) || "0.00",
+            VALOR_PRESTACAO: simulacao.PARCELAS[0]?.PRESTACAO?.toFixed(2) || "0.00",
+            PRAZO: simulacao.PRAZO || simulacao.PARCELAS.length,
+            VALOR_LIQUIDO: (
+              simulacao.valorCliente -
+              (simulacao.iof || 0) -
+              (simulacao.taxaCadastro || 0)
+            ).toFixed(2),
+            IOF: (simulacao.iof || 0).toFixed(2),
+            VALOR_BRUTO: simulacao.valorCliente?.toFixed(2),
+            PARCELAS: simulacao.PARCELAS.reduce(
+              (acc, parcela, index) => {
+                acc[(index + 1).toString()] = {
+                  VENCIMENTO: new Date(Date.now() + (index + 1) * 30 * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split("T")[0],
+                  SALDO_DEVEDOR: "0.00",
+                  AMORTIZACAO: (parcela.PRESTACAO - parcela.JUROS).toFixed(2),
+                  JUROS: parcela.JUROS.toFixed(2),
+                  PRESTACAO: parcela.PRESTACAO.toFixed(2)
+                };
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
+            NOME_TABELA: proutoName,
+            TAXA_MENSAL: simulacao.TAXA_MENSAL?.toFixed(2) || "0.00"
+          }
+        : {};
 
       const body = {
         cliente_hash: cliente?.hash,
@@ -211,9 +231,9 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         proposta_nome: cliente?.nome,
         proposta_email: cliente?.emails?.email ?? "",
         proposta_telefone: Object.values(cliente?.telefones || {})
-          .filter(t => t.status_telefone === 1)
-          .map(t => `${t.ddd}${t.numero}`)
-          .join(';'),
+          .filter((t) => t.status_telefone === 1)
+          .map((t) => `${t.ddd}${t.numero}`)
+          .join(";"),
         proposta_numero_documento: cliente?.numero_documento,
         proposta_tipo_documento: cliente?.tipo_documento,
         proposta_cpf: cliente?.cpf,
@@ -229,7 +249,8 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         proposta_endereco_complemento: cliente?.enderecos?.[0]?.complemento ?? "",
         proposta_endereco_bairro: cliente?.enderecos?.[0]?.bairro ?? "",
         proposta_endereco_cidade: cliente?.enderecos?.[0]?.cidade ?? "",
-        proposta_endereco_estado: cliente?.enderecos?.[0]?.estado ?? cliente?.enderecos?.[0]?.uf ?? "",
+        proposta_endereco_estado:
+          cliente?.enderecos?.[0]?.estado ?? cliente?.enderecos?.[0]?.uf ?? "",
         proposta_endereco_uf: cliente?.enderecos?.[0]?.uf ?? "",
         proposta_valor_solicitado: simulacao?.valorCliente?.toFixed(2) || "0.00",
         proposta_banco_agencia: cliente?.dados_bancarios?.[0]?.agencia ?? "",
@@ -239,9 +260,11 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
         proposta_status: 1, // EM ANALISE
         proposta_tipo_liquidacao: 1,
         roteiro_operacional_hash: "0198566d-269a-718f-923e-3413ddad1c76",
-        simulacao: simulacao ? {
-          [simulacaoSelecionadaKey]: simulacaoData
-        } : {}
+        simulacao: simulacao
+          ? {
+              [simulacaoSelecionadaKey]: simulacaoData
+            }
+          : {}
       };
 
       const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
@@ -258,6 +281,8 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
           boxShadow: "var(--toast-shadow)"
         }
       });
+
+      navigate("/dashboard/credito/operacoes"); // Redireciona programaticamente
     } catch (error) {
       console.error("erro ao gerar proposta", error);
       toast.error("Erro ao gerar proposta", {
@@ -386,8 +411,7 @@ export default function PropostaCliente({ cpf, simulacao, proutoName, produtoHas
                 <strong>IOF:</strong> R$ {(simulacao.iof ?? 0).toFixed(2)}
               </p>
               <p>
-                <strong>Taxa de Cadastro:</strong> R${" "}
-                {(simulacao.taxaCadastro ?? 0).toFixed(2)}
+                <strong>Taxa de Cadastro:</strong> R$ {(simulacao.taxaCadastro ?? 0).toFixed(2)}
               </p>
               <p>
                 <strong>Valor Cliente:</strong> R$ {(simulacao.valorCliente ?? 0).toFixed(2)}
