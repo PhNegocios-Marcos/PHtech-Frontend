@@ -49,6 +49,9 @@ export function CarregandoTable() {
                 <TableCell>
                   <Skeleton className="h-5 w-80" />
                 </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-80" />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
