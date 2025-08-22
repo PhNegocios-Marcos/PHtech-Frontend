@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation"; // Alterado para useRouter do Next.js
 
 import {
   Table,
@@ -113,6 +113,7 @@ export default function PropostaCliente({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token, selectedPromotoraId, userData } = useAuth();
+  const router = useRouter(); // Alterado para useRouter do Next.js
 
   const idUser = (userData as any)?.id ?? "null";
 
@@ -120,8 +121,6 @@ export default function PropostaCliente({
   const [pixValue, setPixValue] = useState("");
 
   const cleanCPF = cpf.replace(/\D/g, "");
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchCliente() {
@@ -282,7 +281,7 @@ export default function PropostaCliente({
         }
       });
 
-      navigate("/dashboard/credito/operacoes"); // Redireciona programaticamente
+      router.push("/dashboard/credito/operacoes"); // Alterado para router.push
     } catch (error) {
       console.error("erro ao gerar proposta", error);
       toast.error("Erro ao gerar proposta", {
