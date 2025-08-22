@@ -61,7 +61,25 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const promotoraColumns: ColumnDef<Promotora>[] = [
     { accessorKey: "nome", header: "Nome" },
     { accessorKey: "razao_social", header: "Razão Social" },
-    { accessorKey: "cnpj", header: "CNPJ" },
+    {
+      accessorKey: "cnpj",
+      header: "CNPJ",
+      cell: ({ getValue }) => {
+        const cnpj = getValue<string>() || "";
+        // Função simples para formatar CNPJ
+        const formatCNPJ = (value: string) => {
+          return value
+            .replace(/\D/g, "") // remove tudo que não é número
+            .replace(/^(\d{2})(\d)/, "$1.$2")
+            .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+            .replace(/\.(\d{3})(\d)/, ".$1/$2")
+            .replace(/(\d{4})(\d)/, "$1-$2")
+            .replace(/(-\d{2})\d+?$/, "$1"); // impede inserir mais que 14 números
+        };
+
+        return formatCNPJ(cnpj);
+      }
+    },
     { accessorKey: "representante", header: "Representante" },
     { accessorKey: "master", header: "É Master?" },
     {
@@ -146,9 +164,9 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
         console.error("Erro ao buscar promotoras:", error.message || error);
         toast.error("Erro ao carregar lista de promotoras", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: error.message || "Tente novamente mais tarde"
         });
@@ -160,9 +178,9 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
     } else {
       toast.error("Autenticação necessária", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: "Faça login para acessar esta página"
       });
@@ -200,18 +218,18 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
       onSelectPromotora(promotora);
       toast.success("Promotora selecionada", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: `Editando: ${promotora.nome}`
       });
     } catch (error: any) {
       toast.error("Erro ao selecionar promotora", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: error.message || "Tente novamente"
       });
