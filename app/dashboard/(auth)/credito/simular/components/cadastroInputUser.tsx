@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Trash2, CirclePlus } from "lucide-react";
 import {
   Form,
   FormField,
@@ -166,15 +167,17 @@ export default function CadastroCamposModal({
     return sectionOptions.filter((option) => !selectedSections.includes(option.value));
   };
 
-  const transformApiData = (apiData: any): FormData['sections'] => {
-    if (!apiData || typeof apiData !== 'object') {
-      return [{
-        section: "DadosPessoais",
-        fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-      }];
+  const transformApiData = (apiData: any): FormData["sections"] => {
+    if (!apiData || typeof apiData !== "object") {
+      return [
+        {
+          section: "DadosPessoais",
+          fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+        }
+      ];
     }
 
-    const sections: FormData['sections'] = [];
+    const sections: FormData["sections"] = [];
 
     Object.keys(apiData).forEach((sectionName) => {
       const sectionData = apiData[sectionName];
@@ -194,10 +197,14 @@ export default function CadastroCamposModal({
       }
     });
 
-    return sections.length > 0 ? sections : [{
-      section: "DadosPessoais",
-      fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-    }];
+    return sections.length > 0
+      ? sections
+      : [
+          {
+            section: "DadosPessoais",
+            fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+          }
+        ];
   };
 
   useEffect(() => {
@@ -228,9 +235,9 @@ export default function CadastroCamposModal({
         console.error("Erro ao listar produtos:", error);
         toast.error("Erro ao listar produtos", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -244,23 +251,28 @@ export default function CadastroCamposModal({
 
     async function fetchConfig() {
       try {
-        const response = await fetch(`${API_BASE_URL}/produto-config-campos-cadastro/listar?produto_hash=${produtoSelect.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache"
+        const response = await fetch(
+          `${API_BASE_URL}/produto-config-campos-cadastro/listar?produto_hash=${produtoSelect.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "Cache-Control": "no-cache"
+            }
           }
-        });
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
             methods.reset({
               produto_hash: produtoSelect.id,
-              sections: [{
-                section: "DadosPessoais",
-                fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-              }]
+              sections: [
+                {
+                  section: "DadosPessoais",
+                  fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+                }
+              ]
             });
             return;
           }
@@ -274,17 +286,19 @@ export default function CadastroCamposModal({
         console.error("Erro ao carregar configuração:", error);
         toast.error("Erro ao carregar configuração", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         methods.reset({
           produto_hash: produtoSelect.id,
-          sections: [{
-            section: "DadosPessoais",
-            fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-          }]
+          sections: [
+            {
+              section: "DadosPessoais",
+              fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+            }
+          ]
         });
       }
     }
@@ -300,9 +314,9 @@ export default function CadastroCamposModal({
     if (!token) {
       toast.error("Token não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -338,9 +352,9 @@ export default function CadastroCamposModal({
 
       toast.success("Configuração de campos cadastrada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       methods.reset();
@@ -353,9 +367,9 @@ export default function CadastroCamposModal({
       console.error("Erro ao cadastrar configuração de campos:", error);
       toast.error(`Erro ao cadastrar configuração: ${error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -414,7 +428,9 @@ export default function CadastroCamposModal({
                     />
 
                     {sections.map((section, sectionIndex) => (
-                      <div key={section.id} className="rounded-md p-4 shadow-lg border-2 border-solid">
+                      <div
+                        key={section.id}
+                        className="rounded-md border-2 border-solid p-4 shadow-lg">
                         <FormField
                           control={methods.control}
                           name={`sections.${sectionIndex}.section`}
@@ -451,7 +467,7 @@ export default function CadastroCamposModal({
                           variant="destructive"
                           onClick={() => removeSection(sectionIndex)}
                           className="mt-4">
-                          Remover Seção
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -469,7 +485,7 @@ export default function CadastroCamposModal({
                           })
                         }
                         className="mt-4">
-                        Adicionar Seção
+                        <CirclePlus className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
@@ -504,7 +520,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
   });
 
   const currentSection = watch(`sections.${sectionIndex}.section`);
-  const filteredFields = availableFields.filter(field => field.section === currentSection);
+  const filteredFields = availableFields.filter((field) => field.section === currentSection);
 
   useEffect(() => {
     fields.forEach((field, fieldIndex) => {
@@ -522,7 +538,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
   return (
     <div className={clsx("grid gap-4", className)}>
       {fields.map((field, fieldIndex) => (
-        <div key={field.id} className="rounded-md p-4 border-1 border-solid">
+        <div key={field.id} className="rounded-md border-1 border-solid p-4">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}
@@ -539,7 +555,10 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
                         field.onChange(selected?.value || "");
                         if (selected?.value === "dados_bancarios.0.tipo_pix") {
                           setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "select");
-                          setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, tipoPixOptions);
+                          setValue(
+                            `sections.${sectionIndex}.fields.${fieldIndex}.options`,
+                            tipoPixOptions
+                          );
                         } else if (selected?.value === "dados_bancarios.0.pix") {
                           setValue(`sections.${sectionIndex}.fields.${fieldIndex}.type`, "text");
                           setValue(`sections.${sectionIndex}.fields.${fieldIndex}.options`, []);
@@ -598,8 +617,10 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
                       searchFields={["label"]}
                       placeholder="Selecione o tipo"
                       disabled={
-                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.tipo_pix" ||
-                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.pix"
+                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) ===
+                          "dados_bancarios.0.tipo_pix" ||
+                        watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) ===
+                          "dados_bancarios.0.pix"
                       }
                     />
                   </FormControl>
@@ -632,7 +653,10 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
             <OptionArray
               sectionIndex={sectionIndex}
               fieldIndex={fieldIndex}
-              isTipoPix={watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) === "dados_bancarios.0.tipo_pix"}
+              isTipoPix={
+                watch(`sections.${sectionIndex}.fields.${fieldIndex}.name`) ===
+                "dados_bancarios.0.tipo_pix"
+              }
             />
           )}
 
@@ -641,7 +665,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
             variant="destructive"
             onClick={() => remove(fieldIndex)}
             className="mt-4">
-            Remover Campo
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ))}
@@ -651,7 +675,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
         variant="outline"
         onClick={() => append({ name: "", label: "", type: "text", required: false, options: [] })}
         className="mt-4">
-        Adicionar Campo
+        <CirclePlus className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -682,11 +706,7 @@ function OptionArray({ sectionIndex, fieldIndex, isTipoPix }: OptionArrayProps) 
               <FormItem>
                 <FormLabel>Valor</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Digite o valor"
-                    {...field}
-                    disabled={isTipoPix}
-                  />
+                  <Input placeholder="Digite o valor" {...field} disabled={isTipoPix} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -699,11 +719,7 @@ function OptionArray({ sectionIndex, fieldIndex, isTipoPix }: OptionArrayProps) 
               <FormItem>
                 <FormLabel>Rótulo</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Digite o rótulo"
-                    {...field}
-                    disabled={isTipoPix}
-                  />
+                  <Input placeholder="Digite o rótulo" {...field} disabled={isTipoPix} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -726,7 +742,7 @@ function OptionArray({ sectionIndex, fieldIndex, isTipoPix }: OptionArrayProps) 
           variant="outline"
           className="mt-4"
           onClick={() => append({ value: "", label: "" })}>
-          Adicionar Opção
+          <CirclePlus className="h-4 w-4" />
         </Button>
       )}
     </div>

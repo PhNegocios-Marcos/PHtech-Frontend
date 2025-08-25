@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Trash2, CirclePlus } from "lucide-react";
 import {
   Form,
   FormField,
@@ -120,7 +121,11 @@ export default function CadastroInputProduto({
     { value: "data_inicio", label: "Data de Início", section: "DadosSimulacao" },
     { value: "valor_liberado", label: "Valor Liberado", section: "ResultadoSimulacao" },
     { value: "valor_parcela", label: "Valor Parcela", section: "ResultadoSimulacao" },
-    { value: "quantidade_parcelas", label: "Quantidade de Parcelas", section: "ResultadoSimulacao" },
+    {
+      value: "quantidade_parcelas",
+      label: "Quantidade de Parcelas",
+      section: "ResultadoSimulacao"
+    },
     { value: "cet", label: "CET", section: "ResultadoSimulacao" },
     { value: "taxa_juros", label: "Taxa de Juros", section: "ResultadoSimulacao" }
   ]);
@@ -140,17 +145,19 @@ export default function CadastroInputProduto({
   };
 
   // AJUSTE AQUI: Converte o retorno do endpoint para o formato do formulário
-  const transformApiData = (apiData: any): FormData['sections'] => {
+  const transformApiData = (apiData: any): FormData["sections"] => {
     if (!Array.isArray(apiData) || apiData.length === 0) {
-      return [{
-        section: "DadosSimulacao",
-        fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-      }];
+      return [
+        {
+          section: "DadosSimulacao",
+          fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+        }
+      ];
     }
 
     // O endpoint retorna um array. Vamos assumir que cada item é uma seção (pode adaptar se vier mais de uma seção)
     // Aqui, exemplos para 'DadosSimulacao' e 'ResultadoSimulacao'. Adapte se vier mais seções.
-    const sections: FormData['sections'] = [];
+    const sections: FormData["sections"] = [];
 
     // Exemplo: pegar sempre a seção "DadosSimulacao" se tiver
     const dadosSimulacao = apiData.find(
@@ -168,7 +175,10 @@ export default function CadastroInputProduto({
         fields: fieldsArr.map((f) => ({
           name: f.key || f.name || "",
           label: f.label || "",
-          type: (f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select") ? f.type : "text",
+          type:
+            f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select"
+              ? f.type
+              : "text",
           required: typeof f.required === "boolean" ? f.required : false,
           options: f.options || []
         }))
@@ -191,7 +201,10 @@ export default function CadastroInputProduto({
         fields: fieldsArr.map((f) => ({
           name: f.key || f.name || "",
           label: f.label || "",
-          type: (f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select") ? f.type : "text",
+          type:
+            f.type === "text" || f.type === "number" || f.type === "date" || f.type === "select"
+              ? f.type
+              : "text",
           required: typeof f.required === "boolean" ? f.required : false,
           options: f.options || []
         }))
@@ -239,9 +252,9 @@ export default function CadastroInputProduto({
         console.error("Erro ao listar produtos:", error);
         toast.error("Erro ao listar produtos", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -255,23 +268,28 @@ export default function CadastroInputProduto({
 
     async function fetchConfig() {
       try {
-        const response = await fetch(`${API_BASE_URL}/simulacao-campos-produtos/listar?produto_hash=${produtoSelect.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache"
+        const response = await fetch(
+          `${API_BASE_URL}/simulacao-campos-produtos/listar?produto_hash=${produtoSelect.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "Cache-Control": "no-cache"
+            }
           }
-        });
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
             methods.reset({
               produto_hash: produtoSelect.id,
-              sections: [{
-                section: "DadosSimulacao",
-                fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-              }]
+              sections: [
+                {
+                  section: "DadosSimulacao",
+                  fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+                }
+              ]
             });
             return;
           }
@@ -285,17 +303,19 @@ export default function CadastroInputProduto({
         console.error("Erro ao carregar configuração:", error);
         toast.error("Erro ao carregar configuração", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         methods.reset({
           produto_hash: produtoSelect.id,
-          sections: [{
-            section: "DadosSimulacao",
-            fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
-          }]
+          sections: [
+            {
+              section: "DadosSimulacao",
+              fields: [{ name: "", label: "", type: "text", required: false, options: [] }]
+            }
+          ]
         });
       }
     }
@@ -311,9 +331,9 @@ export default function CadastroInputProduto({
     if (!token) {
       toast.error("Token não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -349,9 +369,9 @@ export default function CadastroInputProduto({
 
       toast.success("Configuração de campos da simulação salva com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       methods.reset();
@@ -364,9 +384,9 @@ export default function CadastroInputProduto({
       console.error("Erro ao cadastrar configuração de campos:", error);
       toast.error(`Erro ao cadastrar configuração: ${error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -425,7 +445,9 @@ export default function CadastroInputProduto({
                     />
 
                     {sections.map((section, sectionIndex) => (
-                      <div key={section.id} className="rounded-md p-4 shadow-lg border-2 border-solid">
+                      <div
+                        key={section.id}
+                        className="rounded-md border-2 border-solid p-4 shadow-lg">
                         <FormField
                           control={methods.control}
                           name={`sections.${sectionIndex}.section`}
@@ -462,7 +484,7 @@ export default function CadastroInputProduto({
                           variant="destructive"
                           onClick={() => removeSection(sectionIndex)}
                           className="mt-4">
-                          Remover Seção
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -480,7 +502,7 @@ export default function CadastroInputProduto({
                           })
                         }
                         className="mt-4">
-                        Adicionar Seção
+                        <CirclePlus className="h-4 w-4" />{" "}
                       </Button>
                     )}
                   </div>
@@ -515,12 +537,14 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
   });
 
   const currentSection = watch(`sections.${sectionIndex}.section`);
-  const filteredFields = availableFields.filter(field => field.section === currentSection);
+  const filteredFields = availableFields.filter((field) => field.section === currentSection);
 
   return (
     <div className={clsx("grid gap-4", className)}>
       {fields.map((field, fieldIndex) => (
-        <div key={field.id} className="rounded-md p-4 border-1 border-solid hover:bg-[var(--primary-100)]">
+        <div
+          key={field.id}
+          className="rounded-md border-1 border-solid p-4 hover:bg-[var(--primary-100)]">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}
@@ -614,10 +638,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
           </div>
 
           {watch(`sections.${sectionIndex}.fields.${fieldIndex}.type`) === "select" && (
-            <OptionArray
-              sectionIndex={sectionIndex}
-              fieldIndex={fieldIndex}
-            />
+            <OptionArray sectionIndex={sectionIndex} fieldIndex={fieldIndex} />
           )}
 
           <Button
@@ -625,7 +646,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
             variant="destructive"
             onClick={() => remove(fieldIndex)}
             className="mt-4">
-            Remover Campo
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ))}
@@ -635,7 +656,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
         variant="outline"
         onClick={() => append({ name: "", label: "", type: "text", required: false, options: [] })}
         className="mt-4">
-        Adicionar Campo
+        <CirclePlus className="h-4 w-4" />{" "}
       </Button>
     </div>
   );
@@ -699,7 +720,7 @@ function OptionArray({ sectionIndex, fieldIndex }: OptionArrayProps) {
         variant="outline"
         className="mt-4"
         onClick={() => append({ value: "", label: "" })}>
-        Adicionar Opção
+        <CirclePlus className="h-4 w-4" />{" "}
       </Button>
     </div>
   );
