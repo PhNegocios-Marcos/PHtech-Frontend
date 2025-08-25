@@ -19,9 +19,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // console.log("localStorage", localStorage);
   // console.log("sessionStorage", sessionStorage);
 
-
-
-
   const [defaultOpen, setDefaultOpen] = useState(true);
 
   useEffect(() => {
@@ -36,6 +33,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleInatividade = () => {
+    sessionStorage.clear(); // ou removeItem("token"), etc.
     router.push("/dashboard/login");
   };
 
