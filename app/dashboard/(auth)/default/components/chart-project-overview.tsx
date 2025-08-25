@@ -42,6 +42,28 @@ function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// Função para adicionar um dia à data e formatar
+const adjustAndFormatDate = (value: string) => {
+  try {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      console.warn('Data inválida:', value);
+      return value;
+    }
+    
+    // Adiciona um dia para compensar o fuso horário
+    date.setDate(date.getDate() + 1);
+    
+    return date.toLocaleDateString("pt-BR", {
+      month: "short",
+      day: "numeric"
+    });
+  } catch (error) {
+    console.error('Erro ao formatar data:', error, value);
+    return value;
+  }
+};
+
 export function ChartProjectOverview() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
@@ -66,29 +88,38 @@ export function ChartProjectOverview() {
       .then((res) => {
         const { charConfig, dataValues } = res.data;
 
-        // Converte o objeto dataValues em array ordenado por data
-        const dataArray = (Object.values(dataValues) as ChartPoint[]).sort(
-          (a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime()
+        // Converte o objeto dataValues em array e ordena por data
+        const dataArray = Object.values(dataValues) as ChartPoint[];
+        
+        const sortedData = dataArray.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
-        setChartData(dataArray);
+        console.log('Dados carregados:', sortedData);
+        setChartData(sortedData);
         setChartConfig(charConfig);
       })
       .catch((err) => {
         console.error("Erro ao carregar gráfico:", err);
       });
-  }, []);
+  }, [token]);
 
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date as string);
-    const referenceDate = new Date();
-    let daysToSubtract = 90;
-    if (timeRange === "30d") daysToSubtract = 30;
-    else if (timeRange === "7d") daysToSubtract = 7;
+    if (!item.date) return false;
+    
+    const itemDate = new Date(item.date);
+    if (isNaN(itemDate.getTime())) return false;
 
-    const startDate = new Date(referenceDate);
-    startDate.setDate(startDate.getDate() - daysToSubtract);
-    return date >= startDate;
+    const today = new Date();
+    let cutoffDate = new Date();
+    
+    if (timeRange === "90d") cutoffDate.setDate(today.getDate() - 90);
+    else if (timeRange === "30d") cutoffDate.setDate(today.getDate() - 30);
+    else if (timeRange === "7d") cutoffDate.setDate(today.getDate() - 7);
+
+    cutoffDate.setHours(0, 0, 0, 0);
+
+    return itemDate >= cutoffDate;
   });
 
   const dataKeys = Object.keys(chartConfig);
@@ -160,13 +191,7 @@ export function ChartProjectOverview() {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("pt-BR", {
-                  month: "short",
-                  day: "numeric"
-                });
-              }}
+              tickFormatter={adjustAndFormatDate}
             />
 
             <ChartTooltip
@@ -174,12 +199,12 @@ export function ChartProjectOverview() {
               defaultIndex={isMobile ? -1 : 10}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) =>
-                    new Date(value).toLocaleDateString("pt-BR", {
-                      month: "short",
-                      day: "numeric"
-                    })
-                  }
+                  labelFormatter={(value) => {
+                    if (typeof value === 'string' && value.includes('-')) {
+                      return adjustAndFormatDate(value);
+                    }
+                    return String(value);
+                  }}
                   indicator="dot"
                 />
               }
