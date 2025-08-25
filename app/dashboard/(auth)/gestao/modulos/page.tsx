@@ -14,13 +14,13 @@ export default function Page() {
 
   const handleCloseCadastro = () => {
     setIsCadastroOpen(false);
-    toast.success("Módulo cadastrado com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Módulo cadastrado com sucesso!", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   const handleOpenCadastro = () => {

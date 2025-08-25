@@ -46,13 +46,13 @@ export function ModulosDrawer({ isOpen, onClose, modulos, onRefresh }: ModalDraw
   const handleSuccess = () => {
     onRefresh?.();
     onClose();
-    toast.success("Operação realizada com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Operação realizada com sucesso!", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   return (

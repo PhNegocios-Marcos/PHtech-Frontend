@@ -146,13 +146,13 @@ export function ModulosTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
-    toast.success("Tabela de módulos atualizada!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Tabela de módulos atualizada!", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   return (
