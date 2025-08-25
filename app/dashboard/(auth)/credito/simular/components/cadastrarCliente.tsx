@@ -104,6 +104,12 @@ export default function Cadastrar({
     telefones: {
       0: { ddd: "", numero: "" }
     },
+    emails: {
+      0: {
+        email: "",
+        status: 1
+      }
+    },
     enderecos: {
       0: {
         cep: "",
@@ -114,12 +120,6 @@ export default function Cadastrar({
         cidade: "",
         estado: "",
         uf: ""
-      }
-    },
-    emails: {
-      0: {
-        email: "",
-        status: 1
       }
     },
     dados_bancarios: {

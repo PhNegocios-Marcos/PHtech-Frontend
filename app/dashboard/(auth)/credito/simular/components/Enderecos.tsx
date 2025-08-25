@@ -1,7 +1,6 @@
-// Arquivo: Enderecos.tsx
 "use client";
 
-import React, { forwardRef, useImperativeHandle, useEffect } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +21,12 @@ interface EnderecoProps {
   fields: FormField[];
 }
 
+const getNestedValue = (obj: any, path: string): string => {
+  return path.split(".").reduce((acc, part) => acc?.[part], obj) || "";
+};
+
 export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoProps, ref) => {
-  const e = formData.enderecos[0] || {};
+  const e = formData.enderecos?.[0] || {};
 
   // Criar schema dinamicamente
   const createSchema = () => {
@@ -61,14 +64,6 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
     ),
   });
 
-  // Sincronizar formData com o estado do formulário
-  useEffect(() => {
-    fields.forEach((field) => {
-      const fieldName = field.name.startsWith("enderecos.0.") ? field.name.split(".").slice(2).join(".") : field.name;
-      setValue(fieldName, e[fieldName] || "");
-    });
-  }, [formData, setValue, fields]);
-
   useImperativeHandle(ref, () => ({
     validate: () => trigger(),
   }));
@@ -96,10 +91,10 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
       if (data.erro) {
         toast.error("CEP não encontrado", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)",
+          },
         });
         return;
       }
@@ -119,19 +114,19 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
 
       toast.success("Endereço encontrado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)",
+        },
       });
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
       toast.error("Não foi possível buscar o endereço. Verifique sua conexão.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)",
+        },
       });
     }
   };
@@ -148,6 +143,7 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
           <Input
             {...register(fieldName)}
             placeholder={field.label}
+            value={e[fieldName] || ""}
             onChange={(e) => {
               const rawValue = e.target.value;
               const formattedValue = formatCep(rawValue);
@@ -164,6 +160,7 @@ export const Enderecos = forwardRef(({ formData, onChange, fields }: EnderecoPro
             {...register(fieldName)}
             placeholder={field.label}
             type={field.type}
+            value={e[fieldName] || ""}
             onChange={(e) => {
               const value = field.type === "number" ? parseInt(e.target.value) || 0 : e.target.value;
               setValue(fieldName, value);

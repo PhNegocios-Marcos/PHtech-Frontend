@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ interface DadosBancariosProps {
 export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, DadosBancariosProps>(
   ({ formData, onChange, fields }, ref) => {
     const uniqueFields = Array.from(new Map(fields.map((field) => [field.name, field])).values());
+    const [currentPixType, setCurrentPixType] = useState("");
 
     const createSchema = () => {
       const schemaObj: Record<string, any> = {};
@@ -52,7 +53,8 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
       register,
       setValue,
       formState: { errors },
-      trigger
+      trigger,
+      watch
     } = useForm<DadosBancariosFormData>({
       resolver: zodResolver(dadosBancariosSchema),
       defaultValues: uniqueFields.reduce(
@@ -60,7 +62,7 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
           const keys = field.name.split(".");
           let value = formData;
           for (const key of keys) {
-            value = value[key] || "";
+            value = value?.[key] || "";
           }
           acc[field.name] = value;
           return acc;
@@ -68,6 +70,22 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
         {} as Record<string, any>
       )
     });
+
+    // Sincronizar formData com o estado do formulário
+    useEffect(() => {
+      uniqueFields.forEach((field) => {
+        const keys = field.name.split(".");
+        let value = formData;
+        for (const key of keys) {
+          value = value?.[key] || "";
+        }
+        setValue(field.name, value);
+      });
+
+      // Inicializar o tipo PIX atual
+      const pixType = getFieldValue("dados_bancarios.0.tipo_pix");
+      setCurrentPixType(pixType);
+    }, [formData, setValue, uniqueFields]);
 
     useImperativeHandle(ref, () => ({
       validate: async () => {
@@ -85,9 +103,79 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
       }
     }));
 
-    const renderField = (field: FormField, index: number = 0) => {
+    const getFieldValue = (fieldName: string) => {
+      const keys = fieldName.split(".");
+      let value = formData;
+      for (const key of keys) {
+        value = value?.[key] || "";
+      }
+      return value;
+    };
+
+    // Funções de máscara para cada tipo de PIX
+    const applyMask = (value: string, pixType: string): string => {
+      const cleanValue = value.replace(/\D/g, "");
+      
+      switch (pixType) {
+        case "1": // CPF
+          if (cleanValue.length <= 11) {
+            return cleanValue
+              .replace(/(\d{3})(\d)/, '$1.$2')
+              .replace(/(\d{3})(\d)/, '$1.$2')
+              .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+              .replace(/(-\d{2})\d+?$/, '$1');
+          }
+          break;
+          
+        case "2": // CNPJ
+          if (cleanValue.length <= 14) {
+            return cleanValue
+              .replace(/(\d{2})(\d)/, '$1.$2')
+              .replace(/(\d{3})(\d)/, '$1.$2')
+              .replace(/(\d{3})(\d)/, '$1/$2')
+              .replace(/(\d{4})(\d)/, '$1-$2')
+              .replace(/(-\d{2})\d+?$/, '$1');
+          }
+          break;
+          
+        case "4": // Celular
+          if (cleanValue.length <= 11) {
+            return cleanValue
+              .replace(/(\d{2})(\d)/, '($1) $2')
+              .replace(/(\d{5})(\d)/, '$1-$2')
+              .replace(/(-\d{4})\d+?$/, '$1');
+          }
+          break;
+          
+        case "3": // E-mail - não aplica máscara, apenas validação
+        default:
+          return value;
+      }
+      
+      return value;
+    };
+
+    const handlePixTypeChange = (selected: any) => {
+      const selectedValue = selected?.value ?? "";
+      setCurrentPixType(selectedValue);
+      setValue("dados_bancarios.0.tipo_pix", selectedValue);
+      onChange("dados_bancarios.0.tipo_pix", selectedValue);
+      
+      // Limpar o valor da chave PIX quando mudar o tipo
+      setValue("dados_bancarios.0.chave_pix", "");
+      onChange("dados_bancarios.0.chave_pix", "");
+    };
+
+    const handleChavePixChange = (value: string) => {
+      const maskedValue = applyMask(value, currentPixType);
+      setValue("dados_bancarios.0.chave_pix", maskedValue);
+      onChange("dados_bancarios.0.chave_pix", maskedValue);
+    };
+
+    const renderField = (field: FormField) => {
       const errorMessage = errors[field.name]?.message;
       const isErrorString = typeof errorMessage === "string";
+      const fieldValue = getFieldValue(field.name);
 
       if (field.type === "select" && field.name.includes("tipo_pix")) {
         const options = field.options?.length ? field.options : pixOptions;
@@ -97,18 +185,8 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
             <Combobox
               data={options}
               displayField="label"
-              value={
-                options.find((opt) => opt.value === formData.dados_bancarios[index].tipo_pix) ??
-                null
-              }
-              onChange={(selected) => {
-                const selectedValue = selected?.value ?? "";
-                if (formData.dados_bancarios[index].tipo_pix !== selectedValue) {
-                  setValue(field.name, selectedValue);
-                  onChange(field.name, selectedValue);
-                }
-              }}
-              
+              value={options.find((opt) => opt.value === fieldValue) ?? null}
+              onChange={handlePixTypeChange}
               searchFields={["label"]}
             />
             {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
@@ -116,27 +194,65 @@ export const DadosBancarios = forwardRef<{ validate: () => Promise<boolean> }, D
         );
       }
 
-      const key = field.name.split(".").pop()!;
+      if (field.name.includes("chave_pix")) {
+        return (
+          <div key={field.name} className="space-y-2">
+            <span>{field.label}</span>
+            <Input
+              {...register(field.name)}
+              placeholder={getChavePixPlaceholder(currentPixType)}
+              value={fieldValue}
+              onChange={(e) => handleChavePixChange(e.target.value)}
+              className="mt-1"
+              type={currentPixType === "3" ? "email" : "text"} // Tipo email para chave de e-mail
+            />
+            {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+            {currentPixType && (
+              <p className="text-xs text-gray-500">
+                {getMaskDescription(currentPixType)}
+              </p>
+            )}
+          </div>
+        );
+      }
+
       return (
         <div key={field.name} className="space-y-2">
           <span>{field.label}</span>
           <Input
             {...register(field.name)}
             placeholder={field.label}
-            value={formData.dados_bancarios?.[index.toString()]?.[key] ?? ""}
+            value={fieldValue}
             onChange={(e) => {
               const newValue = e.target.value;
-              const current = formData.dados_bancarios?.[index]?.[key];
-              if (current !== newValue) {
-                setValue(field.name, newValue);
-                onChange(field.name, newValue);
-              }
+              setValue(field.name, newValue);
+              onChange(field.name, newValue);
             }}
             className="mt-1"
           />
           {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
         </div>
       );
+    };
+
+    const getChavePixPlaceholder = (pixType: string): string => {
+      switch (pixType) {
+        case "1": return "000.000.000-00";
+        case "2": return "00.000.000/0000-00";
+        case "3": return "seu.email@exemplo.com";
+        case "4": return "(11) 99999-9999";
+        default: return "Informe a chave PIX";
+      }
+    };
+
+    const getMaskDescription = (pixType: string): string => {
+      switch (pixType) {
+        case "1": return "Formato: 000.000.000-00";
+        case "2": return "Formato: 00.000.000/0000-00";
+        case "3": return "Digite um e-mail válido";
+        case "4": return "Formato: (11) 99999-9999";
+        default: return "Selecione o tipo de chave PIX";
+      }
     };
 
     return (
