@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Form,
@@ -34,7 +34,7 @@ const createSchema = z.object({
   idade_minima: z.string().min(1, "Idade mínima é obrigatória"),
   idade_maxima: z.string().min(1, "Idade máxima é obrigatória"),
   prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
-  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatório"),
+  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatória"),
   valor_bruto_minimo: z.string().min(1, "Valor bruto mínimo é obrigatório"),
   valor_bruto_maximo: z.string().min(1, "Valor bruto máximo é obrigatório"),
   taxa_minima: z.string().min(1, "Taxa mínima é obrigatória"),
@@ -45,7 +45,13 @@ const createSchema = z.object({
   tac_max: z.string().min(1, "TAC máxima é obrigatória"),
   usa_limite_proposta: z.enum(["true", "false"], { message: "Selecione uma opção" }),
   valor_limite_proposta: z.string().optional(),
-  quantidade_propostas_ativas: z.string()
+  quantidade_propostas_ativas: z.string(),
+
+  // novos campos
+  dia_corte_competencia: z.string().min(1, "Dia de corte da competência é obrigatório"),
+  dia_recebimento: z.string().min(1, "Dia de recebimento é obrigatório"),
+  dia_corte_folha_pagamento: z.string().min(1, "Dia de corte da folha é obrigatório"),
+  status: z.enum(["0", "1"], { message: "Selecione um status" })
 });
 
 export type CreateFormData = z.infer<typeof createSchema>;
@@ -93,11 +99,15 @@ export default function CadastroRoteiroModal({
       taxa_maxima: "",
       usa_margem_seguranca: "false",
       valor_margem_seguranca: "",
-      tac_min: "",
-      tac_max: "",
+      // tac_min: "",
+      // tac_max: "",
       usa_limite_proposta: "false",
       valor_limite_proposta: "",
-      quantidade_propostas_ativas: ""
+      quantidade_propostas_ativas: "",
+      dia_corte_competencia: "",
+      dia_recebimento: "",
+      dia_corte_folha_pagamento: "",
+      status: "1"
     }
   });
 
@@ -122,8 +132,11 @@ export default function CadastroRoteiroModal({
     },
     { name: "taxa_minima", label: "Taxa Mínima (% a.m.)", placeholder: "1.5", type: "number" },
     { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
-    { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
-    { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" }
+    // { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
+    // { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" },
+    { name: "dia_corte_competencia", label: "Dia de Corte da Competência", placeholder: "1", type: "number" },
+    { name: "dia_recebimento", label: "Dia de Recebimento", placeholder: "1", type: "number" },
+    { name: "dia_corte_folha_pagamento", label: "Dia de Corte da Folha", placeholder: "1", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -158,6 +171,16 @@ export default function CadastroRoteiroModal({
         placeholder: "Digite o valor da margem",
         type: "number"
       }
+    },
+    {
+      name: "status",
+      label: "Status",
+      placeholder: "Selecione",
+      component: "select",
+      options: [
+        { value: "0", label: "Inativo" },
+        { value: "1", label: "Ativo" }
+      ]
     }
   ];
 
@@ -179,15 +202,19 @@ export default function CadastroRoteiroModal({
         valor_bruto_maximo: parseFloat(data.valor_bruto_maximo),
         taxa_minima: parseFloat(data.taxa_minima),
         taxa_maxima: parseFloat(data.taxa_maxima),
-        usa_margem_seguranca: data.usa_margem_seguranca === "true",
+        usa_margem_seguranca: data.usa_margem_seguranca === "true" ? 1 : 0,
         margem_seguranca:
           data.usa_margem_seguranca === "true" ? parseFloat(data.valor_margem_seguranca || "0") : 0,
-        usa_limite_propostas: data.usa_limite_proposta === "true",
+        usa_limite_propostas: data.usa_limite_proposta === "true" ? 1 : 0,
         valor_limite_proposta:
           data.usa_limite_proposta === "true" ? parseFloat(data.valor_limite_proposta || "0") : 0,
         limite_propostas_ativas: parseInt(data.quantidade_propostas_ativas),
         tarifa_cadastro_minima: parseFloat(data.tac_min),
         tarifa_cadastro_maxima: parseFloat(data.tac_max),
+        dia_corte_competencia: parseInt(data.dia_corte_competencia),
+        dia_recebimento: parseInt(data.dia_recebimento),
+        dia_corte_folha_pagamento: parseInt(data.dia_corte_folha_pagamento),
+        status: parseInt(data.status),
         usuario_criacao: userData?.id
       };
 

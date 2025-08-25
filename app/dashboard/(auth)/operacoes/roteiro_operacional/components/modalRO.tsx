@@ -17,7 +17,8 @@ export function ModalRO({ onClose, onRefresh, roteiro }: ModalROProps) {
   const { userData } = useAuth();
 
   // Converter de RoteiroOperacional para Roteiro
-  const roteiroConvertido: Roteiro = roteiro
+  // Converter de RoteiroOperacional para Roteiro
+  const roteiroConvertido: any = roteiro
     ? {
         rotina_operacional_hash: roteiro.rotina_operacional_hash,
         nome: roteiro.nome,
@@ -29,11 +30,11 @@ export function ModalRO({ onClose, onRefresh, roteiro }: ModalROProps) {
         valor_bruto_maximo: parseFloat(roteiro.valor_bruto_maximo),
         tac_min: parseFloat(roteiro.tarifa_cadastro_minima),
         tac_max: parseFloat(roteiro.tarifa_cadastro_maxima),
-        usa_limite_proposta: roteiro.usa_limite_proposta,
-        usa_margem_seguranca: roteiro.usa_margem_seguranca,
-        valor_limite_proposta: 0, // Você precisa definir como obter esse valor
-        valor_margem_seguranca: 0, // Você precisa definir como obter esse valor
-        usuario_atualizacao: userData?.id
+        usa_limite_proposta: roteiro.usa_limite_proposta ? 1 : 0,
+        usa_margem_seguranca: roteiro.usa_margem_seguranca ? 1 : 0,
+        valor_limite_proposta: 0,
+        valor_margem_seguranca: 0,
+        usuario_atualizacao: userData?.id || ""
       }
     : {
         rotina_operacional_hash: "",
@@ -46,8 +47,10 @@ export function ModalRO({ onClose, onRefresh, roteiro }: ModalROProps) {
         valor_bruto_maximo: 0,
         tac_min: 0,
         tac_max: 0,
-        usa_limite_proposta: false,
-        usa_margem_seguranca: false,
+        usa_limite_proposta: 0,
+        usa_margem_seguranca: 0,
+        valor_limite_proposta: 0,
+        valor_margem_seguranca: 0,
         usuario_atualizacao: ""
       };
 

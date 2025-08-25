@@ -40,20 +40,25 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type RoteiroOperacional = {
+  prazo_minimo: number;
+  tarifa_cadastro_minima: string;
+  tarifa_cadastro_maxima: string;
+  status: number;
   rotina_operacional_hash: string;
-  nome: string;
+  nome: string; // Add this
   descricao: string;
   idade_minima: number;
   idade_maxima: number;
-  prazo_minimo: number;
   prazo_maximo: number;
   valor_bruto_minimo: string;
   valor_bruto_maximo: string;
-  usa_margem_seguranca: boolean;
-  tarifa_cadastro_minima: string;
-  tarifa_cadastro_maxima: string;
-  usa_limite_proposta: boolean;
-  status: number;
+  tac_min: number; // Add this
+  tac_max: number; // Add this
+  usa_limite_proposta: number;
+  usa_margem_seguranca: number;
+  valor_limite_proposta: number;
+  valor_margem_seguranca?: number;
+  usuario_atualizacao: any;
 };
 
 type Props = {
@@ -87,13 +92,17 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
         });
         setRoteiros(response.data);
       } catch (error: any) {
-        toast.error("Não foi possível carregar os roteiros operacionais: " + (error.response?.data?.detail || error.message), {
-          style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+        toast.error(
+          "Não foi possível carregar os roteiros operacionais: " +
+            (error.response?.data?.detail || error.message),
+          {
+            style: {
+              background: "var(--toast-error)",
+              color: "var(--toast-error-foreground)",
+              boxShadow: "var(--toast-shadow)"
+            }
           }
-        });
+        );
         console.error("Erro ao buscar roteiros:", error);
       } finally {
         setLoading(false);
@@ -146,12 +155,16 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
     {
       accessorKey: "tac_min",
       header: "TAC Mínima",
-      cell: ({ row }) => <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
+      cell: ({ row }) => (
+        <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
+      )
     },
     {
       accessorKey: "tac_max",
       header: "TAC Máxima",
-      cell: ({ row }) => <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
+      cell: ({ row }) => (
+        <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
+      )
     },
     {
       accessorKey: "usa_limite_proposta",
