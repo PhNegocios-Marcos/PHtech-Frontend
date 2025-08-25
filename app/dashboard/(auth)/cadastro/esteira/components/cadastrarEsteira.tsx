@@ -433,7 +433,7 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">Ações</h3>
                   {fields.map((field, index) => (
-                    <Card key={field.id} className="mt-4 p-4">
+                    <Card key={field.id} className="mt-4 p-4 shadow-lg border-3 border-solid">
                       <div className="flex justify-between">
                         <h4 className="font-medium">Ação {index + 1}</h4>
                         <Button variant="destructive" onClick={() => remove(index)}>
