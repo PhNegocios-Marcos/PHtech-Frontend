@@ -425,7 +425,7 @@ export default function CadastroInputProduto({
                     />
 
                     {sections.map((section, sectionIndex) => (
-                      <div key={section.id} className="rounded-md border p-4">
+                      <div key={section.id} className="rounded-md p-4 shadow-lg border-2 border-solid">
                         <FormField
                           control={methods.control}
                           name={`sections.${sectionIndex}.section`}
@@ -450,7 +450,7 @@ export default function CadastroInputProduto({
                         />
 
                         <div className="mt-4">
-                          <h3 className="text-lg font-medium">Campos</h3>
+                          {/* <h3 className="text-lg font-medium">Campos</h3> */}
                           <FieldArray
                             sectionIndex={sectionIndex}
                             availableFields={availableFields}
@@ -520,7 +520,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
   return (
     <div className={clsx("grid gap-4", className)}>
       {fields.map((field, fieldIndex) => (
-        <div key={field.id} className="rounded-md border p-4 bg-[var(--secondary-50)]">
+        <div key={field.id} className="rounded-md p-4 border-1 border-solid hover:bg-[var(--primary-100)]">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}

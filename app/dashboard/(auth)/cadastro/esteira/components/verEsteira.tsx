@@ -479,7 +479,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
                 {etapa.processos && etapa.processos.length > 0 && (
                   <div className="mt-4 space-y-6">
                     {etapa.processos.map((processo) => (
-                      <Card key={processo.dadosStatusEtapa.status_hash} className="gap-0 p-4 shadow-lg border-3 border-solid">
+                      <Card key={processo.dadosStatusEtapa.status_hash} className="gap-0 p-4 shadow-lg border-1 border-solid">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">
