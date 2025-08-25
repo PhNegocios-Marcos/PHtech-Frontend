@@ -23,28 +23,28 @@ type EquipeDrawerProps = {
 export function PermissoesDrawer({ isOpen, onClose, permissao, onRefresh }: EquipeDrawerProps) {
   const [formData, setFormData] = useState<Permissao | null>(null);
 
-  // useEffect(() => {
-  //   if (isOpen && permissao) {
-  //     setFormData({ ...permissao });
-  //     toast.info("Dados da permissão carregados", {
-  //       style: {
-  //         background: 'var(--toast-info)',
-  //         color: 'var(--toast-info-foreground)',
-  //         boxShadow: 'var(--toast-shadow)'
-  //       },
-  //       description: `Editando: ${permissao.nome}`
-  //     });
-  //   }
-  // }, [permissao, isOpen]);
+  useEffect(() => {
+    if (isOpen && permissao) {
+      setFormData({ ...permissao });
+      // toast.info("Dados da permissão carregados", {
+      //   style: {
+      //     background: 'var(--toast-info)',
+      //     color: 'var(--toast-info-foreground)',
+      //     boxShadow: 'var(--toast-shadow)'
+      //   },
+      //   description: `Editando: ${permissao.nome}`
+      // });
+    }
+  }, [permissao, isOpen]);
 
   const handleSuccess = () => {
-    toast.success("Permissão atualizada com sucesso", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Permissão atualizada com sucesso", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
     onRefresh?.();
     onClose();
   };

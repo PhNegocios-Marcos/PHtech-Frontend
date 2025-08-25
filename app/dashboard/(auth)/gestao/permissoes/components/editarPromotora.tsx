@@ -50,14 +50,14 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
   useEffect(() => {
     methods.reset(permissoes);
-    toast.info("Dados da equipe carregados", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      },
-      description: `Editando: ${permissoes.nome}`
-    });
+    // toast.info("Dados da equipe carregados", {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   },
+    //   description: `Editando: ${permissoes.nome}`
+    // });
   }, [permissoes, methods]);
 
   const statusOptions = [

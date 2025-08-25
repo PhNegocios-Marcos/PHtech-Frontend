@@ -74,14 +74,14 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
         }));
         setModulos(options);
         
-        toast.success("Módulos carregados com sucesso", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          },
-          description: `${options.length} módulos disponíveis`
-        });
+        // toast.success("Módulos carregados com sucesso", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `${options.length} módulos disponíveis`
+        // });
       } catch (error) {
         console.error("Erro ao listar módulos:", error);
         toast.error("Falha ao carregar módulos", {

@@ -196,13 +196,13 @@ export function PermissoesTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
-    toast.success("Lista atualizada", {
-      style: {
-        background: "var(--toast-success)",
-        color: "var(--toast-success-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    // toast.success("Lista atualizada", {
+    //   style: {
+    //     background: "var(--toast-success)",
+    //     color: "var(--toast-success-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   }
+    // });
   };
 
   return (
