@@ -49,9 +49,9 @@ export function PermissoesTable() {
       if (!token) {
         toast.error("Autenticação necessária", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: "Faça login para acessar as permissões"
         });
@@ -94,9 +94,9 @@ export function PermissoesTable() {
         console.error("Erro ao carregar permissões:", error);
         toast.error("Falha ao carregar permissões", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: "Tente novamente mais tarde"
         });
@@ -173,34 +173,34 @@ export function PermissoesTable() {
 
   const handleRowDoubleClick = (equipe: PermissaoLinha) => {
     setSelectedEquipe(equipe);
-    toast.info("Editando permissão", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      },
-      description: equipe.nome
-    });
+    // toast.info("Editando permissão", {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   },
+    //   description: equipe.nome
+    // });
   };
 
   const handleCloseDrawer = () => {
     setSelectedEquipe(null);
-    toast.info("Edição concluída", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info("Edição concluída", {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
     toast.success("Lista atualizada", {
       style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
   };
@@ -212,7 +212,7 @@ export function PermissoesTable() {
           <CardHeader className="flex flex-col justify-between">
             <CardTitle>Permissões</CardTitle>
           </CardHeader>
-          
+
           <CardContent>
             <div className="mb-4 flex items-center gap-2">
               <Input
@@ -262,22 +262,28 @@ export function PermissoesTable() {
                 </TableHeader>
 
                 <TableBody>
-                  {table.getRowModel().rows.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="p-4 text-center">
-                        <CarregandoTable />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
+                  {table.getRowModel().rows.length ? (
                     table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
+                      <TableRow
+                        key={row.id}
+                        onDoubleClick={() => handleRowDoubleClick(row.original)}
+                        className="hover:bg-muted cursor-pointer">
+                        {row.getVisibleCells().map((cell, index) => {
+                          const isLast = index === row.getVisibleCells().length - 1;
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={`truncate overflow-hidden whitespace-nowrap ${
+                                isLast ? "w-16" : "w-auto"
+                              }`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     ))
+                  ) : (
+                    <CarregandoTable />
                   )}
                 </TableBody>
               </Table>
