@@ -326,11 +326,11 @@ export default function SimuladorFgts({
 
   if (abrirCadastro && formValues.cpf && produtoId) {
     // Limpa o CPF (remove pontos e traços)
-    const cpfLimpo = formValues.cpf.replace(/\D/g, "");
+    // const cpfLimpo = formValues.cpf.replace(/\D/g, "");
 
     return (
       <Cadastrar
-        cpf={cpfLimpo} // Passa o CPF limpo
+        cpf={formValues.cpf} // Passa o CPF limpo
         simulacao={resultado?.mensagem}
         produtoId={produtoId}
         isOpen={abrirCadastro}
