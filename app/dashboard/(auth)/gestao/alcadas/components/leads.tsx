@@ -11,6 +11,7 @@ import {
   getPaginationRowModel
 } from "@tanstack/react-table";
 import { CarregandoTable } from "./leads_carregando";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -54,7 +55,7 @@ export function AlcadasTable() {
             Authorization: `Bearer ${token}`
           }
         });
-        
+
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData?.message || "Erro ao buscar alçadas");
@@ -75,9 +76,9 @@ export function AlcadasTable() {
         toast.error("Falha ao carregar alçadas", {
           description: error.message || "Tente novamente mais tarde",
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -108,9 +109,7 @@ export function AlcadasTable() {
 
       // Atualiza diretamente no estado alcadas
       setAlcadas((prev) =>
-        prev.map((item) =>
-          item.id === row.id ? { ...item, status: novoStatus } : item
-        )
+        prev.map((item) => (item.id === row.id ? { ...item, status: novoStatus } : item))
       );
 
       toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
@@ -122,16 +121,13 @@ export function AlcadasTable() {
       });
     } catch (error: any) {
       console.error("Erro ao atualizar status", error);
-      toast.error(
-        `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
-        {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
+      toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
-      );
+      });
     }
   };
 
@@ -144,7 +140,7 @@ export function AlcadasTable() {
     {
       accessorKey: "valor",
       header: "Valor",
-      cell: ({ getValue }) => `${getValue<number>().toLocaleString('pt-BR')}`
+      cell: ({ getValue }) => `${getValue<number>().toLocaleString("pt-BR")}`
     },
     {
       accessorKey: "descricao",
@@ -167,8 +163,7 @@ export function AlcadasTable() {
             className={`w-24 cursor-pointer ${
               ativo ? "" : "border border-red-500 bg-transparent text-red-500"
             }`}
-            variant={ativo ? "default" : "outline"}
-          >
+            variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
@@ -189,81 +184,77 @@ export function AlcadasTable() {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Filtrar alçadas..."
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
+    <Card className="col-span-2 space-y-4">
+      <CardHeader>
+        <CardTitle>Alçada</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Filtrar alçadas..."
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <CarregandoTable />
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Nenhuma alçada encontrada
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
 
-      {!loading && (
-        <div className="flex items-center justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <CarregandoTable />
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length === 0 ? (
+                <CarregandoTable />
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
-      )}
-    </div>
+
+        {!loading && (
+          <div className="flex items-center justify-end space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
