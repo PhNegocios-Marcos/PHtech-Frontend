@@ -88,9 +88,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
 
   const { token } = useAuth();
 
-  const [showLimiteProposta, setShowLimiteProposta] = useState(
-    roteiro?.usa_limite_proposta === 1
-  );
+  const [showLimiteProposta, setShowLimiteProposta] = useState(roteiro?.usa_limite_proposta === 1);
   const [showMargemSeguranca, setShowMargemSeguranca] = useState(
     roteiro?.usa_margem_seguranca === 1
   );
@@ -180,7 +178,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
 
     const payload = {
       ...data,
-      valor_limite_proposta: data.usa_limite_proposta === 1 ? data.valor_limite_proposta : undefined,
+      valor_limite_proposta:
+        data.usa_limite_proposta === 1 ? data.valor_limite_proposta : undefined,
       valor_margem_seguranca:
         data.usa_margem_seguranca === 1 ? data.valor_margem_seguranca : undefined
     };
@@ -224,119 +223,123 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex justify-between">
-                <CardTitle>
-                  Editar Roteiro: <span>{roteiro.nome}</span>
-                </CardTitle>
-                <Button onClick={onClose} variant="outline">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
-                </Button>
+                <div>
+                  <CardTitle>
+                    Editar Roteiro: <span>{roteiro.nome}</span>
+                  </CardTitle>
+                </div>
+                <div className="gap-4">
+                  <Button onClick={onClose} variant="outline">
+                    Voltar
+                  </Button>
+                  <Button className="ml-4" type="submit">Salvar Alterações</Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {formFields.map((fieldConfig) => (
-                  <FormField
-                    key={fieldConfig.name}
-                    control={methods.control}
-                    name={fieldConfig.name}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{fieldConfig.label}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={fieldConfig.placeholder}
-                            type={fieldConfig.type}
-                            value={
-                              field.value === undefined || field.value === null
-                                ? ""
-                                : String(field.value)
-                            }
-                            onChange={(e) => {
-                              if (fieldConfig.type === "number") {
-                                const numValue = e.target.value ? Number(e.target.value) : null;
-                                field.onChange(numValue);
-                              } else {
-                                field.onChange(e.target.value);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-
-                {formFields2.map((fieldConfig) => (
-                  <React.Fragment key={fieldConfig.name}>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {formFields.map((fieldConfig) => (
                     <FormField
+                      key={fieldConfig.name}
                       control={methods.control}
                       name={fieldConfig.name}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{fieldConfig.label}</FormLabel>
                           <FormControl>
-                            <Select
-                              value={String(field.value ?? "0")}
-                              onValueChange={(value) => handleSelectChange(fieldConfig.name, value)}>
-                              <SelectTrigger>
-                                <SelectValue placeholder={fieldConfig.placeholder} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="1">Sim</SelectItem>
-                                <SelectItem value="0">Não</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input
+                              placeholder={fieldConfig.placeholder}
+                              type={fieldConfig.type}
+                              value={
+                                field.value === undefined || field.value === null
+                                  ? ""
+                                  : String(field.value)
+                              }
+                              onChange={(e) => {
+                                if (fieldConfig.type === "number") {
+                                  const numValue = e.target.value ? Number(e.target.value) : null;
+                                  field.onChange(numValue);
+                                } else {
+                                  field.onChange(e.target.value);
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                  {formFields2.map((fieldConfig) => (
+                    <React.Fragment key={fieldConfig.name}>
+                      <FormField
+                        control={methods.control}
+                        name={fieldConfig.name}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{fieldConfig.label}</FormLabel>
+                            <FormControl>
+                              <Select
+                                value={String(field.value ?? "0")}
+                                onValueChange={(value) =>
+                                  handleSelectChange(fieldConfig.name, value)
+                                }>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={fieldConfig.placeholder} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">Sim</SelectItem>
+                                  <SelectItem value="0">Não</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {fieldConfig.showInputOnTrue &&
-                      ((fieldConfig.name === "usa_limite_proposta" &&
-                        methods.watch("usa_limite_proposta") === 1) ||
-                        (fieldConfig.name === "usa_margem_seguranca" &&
-                          methods.watch("usa_margem_seguranca") === 1)) && (
-                        <FormField
-                          control={methods.control}
-                          name={fieldConfig.showInputOnTrue!.fieldName}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{fieldConfig.showInputOnTrue!.label}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder={fieldConfig.showInputOnTrue!.placeholder}
-                                  type={fieldConfig.showInputOnTrue!.type}
-                                  value={
-                                    field.value === undefined || field.value === null
-                                      ? ""
-                                      : String(field.value)
-                                  }
-                                  onChange={(e) => {
-                                    const numValue = e.target.value ? Number(e.target.value) : null;
-                                    field.onChange(numValue === null ? undefined : numValue);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                  </React.Fragment>
-                ))}
+                      {fieldConfig.showInputOnTrue &&
+                        ((fieldConfig.name === "usa_limite_proposta" &&
+                          methods.watch("usa_limite_proposta") === 1) ||
+                          (fieldConfig.name === "usa_margem_seguranca" &&
+                            methods.watch("usa_margem_seguranca") === 1)) && (
+                          <FormField
+                            control={methods.control}
+                            name={fieldConfig.showInputOnTrue!.fieldName}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>{fieldConfig.showInputOnTrue!.label}</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder={fieldConfig.showInputOnTrue!.placeholder}
+                                    type={fieldConfig.showInputOnTrue!.type}
+                                    value={
+                                      field.value === undefined || field.value === null
+                                        ? ""
+                                        : String(field.value)
+                                    }
+                                    onChange={(e) => {
+                                      const numValue = e.target.value
+                                        ? Number(e.target.value)
+                                        : null;
+                                      field.onChange(numValue === null ? undefined : numValue);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
-
-          <div className="col-span-2 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
         </form>
       </Form>
     </FormProvider>
