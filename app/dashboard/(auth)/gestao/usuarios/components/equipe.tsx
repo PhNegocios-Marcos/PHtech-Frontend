@@ -46,8 +46,7 @@ type Option = {
   status_relacionamento?: any;
   id_relacionamento?: any;
   onClose: () => void;
-    onRefresh?: () => void; // Adicione esta linha
-
+  onRefresh?: () => void; // Adicione esta linha
 };
 
 export default function Equipes({ usuario, equipes, onClose }: Option) {
@@ -65,6 +64,7 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
   const [selectedUser, setSelectedUser] = React.useState<Usuario | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [isLoadingEquipes, setIsLoadingEquipes] = React.useState(true); // Novo estado para controlar o carregamento
 
   const equipeColumns = React.useMemo<ColumnDef<Option>[]>(
     () => [
@@ -144,6 +144,7 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
   // Fetch equipes vinculadas ao usuário para a tabela
   useEffect(() => {
     async function fetchEquipe() {
+      setIsLoadingEquipes(true);
       try {
         const res = await axios.get(`${API_BASE_URL}/rel_usuario_equipe/${usuario.email}`, {
           headers: {
@@ -156,12 +157,14 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
           id: p.equipe.id,
           nome: p.equipe.nome,
           id_relacionamento: p.id_relacionamento,
-          status_relacionamento: p.status_relacionamento // <- ADICIONE ISSO
+          status_relacionamento: p.status_relacionamento
         }));
 
         setEquipe(data);
       } catch (error) {
         console.error("Erro ao carregar equipes do usuário", error);
+      } finally {
+        setIsLoadingEquipes(false);
       }
     }
     fetchEquipe();
@@ -291,7 +294,9 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {isLoadingEquipes ? (
+              <CarregandoTable />
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                   {row.getVisibleCells().map((cell, index) => {
@@ -309,7 +314,11 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
                 </TableRow>
               ))
             ) : (
-              <CarregandoTable />
+              <TableRow>
+                <TableCell colSpan={equipeColumns.length} className="h-24 text-center">
+                  Usuário não possui equipes vinculadas
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

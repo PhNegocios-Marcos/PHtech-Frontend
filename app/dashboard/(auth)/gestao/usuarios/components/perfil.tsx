@@ -47,8 +47,7 @@ type Option = {
   status_relacionamento?: any;
   id_relacionamento?: any;
   onClose: () => void;
-  onRefresh?: () => void; // Adicione esta linha
-
+  onRefresh?: () => void;
 };
 
 export default function Perfil({ usuario, perfis, onClose }: Option) {
@@ -63,6 +62,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [isLoadingPerfis, setIsLoadingPerfis] = React.useState(true);
 
   const perfilColumns = React.useMemo<ColumnDef<Option>[]>(
     () => [
@@ -167,6 +167,48 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
     }
     fetchPerfisDisponiveis();
   }, [token]);
+
+  // Fetch perfis vinculados ao usuário para a tabela
+  useEffect(() => {
+    async function fetchPerfisUsuario() {
+      setIsLoadingPerfis(true);
+      try {
+        if (!token || !usuario.id) {
+          throw new Error("Token de autenticação ou ID do usuário não encontrado");
+        }
+
+        const res = await axios.get(`${API_BASE_URL}/perfil/${usuario.id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        // Ajuste esta parte conforme a estrutura da resposta da API
+        const data = res.data.map((p: any) => ({
+          id: p.perfil.id,
+          nome: p.perfil.nome,
+          id_relacionamento: p.id_relacionamento,
+          status_relacionamento: p.status_relacionamento
+        }));
+
+        setPerfil(data);
+      } catch (error: any) {
+        console.error("Erro ao carregar perfis do usuário", error);
+        toast.error(`Erro ao carregar perfis do usuário: ${error.message}`, {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            border: '1px solid var(--toast-border)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+      } finally {
+        setIsLoadingPerfis(false);
+      }
+    }
+    fetchPerfisUsuario();
+  }, [token, usuario.id, refreshKey]);
 
   async function relacionarPerfil() {
     if (!perfisSelect) {
@@ -304,7 +346,9 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {isLoadingPerfis ? (
+              <CarregandoTable />
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                   {row.getVisibleCells().map((cell, index) => {
