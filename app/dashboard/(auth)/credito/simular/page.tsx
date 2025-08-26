@@ -61,9 +61,9 @@ export default function CreditSimular() {
         console.error("Erro ao buscar convênios:", error);
         toast.error("Erro ao carregar convênios", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -99,9 +99,9 @@ export default function CreditSimular() {
         console.error("Erro ao buscar produtos:", error);
         toast.error("Erro ao carregar modalidades", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -137,9 +137,9 @@ export default function CreditSimular() {
         console.error("Erro ao buscar categorias:", error);
         toast.error("Erro ao carregar categorias", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -153,9 +153,9 @@ export default function CreditSimular() {
     setSimulacao(dadosSimulacao);
     toast.success("Cliente encontrado, montando proposta...", {
       style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
   };
@@ -165,12 +165,8 @@ export default function CreditSimular() {
       <div className="flex flex-row justify-between">
         <CampoBoasVindas />
         <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
-          {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen(true)}>Campos Usuario</Button>
-          )}
-          {podeCriar && (
-            <Button onClick={() => setIsCadastroOpen2(true)}>Campos Produto</Button>
-          )}
+          {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Campos Usuario</Button>}
+          {podeCriar && <Button onClick={() => setIsCadastroOpen2(true)}>Campos Produto</Button>}
         </div>
       </div>
       <div className="space-y-6">
@@ -240,7 +236,27 @@ export default function CreditSimular() {
             )}
           </>
         ) : (
-          simulacao && <Proposta cpf={cpfProposta} simulacao={simulacao} />
+          simulacao && (
+            <Proposta
+              cpf={cpfProposta}
+              simulacao={simulacao}
+              isOpen={true}
+              onClose={() => {
+                setCpfProposta(null);
+                setSimulacao(null);
+              }}
+              onCadastrado={() => {
+                // Lógica quando o cadastro é concluído
+                setCpfProposta(null);
+                setSimulacao(null);
+              }}
+              onClienteExiste={() => {
+                // Lógica quando o cliente já existe
+                setCpfProposta(null);
+                setSimulacao(null);
+              }}
+            />
+          )
         )}
       </div>
       <CadastroInputUser isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
