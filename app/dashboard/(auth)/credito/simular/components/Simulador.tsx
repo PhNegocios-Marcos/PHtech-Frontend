@@ -229,7 +229,7 @@ export default function SimuladorFgts({
     }
 
     const cpfRaw = formValues.cpf;
-    const cpf = cpfRaw?.replace(/\D/g, "");
+    const cpf = cpfRaw?.replace(/\D/g, ""); // Limpa o CPF
     if (!cpf) {
       toast.error("CPF não informado", {
         style: {
@@ -253,7 +253,10 @@ export default function SimuladorFgts({
       if (!response.ok) throw new Error("Erro ao verificar cliente");
 
       const data = await response.json();
-      const clienteExiste = data?.some((cliente: any) => cliente.cpf?.replace(/\D/g, "") === cpf);
+      const clienteExiste = data?.some((cliente: any) => {
+        const clienteCpfLimpo = cliente.cpf?.replace(/\D/g, "");
+        return clienteCpfLimpo === cpf;
+      });
 
       setCpfProposta(cpf);
       setAbrirCadastro(!clienteExiste);
@@ -285,6 +288,28 @@ export default function SimuladorFgts({
         </div>
       );
     }
+
+    // Adicione esta condição para o campo CPF
+    if (item.key === "cpf") {
+      return (
+        <div className="space-y-2" key={item.key}>
+          <Label htmlFor={item.key}>{item.label}</Label>
+          <Cleave
+            id={item.key}
+            placeholder="000.000.000-00"
+            options={{
+              blocks: [3, 3, 3, 2],
+              delimiters: [".", ".", "-"],
+              numericOnly: true
+            }}
+            value={formValues[item.key] || ""}
+            onChange={(e) => handleChange(item.key, e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2"
+          />
+        </div>
+      );
+    }
+
     return (
       <div key={item.key} className="space-y-2">
         <Label htmlFor={item.key}>{item.label}</Label>
@@ -300,15 +325,21 @@ export default function SimuladorFgts({
   };
 
   if (abrirCadastro && formValues.cpf && produtoId) {
+    // Limpa o CPF (remove pontos e traços)
+    const cpfLimpo = formValues.cpf.replace(/\D/g, "");
+
     return (
       <Cadastrar
-        cpf={formValues.cpf}
+        cpf={cpfLimpo} // Passa o CPF limpo
         simulacao={resultado?.mensagem}
         produtoId={produtoId}
+        isOpen={abrirCadastro}
+        onClose={() => setAbrirCadastro(false)}
         onCadastrado={(cpf, simulacao) => {
           setCpfProposta(cpf);
           setAbrirCadastro(false);
           if (simulacao) setResultado({ mensagem: simulacao });
+          onCadastrarCliente(cpf, simulacao);
         }}
         onClienteExiste={(cpf) => {
           setCpfProposta(cpf);
