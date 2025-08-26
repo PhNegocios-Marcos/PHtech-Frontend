@@ -94,20 +94,21 @@ export function ModalCliente({ onClose, onRefresh, cliente }: ClienteProps) {
   return (
     <div className="space-y-4 p-4">
       <Tabs defaultValue="dados" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="dados">Dados do Cliente</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
-        </TabsList>
+        <div className="mb-4 flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="dados">Dados do Cliente</TabsTrigger>
+            <TabsTrigger value="historico">Histórico</TabsTrigger>
+          </TabsList>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+        </div>
 
         <TabsContent value="dados">
-          <EditarCliente
-            cliente={cliente}
-            onClose={onClose}
-            onRefresh={onRefresh}
-          />
+          <EditarCliente cliente={cliente} onClose={onClose} onRefresh={onRefresh} />
         </TabsContent>
         <TabsContent value="historico">
-          <HistoricoCliente cliente={cliente} />
+          <HistoricoCliente onClose={onClose} cliente={cliente} />
         </TabsContent>
       </Tabs>
     </div>

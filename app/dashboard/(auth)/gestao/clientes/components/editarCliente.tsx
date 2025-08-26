@@ -1114,19 +1114,22 @@ export default function EditarCliente({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        {/* <CardTitle>Editar Cliente</CardTitle> */}
-      </CardHeader>
+    <Card className="py-0">
+      <CardHeader>{/* <CardTitle>Editar Cliente</CardTitle> */}</CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="DadosPessoais">Dados Pessoais</TabsTrigger>
-            <TabsTrigger value="Contato">Contato</TabsTrigger>
-            <TabsTrigger value="Enderecos">Endereços</TabsTrigger>
-            <TabsTrigger value="DadosBancarios">Dados Bancários</TabsTrigger>
-            <TabsTrigger value="Documentos">Documentos</TabsTrigger>
-          </TabsList>
+          {/* <div className="mb-4 flex items-center justify-between"> */}
+            <TabsList>
+              <TabsTrigger value="DadosPessoais">Dados Pessoais</TabsTrigger>
+              <TabsTrigger value="Contato">Contato</TabsTrigger>
+              <TabsTrigger value="Enderecos">Endereços</TabsTrigger>
+              <TabsTrigger value="DadosBancarios">Dados Bancários</TabsTrigger>
+              <TabsTrigger value="Documentos">Documentos</TabsTrigger>
+            </TabsList>
+            {/* <Button type="button" variant="outline" onClick={onClose}>
+              Voltar
+            </Button> */}
+          {/* </div> */}
 
           <TabsContent value="DadosPessoais">
             <DadosPessoais
@@ -1173,7 +1176,7 @@ export default function EditarCliente({
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-4 pt-4">
+        {/* <div className="flex justify-end gap-4 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Voltar
           </Button>
@@ -1184,7 +1187,7 @@ export default function EditarCliente({
           ) : (
             <Button onClick={handleNext}>Próximo</Button>
           )}
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

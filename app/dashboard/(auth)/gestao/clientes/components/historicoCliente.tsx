@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CarregandoTable } from "./tabela_carregando";
+import { Button } from "@/components/ui/button";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,7 +25,7 @@ export type Historico = {
   detalhes: string;
 };
 
-export default function HistoricoCliente({ cliente }: { cliente: any }) {
+export default function HistoricoCliente({ cliente, onClose, }: { cliente: any; onClose: () => void; }) {
   const { token } = useAuth();
   const [historico, setHistorico] = useState<Historico[]>([]);
   const [loading, setLoading] = useState(false);
