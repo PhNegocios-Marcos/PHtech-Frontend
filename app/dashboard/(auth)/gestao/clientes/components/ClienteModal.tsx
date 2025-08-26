@@ -8,15 +8,60 @@ import HistoricoCliente from "./historicoCliente";
 import { toast } from "sonner";
 
 export type Cliente = {
-  id: string;
-  cpf: string;
+  hash: string;
   nome: string;
-  email: string;
-  telefone: string;
-  data_nascimento: string;
-  status: number;
-  data_cadastro: string;
-  data_atualizacao: string;
+  tipo_documento: number;
+  numero_documento: string;
+  cpf: string;
+  nome_mae: string;
+  nome_pai: string;
+  telefones: {
+    [key: string]: {
+      detalhe_telefone_numero: string;
+      ddd: number;
+      numero: number;
+      status_telefone: number;
+    };
+  };
+  enderecos: {
+    [key: string]: {
+      logradouro: string;
+      numero: string;
+      complemento: string;
+      cep: string;
+      bairro: string;
+      cidade: string;
+      uf: string;
+      estado: string;
+      origemDado: string;
+    };
+  };
+  dados_bancarios: Array<{
+    id: string;
+    id_banco: string;
+    id_cliente: string;
+    agencia: string | null;
+    conta: string | null;
+    status: number;
+    data_insercao: string;
+    data_atualizacao: string;
+    tipo_pix: string | null;
+    pix: string | null;
+  }>;
+  documentos: Array<{
+    url_doc: string;
+  }>;
+  emails: {
+    id: string;
+    id_cliente: string;
+    email: string;
+    status: number;
+    data_insercao: string;
+    data_atualizacao: string;
+  };
+  status?: number;
+  data_cadastro?: string;
+  data_atualizacao?: string;
 };
 
 type ClienteProps = {
