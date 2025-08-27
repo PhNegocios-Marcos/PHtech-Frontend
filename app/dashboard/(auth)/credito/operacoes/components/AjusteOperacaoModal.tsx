@@ -19,10 +19,10 @@ type AjusteOperacaoModalProps = {
   propostaId: string; // ← Adicione esta prop para receber o ID da proposta
 };
 
-export default function AjusteOperacaoModal({ 
-  isOpen, 
-  evento, 
-  onClose, 
+export default function AjusteOperacaoModal({
+  isOpen,
+  evento,
+  onClose,
   propostaId // ← Receba o ID da proposta
 }: AjusteOperacaoModalProps) {
   const { token } = useAuth();
@@ -68,49 +68,47 @@ export default function AjusteOperacaoModal({
     e.preventDefault();
     try {
       let payload;
-      
+
       if (evento.tipoPendencia === "upload") {
         payload = new FormData();
-        
+
         // Adicione o arquivo
         if (file) {
           payload.append("fileImage", file);
         }
-        
+
         // Adicione o proposta_hash (ID da proposta)
         payload.append("proposta_hash", propostaId);
-        
+
+        payload.append("log_hash", evento.campos?.log_hash);
+
         // Adicione o acao_hash do campo
         if (evento.campos?.acao_hash) {
           payload.append("acao_hash", evento.campos.acao_hash);
         }
-        
+
         console.log("Enviando FormData com:", {
           proposta_hash: propostaId,
           acao_hash: evento.campos?.acao_hash,
-          hasFile: !!file
+          hasFile: !!file,
+          log_hash: evento.campos?.log_hash
         });
-        
       } else {
         payload = { ...form };
       }
-      
-      await axios.post(
-        `${API_BASE_URL}/resolucao-proposta-pendencia/resolvePendencia`, 
-        payload, 
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            ...(evento.tipoPendencia === "upload" && { 
-              "Content-Type": "multipart/form-data" 
-            })
-          }
+
+      console.log("payload:", payload);
+      await axios.post(`${API_BASE_URL}/resolucao-proposta-pendencia/resolvePendencia`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(evento.tipoPendencia === "upload" && {
+            "Content-Type": "multipart/form-data"
+          })
         }
-      );
-      
+      });
+
       toast.success("Pendência resolvida com sucesso!");
       onClose();
-      
     } catch (err: any) {
       console.error("Erro ao resolver pendência:", err);
       toast.error("Erro ao resolver pendência");
@@ -135,13 +133,12 @@ export default function AjusteOperacaoModal({
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              
               {/* Campos ocultos com os hashes necessários */}
               <input type="hidden" name="proposta_hash" value={propostaId} />
               {evento.campos?.acao_hash && (
                 <input type="hidden" name="acao_hash" value={evento.campos.acao_hash} />
               )}
-              
+
               {evento.campos ? (
                 [evento.campos].map((campo: any) => {
                   if (campo.type === "file") {
@@ -219,7 +216,7 @@ export default function AjusteOperacaoModal({
                   Nenhum campo configurado para esta pendência
                 </p>
               )}
-              
+
               <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar

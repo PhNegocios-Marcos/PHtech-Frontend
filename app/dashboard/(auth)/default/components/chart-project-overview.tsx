@@ -95,7 +95,7 @@ export function ChartProjectOverview() {
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
-        console.log('Dados carregados:', sortedData);
+        // console.log('Dados carregados:', sortedData);
         setChartData(sortedData);
         setChartConfig(charConfig);
       })
