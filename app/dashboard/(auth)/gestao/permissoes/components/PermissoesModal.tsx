@@ -56,7 +56,7 @@ export function PermissoesDrawer({ isOpen, onClose, permissao, onRefresh }: Equi
         color: 'var(--toast-info-foreground)',
         boxShadow: 'var(--toast-shadow)'
       }
-    });
+    }); 
     onClose();
   };
 

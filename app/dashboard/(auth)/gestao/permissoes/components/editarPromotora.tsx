@@ -35,7 +35,7 @@ type EquipeFormValues = z.infer<typeof permissoesSchema> & {
 type EquipeEditProps = {
   permissoes: EquipeFormValues;
   onClose: () => void;
-  onCancel: () => void
+  onCancel: () => void;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -69,9 +69,9 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
     if (!token) {
       toast.error("Autenticação necessária", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: "Faça login para continuar"
       });
@@ -94,9 +94,9 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
       toast.success("Equipe atualizada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: `Alterações salvas para: ${data.nome}`
       });
@@ -111,18 +111,18 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
         });
         toast.warning("Nome já existe", {
           style: {
-            background: 'var(--toast-warning)',
-            color: 'var(--toast-warning-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-warning)",
+            color: "var(--toast-warning-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: "Escolha outro nome para a equipe"
         });
       } else {
         toast.error("Falha na atualização", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: msg
         });
@@ -135,78 +135,99 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
   const handleClose = () => {
     toast.info("Edição cancelada", {
       style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
     onClose();
   };
 
   return (
-    <FormProvider {...methods}>
-      <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-          <Card className="col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>
-                  <h2>
-                    Editar Averbador: <span className="text-primary">{permissoes.nome}</span>
-                  </h2>
-                </CardTitle>
-                <Button onClick={handleClose} variant="outline">
-                  Voltar
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={methods.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome da Equipe</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <>
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
-                <FormField
-                  control={methods.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Combobox
-                          data={statusOptions}
-                          displayField="name"
-                          value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected?.id)}
-                          searchFields={["name"]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Editar Permissões: <span className="text-primary">{permissoes.nome}</span></h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-2xl font-bold hover:text-gray-900"
+                  aria-label="Fechar">
+                  ×
+                </button>
               </div>
+              <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+                <Card className="col-span-2">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      {/* <CardTitle>
+                        <h2>
+                          Editar Averbador: <span className="text-primary">{permissoes.nome}</span>
+                        </h2>
+                      </CardTitle> */}
+                      {/* <Button onClick={handleClose} variant="outline">
+                      Voltar
+                    </Button> */}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <FormField
+                        control={methods.control}
+                        name="nome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nome da Equipe</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={handleClose}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Salvar Alterações</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </form>
-      </Form>
-    </FormProvider>
+                      <FormField
+                        control={methods.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Status</FormLabel>
+                            <FormControl>
+                              <Combobox
+                                data={statusOptions}
+                                displayField="name"
+                                value={statusOptions.find((opt) => opt.id === field.value) ?? null}
+                                onChange={(selected) => field.onChange(selected?.id)}
+                                searchFields={["name"]}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button type="button" variant="outline" onClick={handleClose}>
+                        Cancelar
+                      </Button>
+                      <Button type="submit">Salvar Alterações</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </form>
+            </div>
+          </Form>
+        </FormProvider>
+      </aside>
+    </>
   );
 }
