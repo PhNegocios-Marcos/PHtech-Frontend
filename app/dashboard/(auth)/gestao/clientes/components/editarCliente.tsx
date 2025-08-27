@@ -271,7 +271,7 @@ const DadosPessoais = forwardRef<
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="ml-2">
-                        <CalendarIcon className="h-4 w-4" />
+                        {/* <CalendarIcon className="h-4 w-4" /> */}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -299,7 +299,7 @@ const DadosPessoais = forwardRef<
 
   return (
     <Form {...form}>
-      <div className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-2">
+      <div className="m-10 grid grid-cols-1 gap-5 space-y-3 md:grid-cols-3">
         {uniqueFields.map(renderField)}
       </div>
     </Form>
@@ -1115,18 +1115,27 @@ export default function EditarCliente({
 
   return (
     <Card className="py-0">
-      <CardHeader>{/* <CardTitle>Editar Cliente</CardTitle> */}</CardHeader>
+      <CardHeader className="mt-6">
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Cliente: <span className="text-primary">{formData.nome}</span>
+          </CardTitle>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Voltar
+          </Button>
+        </div>
+      </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           {/* <div className="mb-4 flex items-center justify-between"> */}
-            <TabsList>
-              <TabsTrigger value="DadosPessoais">Dados Pessoais</TabsTrigger>
-              <TabsTrigger value="Contato">Contato</TabsTrigger>
-              <TabsTrigger value="Enderecos">Endereços</TabsTrigger>
-              <TabsTrigger value="DadosBancarios">Dados Bancários</TabsTrigger>
-              <TabsTrigger value="Documentos">Documentos</TabsTrigger>
-            </TabsList>
-            {/* <Button type="button" variant="outline" onClick={onClose}>
+          <TabsList className="w-full">
+            <TabsTrigger value="DadosPessoais">Dados Pessoais</TabsTrigger>
+            <TabsTrigger value="Contato">Contato</TabsTrigger>
+            <TabsTrigger value="Enderecos">Endereços</TabsTrigger>
+            <TabsTrigger value="DadosBancarios">Dados Bancários</TabsTrigger>
+            <TabsTrigger value="Documentos">Documentos</TabsTrigger>
+          </TabsList>
+          {/* <Button type="button" variant="outline" onClick={onClose}>
               Voltar
             </Button> */}
           {/* </div> */}

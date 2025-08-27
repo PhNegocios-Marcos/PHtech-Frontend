@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./tabela_carregando";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { ModalCliente } from "./ClienteModal";
 import {
   Table,
@@ -169,14 +169,14 @@ export default function ListaClientes() {
     },
     {
       id: "editar",
-      header: "Ações",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSelectedCliente(row.original)}
           title="Editar cliente">
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -240,7 +240,7 @@ export default function ListaClientes() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Clientes Cadastrados</CardTitle>
+            <CardTitle>Clientes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex items-center gap-2">
