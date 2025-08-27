@@ -11,7 +11,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -131,14 +131,14 @@ export function UsuariosTable() {
       },
       {
         id: "editar",
-        header: "Editar",
+        header: "Ver",
         cell: ({ row }) => (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSelectedUser(row.original)}
             title="Editar usuário">
-            <Pencil className="h-4 w-4" />
+            <Search className="h-4 w-4" />
           </Button>
         ),
         enableSorting: false,
