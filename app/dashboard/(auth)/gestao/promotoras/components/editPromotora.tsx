@@ -53,9 +53,9 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       // console.error("Token global não definido! Autenticação inválida.");
       toast.error("Token de autenticação não encontrado.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -78,9 +78,9 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
 
       toast.success("Promotora atualizada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -89,9 +89,9 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       // console.error("Erro ao atualizar promotora:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -112,12 +112,14 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  Dados da Promotora:{" "}
-                  <span className="text-primary">{data.nome}</span>
+                  Dados da Promotora: <span className="text-primary">{data.nome}</span>
                 </CardTitle>
-                <Button onClick={onClose} variant="outline">
-                  Voltar
-                </Button>
+                <div>
+                  <Button onClick={onClose} variant="outline">
+                    Voltar
+                  </Button>
+                  <Button className="ml-4" type="submit">Salvar Alterações</Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -232,13 +234,6 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
               </div>
             </CardContent>
           </Card>
-
-          <div className="col-span-2 flex justify-end p-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
         </form>
       </Form>
     </FormProvider>

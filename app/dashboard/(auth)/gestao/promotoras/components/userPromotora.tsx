@@ -112,14 +112,14 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         });
 
         setUsuarios(usuariosArray);
-        toast.success("Usuários carregados com sucesso", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          },
-          description: `${usuariosArray.length} usuários encontrados`
-        });
+        // toast.success("Usuários carregados com sucesso", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `${usuariosArray.length} usuários encontrados`
+        // });
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
         toast.error("Falha ao carregar usuários", {

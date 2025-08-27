@@ -33,14 +33,14 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
     if (isOpen && promotora) {
       try {
         setFormData({ ...promotora });
-        toast.success("Dados da promotora carregados", {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          },
-          description: `Editando: ${promotora.nome}`
-        });
+        // toast.success("Dados da promotora carregados", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `Editando: ${promotora.nome}`
+        // });
       } catch (error: any) {
         toast.error("Erro ao carregar dados", {
           style: {
@@ -60,18 +60,18 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
   }
 
   const handleTabChange = (value: string) => {
-    toast.info(`Aba alterada para ${value === "overview" ? "Informações" : "Usuários"}`, {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info(`Aba alterada para ${value === "overview" ? "Informações" : "Usuários"}`, {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   return (
     <Tabs defaultValue="overview" className="space-y-4" onValueChange={handleTabChange}>
-      <TabsList>
+      <TabsList className="w-full">
         <TabsTrigger value="overview">Informações</TabsTrigger>
         <TabsTrigger value="reports">Usuários</TabsTrigger>
       </TabsList>
