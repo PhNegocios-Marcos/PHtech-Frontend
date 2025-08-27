@@ -49,6 +49,7 @@ type Promotora = {
 
 type UsuariosTableProps = {
   equipeNome: string;
+  onClose: () => void;
 };
 
 const promotoraColumns: ColumnDef<Promotora>[] = [
@@ -64,7 +65,7 @@ const promotoraColumns: ColumnDef<Promotora>[] = [
   }
 ];
 
-export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
+export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTableProps) {
   const [promotoras, setPromotoras] = useState<Promotora[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -106,21 +107,21 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
           .filter((usuario: any) => usuario.status_relacionamento === 1);
 
         setPromotoras(usuariosFormatados);
-        toast.success(`Usuários da equipe ${equipeNome} carregados`, {
-          style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
-        });
+        // toast.success(`Usuários da equipe ${equipeNome} carregados`, {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   }
+        // });
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
         toast.error("Falha ao carregar usuários", {
           description: error.message || "Tente novamente mais tarde",
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -153,7 +154,15 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Usuários da Equipe {equipeNome}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            Equipe: <span className="text-primary">{equipeNome}</span>
+          </CardTitle>
+
+          <Button onClick={onClose} variant="outline">
+            Voltar
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
@@ -216,7 +225,7 @@ export function UsuariosPorEquipeTable({ equipeNome }: UsuariosTableProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={promotoraColumns.length} className="text-center h-24">
+                  <TableCell colSpan={promotoraColumns.length} className="h-24 text-center">
                     Nenhum usuário encontrado na equipe
                   </TableCell>
                 </TableRow>

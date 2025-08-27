@@ -155,7 +155,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
           <Form {...methods}>
             <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Editar Permissões: <span className="text-primary">{permissoes.nome}</span></h2>
+                <h2 className="text-xl font-semibold">Permissão: <span className="text-primary">{permissoes.nome}</span></h2>
                 <button
                   type="button"
                   onClick={onClose}

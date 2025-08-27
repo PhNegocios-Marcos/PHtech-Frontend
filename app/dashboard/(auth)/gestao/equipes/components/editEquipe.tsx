@@ -116,7 +116,7 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  <h2>Editar Equipe: <span className="text-primary">{equipe.nome}</span></h2>
+                  <h2>Equipe: <span className="text-primary">{equipe.nome}</span></h2>
                 </CardTitle>
                 <Button onClick={onClose} variant="outline">
                   Voltar

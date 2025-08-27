@@ -31,13 +31,13 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
     if (isOpen && equipe) {
       try {
         setFormData({ ...equipe });
-        toast.info(`Editando equipe: ${equipe.nome}`, {
-          style: {
-            background: 'var(--toast-info)',
-            color: 'var(--toast-info-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
-        });
+        // toast.info(`Editando equipe: ${equipe.nome}`, {
+        //   style: {
+        //     background: 'var(--toast-info)',
+        //     color: 'var(--toast-info-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   }
+        // });
       } catch (error: any) {
         console.error("Erro ao carregar dados da equipe:", error.message || error);
         toast.error("Erro ao carregar equipe", {
@@ -56,24 +56,24 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
   const handleSuccess = () => {
     onRefresh?.();
     onClose();
-    toast.success("Equipe atualizada com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Equipe atualizada com sucesso!", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    toast.info(`Visualizando: ${getTabLabel(value)}`, {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info(`Visualizando: ${getTabLabel(value)}`, {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   const getTabLabel = (value: string) => {
@@ -95,7 +95,7 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
         value={activeTab}
         onValueChange={handleTabChange}
       >
-        <TabsList>
+        <TabsList className="w-full">
           <TabsTrigger value="overview">Informações</TabsTrigger>
           <TabsTrigger value="members">Membros</TabsTrigger>
           <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger>
@@ -106,7 +106,7 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
         </TabsContent>
 
         <TabsContent value="members">
-          <UsuariosPorEquipeTable equipeNome={formData.nome} />
+          <UsuariosPorEquipeTable onClose={onClose} equipeNome={formData.nome} />
         </TabsContent>
 
         <TabsContent value="ADD_novo_members">

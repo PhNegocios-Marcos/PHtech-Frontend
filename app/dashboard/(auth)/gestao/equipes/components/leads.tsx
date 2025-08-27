@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -95,14 +95,14 @@ export function EquipesTable() {
     },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleRowDoubleClick(row.original)}
           title="Editar equipe">
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -157,7 +157,7 @@ export function EquipesTable() {
   }, [token, refreshKey]);
 
   const table = useReactTable({
-    data: equipes,
+    data: equipes.reverse(),
     columns: equipeColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -184,13 +184,13 @@ export function EquipesTable() {
 
   const handleRowDoubleClick = (equipe: Equipe) => {
     setSelectedEquipe(equipe);
-    toast.info(`Editando equipe: ${equipe.nome}`, {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info(`Editando equipe: ${equipe.nome}`, {
+    //   style: {
+    //     background: 'var(--toast-info)',
+    //     color: 'var(--toast-info-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   const handleCloseDrawer = () => {
@@ -199,13 +199,13 @@ export function EquipesTable() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
-    toast.success("Lista de equipes atualizada", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.success("Lista de equipes atualizada", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
   };
 
   return (
