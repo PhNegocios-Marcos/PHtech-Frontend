@@ -64,7 +64,7 @@ export function PermissoesDrawer({ isOpen, onClose, permissao, onRefresh }: Equi
 
   return (
     <div className="w-full space-y-4 px-6">
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="overview" className="">
         <EquipeEditForm 
           permissoes={formData} 
           onClose={handleSuccess} 

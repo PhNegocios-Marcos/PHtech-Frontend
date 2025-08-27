@@ -206,9 +206,9 @@ export function PermissoesTable() {
   };
 
   return (
-    <>
-      {!selectedEquipe ? (
-        <Card className="col-span-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Card className="col-span-2">
+        <>
           <CardHeader className="flex flex-col justify-between">
             <CardTitle>Permissões</CardTitle>
           </CardHeader>
@@ -289,18 +289,17 @@ export function PermissoesTable() {
               </Table>
             </div>
           </CardContent>
-        </Card>
-      ) : (
-        <PermissoesDrawer
-          isOpen={!!selectedEquipe}
-          permissao={selectedEquipe}
-          onClose={() => {
-            handleCloseDrawer();
-            handleRefresh();
-          }}
-          onRefresh={handleRefresh}
-        />
-      )}
-    </>
+        </>
+      </Card>
+      <PermissoesDrawer
+        isOpen={!!selectedEquipe}
+        permissao={selectedEquipe}
+        onClose={() => {
+          handleCloseDrawer();
+          handleRefresh();
+        }}
+        onRefresh={handleRefresh}
+      />
+    </div>
   );
 }

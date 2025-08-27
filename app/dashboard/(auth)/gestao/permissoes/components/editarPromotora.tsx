@@ -164,7 +164,6 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                   ×
                 </button>
               </div>
-              <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
                 <Card className="col-span-2">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -223,7 +222,6 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                     </div>
                   </CardContent>
                 </Card>
-              </form>
             </div>
           </Form>
         </FormProvider>
