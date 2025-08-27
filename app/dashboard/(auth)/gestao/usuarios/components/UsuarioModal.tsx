@@ -41,16 +41,6 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button 
-          onClick={onClose} 
-          variant="outline"
-          className="mb-4"
-        >
-          Voltar
-        </Button>
-      </div>
-
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Informações</TabsTrigger>
@@ -59,25 +49,21 @@ export function UsuarioPerfil({ usuario, onClose, onRefresh }: UsuarioPerfilProp
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <UsuarioEdit 
-            usuario={usuario} 
-            onClose={onClose} 
-            onRefresh={handleRefresh} 
-          />
+          <UsuarioEdit usuario={usuario} onClose={onClose} onRefresh={handleRefresh} />
         </TabsContent>
 
         <TabsContent value="reports" className="mt-4">
-          <Equipes 
-            usuario={usuario} 
-            onClose={onClose} 
+          <Equipes
+            usuario={usuario}
+            onClose={onClose}
             // onRefresh={handleRefresh}
           />
         </TabsContent>
 
         <TabsContent value="perfil" className="mt-4">
-          <Perfil 
-            usuario={usuario} 
-            onClose={onClose} 
+          <Perfil
+            usuario={usuario}
+            onClose={onClose}
             // onRefresh={handleRefresh}
           />
         </TabsContent>

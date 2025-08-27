@@ -41,6 +41,42 @@ type UsuarioDrawerProps = {
   onRefresh: () => void;
 };
 
+// Função para formatar CPF
+function formatCpf(cpf: string): string {
+  if (!cpf) return "";
+
+  // Remove tudo que não for número
+  let digits = cpf.replace(/\D/g, "");
+
+  // Aplica máscara
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+// Função para formatar telefone
+function formatTelefone(telefone: string): string {
+  if (!telefone) return "";
+
+  // Remove tudo que não for número
+  let digits = telefone.replace(/\D/g, "");
+
+  // Remove o código do Brasil se tiver
+  if (digits.startsWith("55")) {
+    digits = digits.slice(2);
+  }
+
+  // Aplica máscara
+  if (digits.length <= 10) {
+    // Telefone fixo (xx) xxxx-xxxx
+    return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "");
+  } else {
+    // Celular (xx) xxxxx-xxxx
+    return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "");
+  }
+}
+
 export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
   const methods = useForm<Usuario>({
     resolver: zodResolver(usuarioSchema),
@@ -63,9 +99,9 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
       console.error("Token global não definido!");
       toast.error("Token de autenticação não encontrado.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -78,9 +114,9 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
 
       toast.success("Usuário atualizado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -89,9 +125,9 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
       console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -109,9 +145,14 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
                 <CardTitle>
                   Editar Usuário: <span className="text-primary">{usuario.nome}</span>
                 </CardTitle>
-                <Button onClick={onClose} variant="outline">
-                  Voltar
-                </Button>
+                <div>
+                  <Button onClick={onClose} variant="outline">
+                    Voltar
+                  </Button>
+                  <Button className="ml-4" type="submit">
+                    Salvar Alterações
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -137,7 +178,12 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
                     <FormItem>
                       <FormLabel>CPF</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-gray-100" />
+                        <Input
+                          {...field}
+                          value={formatCpf(field.value ?? "")}
+                          readOnly
+                          className="bg-gray-100"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -165,7 +211,7 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={formatTelefone(field.value)} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -208,13 +254,6 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
               </div>
             </CardContent>
           </Card>
-
-          <div className="col-span-2 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
         </form>
       </Form>
     </FormProvider>

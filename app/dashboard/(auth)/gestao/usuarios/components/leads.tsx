@@ -72,6 +72,19 @@ function formatTelefone(telefone: string): string {
   }
 }
 
+// Função para formatar CPF
+function formatCpf(cpf: string): string {
+  if (!cpf) return "";
+
+  // Remove tudo que não for número
+  let digits = cpf.replace(/\D/g, "");
+
+  // Aplica máscara
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
 
 export function UsuariosTable() {
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
@@ -89,7 +102,11 @@ export function UsuariosTable() {
   const usuarioColumns = React.useMemo<ColumnDef<Usuario>[]>(
     () => [
       { accessorKey: "nome", header: "Nome" },
-      { accessorKey: "cpf", header: "CPF" },
+      {
+        accessorKey: "cpf",
+        header: "CPF",
+        cell: ({ getValue }) => formatCpf(String(getValue()))
+      },
       { accessorKey: "email", header: "Email" },
       {
         accessorKey: "telefone",
@@ -170,10 +187,10 @@ export function UsuariosTable() {
         console.error("Erro ao buscar usuários:", error.message);
         toast.error(`Erro ao carregar usuários: ${error.message}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            border: '1px solid var(--toast-border)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            border: "1px solid var(--toast-border)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
