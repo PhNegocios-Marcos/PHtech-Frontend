@@ -38,7 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { PerfilDrawer } from "./PerfilModal";
-import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Equipe = {
@@ -78,14 +78,14 @@ export function EquipesTable() {
     },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleEditClick(row.original)}
           title="Editar usuário">
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -95,14 +95,14 @@ export function EquipesTable() {
 
   const handleEditClick = (equipe: Equipe) => {
     setSelectedUser(equipe);
-    toast.info("Editando equipe", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      },
-      description: equipe.nome
-    });
+    // toast.info("Editando equipe", {
+    //   style: {
+    //     background: "var(--toast-info)",
+    //     color: "var(--toast-info-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   },
+    //   description: equipe.nome
+    // });
   };
 
   React.useEffect(() => {
@@ -110,9 +110,9 @@ export function EquipesTable() {
       if (!token) {
         toast.error("Autenticação necessária", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: "Faça login para acessar as equipes"
         });
@@ -154,9 +154,9 @@ export function EquipesTable() {
         console.error("Erro ao buscar equipes:", error.message || error);
         toast.error("Falha ao carregar equipes", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: error.message || "Erro desconhecido"
         });
@@ -167,7 +167,7 @@ export function EquipesTable() {
   }, [token]);
 
   const table = useReactTable({
-    data: equipes,
+    data: equipes.reverse(),
     columns: equipeColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -194,131 +194,129 @@ export function EquipesTable() {
 
   const handleCloseDrawer = () => {
     setSelectedUser(null);
-    toast.info("Edição concluída", {
-      style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    // toast.info("Edição concluída", {
+    //   style: {
+    //     background: "var(--toast-info)",
+    //     color: "var(--toast-info-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   }
+    // });
   };
 
   return (
-    <Card className="col-span-2">
-      <CardHeader className="flex flex-col justify-between">
-        <CardTitle>Perfis</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {selectedUser ? (
-          <PerfilDrawer
-            isOpen={true}
-            onClose={handleCloseDrawer}
-            usuario={selectedUser}
-          />
-        ) : (
-          <>
-            <div className="mb-4 flex items-center gap-2">
-              <Input
-                placeholder="Filtrar por qualquer campo..."
-                value={globalFilter}
-                onChange={(event) => setGlobalFilter(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
-                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+    <>
+      {selectedUser ? (
+        <PerfilDrawer isOpen={true} onClose={handleCloseDrawer} usuario={selectedUser} />
+      ) : (
+        <Card className="col-span-2">
+          <CardHeader className="flex flex-col justify-between">
+            <CardTitle>Perfis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <>
+              <div className="mb-4 flex items-center gap-2">
+                <Input
+                  placeholder="Filtrar por qualquer campo..."
+                  value={globalFilter}
+                  onChange={(event) => setGlobalFilter(event.target.value)}
+                  className="max-w-sm"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-auto">
+                      Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header, index) => {
-                        const isLast = index === headerGroup.headers.length - 1;
-                        return (
-                          <TableHead
-                            key={header.id}
-                            className={`truncate overflow-hidden whitespace-nowrap ${
-                              isLast ? "w-16" : "w-auto"
-                            }`}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </TableHead>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        onDoubleClick={() => handleEditClick(row.original)}
-                        className="hover:bg-muted cursor-pointer">
-                        {row.getVisibleCells().map((cell, index) => {
-                          const isLast = index === row.getVisibleCells().length - 1;
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header, index) => {
+                          const isLast = index === headerGroup.headers.length - 1;
                           return (
-                            <TableCell
-                              key={cell.id}
+                            <TableHead
+                              key={header.id}
                               className={`truncate overflow-hidden whitespace-nowrap ${
                                 isLast ? "w-16" : "w-auto"
                               }`}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </TableHead>
                           );
                         })}
                       </TableRow>
-                    ))
-                  ) : (
-                    <CarregandoTable />
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="flex items-center justify-end space-x-2 pt-4">
-              <div className="text-muted-foreground flex-1 text-sm">
-                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                {table.getFilteredRowModel().rows.length} row(s) selected.
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {table.getRowModel().rows.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <TableRow
+                          key={row.id}
+                          onDoubleClick={() => handleEditClick(row.original)}
+                          className="hover:bg-muted cursor-pointer">
+                          {row.getVisibleCells().map((cell, index) => {
+                            const isLast = index === row.getVisibleCells().length - 1;
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={`truncate overflow-hidden whitespace-nowrap ${
+                                  isLast ? "w-16" : "w-auto"
+                                }`}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <CarregandoTable />
+                    )}
+                  </TableBody>
+                </Table>
               </div>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}>
-                  <ChevronLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}>
-                  <ChevronRight />
-                </Button>
+              <div className="flex items-center justify-end space-x-2 pt-4">
+                <div className="text-muted-foreground flex-1 text-sm">
+                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                  {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className="space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}>
+                    <ChevronLeft />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}>
+                    <ChevronRight />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+            </>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 }

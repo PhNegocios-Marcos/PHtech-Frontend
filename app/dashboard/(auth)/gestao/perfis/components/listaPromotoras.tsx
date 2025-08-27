@@ -149,7 +149,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Permissões do Perfil: <span className="text-primary">{equipeLabel}</span>
+            Perfil: <span className="text-primary">{equipeLabel}</span>
           </CardTitle>
           <Button onClick={onClose} variant="outline">
             Voltar

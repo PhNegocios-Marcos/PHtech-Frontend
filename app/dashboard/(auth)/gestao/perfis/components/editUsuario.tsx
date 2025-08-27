@@ -48,14 +48,14 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
   useEffect(() => {
     if (perfil) {
       methods.reset(perfil);
-      toast.info("Dados do perfil carregados", {
-        style: {
-          background: "var(--toast-info)",
-          color: "var(--toast-info-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        },
-        description: `Editando: ${perfil.nome}`
-      });
+      // toast.info("Dados do perfil carregados", {
+      //   style: {
+      //     background: "var(--toast-info)",
+      //     color: "var(--toast-info-foreground)",
+      //     boxShadow: "var(--toast-shadow)"
+      //   },
+      //   description: `Editando: ${perfil.nome}`
+      // });
     }
   }, [perfil, methods]);
 
@@ -64,62 +64,62 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
     { id: 0, name: "Inativo" }
   ];
 
-const onSubmit = async (data: Perfil) => {
-  if (!token) {
-    toast.error("Autenticação necessária", {
-      style: {
-        background: 'var(--toast-error)',
-        color: 'var(--toast-error-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      },
-      description: "Faça login para continuar"
-    });
-    return;
-  }
+  const onSubmit = async (data: Perfil) => {
+    if (!token) {
+      toast.error("Autenticação necessária", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        },
+        description: "Faça login para continuar"
+      });
+      return;
+    }
 
-  // Cria uma cópia dos dados para enviar
-  const payload = { ...data };
+    // Cria uma cópia dos dados para enviar
+    const payload = { ...data };
 
-  // Remove o campo 'nome' se não foi alterado
-  if (perfil && data.nome === perfil.nome) {
-    delete payload.nome;
-  }
+    // Remove o campo 'nome' se não foi alterado
+    if (perfil && data.nome === perfil.nome) {
+      delete payload.nome;
+    }
 
-  try {
-    await axios.put(`${API_BASE_URL}/perfil/atualizar`, payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      await axios.put(`${API_BASE_URL}/perfil/atualizar`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    toast.success("Perfil atualizado com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
-    onClose();
-    window.location.reload();
-  } catch (error: any) {
-    console.error("Erro ao atualizar perfil:", error.response?.data || error.message);
-    toast.error("Falha ao atualizar perfil", {
-      style: {
-        background: 'var(--toast-error)',
-        color: 'var(--toast-error-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      },
-      description: error.response?.data?.message || "Erro desconhecido"
-    });
-  }
-};
+      toast.success("Perfil atualizado com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+      onClose();
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Erro ao atualizar perfil:", error.response?.data || error.message);
+      toast.error("Falha ao atualizar perfil", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        },
+        description: error.response?.data?.message || "Erro desconhecido"
+      });
+    }
+  };
 
   const handleClose = () => {
-    toast.info("Edição cancelada", {
-      style: {
-        background: "var(--toast-info)",
-        color: "var(--toast-info-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    // toast.info("Edição cancelada", {
+    //   style: {
+    //     background: "var(--toast-info)",
+    //     color: "var(--toast-info-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   }
+    // });
     onClose();
   };
 
@@ -133,11 +133,14 @@ const onSubmit = async (data: Perfil) => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  Dados do Perfil: <span className="text-primary">{perfil?.nome}</span>
+                  Perfil: <span className="text-primary">{perfil?.nome}</span>
                 </CardTitle>
-                <Button onClick={handleClose} variant="outline">
-                  Voltar
-                </Button>
+                <div>
+                  <Button onClick={handleClose} variant="outline">
+                    Voltar
+                  </Button>
+                  <Button className="ml-4" type="submit">Salvar Alterações</Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -192,10 +195,6 @@ const onSubmit = async (data: Perfil) => {
               </div>
             </CardContent>
           </Card>
-
-          <div className="col-span-2 p-4">
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
         </form>
       </Form>
     </FormProvider>

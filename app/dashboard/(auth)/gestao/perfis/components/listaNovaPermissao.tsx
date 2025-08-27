@@ -78,9 +78,9 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
         console.error("Erro ao buscar permissões:", error.message || error);
         toast.error(`Erro ao buscar permissões: ${error.message || error}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -137,18 +137,18 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
 
       toast.success("Permissões atualizadas com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (error: any) {
       console.error("Erro ao enviar permissões:", error.message || error);
       toast.error(`Erro ao enviar permissões: ${error.message || error}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -159,11 +159,17 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Permissões do Perfil: <span className="text-primary">{equipeLabel}</span>
+            Perfil: <span className="text-primary">{equipeLabel}</span>
           </CardTitle>
-          <Button onClick={onClose} variant="outline">
-            Voltar
-          </Button>
+
+          <div>
+            <Button onClick={onClose} variant="outline">
+              Voltar
+            </Button>
+            <Button className="ml-4" onClick={enviarPermissoesSelecionadas}>
+              Salvar Permissões Selecionadas
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="overflow-auto">
@@ -206,10 +212,6 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
             ))}
           </tbody>
         </table>
-
-        <div className="mt-4 flex justify-end">
-          <Button onClick={enviarPermissoesSelecionadas}>Salvar Permissões Selecionadas</Button>
-        </div>
       </CardContent>
     </Card>
   );
