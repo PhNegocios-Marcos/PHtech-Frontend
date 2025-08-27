@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -152,7 +152,7 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
     },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
@@ -160,7 +160,7 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
           onClick={() => handleSelectTaxa(row.original)}
           title="Editar produto"
         >
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,

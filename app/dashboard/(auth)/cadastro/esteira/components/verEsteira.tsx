@@ -444,7 +444,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
     <Card>
       <CardHeader className="flex items-center justify-between">
         <CardTitle>
-          Gerenciamento de Etapas: <span className="text-primary">{esteiraData}</span>
+          Esteira: <span className="text-primary">{esteiraData}</span>
         </CardTitle>
         <Button onClick={onClose} variant="outline">
           Fechar
