@@ -173,7 +173,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Detalhes do Produto</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
