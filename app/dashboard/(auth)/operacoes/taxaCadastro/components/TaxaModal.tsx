@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export type Taxa = {
-  id: number;
-  valor_minimo: string;
-  valor_maximo: string;
-  valor_cobrado: string;
+  cad_tac_id: number;
+  cad_tac_valor_minimo: string;
+  cad_tac_valor_maximo: string;
+  cad_tac_valor_cobrado: string;
 };
 
 type TaxaDrawerProps = {
@@ -31,13 +31,13 @@ export function TaxaModal({ isOpen, onClose, taxa, onRefresh }: TaxaDrawerProps)
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
-    toast.success("Taxa atualizada com sucesso!", {
-      style: {
-        background: "var(--toast-success)",
-        color: "var(--toast-success-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    // toast.success("Taxa atualizada com sucesso!", {
+    //   style: {
+    //     background: "var(--toast-success)",
+    //     color: "var(--toast-success-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   }
+    // });
     onRefresh?.();
     onClose();
   };

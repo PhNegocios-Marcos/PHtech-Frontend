@@ -29,10 +29,10 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type TaxaLinha = {
-  id: number;
-  valor_minimo: string;
-  valor_maximo: string;
-  valor_cobrado: string;
+  cad_tac_id: number;
+  cad_tac_valor_minimo: string;
+  cad_tac_valor_maximo: string;
+  cad_tac_valor_cobrado: string;
 };
 
 export function TaxaCadastroTable() {
@@ -86,7 +86,7 @@ export function TaxaCadastroTable() {
   const filteredTaxas = React.useMemo(() => {
     const filtroLower = filtro.toLowerCase();
     return taxas.filter((s) =>
-      [s.valor_minimo, s.valor_maximo, s.valor_cobrado].some((campo) =>
+      [s.cad_tac_valor_minimo, s.cad_tac_valor_maximo, s.cad_tac_valor_cobrado].some((campo) =>
         (campo || "").toLowerCase().includes(filtroLower)
       )
     );
@@ -94,13 +94,13 @@ export function TaxaCadastroTable() {
 
   const columns: ColumnDef<TaxaLinha>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "cad_tac_id",
       header: "ID",
       cell: (info) => <strong>{info.getValue() as number}</strong>
     },
-    { accessorKey: "valor_minimo", header: "Valor Mínimo" },
-    { accessorKey: "valor_maximo", header: "Valor Máximo" },
-    { accessorKey: "valor_cobrado", header: "Valor Cobrado" },
+    { accessorKey: "cad_tac_valor_minimo", header: "Valor Mínimo" },
+    { accessorKey: "cad_tac_valor_maximo", header: "Valor Máximo" },
+    { accessorKey: "cad_tac_valor_cobrado", header: "Valor Cobrado" },
     {
       id: "editar",
       header: "Editar",
@@ -124,9 +124,7 @@ export function TaxaCadastroTable() {
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) =>
-      String(row.getValue(columnId))
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase()),
+      String(row.getValue(columnId)).toLowerCase().includes(String(filterValue).toLowerCase()),
     state: { globalFilter }
   });
 
@@ -136,94 +134,91 @@ export function TaxaCadastroTable() {
 
   return (
     <>
-      {!selectedTaxa ? (
-        <Card className="col-span-2">
-          <CardHeader>
-            <CardTitle>Faixas de Taxa</CardTitle>
-          </CardHeader>
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle>Faixas de Taxa</CardTitle>
+        </CardHeader>
 
-          <CardContent>
-            <div className="mb-4 flex items-center gap-2">
-              <Input
-                placeholder="Filtrar por qualquer campo..."
-                value={globalFilter}
-                onChange={(event) => setGlobalFilter(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
-                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
+        <CardContent>
+          <div className="mb-4 flex items-center gap-2">
+            <Input
+              placeholder="Filtrar por qualquer campo..."
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {!header.isPlaceholder &&
+                          (typeof header.column.columnDef.header === "function"
+                            ? header.column.columnDef.header(header.getContext() as any)
+                            : String(header.column.columnDef.header))}
+                      </TableHead>
                     ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  </TableRow>
+                ))}
+              </TableHeader>
 
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {!header.isPlaceholder &&
-                            (typeof header.column.columnDef.header === "function"
-                              ? header.column.columnDef.header(header.getContext() as any)
-                              : String(header.column.columnDef.header))}
-                        </TableHead>
+              <TableBody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-4 text-center">
+                      <TaxaCarregando />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
                       ))}
                     </TableRow>
-                  ))}
-                </TableHeader>
-
-                <TableBody>
-                  {table.getRowModel().rows.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="p-4 text-center">
-                        <TaxaCarregando />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <TaxaModal
-          isOpen={!!selectedTaxa}
-          taxa={selectedTaxa}
-          onClose={() => {
-            handleCloseDrawer();
-            handleRefresh();
-          }}
-          onRefresh={handleRefresh}
-        />
-      )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+      <TaxaModal
+        isOpen={!!selectedTaxa}
+        taxa={selectedTaxa}
+        onClose={() => {
+          handleCloseDrawer();
+          handleRefresh();
+        }}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }

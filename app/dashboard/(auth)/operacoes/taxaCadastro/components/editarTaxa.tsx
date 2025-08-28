@@ -20,10 +20,10 @@ import {
 import { toast } from "sonner";
 
 const taxaSchema = z.object({
-  id: z.number(),
-  valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
-  valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
-  valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
+  cad_tac_id: z.number(),
+  cad_tac_valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
+  cad_tac_valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
+  cad_tac_valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
 });
 
 type TaxaFormValues = z.infer<typeof taxaSchema>;
@@ -49,14 +49,14 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
 
   const onSubmit = async (data: TaxaFormValues) => {
     try {
-      const payload: Partial<TaxaFormValues> = { id: data.id };
+      const payload: Partial<TaxaFormValues> = { cad_tac_id: data.cad_tac_id };
 
-      if (data.valor_minimo !== taxa.valor_minimo)
-        payload.valor_minimo = data.valor_minimo;
-      if (data.valor_maximo !== taxa.valor_maximo)
-        payload.valor_maximo = data.valor_maximo;
-      if (data.valor_cobrado !== taxa.valor_cobrado)
-        payload.valor_cobrado = data.valor_cobrado;
+      if (data.cad_tac_valor_minimo !== taxa.cad_tac_valor_minimo)
+        payload.cad_tac_valor_minimo = data.cad_tac_valor_minimo;
+      if (data.cad_tac_valor_maximo !== taxa.cad_tac_valor_maximo)
+        payload.cad_tac_valor_maximo = data.cad_tac_valor_maximo;
+      if (data.cad_tac_valor_cobrado !== taxa.cad_tac_valor_cobrado)
+        payload.cad_tac_valor_cobrado = data.cad_tac_valor_cobrado;
 
       await axios.put(`${API_BASE_URL}/faixa-valor-cobrado/atualizar`, payload, {
         headers: {
@@ -74,76 +74,100 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
     }
   };
 
-  return (
-    <FormProvider {...methods}>
-      <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-          <Card className="col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>
-                  <h2>
-                    Editar Faixa de Taxa: <span className="text-primary">{taxa.id}</span>
-                  </h2>
-                </CardTitle>
-                <Button onClick={onClose} variant="outline">
-                  Voltar
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={methods.control}
-                  name="valor_minimo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor Mínimo</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={methods.control}
-                  name="valor_maximo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor Máximo</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={methods.control}
-                  name="valor_cobrado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor Cobrado</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+  const handleClose = () => {
+    toast.info("Edição cancelada", {
+      style: {
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
+    onClose?.();
+  };
 
+  return (
+    <>
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+
+      <aside
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-white p-6 shadow-lg md:w-1/2">
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                Faixa de Taxa: <span className="text-primary">{taxa.cad_tac_id}</span>
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-2xl font-bold hover:text-gray-900"
+                aria-label="Fechar">
+                ×
+              </button>
+            </div>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+              <Card className="col-span-2">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle></CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={methods.control}
+                      name="cad_tac_valor_minimo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Mínimo</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="cad_tac_valor_maximo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Máximo</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={methods.control}
+                      name="cad_tac_valor_cobrado"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Cobrado</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
                 <Button type="submit">Salvar Alterações</Button>
               </div>
-            </CardContent>
-          </Card>
-        </form>
-      </Form>
-    </FormProvider>
+            </form>
+          </Form>
+        </FormProvider>
+      </aside>
+    </>
   );
 }
