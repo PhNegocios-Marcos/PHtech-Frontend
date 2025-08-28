@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 type ModalROProps = {
   onClose: () => void;
   onRefresh: () => void;
-  roteiro?: RoteiroOperacional; // Alterado para usar o tipo da tabela
+  roteiro?: RoteiroOperacional | null; // Alterado para usar o tipo da tabela
 };
 
 export function ModalRO({ onClose, onRefresh, roteiro }: ModalROProps) {
