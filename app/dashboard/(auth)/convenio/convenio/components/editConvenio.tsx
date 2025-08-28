@@ -16,8 +16,8 @@ type Props = {
 export default function ProdutoDetalhesTabs({ convenio, onClose, onRefresh }: Props) {
   return (
     <div className="space-y-4">
-      <Tabs defaultValue="info" className="w-full">
-        <TabsList>
+      <Tabs defaultValue="info">
+        <TabsList className="w-full">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="relacionamento">Relacionamento</TabsTrigger>
         </TabsList>
