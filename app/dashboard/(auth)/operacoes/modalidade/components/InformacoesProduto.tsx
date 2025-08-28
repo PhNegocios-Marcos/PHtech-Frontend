@@ -35,29 +35,41 @@ const produtoSchema = z.object({
 type Produto = z.infer<typeof produtoSchema>;
 
 type ProdutoDrawerProps = {
-  produto: Produto;
-  onClose?: () => void;
+  produto: Produto | null;
+  onClose: (() => void) | undefined;
   onRefresh?: () => void;
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
+  const defaultValues: Produto = {
+    id: produto?.id || "",
+    nome: produto?.nome || "",
+    status: produto?.status || 1, // Default to active
+    idade_minima: produto?.idade_minima || 0,
+    idade_maxima: produto?.idade_maxima || 0,
+    prazo_minimo: produto?.prazo_minimo || 0,
+    prazo_maximo: produto?.prazo_maximo || 0,
+    id_uy3: produto?.id_uy3 || null,
+    cor_grafico: produto?.cor_grafico || ""
+  };
+
   const methods = useForm<Produto>({
     resolver: zodResolver(produtoSchema),
-    defaultValues: {
-      ...produto,
-      cor_grafico: produto.cor_grafico || ""
-    }
+    defaultValues
   });
 
   const { token } = useAuth();
-  const originalData = useRef<Produto>({ ...produto, cor_grafico: produto.cor_grafico || "" });
+  const originalData = useRef<Produto>(defaultValues);
 
   useEffect(() => {
-    methods.reset({
-      ...produto,
-      cor_grafico: produto.cor_grafico || ""
-    });
-    originalData.current = { ...produto, cor_grafico: produto.cor_grafico || "" };
+    if (produto) {
+      const values = {
+        ...produto,
+        cor_grafico: produto.cor_grafico || ""
+      };
+      methods.reset(values);
+      originalData.current = values;
+    }
   }, [produto, methods]);
 
   const statusOptions = [
@@ -83,187 +95,223 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
       const normalizedNewValue = newValue === null ? undefined : newValue;
       const normalizedOldValue = oldValue === null ? undefined : oldValue;
 
-      // Compare values (including type conversion for numbers from strings)
+      // Compare values
       if (normalizedNewValue !== normalizedOldValue) {
-        // For number fields that might come as strings from input
-        if (typeof normalizedOldValue === 'number' && typeof normalizedNewValue === 'string') {
-          const numValue = parseInt(normalizedNewValue);
-          if (numValue !== normalizedOldValue) {
-            updatedFields[fieldKey] = numValue as any;
-          }
-        } else {
-          updatedFields[fieldKey] = normalizedNewValue as any;
-        }
+        updatedFields[fieldKey] = normalizedNewValue as any;
       }
     });
 
     // If only ID was added (no changes)
     if (Object.keys(updatedFields).length === 1) {
-      toast("Nenhuma alteração detectada.");
+      toast.info("Nenhuma alteração detectada.", {
+        style: {
+          background: "var(--toast-info)",
+          color: "var(--toast-info-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       return;
     }
 
     try {
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/rel-rotina-operacional-prod-convenio/atualizar`, updatedFields, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/rel-rotina-operacional-prod-convenio/atualizar`,
+        updatedFields,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       toast.success("Produto atualizado com sucesso!");
-      if (onClose) onClose();
-      if (onRefresh) onRefresh();
+      onClose?.();
+      onRefresh?.();
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
 
+  const handleClose = () => {
+    toast.info("Edição cancelada", {
+      style: {
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
+      }
+    });
+    onClose?.();
+  };
+
+  // Handle number input more gracefully
+  const handleNumberChange = (field: any, value: string) => {
+    const numValue = value === "" ? 0 : parseInt(value, 10) || 0;
+    field.onChange(numValue);
+  };
+
   return (
-    <FormProvider {...methods}>
-      <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6 p-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>
-                  Editar Modalidade: <span className="text-primary">{produto.nome}</span>
-                </CardTitle>
-                <Button onClick={onClose} variant="outline">
-                  Voltar
+    <>
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+
+      <aside
+        role="dialog"
+        aria-modal="true"
+        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-white p-6 shadow-lg md:w-1/2">
+        <FormProvider {...methods}>
+          <Form {...methods}>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                Editar Modalidade: <span className="text-primary">{produto?.nome}</span>
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-2xl font-bold hover:text-gray-900"
+                aria-label="Fechar">
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Detalhes do Produto</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={methods.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={statusOptions}
+                              displayField="name"
+                              value={statusOptions.find((opt) => opt.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id ?? 1)}
+                              searchFields={["name"]}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="idade_minima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Idade Mínima</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={field.value}
+                              onChange={(e) => handleNumberChange(field, e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="idade_maxima"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Idade Máxima</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={field.value}
+                              onChange={(e) => handleNumberChange(field, e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="prazo_minimo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prazo Mínimo</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={field.value}
+                              onChange={(e) => handleNumberChange(field, e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="prazo_maximo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prazo Máximo</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={field.value}
+                              onChange={(e) => handleNumberChange(field, e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="cor_grafico"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cor do Gráfico</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={methods.formState.isSubmitting}>
+                  {methods.formState.isSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={methods.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
-                      <FormControl>
-                        <Input value={field.value ?? ""} onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Combobox
-                          data={statusOptions}
-                          displayField="name"
-                          value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected?.id ?? 1)}
-                          searchFields={["name"]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="idade_minima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Idade Mínima</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="idade_maxima"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Idade Máxima</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="prazo_minimo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prazo Mínimo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="prazo_maximo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prazo Máximo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          value={field.value ?? 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={methods.control}
-                  name="cor_grafico"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor do Gráfico</FormLabel>
-                      <FormControl>
-                        <Input value={field.value ?? ""} onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit">Salvar Alterações</Button>
-          </div>
-        </form>
-      </Form>
-    </FormProvider>
+            </form>
+          </Form>
+        </FormProvider>
+      </aside>
+    </>
   );
 }

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import TabelaProduto from "./taxa"
 
 type Props = {
-  produto: Produto;
+  produto: Produto | null;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };
@@ -18,10 +18,10 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
   return (
     <div className="space-y-4">
       <Tabs defaultValue="info" className="w-full">
-        <TabsList>
+        {/* <TabsList>
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="relacionamento">Relacionamento</TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="info">
           <ProdutoEdit
@@ -31,9 +31,9 @@ export default function ProdutoDetalhesTabs({ produto, onClose, onRefresh }: Pro
           />
         </TabsContent>
 
-        <TabsContent value="relacionamento">
+        {/* <TabsContent value="relacionamento">
           <RelacionamentoProduto produto={produto} onClose={() => console.log("Fechar aba")} />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
