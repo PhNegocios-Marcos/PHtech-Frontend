@@ -150,8 +150,6 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
             </div>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
               <Card className="col-span-2">
-                <CardHeader>
-                </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField

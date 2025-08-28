@@ -224,7 +224,7 @@ export const page_routes: PageRoutesType[] = [
           {
             id: "Orgao_ver",
             title: "Orgão",
-            href: "/dashboard/cadastro/orgao"
+            href: "/dashboard/convenio/orgao"
             // icon: "ChartPie"
           }
         ]
