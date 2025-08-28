@@ -137,11 +137,11 @@ export default function Page() {
               alt="Descrição da imagem"
               width={200}
               height={200}
-              className="mx-auto"
+              className="mx-auto mb-5"
             />
             <CardHeader>
               <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription className="text-[13px]">
+              <CardDescription className="text-[13px] mb-5">
                 Digite seu e-mail e senha abaixo para acessar sua conta
               </CardDescription>
             </CardHeader>
@@ -178,8 +178,8 @@ export default function Page() {
                   {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                 </div>
                 {loginError && <p className="text-center text-sm text-red-500">{loginError}</p>}
-                <Button onClick={handleLogin} type="button" className="w-full">
-                  Login
+                <Button onClick={handleLogin} type="button" className="w-full py-6">
+                  Entrar
                 </Button>
               </div>
             </CardContent>
