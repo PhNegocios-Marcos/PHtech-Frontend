@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export type Seguro = {
   id: string;
-  seguradora_hash: string;
+  nome: string;
   faixa_inicio: string;
   faixa_fim: string;
   valor_seguradora: string;
@@ -34,14 +34,14 @@ export function SeguroModal({ isOpen, onClose, seguro, onRefresh }: SeguroDrawer
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
-    toast.success("Operação realizada com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
-    onRefresh?.();
+    // toast.success("Operação realizada com sucesso!", {
+    //   style: {
+    //     background: 'var(--toast-success)',
+    //     color: 'var(--toast-success-foreground)',
+    //     boxShadow: 'var(--toast-shadow)'
+    //   }
+    // });
+    // onRefresh?.();
     onClose();
   };
 

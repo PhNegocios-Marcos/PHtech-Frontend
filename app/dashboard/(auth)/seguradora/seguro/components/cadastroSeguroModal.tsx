@@ -22,7 +22,7 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const schema = z.object({
-  seguradora_hash: z.string().min(1, "Seguradora é obrigatória"),
+  nome: z.string().min(1, "Seguradora é obrigatória"),
   faixa_inicio: z.string().min(1, "Faixa inicial é obrigatória"),
   faixa_fim: z.string().min(1, "Faixa final é obrigatória"),
   valor_seguradora: z.string().min(1, "Valor da seguradora é obrigatório"),
@@ -46,7 +46,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      seguradora_hash: "",
+      nome: "",
       faixa_inicio: "",
       faixa_fim: "",
       valor_seguradora: "",
@@ -76,7 +76,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
 
         const data = await response.json();
         const options = data.map((seguradora: any) => ({
-          id: seguradora.seguradora_hash,
+          id: seguradora.nome,
           name: seguradora.nome
         }));
         setSeguradoras(options);
@@ -90,7 +90,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
   }, [token, isOpen]);
 
   useEffect(() => {
-    methods.setValue("seguradora_hash", seguradoraSelect?.id ?? "");
+    methods.setValue("nome", seguradoraSelect?.id ?? "");
   }, [seguradoraSelect, methods]);
 
   const onSubmit = async (data: FormData) => {
@@ -160,7 +160,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                   <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={methods.control}
-                      name="seguradora_hash"
+                      name="nome"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Seguradora</FormLabel>

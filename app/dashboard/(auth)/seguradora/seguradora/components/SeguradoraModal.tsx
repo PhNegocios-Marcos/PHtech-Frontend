@@ -34,13 +34,13 @@ export function SeguradoraModal({ isOpen, onClose, seguradora, onRefresh }: Segu
   if (!isOpen || !formData) return null;
 
   const handleSuccess = () => {
-    toast.success("Seguradora atualizada com sucesso!", {
-      style: {
-        background: "var(--toast-success)",
-        color: "var(--toast-success-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    // toast.success("Seguradora atualizada com sucesso!", {
+    //   style: {
+    //     background: "var(--toast-success)",
+    //     color: "var(--toast-success-foreground)",
+    //     boxShadow: "var(--toast-shadow)"
+    //   }
+    // });
     onRefresh?.();
     onClose();
   };
