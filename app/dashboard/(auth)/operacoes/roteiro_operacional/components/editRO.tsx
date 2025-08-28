@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import NumberFormat from "react-number-format";
 import {
   Form,
   FormControl,
@@ -70,7 +70,7 @@ type FormFieldConfig = {
   placeholder?: string;
   type?: string;
   readOnly?: boolean;
-  component?: "input" | "select";
+  component?: "select" | "input" | "numberFormat" | undefined; // Adicione "numberFormat" aqui
   options?: Array<{ value: string; label: string }>;
   showInputOnTrue?: {
     fieldName: keyof Roteiro;
@@ -123,13 +123,15 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       name: "valor_bruto_minimo",
       label: "Valor Bruto Mínimo",
       placeholder: "500.00",
-      type: "number"
+      type: "text", // Alterado para text
+      component: "numberFormat" // Adicione esta linha para identificar o componente
     },
     {
       name: "valor_bruto_maximo",
       label: "Valor Bruto Máximo",
       placeholder: "15500.50",
-      type: "number"
+      type: "text", // Alterado para text
+      component: "numberFormat" // Adicione esta linha para identificar o componente
     },
     { name: "tac_min", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
     { name: "tac_max", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
@@ -254,8 +256,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                 <CardHeader>
                   <div className="flex justify-between">
                     <div>
-                      <CardTitle>
-                      </CardTitle>
+                      <CardTitle></CardTitle>
                     </div>
                   </div>
                 </CardHeader>
