@@ -121,33 +121,26 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
         aria-modal="true"
         className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
+              Tipo de Operação:{" "}
+              <span className="text-primary">{subproduto.produtos_subprodutos_nome}</span>
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-2xl font-bold hover:text-gray-900"
+              aria-label="Fechar">
+              ×
+            </button>
+          </div>
           <form
             onSubmit={methods.handleSubmit(onSubmit, (errors) => {
               console.warn("Erros de validação:", errors);
             })}
             className="grid grid-cols-2 gap-4">
-            <div className="mb-6 flex items-center justify-between">
-              <h3></h3>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
-            </div>
             <Card className="col-span-2">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>
-                    Editar Tipo de Operação:{" "}
-                    <span className="text-primary">{subproduto.produtos_subprodutos_nome}</span>
-                  </CardTitle>
-                  {/* <Button onClick={onClose} variant="outline">
-                    Voltar
-                  </Button> */}
-                </div>
-              </CardHeader>
+              <CardHeader></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
