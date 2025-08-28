@@ -120,9 +120,9 @@ export function AverbadorTable() {
         console.error("Erro ao buscar usuários:", error.message);
         toast.error(`Erro ao buscar averbadores: ${error.message}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -159,9 +159,9 @@ export function AverbadorTable() {
     setRefreshKey((prev) => prev + 1);
     toast.success("Tabela de averbadores atualizada!", {
       style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
   };
@@ -169,11 +169,121 @@ export function AverbadorTable() {
   return (
     <>
       {selectedUser ? (
-        <AverbadorPerfil
-          averbador={selectedUser}
-          onClose={() => setSelectedUser(null)}
-          onRefresh={handleRefresh}
-        />
+        <>
+          <AverbadorPerfil
+            averbador={selectedUser}
+            onClose={() => setSelectedUser(null)}
+            onRefresh={handleRefresh}
+          />
+          <Card className="col-span-2">
+            <CardHeader className="flex flex-col justify-between">
+              <CardTitle>Averbador</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <>
+                <div className="mb-4 flex items-center gap-2">
+                  <Input
+                    placeholder="Filtrar por qualquer campo..."
+                    value={globalFilter}
+                    onChange={(event) => setGlobalFilter(event.target.value)}
+                    className="max-w-sm"
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="ml-auto">
+                        Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => (
+                          <DropdownMenuCheckboxItem
+                            key={column.id}
+                            className="capitalize"
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                            {column.id}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header, index) => {
+                            const isLast = index === headerGroup.headers.length - 1;
+                            return (
+                              <TableHead
+                                key={header.id}
+                                className={`truncate overflow-hidden whitespace-nowrap ${
+                                  isLast ? "w-16" : "w-auto" // Ajuste para 50px na última coluna
+                                }`}>
+                                {flexRender(header.column.columnDef.header, header.getContext())}
+                              </TableHead>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {table.getRowModel().rows.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            onDoubleClick={() => setSelectedUser(row.original)}
+                            className="hover:bg-muted cursor-pointer">
+                            {row.getVisibleCells().map((cell, index) => {
+                              const isLast = index === row.getVisibleCells().length - 1;
+                              return (
+                                <TableCell
+                                  key={cell.id}
+                                  className={`truncate overflow-hidden whitespace-nowrap ${
+                                    isLast ? "w-16" : "w-auto" // Mesmo ajuste para células
+                                  }`}>
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <CarregandoTable />
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="flex items-center justify-end space-x-2 pt-4">
+                  <div className="text-muted-foreground flex-1 text-sm">
+                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                  </div>
+                  <div className="space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}>
+                      <ChevronLeft />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}>
+                      <ChevronRight />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            </CardContent>
+          </Card>
+        </>
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">

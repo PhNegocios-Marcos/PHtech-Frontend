@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Averbador } from "./leads";
 
 type AverbadorPerfilProps = {
-  averbador: Averbador;
+  averbador: Averbador | null;
   onClose: () => void;
   onRefresh: () => void;
 };
