@@ -248,14 +248,13 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
 
   return (
     <div className="space-y-6">
-      {selectedTaxa ? (
         <VerEsteira
           isOpen={isCadastroOpen}
-          esteiraHash={selectedTaxa.esteira_hash}
-          esteiraData={selectedTaxa.esteira_nome}
+          esteiraHash={!!selectedTaxa ? selectedTaxa.esteira_hash : null}
+          esteiraData={!!selectedTaxa ? selectedTaxa.esteira_nome : null}
           onClose={handleClose}
         />
-      ) : (
+
         <Card className="">
           <CardHeader>
             <CardTitle>Esteira</CardTitle>
@@ -349,7 +348,7 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
             </>
           </CardContent>
         </Card>
-      )}
+        
 
       {/* <CadastroTabelaModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} /> */}
     </div>
