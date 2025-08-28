@@ -251,7 +251,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
             </div>
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
-              className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              className="grid grid-cols-1 gap-4">
               <Card className="col-span-2">
                 <CardHeader>
                   <div className="flex justify-between">
@@ -366,9 +366,12 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                   </div>
                 </CardContent>
               </Card>
-              <div className="gap-4">
-                <Button className="ml-4" type="submit">
-                  Salvar Alterações
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={methods.formState.isSubmitting}>
+                  {methods.formState.isSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>
             </form>
