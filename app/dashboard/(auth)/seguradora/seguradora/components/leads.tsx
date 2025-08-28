@@ -6,6 +6,8 @@ import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack
 import { SeguradorasCarregando } from "./leads_carregando";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
+import InputMask from "react-input-mask";
+
 import {
   Table,
   TableBody,
@@ -45,6 +47,7 @@ export function SeguradorasTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraLinha | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [cnpj, setCnpj] = useState("");
 
   useEffect(() => {
     async function fetchSeguradoras() {
@@ -81,6 +84,27 @@ export function SeguradorasTable() {
     );
   }, [filtro, seguradoras]);
 
+  // Função para formatar CNPJ
+  const formatarCNPJ = (cnpj: string) => {
+    if (!cnpj) return "";
+    
+    // Remove caracteres não numéricos
+    const cnpjLimpo = cnpj.replace(/\D/g, '');
+    
+    // Aplica a máscara: 00.000.000/0000-00
+    if (cnpjLimpo.length <= 2) {
+      return cnpjLimpo;
+    } else if (cnpjLimpo.length <= 5) {
+      return `${cnpjLimpo.slice(0, 2)}.${cnpjLimpo.slice(2)}`;
+    } else if (cnpjLimpo.length <= 8) {
+      return `${cnpjLimpo.slice(0, 2)}.${cnpjLimpo.slice(2, 5)}.${cnpjLimpo.slice(5)}`;
+    } else if (cnpjLimpo.length <= 12) {
+      return `${cnpjLimpo.slice(0, 2)}.${cnpjLimpo.slice(2, 5)}.${cnpjLimpo.slice(5, 8)}/${cnpjLimpo.slice(8)}`;
+    } else {
+      return `${cnpjLimpo.slice(0, 2)}.${cnpjLimpo.slice(2, 5)}.${cnpjLimpo.slice(5, 8)}/${cnpjLimpo.slice(8, 12)}-${cnpjLimpo.slice(12, 14)}`;
+    }
+  };
+
   const columns: ColumnDef<SeguradoraLinha>[] = [
     {
       accessorKey: "nome",
@@ -92,7 +116,11 @@ export function SeguradorasTable() {
     },
     {
       accessorKey: "cnpj",
-      header: "CNPJ"
+      header: "CNPJ",
+      cell: ({ row }) => {
+        const cnpjValue = row.original.cnpj;
+        return formatarCNPJ(cnpjValue);
+      }
     },
     {
       id: "status",
@@ -154,94 +182,91 @@ export function SeguradorasTable() {
 
   return (
     <>
-      {!selectedSeguradora ? (
-        <Card className="col-span-2">
-          <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Seguradoras</CardTitle>
-          </CardHeader>
+      <Card className="col-span-2">
+        <CardHeader className="flex flex-col justify-between">
+          <CardTitle>Seguradoras</CardTitle>
+        </CardHeader>
 
-          <CardContent>
-            <div className="mb-4 flex items-center gap-2">
-              <Input
-                placeholder="Filtrar por qualquer campo..."
-                value={globalFilter}
-                onChange={(event) => setGlobalFilter(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
-                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
+        <CardContent>
+          <div className="mb-4 flex items-center gap-2">
+            <Input
+              placeholder="Filtrar por qualquer campo..."
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}>
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {!header.isPlaceholder &&
+                          (typeof header.column.columnDef.header === "function"
+                            ? header.column.columnDef.header(header.getContext() as any)
+                            : String(header.column.columnDef.header))}
+                      </TableHead>
                     ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                  </TableRow>
+                ))}
+              </TableHeader>
 
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {!header.isPlaceholder &&
-                            (typeof header.column.columnDef.header === "function"
-                              ? header.column.columnDef.header(header.getContext() as any)
-                              : String(header.column.columnDef.header))}
-                        </TableHead>
+              <TableBody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-4 text-center">
+                      <SeguradorasCarregando />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
                       ))}
                     </TableRow>
-                  ))}
-                </TableHeader>
-
-                <TableBody>
-                  {table.getRowModel().rows.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="p-4 text-center">
-                        <SeguradorasCarregando />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <SeguradoraModal
-          isOpen={!!selectedSeguradora}
-          seguradora={selectedSeguradora}
-          onClose={() => {
-            handleCloseDrawer();
-            handleRefresh();
-          }}
-          onRefresh={handleRefresh}
-        />
-      )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+      <SeguradoraModal
+        isOpen={!!selectedSeguradora}
+        seguradora={selectedSeguradora}
+        onClose={() => {
+          handleCloseDrawer();
+          handleRefresh();
+        }}
+        onRefresh={handleRefresh}
+      />
     </>
   );
 }
