@@ -26,6 +26,7 @@ const loginSchema = z.object({
 export default function Page() {
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
   const [usa2faModal, setUsa2faModal] = useState<ModalType>("none");
+  const [loading, setLoading] = useState(false); 
   const [promotorasModal, setPromotorasModal] = useState<ModalType>("none");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,6 +82,8 @@ export default function Page() {
         return;
       }
 
+      setLoading(true);
+
       // Armazenando dados no contexto
       setMail(email);
       setSenha(password);
@@ -102,6 +105,7 @@ export default function Page() {
           setUsa2faModal("usa_2fa");
         }
       }
+
     } catch (error: any) {
       setLoginError("Erro na conexão com o servidor.");
       console.error("Erro ao fazer login:", error instanceof Error ? error.message : error);
@@ -126,18 +130,16 @@ export default function Page() {
     backgroundPosition: 'center center',
   }
 
-
   return (
-      <div className="flex flex-col pb-8 lg:pb-0 h-screen py-20 px-[24px] md:px-[64px] xl:px-[144px]" style={imageConstruct}>
-        <Image
-          src="/logo.png" // caminho da imagem (pública ou importada)
-          alt="Descrição da imagem"
-          width={100}
-          height={100}
-          className="mb-5"
-        />
+      <div className="flex flex-col h-screen py-20 px-[24px] md:px-[64px] xl:px-[256px]" style={imageConstruct}>
         <div className="flex w-full flex-col lg:flex-row my-auto justify-between items-center">
-          <div className="lg:w-[50%] sm:w-[75%] w-full  hidden md:mb-6 sm:flex flex-col justify-center gap-32">
+          <div className="lg:w-[50%] sm:w-[75%] w-full  hidden md:mb-6 sm:flex flex-col justify-center gap-3">
+            <Image
+              src="/logo_white.png" // caminho da imagem (pública ou importada)
+              alt="Descrição da imagem"
+              width={200}
+              height={200}
+            />
             <h3 className="text-white text-[16px] md:text-[24px] text-center lg:text-left lg:text-[28px] xl:text-[32px]">
               A melhor experiência <br/> para você e seu cliente.
             </h3>
@@ -186,8 +188,8 @@ export default function Page() {
                     {loginError && <p className="text-center text-sm text-white">{loginError}</p>}
                   </div>
 
-                  <Button onClick={handleLogin} type="button" className="w-full py-7">
-                    Entrar
+                  <Button onClick={handleLogin} type="button" className="w-full py-7 disabled:bg-red-800" disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
                   </Button>
                 </GlassCard>
               </div>
