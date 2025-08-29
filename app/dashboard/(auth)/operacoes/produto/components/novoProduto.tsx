@@ -36,6 +36,7 @@ const schema = z.object({
   convenio_hash: z.string().min(1, "Convênio é obrigatório"),
   modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
   tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
+  dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
   RO: z.string().min(1, "RO é obrigatório"),
   // Dados da taxa
   nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
@@ -56,20 +57,39 @@ type CadastroCompletoModalProps = {
 };
 
 type Option = {
-  id?: string;
-  nome: string;
-  hash?: string;
-  name?: string;
+  id?: string | number;
+  nome: string | number;
+  hash?: string | number;
+  name?: string | number;
 };
 
 // Campos de texto repetidos (para reduzir código)
 const textFields = [
   { name: "nome_taxa", label: "Nome Tabela", placeholder: "Digite o nome" },
-  { name: "prazo_minimo", label: "Prazo mínimo", placeholder: "12" },
-  { name: "prazo_maximo", label: "Prazo máximo", placeholder: "64" },
   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6" },
   { name: "periodiciade", label: "Periodicidade", placeholder: "12" }
 ] as const;
+
+const prazoFields = [
+  { name: "prazo_minimo", label: "Prazo mínimo", placeholder: "12" },
+  { name: "prazo_maximo", label: "Prazo máximo", placeholder: "64" }
+] as const;
+
+// const textFields = [
+//   { name: "nome_taxa", label: "Nome Tabela", placeholder: "Digite o nome" },
+//   { name: "prazo_minimo", label: "Prazo mínimo", placeholder: "12" },
+//   { name: "prazo_maximo", label: "Prazo máximo", placeholder: "64" },
+//   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6" },
+//   { name: "periodiciade", label: "Periodicidade", placeholder: "12" }
+// ] as const;
+
+// const textFields = [
+//   { name: "nome_taxa", label: "Nome Tabela", placeholder: "Digite o nome" },
+//   { name: "prazo_minimo", label: "Prazo mínimo", placeholder: "12" },
+//   { name: "prazo_maximo", label: "Prazo máximo", placeholder: "64" },
+//   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6" },
+//   { name: "periodiciade", label: "Periodicidade", placeholder: "12" }
+// ] as const;
 
 export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompletoModalProps) {
   const [loading, setLoading] = useState(false);
@@ -87,6 +107,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       convenio_hash: "",
       modalidade_hash: "",
       tipo_operacao_hash: "",
+      dias_validade_ccb: "",
       nome_taxa: "",
       prazo_minimo: "",
       prazo_maximo: "",
@@ -214,7 +235,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
         {
           convenio_hash: data.convenio_hash,
           modalidade_hash: data.modalidade_hash,
-          tipo_operacao_hash: data.tipo_operacao_hash
+          tipo_operacao_hash: data.tipo_operacao_hash,
+          dias_validade_ccb: data.dias_validade_ccb
         },
         {
           headers: {
@@ -293,7 +315,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Cadastrar Produto e Taxa</h2>
+              <h2 className="text-xl font-semibold">Cadastrar Produto</h2>
               <button
                 type="button"
                 onClick={onClose}
@@ -372,6 +394,24 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={methods.control}
+                    name="dias_validade_ccb"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dias de Validade da CCB</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Selecione o Tipo de Operação"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
@@ -380,27 +420,133 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                 <CardHeader>
                   <CardTitle>Tabela Taxa</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CardContent>
                   {/* Campos de texto mapeados */}
-                  {textFields.map((conf) => (
-                    <FormField
-                      key={conf.name}
-                      control={methods.control}
-                      name={conf.name}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{conf.label}</FormLabel>
-                          <FormControl>
-                            <Input placeholder={conf.placeholder} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {textFields.map((conf) => (
+                      <FormField
+                        key={conf.name}
+                        control={methods.control}
+                        name={conf.name}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{conf.label}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={conf.placeholder} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {prazoFields.map((conf) => (
+                        <FormField
+                          key={conf.name}
+                          control={methods.control}
+                          name={conf.name}
+                          render={({ field }) => (
+                            <FormItem className="mt-4">
+                              <FormLabel>{conf.label}</FormLabel>
+                              <FormControl>
+                                <Input placeholder={conf.placeholder} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <FormField
+                        control={methods.control}
+                        name="inicio"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col mt-4">
+                            <FormLabel>Inicio da vigência</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Selecione data</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) => date < new Date()}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Data Fim */}
+                      <FormField
+                        control={methods.control}
+                        name="fim"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col mt-4">
+                            <FormLabel>Fim da vigência</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}>
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Selecione data</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) => date < new Date()}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Data Início */}
 
                   {/* Incrementador */}
-                  <FormField
+                  {/* <FormField
                     control={methods.control}
                     name="incrementador"
                     render={() => (
@@ -430,87 +576,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
-
-                  {/* Data Início */}
-                  <FormField
-                    control={methods.control}
-                    name="inicio"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Inicio da vigência</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}>
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Selecione data</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date()}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Data Fim */}
-                  <FormField
-                    control={methods.control}
-                    name="fim"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Fim da vigência</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}>
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Selecione data</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date()}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  /> */}
                 </CardContent>
               </Card>
 
@@ -550,7 +616,6 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading ? "Cadastrando..." : "Cadastrar Produto e Taxa"}
-
               </Button>
             </div>
           </form>
