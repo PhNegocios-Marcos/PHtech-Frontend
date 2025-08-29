@@ -1,0 +1,8 @@
+.glass-card {
+    background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15));
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    padding: 20px;
+}
