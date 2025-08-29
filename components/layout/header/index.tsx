@@ -15,7 +15,7 @@ export default function Header() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="sticky top-0 z-50 flex flex-col">
+    <div className="sticky top-0 z-40 flex flex-col">
       <header className="bg-background/50 flex h-14 items-center gap-3 px-4 backdrop-blur-xl lg:h-[60px]">
         <Button
           onClick={toggleSidebar}
