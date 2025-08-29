@@ -26,6 +26,7 @@ const loginSchema = z.object({
 export default function Page() {
   const [currentModal, setCurrentModal] = useState<ModalType>("none");
   const [usa2faModal, setUsa2faModal] = useState<ModalType>("none");
+  const [loading, setLoading] = useState(false); 
   const [promotorasModal, setPromotorasModal] = useState<ModalType>("none");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,6 +82,8 @@ export default function Page() {
         return;
       }
 
+      setLoading(true);
+
       // Armazenando dados no contexto
       setMail(email);
       setSenha(password);
@@ -102,6 +105,7 @@ export default function Page() {
           setUsa2faModal("usa_2fa");
         }
       }
+
     } catch (error: any) {
       setLoginError("Erro na conexão com o servidor.");
       console.error("Erro ao fazer login:", error instanceof Error ? error.message : error);
@@ -125,7 +129,6 @@ export default function Page() {
     backgroundSize: 'cover',
     backgroundPosition: 'center center',
   }
-
 
   return (
       <div className="flex flex-col h-screen py-20 px-[24px] md:px-[64px] xl:px-[256px]" style={imageConstruct}>
@@ -185,8 +188,8 @@ export default function Page() {
                     {loginError && <p className="text-center text-sm text-white">{loginError}</p>}
                   </div>
 
-                  <Button onClick={handleLogin} type="button" className="w-full py-7">
-                    Entrar
+                  <Button onClick={handleLogin} type="button" className="w-full py-7 disabled:bg-red-800" disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
                   </Button>
                 </GlassCard>
               </div>
