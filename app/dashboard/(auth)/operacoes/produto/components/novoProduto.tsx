@@ -38,6 +38,7 @@ const schema = z.object({
   modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
   tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
   dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
+  bancalizador: z.string().min(1, "Bancalizador é obrigatório"),
   RO: z.string().min(1, "RO é obrigatório"),
   // Dados da taxa
   nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
@@ -237,7 +238,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           convenio_hash: data.convenio_hash,
           modalidade_hash: data.modalidade_hash,
           tipo_operacao_hash: data.tipo_operacao_hash,
-          dias_validade_ccb: data.dias_validade_ccb
+          dias_validade_ccb: data.dias_validade_ccb,
+          bancalizador: data.bancalizador
         },
         {
           headers: {
@@ -402,6 +404,25 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Dias de Validade da CCB</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
+                            type="number"
+                            placeholder="Selecione o Tipo de Operação"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={methods.control}
+                    name="dias_validade_ccb"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bancalizador</FormLabel>
                         <FormControl>
                           <Input
                             className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
