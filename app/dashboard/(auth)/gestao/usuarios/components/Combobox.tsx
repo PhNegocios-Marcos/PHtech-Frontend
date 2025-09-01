@@ -22,7 +22,8 @@ type ComboboxProps<T> = {
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
-  className?: string; // ✅ Adicionado
+  className?: string;
+  idField?: keyof T; // ✅ New optional prop for unique ID field
 };
 
 export function Combobox<T extends Record<string, any>>({
@@ -32,10 +33,29 @@ export function Combobox<T extends Record<string, any>>({
   onChange,
   label,
   placeholder = "Selecione",
-  searchFields = [displayField]
+  searchFields = [displayField],
+  idField = "id" as keyof T // ✅ Default to 'id' if available
 }: ComboboxProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
+
+  // ✅ Smart key generation - tries to use idField, falls back to index if not unique
+  const getItemKey = (item: T, index: number): string => {
+    if (idField && item[idField] !== undefined) {
+      return String(item[idField]);
+    }
+    
+    // Fallback: use displayField + index to ensure uniqueness
+    return `${String(item[displayField])}-${index}`;
+  };
+
+  // ✅ Smart value comparison - tries to use idField, falls back to displayField
+  const isItemSelected = (item: T): boolean => {
+    if (value && idField && value[idField] !== undefined && item[idField] !== undefined) {
+      return value[idField] === item[idField];
+    }
+    return value?.[displayField] === item[displayField];
+  };
 
   const filteredData = React.useMemo(() => {
     const lowerSearch = search.toLowerCase();
@@ -66,9 +86,9 @@ export function Combobox<T extends Record<string, any>>({
             <CommandInput placeholder="Buscar..." value={search} onValueChange={setSearch} />
             <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
             <CommandGroup className="max-h-50 overflow-y-auto">
-              {filteredData.map((item) => (
+              {filteredData.map((item, index) => (
                 <CommandItem
-                  key={item[displayField]}
+                  key={getItemKey(item, index)} // ✅ Uses smart key generation
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);
@@ -77,7 +97,7 @@ export function Combobox<T extends Record<string, any>>({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value?.[displayField] === item[displayField] ? "opacity-100" : "opacity-0"
+                      isItemSelected(item) ? "opacity-100" : "opacity-0" // ✅ Uses smart comparison
                     )}
                   />
                   {item[displayField]}
