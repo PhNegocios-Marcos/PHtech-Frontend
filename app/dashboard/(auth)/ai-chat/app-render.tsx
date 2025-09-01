@@ -511,7 +511,7 @@ export default function AppRender() {
 
           {/* Sugestões para primeira interação */}
           {!isFirstResponse && (
-            <div className="flex h-full flex-col items-center justify-center pb-32">
+            <div className="flex h-full flex-col items-center justify-center">
               <div className="mx-auto max-w-lg px-4 text-center">
                 <h2 className="mb-6 text-2xl font-bold">Como posso ajudá-lo hoje?</h2>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -528,7 +528,7 @@ export default function AppRender() {
 
         {/* Área de entrada fixa na parte inferior */}
         <div className="bg-background sticky bottom-0 border-t p-4">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-4xl flex">
             <Input
               value={prompt}
               onValueChange={setPrompt}
