@@ -4,9 +4,9 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Produto } from "./produtos";
 import { ProdutoEdit } from "./InformacoesProduto";
-import RelacionamentoProduto from "./RelacionamentoProduto";
+// import RelacionamentoProduto from "./RelacionamentoProduto";
 import { Button } from "@/components/ui/button";
-import TabelaProduto from "./taxa"
+// import TabelaProduto from "./taxa"
 
 type Props = {
   produto: Produto | null;
