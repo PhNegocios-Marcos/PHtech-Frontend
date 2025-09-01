@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +47,18 @@ const usaParadaOptions = [
   { id: "0", nome: "Não" }
 ];
 
+// Schema para endereço
+const enderecoSchema = z.object({
+  cep: z.string().min(8, "CEP é obrigatório"),
+  logradouro: z.string().min(1, "Logradouro é obrigatório"),
+  numero: z.string().min(1, "Número é obrigatório"),
+  complemento: z.string().optional(),
+  bairro: z.string().min(1, "Bairro é obrigatório"),
+  cidade: z.string().min(1, "Cidade é obrigatória"),
+  estado: z.string().min(1, "Estado é obrigatório"),
+  uf: z.string().min(2, "UF é obrigatória").max(2, "UF deve ter 2 caracteres")
+});
+
 const schema = z
   .object({
     nome: z.string().min(1, "Nome é obrigatório"),
@@ -58,7 +70,8 @@ const schema = z
     master_id: z.string().uuid().optional(),
     rateio_master: z.number().min(0).max(100),
     rateio_sub: z.number().min(0).max(100).optional(),
-    file: z.any().optional()
+    file: z.any().optional(),
+    enderecos: z.array(enderecoSchema).min(1, "Pelo menos um endereço é obrigatório")
   })
   .refine(
     (data) => {
@@ -83,6 +96,221 @@ type CadastroPromotoraModalProps = {
   onClose: () => void;
 };
 
+// Campos de endereço para o formulário
+const enderecoFields = [
+  { name: "enderecos.0.cep", label: "CEP", type: "text", required: true },
+  { name: "enderecos.0.logradouro", label: "Logradouro", type: "text", required: true },
+  { name: "enderecos.0.numero", label: "Número", type: "text", required: true },
+  { name: "enderecos.0.bairro", label: "Bairro", type: "text", required: true },
+  { name: "enderecos.0.cidade", label: "Cidade", type: "text", required: true },
+  { name: "enderecos.0.estado", label: "Estado", type: "text", required: true },
+  { name: "enderecos.0.uf", label: "UF", type: "text", required: true }
+];
+
+// Componente para formulário de endereço
+const EnderecoForm = forwardRef<
+  { validate: () => Promise<boolean> },
+  { formData: any; onChange: (path: string, value: any) => void; fields: any[] }
+>(({ formData, onChange, fields }, ref) => {
+  const e = formData.enderecos[0] || {};
+
+  const createSchema = () => {
+    const schemaObj: Record<string, any> = {};
+    fields.forEach((field: any) => {
+      const fieldName = field.name.startsWith("enderecos.0.")
+        ? field.name.split(".").slice(2).join(".")
+        : field.name;
+      if (field.required) {
+        schemaObj[fieldName] = z.string().min(1, `${field.label} é obrigatório`);
+      } else {
+        schemaObj[fieldName] = z.string().optional();
+      }
+    });
+    return z.object(schemaObj);
+  };
+
+  const localSchema = createSchema();
+  type EnderecoFormData = z.infer<typeof localSchema>;
+
+  const {
+    register,
+    setValue,
+    formState: { errors },
+    trigger
+  } = useForm<EnderecoFormData>({
+    resolver: zodResolver(localSchema),
+    defaultValues: fields.reduce(
+      (acc: Record<string, any>, field: any) => {
+        const fieldName = field.name.startsWith("enderecos.0.")
+          ? field.name.split(".").slice(2).join(".")
+          : field.name;
+        acc[fieldName] = e[fieldName] || "";
+        return acc;
+      },
+      {} as Record<string, any>
+    )
+  });
+
+  useEffect(() => {
+    fields.forEach((field: any) => {
+      const fieldName = field.name.startsWith("enderecos.0.")
+        ? field.name.split(".").slice(2).join(".")
+        : field.name;
+      setValue(fieldName, e[fieldName] || "");
+    });
+  }, [formData, setValue, fields]);
+
+  useImperativeHandle(ref, () => ({
+    validate: () => trigger()
+  }));
+
+  const formatCep = (value: string): string => {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length > 5) {
+      return `${cleaned.slice(0, 5)}-${cleaned.slice(5, 8)}`;
+    }
+    return cleaned;
+  };
+
+  const buscarEndereco = async (cep: string) => {
+    const cepLimpo = cep.replace(/\D/g, "");
+    if (cepLimpo.length !== 8) return;
+
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const data = await res.json();
+
+      if (data.erro) {
+        toast.error("CEP não encontrado", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        return;
+      }
+
+      const campos = {
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        estado: data.localidade || "",
+        uf: data.uf || ""
+      };
+
+      Object.entries(campos).forEach(([key, val]) => {
+        setValue(key as keyof EnderecoFormData, val);
+        onChange(`enderecos.0.${key}`, val);
+      });
+
+      toast.success("Endereço encontrado com sucesso!", {
+        style: {
+          background: 'var(--toast-success)',
+          color: 'var(--toast-success-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    } catch (error) {
+      console.error("Erro ao buscar endereço:", error);
+      toast.error("Não foi possível buscar o endereço. Verifique sua conexão.", {
+        style: {
+          background: 'var(--toast-error)',
+          color: 'var(--toast-error-foreground)',
+          boxShadow: 'var(--toast-shadow)'
+        }
+      });
+    }
+  };
+
+  const renderField = (field: any) => {
+    const fieldName = field.name.startsWith("enderecos.0.")
+      ? field.name.split(".").slice(2).join(".")
+      : field.name;
+    const errorMessage = errors[fieldName]?.message;
+    const isErrorString = typeof errorMessage === "string";
+
+    // Garante que o valor do input é sempre string
+    const value =
+      field.name === "enderecos.0.numero"
+        ? e["numero"] !== undefined
+          ? String(e["numero"])
+          : ""
+        : e[fieldName] || "";
+
+    return (
+      <div key={field.name} className="grid gap-1">
+        <span>{field.label}</span>
+        {field.name === "enderecos.0.cep" ? (
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            value={e["cep"] || ""}
+            onChange={(e) => {
+              const rawValue = e.target.value;
+              const formattedValue = formatCep(rawValue);
+              setValue(fieldName, formattedValue);
+              onChange(field.name, formattedValue);
+              if (formattedValue.replace(/\D/g, "").length === 8) {
+                buscarEndereco(formattedValue);
+              }
+            }}
+            className="mt-1"
+          />
+        ) : field.name === "enderecos.0.numero" ? (
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            type="text"
+            value={value}
+            onChange={(e) => {
+              setValue(fieldName, e.target.value);
+              onChange(field.name, e.target.value);
+            }}
+            className="mt-1"
+          />
+        ) : (
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            type={field.type}
+            value={e[fieldName] || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              setValue(fieldName, value);
+              onChange(field.name, value);
+            }}
+            className="mt-1"
+          />
+        )}
+        {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+      </div>
+    );
+  };
+
+  return (
+    <div className="mt-4">
+      <h3 className="text-lg font-medium mb-4">Endereço</h3>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {fields.map(renderField)}
+        <div className="grid gap-1">
+          <span>Complemento</span>
+          <Input
+            placeholder="Complemento"
+            value={e.complemento || ""}
+            onChange={(ev) => {
+              onChange("enderecos.0.complemento", ev.target.value);
+            }}
+            className="mt-1"
+          />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+EnderecoForm.displayName = "EnderecoForm";
+
 export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroPromotoraModalProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -95,7 +323,17 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       rateio_master: 100,
       rateio_sub: 0,
       master_id: undefined,
-      radius: "md"
+      radius: "md",
+      enderecos: [{
+        cep: "",
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+        uf: ""
+      }]
     }
   });
 
@@ -107,6 +345,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
   const [master, setMaster] = useState<any[]>([]);
   const { theme } = useThemeConfig();
   const [selectedPreset, setSelectedPreset] = useState(theme.preset);
+  const enderecoFormRef = React.useRef<{ validate: () => Promise<boolean> }>(null);
 
   const onDrop = (acceptedFiles: File[]) => {
     const imageFiles = acceptedFiles.map((file) => ({
@@ -169,6 +408,22 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       });
       return;
     }
+
+    // Validar endereço antes de enviar
+    if (enderecoFormRef.current) {
+      const isValid = await enderecoFormRef.current.validate();
+      if (!isValid) {
+        toast.error("Por favor, corrija os erros no endereço", {
+          style: {
+            background: 'var(--toast-error)',
+            color: 'var(--toast-error-foreground)',
+            boxShadow: 'var(--toast-shadow)'
+          }
+        });
+        return;
+      }
+    }
+
     try {
       const formData = new FormData();
       formData.append("nome", data.nome);
@@ -187,6 +442,19 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       formData.append("tema[radius]", theme.radius);
       formData.append("tema[scale]", theme.scale);
       formData.append("tema[contentLayout]", theme.contentLayout);
+
+      // Adicionar dados do endereço
+      if (data.enderecos && data.enderecos.length > 0) {
+        const endereco = data.enderecos[0];
+        formData.append("endereco[cep]", endereco.cep.replace(/\D/g, ""));
+        formData.append("endereco[logradouro]", endereco.logradouro);
+        formData.append("endereco[numero]", endereco.numero);
+        formData.append("endereco[complemento]", endereco.complemento || "");
+        formData.append("endereco[bairro]", endereco.bairro);
+        formData.append("endereco[cidade]", endereco.cidade);
+        formData.append("endereco[estado]", endereco.estado);
+        formData.append("endereco[uf]", endereco.uf);
+      }
 
       if (files.length > 0 && files[0].file) {
         formData.append("tema[image]", files[0].file);
@@ -317,7 +585,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                 <CardHeader>
                   <CardTitle>Dados da Promotora</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Campos fixos */}
                     {formFields.map(
@@ -432,6 +700,14 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                       </Select>
                     </div>
                   </div>
+
+                  {/* Seção de Endereço */}
+                  <EnderecoForm
+                    ref={enderecoFormRef}
+                    formData={methods.watch()}
+                    onChange={(path, value) => methods.setValue(path as any, value)}
+                    fields={enderecoFields}
+                  />
 
                   {/* Upload de imagens */}
                   <div className="mt-6">

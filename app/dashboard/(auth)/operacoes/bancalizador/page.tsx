@@ -18,13 +18,13 @@ export default function Page() {
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
-    <ProtectedRoute requiredPermission="Modalidade_ver">
+    <ProtectedRoute requiredPermission="Bancalizador_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
         {podeCriar && (
           <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
-            Nova Modalidade
+            Novo Bancalizador
           </Button>
         )}
       </div>

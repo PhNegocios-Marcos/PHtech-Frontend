@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Combobox } from "./Combobox";
+import { Combobox } from "./ComboboxNovo";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import GlassCard from "@/components/glassCardComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -37,6 +38,7 @@ const schema = z.object({
   modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
   tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
   dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
+  bancalizador: z.string().min(1, "Bancalizador é obrigatório"),
   RO: z.string().min(1, "RO é obrigatório"),
   // Dados da taxa
   nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
@@ -236,7 +238,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           convenio_hash: data.convenio_hash,
           modalidade_hash: data.modalidade_hash,
           tipo_operacao_hash: data.tipo_operacao_hash,
-          dias_validade_ccb: data.dias_validade_ccb
+          dias_validade_ccb: data.dias_validade_ccb,
+          bancalizador: data.bancalizador
         },
         {
           headers: {
@@ -311,7 +314,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto bg-white p-6 shadow-lg md:w-1/2">
+        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto rounded-2xl border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 p-6 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter sm:w-1/2">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
@@ -327,7 +330,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
             <div className="flex-1 space-y-6 overflow-y-auto">
               {/* Seção do Produto */}
-              <Card>
+              <Card className="w-full rounded-2xl border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 p-8 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter">
                 <CardHeader>
                   <CardTitle>Produto</CardTitle>
                 </CardHeader>
@@ -403,6 +406,26 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         <FormLabel>Dias de Validade da CCB</FormLabel>
                         <FormControl>
                           <Input
+                            className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
+                            type="number"
+                            placeholder="Selecione o Tipo de Operação"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={methods.control}
+                    name="dias_validade_ccb"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bancalizador</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
                             type="number"
                             placeholder="Selecione o Tipo de Operação"
                             {...field}
@@ -416,7 +439,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </Card>
 
               {/* Seção da Taxa */}
-              <Card>
+              <Card className="w-full rounded-2xl border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 p-8 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter">
                 <CardHeader>
                   <CardTitle>Tabela Taxa</CardTitle>
                 </CardHeader>
@@ -433,7 +456,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                           <FormItem>
                             <FormLabel>{conf.label}</FormLabel>
                             <FormControl>
-                              <Input placeholder={conf.placeholder} {...field} />
+                              <Input
+                                className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
+                                placeholder={conf.placeholder}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -453,7 +480,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                             <FormItem className="mt-4">
                               <FormLabel>{conf.label}</FormLabel>
                               <FormControl>
-                                <Input placeholder={conf.placeholder} {...field} />
+                                <Input
+                                  className="w-full border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
+                                  placeholder={conf.placeholder}
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -466,7 +497,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         control={methods.control}
                         name="inicio"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col mt-4">
+                          <FormItem className="mt-4 flex flex-col">
                             <FormLabel>Inicio da vigência</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
@@ -506,7 +537,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         control={methods.control}
                         name="fim"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col mt-4">
+                          <FormItem className="mt-4 flex flex-col">
                             <FormLabel>Fim da vigência</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
@@ -581,7 +612,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </Card>
 
               {/* Seção do RO */}
-              <Card>
+              <Card className="w-full rounded-2xl border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 p-8 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter">
                 <CardHeader>
                   <CardTitle>Roteiro Operacional</CardTitle>
                 </CardHeader>
@@ -611,7 +642,12 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
             </div>
 
             <div className="mt-6 flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+              <Button
+                className="border border-white/50 border-t-white/30 border-l-white/30 bg-white/30 shadow-2xl shadow-blue-500/20 backdrop-blur-xs backdrop-filter"
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>

@@ -180,6 +180,11 @@ export const page_routes: PageRoutesType[] = [
             id: "TaxaCadastro_ver",
             title: "Taxa Cadastro",
             href: "/dashboard/operacoes/taxaCadastro"
+          },
+          {
+            id: "Bancalizador_ver",
+            title: "Bancalizador",
+            href: "/dashboard/operacoes/bancalizador"
           }
         ]
       },

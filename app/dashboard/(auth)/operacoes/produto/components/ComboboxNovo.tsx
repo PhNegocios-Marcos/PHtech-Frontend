@@ -22,8 +22,7 @@ type ComboboxProps<T> = {
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
-  className?: string;
-  idField?: keyof T; // ✅ New optional prop for unique ID field
+  className?: any; // ✅ Adicionado
 };
 
 export function Combobox<T extends Record<string, any>>({
@@ -33,29 +32,10 @@ export function Combobox<T extends Record<string, any>>({
   onChange,
   label,
   placeholder = "Selecione",
-  searchFields = [displayField],
-  idField = "id" as keyof T // ✅ Default to 'id' if available
+  searchFields = [displayField]
 }: ComboboxProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
-
-  // ✅ Smart key generation - tries to use idField, falls back to index if not unique
-  const getItemKey = (item: T, index: number): string => {
-    if (idField && item[idField] !== undefined) {
-      return String(item[idField]);
-    }
-    
-    // Fallback: use displayField + index to ensure uniqueness
-    return `${String(item[displayField])}-${index}`;
-  };
-
-  // ✅ Smart value comparison - tries to use idField, falls back to displayField
-  const isItemSelected = (item: T): boolean => {
-    if (value && idField && value[idField] !== undefined && item[idField] !== undefined) {
-      return value[idField] === item[idField];
-    }
-    return value?.[displayField] === item[displayField];
-  };
 
   const filteredData = React.useMemo(() => {
     const lowerSearch = search.toLowerCase();
@@ -76,19 +56,19 @@ export function Combobox<T extends Record<string, any>>({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="justify-between">
+            className="justify-between backdrop-blur-xs bg-white/30 shadow-2xl shadow-blue-500/20 border border-white/50 border-l-white/30 border-t-white/30 w-full backdrop-filter">
             {value ? value[displayField] : placeholder}
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="h-50 w-[var(--radix-popover-trigger-width)] p-0">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 ">
           <Command>
             <CommandInput placeholder="Buscar..." value={search} onValueChange={setSearch} />
             <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
-            <CommandGroup className="max-h-50 overflow-y-auto">
-              {filteredData.map((item, index) => (
+            <CommandGroup>
+              {filteredData.map((item) => (
                 <CommandItem
-                  key={getItemKey(item, index)} // ✅ Uses smart key generation
+                  key={item[displayField]}
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);
@@ -96,8 +76,8 @@ export function Combobox<T extends Record<string, any>>({
                   className="cursor-pointer">
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      isItemSelected(item) ? "opacity-100" : "opacity-0" // ✅ Uses smart comparison
+                      "mr-2 h-4 w-4 backdrop-blur-xs bg-white/30 shadow-2xl shadow-blue-500/20 border border-white/50 border-l-white/30 border-t-white/30 backdrop-filter",
+                      value?.[displayField] === item[displayField] ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {item[displayField]}
