@@ -96,7 +96,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
     async function fetchProdutos() {
       if (!token) return;
       try {
-        const response = await fetch(`${API_BASE_URL}/produtos/listar`, {
+        const response = await fetch(`${API_BASE_URL}/modalidade-credito/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
