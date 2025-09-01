@@ -243,8 +243,8 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         </div>
         <div className="flex items-center justify-end space-x-2 pt-4">
           <div className="text-muted-foreground flex-1 text-sm">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} de{" "}
+            {table.getFilteredRowModel().rows.length} linha(s) selecionadas.
           </div>
           <div className="space-x-2">
             <Button
