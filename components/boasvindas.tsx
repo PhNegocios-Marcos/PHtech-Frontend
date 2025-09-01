@@ -28,7 +28,7 @@ const CampoBoasVindas: React.FC = () => {
     <div className="mb-3 md:mb-0">
       <h2 className="text-1 dark:text-dark-50 truncate font-medium tracking-wide leading-none text-gray-800 dark:text-white md:text-2xl">
         Olá <span className="text-primary">{primeiroNome}</span>!<br/>
-        <span className="text-sm mt-0 text-gray-500 dark:text-white">Hoje é <span>{nomeDia}</span>,{" "} dia {dataFormatada}</span>
+        <span className="text-sm mt-0 text-gray-500 dark:text-gray-400">Hoje é <span>{nomeDia}</span>,{" "} dia {dataFormatada}</span>
       </h2>
     </div>
   );

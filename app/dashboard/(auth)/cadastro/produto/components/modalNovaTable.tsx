@@ -204,7 +204,7 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-2/2 overflow-auto bg-white p-6 shadow-lg md:w-1/2">
+        className="fixed top-0 right-0 z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">

@@ -101,16 +101,16 @@ export function SummaryCards() {
         {[...Array(4)].map((_, index) => (
           <Card key={index}>
             <CardHeader>
-              <div className="h-6 bg-gray-100 rounded w-3/4 animate-pulse"></div>
+              <div className="h-6 bg-gray-100 dark:bg-gray-900 rounded w-3/4 animate-pulse"></div>
               <CardDescription>
-                <div className="h-4 bg-gray-100 rounded w-1/2 mt-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-100 dark:bg-gray-900 rounded w-1/2 mt-2 animate-pulse"></div>
               </CardDescription>
               <CardAction>
-                <div className="size-4 lg:size-6 bg-gray-100 rounded animate-pulse"></div>
+                <div className="size-4 lg:size-6 bg-gray-100 dark:bg-gray-900 rounded animate-pulse"></div>
               </CardAction>
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-100 rounded w-1/2 animate-pulse"></div>
+              <div className="h-8 bg-gray-100 dark:bg-gray-900 rounded w-1/2 animate-pulse"></div>
             </CardContent>
           </Card>
         ))}

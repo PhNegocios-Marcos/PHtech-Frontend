@@ -749,7 +749,7 @@ const Documentos = forwardRef<
       <div className="space-y-4">
         {formData.documentos && formData.documentos.length > 0 ? (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Documentos do Cliente:</h3>
+            <h3 className="text-lg font-medium">Documentos do Cliente</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {formData.documentos.map((doc: any, index: number) => {
                 const fileName = getFileName(doc.url_doc);
@@ -759,7 +759,7 @@ const Documentos = forwardRef<
                 return (
                   <div
                     key={index}
-                    className="overflow-hidden rounded-lg border bg-gray-50 transition-colors hover:bg-gray-100">
+                    className="overflow-hidden rounded-lg border bg-gray-50 dark:bg-gray-800 transition-colors hover:bg-gray-100">
                     {isImg ? (
                       <div className="group relative">
                         <img
