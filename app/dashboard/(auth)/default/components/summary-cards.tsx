@@ -97,20 +97,20 @@ export function SummaryCards() {
 
   if (loading) {
     return (
-      <div className="*:data-[slot=card]:from-primary/10 grid gap-4 *:data-[slot=card]:bg-gradient-to-t md:grid-cols-2 lg:grid-cols-4">
+      <div className="*:data-[slot=card]:from-primary/10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, index) => (
           <Card key={index}>
             <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+              <div className="h-6 bg-gray-100 rounded w-3/4 animate-pulse"></div>
               <CardDescription>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mt-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-100 rounded w-1/2 mt-2 animate-pulse"></div>
               </CardDescription>
               <CardAction>
-                <div className="size-4 lg:size-6 bg-gray-200 rounded animate-pulse"></div>
+                <div className="size-4 lg:size-6 bg-gray-100 rounded animate-pulse"></div>
               </CardAction>
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+              <div className="h-8 bg-gray-100 rounded w-1/2 animate-pulse"></div>
             </CardContent>
           </Card>
         ))}
@@ -135,17 +135,17 @@ export function SummaryCards() {
   }
 
   return (
-    <div className="*:data-[slot=card]:from-primary/10 grid gap-4 *:data-[slot=card]:bg-gradient-to-t md:grid-cols-2 lg:grid-cols-4">
+    <div className="*:data-[slot=card]:from-primary/10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader>
           <CardTitle>Valor total operado</CardTitle>
           <CardDescription>
             <span className={getChangeColorClass(data?.totalValueChange || 0)}>
               {formatPercentage(data?.totalValueChange || 0)}
-            </span> from last month
+            </span> do mês passado
           </CardDescription>
           <CardAction>
-            <DollarSign className="text-muted-foreground/50 size-4 lg:size-6" />
+            <DollarSign className="text-primary size-4 lg:size-6" />
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -154,16 +154,17 @@ export function SummaryCards() {
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Operações concluídas</CardTitle>
           <CardDescription>
             <span className={getChangeColorClass(data?.completedOperationsChange || 0)}>
               {formatPercentage(data?.completedOperationsChange || 0)}
-            </span> from last month
+            </span> do mês passado
           </CardDescription>
           <CardAction>
-            <Briefcase className="text-muted-foreground/50 size-4 lg:size-6" />
+            <Briefcase className="text-primary size-4 lg:size-6" />
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -172,16 +173,17 @@ export function SummaryCards() {
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Coleta de assinaturas</CardTitle>
           <CardDescription>
             <span className={getChangeColorClass(data?.signatureCollectionChange || 0)}>
               {formatPercentage(data?.signatureCollectionChange || 0)}
-            </span> from last month
+            </span> do mês passado
           </CardDescription>
           <CardAction>
-            <Award className="text-muted-foreground/50 size-4 lg:size-6" />
+            <Award className="text-primary size-4 lg:size-6" />
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -190,16 +192,17 @@ export function SummaryCards() {
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Em andamento</CardTitle>
           <CardDescription>
             <span className={getChangeColorClass(data?.inProgressChange || 0)}>
               {formatPercentage(data?.inProgressChange || 0)}
-            </span> from last month
+            </span> do mês passado
           </CardDescription>
           <CardAction>
-            <FileClock className="text-muted-foreground/50 size-4 lg:size-6" />
+            <FileClock className="text-primary size-4 lg:size-6" />
           </CardAction>
         </CardHeader>
         <CardContent>

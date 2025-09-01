@@ -99,7 +99,7 @@ export default function UserMenu() {
         <DropdownMenuSeparator /> */}
         <DropdownMenuItem onClick={logOut}>
           <LogOut />
-          Log out
+          Sair
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

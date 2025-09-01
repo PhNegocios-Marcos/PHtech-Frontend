@@ -127,10 +127,10 @@ export function ChartProjectOverview() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Projects Overview</CardTitle>
+        <CardTitle>Visão geral dos projetos</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">Total for the selected period</span>
-          <span className="@[540px]/card:hidden">Last period</span>
+          <span className="hidden @[540px]/card:block">Total do período selecionado</span>
+          <span className="@[540px]/card:hidden">Último período</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -139,9 +139,9 @@ export function ChartProjectOverview() {
             onValueChange={setTimeRange}
             variant="outline"
             className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex">
-            <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="90d" className="data-[state=on]:bg-primary/30!">Últimos 3 meses</ToggleGroupItem>
+            <ToggleGroupItem value="30d" className="data-[state=on]:bg-primary/30!">Últimos 30 dias</ToggleGroupItem>
+            <ToggleGroupItem value="7d" className="data-[state=on]:bg-primary/30!">Últimos 7 dias</ToggleGroupItem>
           </ToggleGroup>
 
           <Select value={timeRange} onValueChange={setTimeRange}>
