@@ -121,7 +121,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario, onSuccess }: AlcadasDra
       <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
 
       <aside
-        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[600px] flex-col bg-white shadow-lg"
+        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[600px] flex-col bg-background shadow-lg"
         role="dialog"
         aria-modal="true"
       >

@@ -119,7 +119,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg">
         <FormProvider {...methods}>
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold">

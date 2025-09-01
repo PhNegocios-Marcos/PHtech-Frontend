@@ -85,6 +85,9 @@ export default function SimuladorFgts({
         const data = response.data;
         const arrData = Array.isArray(data) ? data : [data];
 
+        console.log(response.data);
+        console.log(response.status);
+
         const parsedSections: Section[] = arrData.map((item: any) => ({
           type: item.simulacao_campos_produtos_type,
           title: item.simulacao_campos_produtos_title,
@@ -105,7 +108,6 @@ export default function SimuladorFgts({
           }
         }
       } catch (error: any) {
-        console.error("Erro ao carregar campos da simulação:", error);
         if (error.response?.data === null) {
           setErrorMessage("Produto não possui campos configurados para a simulação");
           setShowSimulateButton(false);

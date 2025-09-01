@@ -111,7 +111,7 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
       <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
 
       <aside
-        className="fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col bg-white shadow-lg md:w-1/2"
+        className="fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col bg-background shadow-lg md:w-1/2"
         role="dialog"
         aria-modal="true">
         <div className="flex items-center justify-between border-b p-4">

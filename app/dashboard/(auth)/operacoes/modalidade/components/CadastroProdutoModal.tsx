@@ -97,7 +97,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-white shadow-lg overflow-auto p-6"
+        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6"
       >
         <FormProvider {...methods}>
           <Form {...methods}>

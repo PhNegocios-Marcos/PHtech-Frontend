@@ -612,7 +612,7 @@ const LoadingSkeleton = () => (
       </div>
       <div className="min-h-[100vh] w-80 border-l">
         <div
-          className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8"
+          className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8"
           style={{ marginTop: "131px" }}>
           <div>
             <div className="mb-8">
@@ -847,7 +847,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
           <div className="min-h-[100vh] w-80 border-l">
             <div
               style={{ position: "fixed", marginTop: "131px" }}
-              className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-white p-8">
+              className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8">
               <div>
                 <div className="mb-8">
                   <h4 className="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase">
