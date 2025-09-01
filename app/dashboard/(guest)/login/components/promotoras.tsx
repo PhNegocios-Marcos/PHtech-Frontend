@@ -73,11 +73,11 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
   return (
     <div>
       {currentModal === "none" && (
-        <Card className="w-full md:w-[350px]">
-          <CardHeader>
-            <CardTitle>Escolha a promotora</CardTitle>
+        <Card className="w-full md:w-[350px] px-5 gap-0">
+          <CardHeader className="px-0 mb-7">
+            <CardTitle className="text-xl">Escolha a promotora</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-0 w-full mb-10">
             <Combobox
               data={promotoras || []}
               displayField="nome"
@@ -91,13 +91,13 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
             />
           </CardContent>
 
-          <Button className="mx-auto w-20" onClick={handleConfirm}>
+          <Button className="mx-auto w-full py-6 mb-2" onClick={handleConfirm}>
             Confirmar
           </Button>
           {onClose && (
-            <Button onClick={onClose} variant="ghost" className="w-full text-red-500">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Cancelar
+            <Button onClick={onClose} variant="ghost" className="w-full text-red-500 border border-red-500">
+              <ArrowLeftIcon className="h-4 full" />
+              Voltar
             </Button>
           )}
         </Card>

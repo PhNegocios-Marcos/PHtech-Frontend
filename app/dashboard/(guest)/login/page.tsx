@@ -98,6 +98,7 @@ export default function Page() {
 
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");
+        setLoading(false);
       } else {
         if (data.usa_2fa === 1) {
           setCurrentModal("2FA");
@@ -107,6 +108,7 @@ export default function Page() {
       }
 
     } catch (error: any) {
+      setLoading(false);
       setLoginError("Erro na conexão com o servidor.");
       console.error("Erro ao fazer login:", error instanceof Error ? error.message : error);
     }
@@ -157,7 +159,7 @@ export default function Page() {
                       type="email"
                       placeholder="Digite o seu e-mail"
                       value={email}
-                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-black dark:text-white border-0"
+                      className="py-[24px] bg-gray-300/50 placeholder:text-gray-400 text-black dark:text-white border-0"
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
@@ -171,7 +173,7 @@ export default function Page() {
                       type="password"
                       placeholder="Digite a sua senha"
                       value={password}
-                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-black dark:text-white border-0"
+                      className="py-[24px] bg-gray-300/50 placeholder:text-gray-400 text-black dark:text-white border-0"
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
