@@ -1778,11 +1778,24 @@ const DadosBancarios = forwardRef<
 DadosBancarios.displayName = "DadosBancarios";
 
 interface CadastroClienteModalProps {
+  cpf: string;
+  simulacao?: Record<string, any>;
+  produtoId?: string;
   isOpen: boolean;
   onClose: () => void;
+  onCadastrado?: (cpf: string, simulacao: any) => void;
+  onClienteExiste?: (cpf: string) => void;
 }
 
-export default function CadastroClienteModal({ isOpen, onClose }: CadastroClienteModalProps) {
+export default function CadastroClienteModal({
+  cpf,
+  simulacao,
+  produtoId,
+  isOpen,
+  onClose,
+  onCadastrado,
+  onClienteExiste
+}: CadastroClienteModalProps) {
   const { token } = useAuth();
   const [formSections] = useState<FormSection[]>(fixedFormSections);
   const [loading] = useState(false);
@@ -1993,7 +2006,7 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2">
         <Card className="mx-auto mt-10 max-w-6xl space-y-6 p-6">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold">Cadastro de Cliente</h1>
