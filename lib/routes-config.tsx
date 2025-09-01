@@ -19,7 +19,7 @@ type PageRoutesItemType = {
 export const page_routes: PageRoutesType[] = [
   {
     id: "Authentication",
-    title: "Authentication",
+    title: "Autenticação",
     items: [{ id: "login", title: "Login", href: "/dashboard/login" }]
   },
 
@@ -35,7 +35,7 @@ export const page_routes: PageRoutesType[] = [
       },
       {
         id: "Credito",
-        title: "Credito",
+        title: "Crédito",
         href: "/dashboard/credito",
         icon: "BanknoteArrowUp",
         items: [
@@ -73,7 +73,7 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "Gestão_Modulos",
-            title: "Modulos",
+            title: "Módulos",
             href: "/dashboard/gestao/modulos"
             // icon: "Package"
           },
@@ -91,7 +91,7 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "Usuarios_ver",
-            title: "Usuarios",
+            title: "Usuários",
             href: "/dashboard/gestao/usuarios"
             // icon: "User"
           },
@@ -210,7 +210,7 @@ export const page_routes: PageRoutesType[] = [
       },
       {
         id: "Convenio_ver",
-        title: "Convenio",
+        title: "Convênio",
         href: "/dashboard/convenio",
         icon: "ChartPie",
         items: [

@@ -65,7 +65,7 @@ export default function Search() {
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           className="h-9 w-full cursor-pointer rounded-md border pr-4 pl-10 text-sm shadow-xs"
-          placeholder="Search..."
+          placeholder="Pesquisar..."
           type="search"
           onFocus={() => setOpen(true)}
         />
@@ -85,7 +85,7 @@ export default function Search() {
             <DialogTitle></DialogTitle>
           </DialogHeader>
         </VisuallyHidden>
-        <CommandInput placeholder="Type a command or search..." />
+        <CommandInput placeholder="Escreva um comando ou pesquise..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           {page_routes.map((route) => (

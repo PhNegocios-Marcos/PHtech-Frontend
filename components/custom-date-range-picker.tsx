@@ -31,14 +31,14 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const dateFilterPresets = [
-  { name: "Today", value: "today" },
-  { name: "Yesterday", value: "yesterday" },
-  { name: "This Week", value: "thisWeek" },
-  { name: "Last 7 Days", value: "last7Days" },
-  { name: "Last 28 Days", value: "last28Days" },
-  { name: "This Month", value: "thisMonth" },
-  { name: "Last Month", value: "lastMonth" },
-  { name: "This Year", value: "thisYear" }
+  { name: "Hoje", value: "today" },
+  { name: "Ontem", value: "yesterday" },
+  { name: "Essa semana", value: "thisWeek" },
+  { name: "Últimos 7 dias", value: "last7Days" },
+  { name: "Últimos 28 dias", value: "last28Days" },
+  { name: "Este mês", value: "thisMonth" },
+  { name: "Último mês", value: "lastMonth" },
+  { name: "Este ano", value: "thisYear" }
 ];
 
 export default function CalendarDateRangePicker({
