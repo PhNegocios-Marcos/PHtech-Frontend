@@ -25,7 +25,7 @@ export default function Page() {
           <CampoBoasVindas />
             <Button onClick={() => setIsCadastroOpen(true)}>Nova Promotora</Button>
           </div>
-          {!selectedPromotora && !isCadastroOpen && (
+          {!selectedPromotora && (
             <>
               <PromotorasTable onSelectPromotora={setSelectedPromotora} />
             </>
