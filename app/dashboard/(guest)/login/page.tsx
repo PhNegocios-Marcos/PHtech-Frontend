@@ -147,51 +147,51 @@ export default function Page() {
           <div className="flex items-center justify-center lg:w-[35%] sm:w-[75%] w-full">
             {currentModal === "none" && promotorasModal === "none" && (
               <div className="w-full">
-                <GlassCard className="p-[40px]">
-                  <h1 className="text-white text-[24px] font-medium mb-8">Fazer login</h1>
+                <Card className="p-[40px] bg-background">
+                  <h1 className="text-black dark:text-white text-[24px] font-medium mb-8">Fazer login</h1>
 
                   <div className="mb-10">
-                    <Label htmlFor="email" className="text-white mb-1">E-mail</Label>
+                    <Label htmlFor="email" className="text-black dark:text-white mb-1">E-mail</Label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="Digite o seu e-mail"
                       value={email}
-                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-white border-0"
+                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-black dark:text-white border-0"
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
-                    {errors.email && <p className="text-sm text-white">{errors.email}</p>}
+                    {errors.email && <p className="text-sm text-black dark:text-white">{errors.email}</p>}
                   </div>
 
                   <div className="mb-12"> 
-                    <Label htmlFor="password" className="text-white mb-1">Senha</Label>
+                    <Label htmlFor="password" className="text-black dark:text-white mb-1">Senha</Label>
                     <Input
                       id="password"
                       type="password"
                       placeholder="Digite a sua senha"
                       value={password}
-                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-white border-0"
+                      className="py-[24px] bg-gray-400/50 placeholder:text-gray-300 text-black dark:text-white border-0"
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
-                    {errors.password && <p className="text-sm text-white">{errors.password}</p>}
+                    {errors.password && <p className="text-sm text-black dark:text-white">{errors.password}</p>}
 
                     <div className="w-full flex justify-end">
                       <Link
                         href="/dashboard/forgot-password"
-                        className="mt-2 inline-block text-white text-[12px]">
+                        className="mt-2 inline-block text-black dark:text-white text-[12px]">
                         Esqueceu sua senha? <span className="underline">Clique aqui</span>
                       </Link>
                     </div>
 
-                    {loginError && <p className="text-center text-sm text-white">{loginError}</p>}
+                    {loginError && <p className="text-center text-sm text-black dark:text-white">{loginError}</p>}
                   </div>
 
                   <Button onClick={handleLogin} type="button" className="w-full py-7 disabled:bg-red-800" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar"}
                   </Button>
-                </GlassCard>
+                </Card>
               </div>
             )}
 
