@@ -41,7 +41,11 @@ import { Badge } from "@/components/ui/badge";
 export type Produto = {
   modalidade_credito_id: string;
   nome: string;
+  id: string;
+  modalidade_credito_nome: string;
   modalidade_credito_status: number;
+  modalidade_credito_digito_prefixo: number;
+  modalidade_credito_cor_grafico?: string | null;
   idade_minima: number;
   idade_maxima: number;
   prazo_minimo: number;
@@ -99,7 +103,9 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
             // 🔥 Atualiza diretamente no estado produtos
             setProdutos((prev) =>
               prev.map((item) =>
-                item.modalidade_credito_id === row.original.modalidade_credito_id ? { ...item, status: novoStatus } : item
+                item.modalidade_credito_id === row.original.modalidade_credito_id
+                  ? { ...item, status: novoStatus }
+                  : item
               )
             );
 
