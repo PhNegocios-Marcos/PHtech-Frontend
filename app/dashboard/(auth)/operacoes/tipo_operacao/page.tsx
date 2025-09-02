@@ -20,7 +20,7 @@ export default function Page() {
         <CampoBoasVindas />
           {podeCriar && (
             <Button id="" onClick={() => setIsCadastroOpen(true)}>
-              Novo Tipo de Operacao
+              Novo Tipo de Operação
             </Button>
           )}
         </div>
