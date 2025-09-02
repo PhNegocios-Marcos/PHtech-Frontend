@@ -8,19 +8,19 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormControl,
+  FormMessage,
+  Form
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
 const seguroSchema = z.object({
-  id: z.string(),
+  seguro_faixa_hash: z.string(),
   nome: z.string().optional(),
   faixa_inicio: z.string().min(1, "Faixa inicial é obrigatória"),
   faixa_fim: z.string().min(1, "Faixa final é obrigatória"),
@@ -39,19 +39,44 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
   const methods = useForm<SeguroFormValues>({
-    resolver: zodResolver(seguroSchema),
+    // resolver: zodResolver(seguroSchema),
     defaultValues: seguro
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
+    const subscription = methods.watch((value, { name, type }) => {
+      console.log("📋 Form values:", value);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods]);
+
+  useEffect(() => {
+    console.log("🔍 Erros do formulário:", methods.formState.errors);
+  }, [methods.formState.errors]);
+
+  // ADICIONE ESTE HANDLE SUBMIT SIMPLES
+  const handleTestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("✅ Botão submit clicado!");
+    console.log("📊 Form values:", methods.getValues());
+  };
+
+  useEffect(() => {
     methods.reset(seguro);
   }, [seguro, methods]);
 
   const onSubmit = async (data: SeguroFormValues) => {
+    console.log("entrou");
+
+    if (!token) {
+      toast.error("Token de autenticação não encontrado.");
+      return;
+    }
+
     try {
-      const payload: Partial<SeguroFormValues> = { id: data.id };
+      const payload: Partial<SeguroFormValues> = { seguro_faixa_hash: data.seguro_faixa_hash };
 
       if (data.nome !== seguro.nome) payload.nome = data.nome;
       if (data.faixa_inicio !== seguro.faixa_inicio) payload.faixa_inicio = data.faixa_inicio;
@@ -67,12 +92,25 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
           "Content-Type": "application/json"
         }
       });
-      toast.success("Seguro atualizado com sucesso!");
+
+      toast.success("Seguro atualizado com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       onClose();
     } catch (error: any) {
+      console.error("Erro ao atualizar:", error);
       const msg = error?.response?.data?.erro || "Erro ao atualizar faixa de seguro";
-      alert(msg);
-      toast.error("Erro ao atualizar faixa de seguro:", error);
+      toast.error(msg, {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 
@@ -94,7 +132,7 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
@@ -109,7 +147,14 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                 ×
               </button>
             </div>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                console.log("✅ Submit direto");
+                const data = methods.getValues();
+                onSubmit(data);
+              }}
+              className="space-y-4">
               <Card className="col-span-2">
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -181,6 +226,7 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                   </div>
                 </CardContent>
               </Card>
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
