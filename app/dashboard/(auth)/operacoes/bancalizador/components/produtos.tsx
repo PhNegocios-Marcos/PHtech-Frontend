@@ -42,15 +42,36 @@ export type Produto = {
   id: string;
   nome: string;
   status: number;
-  idade_minima: number;
-  idade_maxima: number;
-  prazo_minimo: number;
-  prazo_maximo: number;
   id_uy3: string | null;
   cor_grafico: string | null;
   config_tabela_hash: string;
   usuario_atualizacao: string;
-  tabela_hash: string;
+  data_inclusao: string;
+  data_atualizacao: string;
+};
+
+// New type for the API response
+type ApiProdutoResponse = {
+  [key: string]: {
+    nome: string;
+    status: number;
+    data_inclusao: string;
+    data_atualizacao: string;
+    cadastros: any[];
+    tradutores: Array<{ [key: string]: any }>;
+    credenciais: any[];
+  };
+};
+
+const formatarData = (dataString: string | null | undefined) => {
+  if (!dataString) return "-";
+
+  try {
+    const data = new Date(dataString);
+    return new Intl.DateTimeFormat("pt-BR").format(data);
+  } catch (error) {
+    return dataString;
+  }
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -65,18 +86,27 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const { token } = useAuth();
 
   const columns: ColumnDef<Produto>[] = [
     { accessorKey: "nome", header: "Nome" },
-    { accessorKey: "idade_minima", header: "Idade Mínima" },
-    { accessorKey: "idade_maxima", header: "Idade Máxima" },
-    { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
-    { accessorKey: "prazo_maximo", header: "Prazo Máximo" },
     {
-      accessorKey: "status_toggle",
-      header: "Alterar Status",
+      accessorKey: "data_inclusao",
+      header: "Data de Inclusão",
+      accessorFn: (row) => (row.data_inclusao ? new Date(row.data_inclusao).getTime() : null),
+      cell: ({ row }) => formatarData(row.original.data_inclusao)
+    },
+    {
+      accessorKey: "data_atualizacao",
+      header: "Data de Atualização",
+      accessorFn: (row) => (row.data_atualizacao ? new Date(row.data_atualizacao).getTime() : null),
+      cell: ({ row }) => formatarData(row.original.data_atualizacao)
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.status === 1;
 
@@ -85,7 +115,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
             const novoStatus = ativo ? 0 : 1;
 
             await axios.put(
-              `${API_BASE_URL}/produtos/atualizar`,
+              `${API_BASE_URL}/bancarizador/atualizar`,
               {
                 id: row.original.id,
                 status: novoStatus
@@ -159,8 +189,10 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   useEffect(() => {
     async function fetchProdutos() {
       if (!token) return;
+
+      setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/produtos/listar`, {
+        const response = await fetch(`${API_BASE_URL}/bancarizador/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -173,10 +205,40 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
           throw new Error(errorData?.detail || "Erro ao buscar produtos");
         }
 
-        const data = await response.json();
-        setProdutos(data);
+        const data: ApiProdutoResponse[] = await response.json();
+
+        // Transform the API response into the expected Produto format
+        const transformedData: Produto[] = data.flatMap((item) =>
+          Object.entries(item).map(([id, produtoData]) => ({
+            id,
+            nome: produtoData.nome,
+            status: produtoData.status,
+            id_uy3: null,
+            cor_grafico: null,
+            config_tabela_hash: "",
+            usuario_atualizacao: produtoData.data_atualizacao,
+            tabela_hash: "",
+            data_inclusao: produtoData.data_inclusao,
+            data_atualizacao: produtoData.data_atualizacao,
+            idade_minima: "",
+            idade_maxima: "",
+            prazo_minimo: "",
+            prazo_maximo: ""
+          }))
+        );
+
+        setProdutos(transformedData);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
+        toast.error("Erro ao carregar produtos", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -252,7 +314,9 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
+              {loading ? (
+                <CarregandoTable />
+              ) : table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} className="hover:bg-muted cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
@@ -263,7 +327,11 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
                   </TableRow>
                 ))
               ) : (
-                <CarregandoTable />
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    Nenhum produto encontrado.
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

@@ -20,16 +20,13 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
+// Schema baseado apenas nos campos presentes no JSON
 const produtoSchema = z.object({
   id: z.string(),
   nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   status: z.number(),
-  idade_minima: z.number(),
-  idade_maxima: z.number(),
-  prazo_minimo: z.number(),
-  prazo_maximo: z.number(),
-  id_uy3: z.string().nullable(),
-  cor_grafico: z.string().nullable().optional()
+  data_inclusao: z.string().optional(),
+  data_atualizacao: z.string().optional()
 });
 
 type Produto = z.infer<typeof produtoSchema>;
@@ -44,13 +41,9 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   const defaultValues: Produto = {
     id: produto?.id || "",
     nome: produto?.nome || "",
-    status: produto?.status || 1, // Default to active
-    idade_minima: produto?.idade_minima || 0,
-    idade_maxima: produto?.idade_maxima || 0,
-    prazo_minimo: produto?.prazo_minimo || 0,
-    prazo_maximo: produto?.prazo_maximo || 0,
-    id_uy3: produto?.id_uy3 || null,
-    cor_grafico: produto?.cor_grafico || ""
+    status: produto?.status || 1,
+    data_inclusao: produto?.data_inclusao || "",
+    data_atualizacao: produto?.data_atualizacao || ""
   };
 
   const methods = useForm<Produto>({
@@ -64,8 +57,11 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   useEffect(() => {
     if (produto) {
       const values = {
-        ...produto,
-        cor_grafico: produto.cor_grafico || ""
+        id: produto.id,
+        nome: produto.nome,
+        status: produto.status,
+        data_inclusao: produto.data_inclusao || "",
+        data_atualizacao: produto.data_atualizacao || ""
       };
       methods.reset(values);
       originalData.current = values;
@@ -115,18 +111,33 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
     try {
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/rel-rotina-operacional-prod-convenio/atualizar`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bancarizador/atualizar`,
         updatedFields,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
         }
       );
-      toast.success("Produto atualizado com sucesso!");
+      toast.success("Produto atualizado com sucesso!", {
+        style: {
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
       onClose?.();
       onRefresh?.();
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error.response?.data || error.message);
-      toast.error(`Erro: ${error.response?.data?.detail || error.message}`);
+      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
     }
   };
 
@@ -139,12 +150,6 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
       }
     });
     onClose?.();
-  };
-
-  // Handle number input more gracefully
-  const handleNumberChange = (field: any, value: string) => {
-    const numValue = value === "" ? 0 : parseInt(value, 10) || 0;
-    field.onChange(numValue);
   };
 
   return (
@@ -173,6 +178,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
                 <CardHeader>
+                  <CardTitle>Informações do Produto</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -210,91 +216,31 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                       )}
                     />
 
-                    <FormField
-                      control={methods.control}
-                      name="idade_minima"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Idade Mínima</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {produto?.data_inclusao && (
+                      <FormItem>
+                        <FormLabel>Data de Inclusão</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={produto.data_inclusao} 
+                            disabled 
+                            className="text-muted-foreground"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
 
-                    <FormField
-                      control={methods.control}
-                      name="idade_maxima"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Idade Máxima</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_minimo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Mínimo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_maximo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Máximo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="cor_grafico"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cor do Gráfico</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {produto?.data_atualizacao && (
+                      <FormItem>
+                        <FormLabel>Data de Atualização</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={produto.data_atualizacao} 
+                            disabled 
+                            className="text-muted-foreground"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
                   </div>
                 </CardContent>
               </Card>
