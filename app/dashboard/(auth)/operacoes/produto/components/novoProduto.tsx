@@ -35,7 +35,7 @@ const schema = z
     modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
     tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
     dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
-    bancalizador: z.string().min(1, "Bancalizador é obrigatório"),
+    bancalizador: z.string().min(1, "Bancarizador é obrigatório"),
     seguradora: z.string().min(1, "Seguradora é obrigatória"),
     seguro: z.string().min(1, "Seguro é obrigatório"),
     RO: z.string().min(1, "RO é obrigatório"),
@@ -665,7 +665,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       name="bancalizador"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Bancalizador</FormLabel>
+                          <FormLabel>Bancarizador</FormLabel>
                           <FormControl>
                             <Combobox
                               data={bancarizador}
