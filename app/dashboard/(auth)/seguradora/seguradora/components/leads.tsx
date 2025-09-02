@@ -7,6 +7,7 @@ import { SeguradorasCarregando } from "./leads_carregando";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import InputMask from "react-input-mask";
+import axios from "axios";
 
 import {
   Table,
@@ -123,15 +124,66 @@ export function SeguradorasTable() {
       }
     },
     {
-      id: "status",
+      accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/seguradoras/atualizar`,
+              {
+                seguradora_hash: row.original.seguradora_hash,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            // 🔥 Atualiza diretamente no estado seguradoras
+            setSeguradoras((prev) =>
+              prev.map((item) =>
+                item.seguradora_hash === row.original.seguradora_hash ? { ...item, status: novoStatus } : item
+              )
+            );
+
+            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            console.error("Erro ao atualizar status", error);
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          }
+        };
+
         return (
           <Badge
-            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${
+              ativo ? "" : "border border-red-500 bg-transparent text-red-500"
+            }`}
             variant={ativo ? "default" : "outline"}>
-            {ativo ? "Ativa" : "Inativa"}
+            {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
       }
