@@ -268,25 +268,6 @@ const DadosPessoais = forwardRef<
                     value={fieldProps.value || ""}
                     className="mt-1"
                   />
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="ml-2">
-                        {/* <CalendarIcon className="h-4 w-4" /> */}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={fieldProps.value ? new Date(fieldProps.value) : undefined}
-                        onSelect={(date) => {
-                          const isoDate = date ? date.toISOString().slice(0, 10) : "";
-                          fieldProps.onChange(isoDate);
-                          onChange(field.name, isoDate);
-                        }}
-                        className="rounded-md border"
-                      />
-                    </PopoverContent>
-                  </Popover>
                 </div>
               ) : null}
             </FormControl>
@@ -759,7 +740,7 @@ const Documentos = forwardRef<
                 return (
                   <div
                     key={index}
-                    className="overflow-hidden rounded-lg border bg-gray-50 dark:bg-gray-800 transition-colors hover:bg-gray-100">
+                    className="overflow-hidden rounded-lg border bg-gray-50 transition-colors hover:bg-gray-100 dark:bg-gray-800">
                     {isImg ? (
                       <div className="group relative">
                         <img
@@ -936,56 +917,6 @@ export default function EditarCliente({
     fetchClienteData();
   }, [cliente?.cpf, token]);
 
-  // Novo useEffect para buscar dados do endpoint
-  useEffect(() => {
-    const fetchClienteData = async () => {
-      if (!cliente?.cpf) return;
-
-      setFetchingData(true);
-      try {
-        const response = await axios.get(`${API_BASE_URL}/cliente/${cliente.cpf}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.data && response.data.length > 0) {
-          const clienteData = response.data[0];
-
-          setFormData({
-            hash: clienteData.hash || "",
-            nome: clienteData.nome || "",
-            nome_pai: clienteData.nome_pai || "",
-            nome_mae: clienteData.nome_mae || "",
-            tipo_documento: clienteData.tipo_documento?.toString() || "",
-            numero_documento: clienteData.numero_documento || "",
-            cpf: clienteData.cpf || "",
-            telefones: clienteData.telefones || {},
-            enderecos: clienteData.enderecos || {},
-            emails: clienteData.emails || { email: "", status: 1 },
-            dados_bancarios: clienteData.dados_bancarios || [
-              {
-                id_banco: "019611f9-3d2d-7200-9289-688323e474b5",
-                status: 1,
-                pix: "",
-                tipo_pix: ""
-              }
-            ],
-            documentos: clienteData.documentos || [],
-            status: clienteData.status || 1
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados do cliente:", error);
-        toast.error("Erro ao carregar dados do cliente");
-      } finally {
-        setFetchingData(false);
-      }
-    };
-
-    fetchClienteData();
-  }, [cliente?.cpf, token]);
-
   // Adicionar indicador de carregamento no JSX
   if (fetchingData) {
     return (
@@ -1024,90 +955,32 @@ export default function EditarCliente({
     });
   };
 
-  const handleNext = async () => {
-    const ref = tabRefs[activeTab];
-    if (ref?.current?.validate) {
-      const isValid = await ref.current.validate();
-      if (!isValid) {
-        toast.warning("Preencha todos os campos obrigatórios antes de continuar");
-        return;
-      }
-    }
-    const currentIndex = tabOrder.indexOf(activeTab);
-    const nextTab = tabOrder[currentIndex + 1];
-    if (nextTab) {
-      setActiveTab(nextTab);
-    }
-  };
-
-  const sanitizeFormData = (data: any): any => {
-    const clone = structuredClone(data);
-
-    // Limpar campos de formatação
-    const limparCampos = ["cpf", "numero_documento"];
-
-    limparCampos.forEach((path) => {
-      const keys = path.split(".");
-      let obj = clone;
-      for (let i = 0; i < keys.length - 1; i++) {
-        obj = obj?.[keys[i]];
-        if (!obj) return;
-      }
-      const lastKey = keys[keys.length - 1];
-      if (obj && typeof obj[lastKey] === "string") {
-        obj[lastKey] = obj[lastKey].replace(/[.\-]/g, "");
-      }
-    });
-
-    return clone;
-  };
-
-  const handleSubmit = async () => {
-    for (const tab of tabOrder) {
-      const ref = tabRefs[tab];
-      if (ref?.current?.validate) {
-        const valid = await ref.current.validate();
-        if (!valid && tab !== "Documentos") {
-          // Documentos não é obrigatório
-          setActiveTab(tab);
-          toast.warning("Preencha todos os campos obrigatórios");
-          return;
-        }
-      }
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const sanitizedData = sanitizeFormData(formData);
-
-      // Chumba o id_banco
-      if (sanitizedData.dados_bancarios && sanitizedData.dados_bancarios[0]) {
-        sanitizedData.dados_bancarios[0].id_banco = "019611f9-3d2d-7200-9289-688323e474b5";
-      }
-
-      // Garante tipo_documento como número
-      if (typeof sanitizedData.tipo_documento === "string") {
-        sanitizedData.tipo_documento = Number(sanitizedData.tipo_documento);
-      }
-
-      // Adiciona informações de atualização
-      sanitizedData.usuario_atualizacao = userData?.id || "system";
-
-      const response = await axios.put(`${API_BASE_URL}/cliente/atualizar`, sanitizedData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+      const response = await axios.put(`${API_BASE_URL}/cliente/${formData.hash}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (response.status === 200) {
-        toast.success("Cliente atualizado com sucesso!");
-        onRefresh();
-        onClose();
+      toast.success("Dados atualizados com sucesso!", {
+      style: {
+        background: 'var(--toast-success)',
+        color: 'var(--toast-success-foreground)',
+        boxShadow: 'var(--toast-shadow)'
       }
-    } catch (error: any) {
+    });
+      console.log("Cliente atualizado:", response.data);
+    } catch (error) {
       console.error("Erro ao atualizar cliente:", error);
-      toast.error(`Erro ao atualizar cliente: ${error.response?.data?.detail || error.message}`);
+      toast.error("Erro ao atualizar dados do cliente", {
+      style: {
+        background: 'var(--toast-error)',
+        color: 'var(--toast-error-foreground)',
+        boxShadow: 'var(--toast-shadow)'
+      }
+    });
     } finally {
       setLoading(false);
     }
@@ -1120,9 +993,14 @@ export default function EditarCliente({
           <CardTitle>
             Cliente: <span className="text-primary">{formData.nome}</span>
           </CardTitle>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Voltar
-          </Button>
+          <div className="flex justify-end gap-4 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Voltar
+            </Button>
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -1184,19 +1062,6 @@ export default function EditarCliente({
             />
           </TabsContent>
         </Tabs>
-
-        {/* <div className="flex justify-end gap-4 pt-4">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Voltar
-          </Button>
-          {activeTab === tabOrder[tabOrder.length - 1] ? (
-            <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-          ) : (
-            <Button onClick={handleNext}>Próximo</Button>
-          )}
-        </div> */}
       </CardContent>
     </Card>
   );
