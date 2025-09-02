@@ -186,7 +186,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   }, [token]);
 
   const table = useReactTable({
-    data: promotoras,
+    data: promotoras.reverse(),
     columns: promotoraColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
