@@ -36,6 +36,7 @@ type SeguroLinha = {
   faixa_fim: string;
   valor_seguradora: string;
   valor_pago_cliente: string;
+  seguro_faixa_hash: string;
 };
 
 export function SeguroTable() {

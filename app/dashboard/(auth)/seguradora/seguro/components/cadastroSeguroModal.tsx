@@ -22,9 +22,9 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const schema = z.object({
-  nome: z.string().min(1, "Seguradora é obrigatória"),
-  faixa_inicio: z.string().min(1, "Faixa inicial é obrigatória"),
-  faixa_fim: z.string().min(1, "Faixa final é obrigatória"),
+  seguradora_hash: z.string().min(1, "Seguradora é obrigatória"),
+  faixa_inicio: z.string().min(2, "Faixa inicial é obrigatória"),
+  faixa_fim: z.string().min(2, "Faixa final é obrigatória"),
   valor_seguradora: z.string().min(1, "Valor da seguradora é obrigatório"),
   valor_pago_cliente: z.string().min(1, "Valor pago pelo cliente é obrigatório")
 });
@@ -38,15 +38,16 @@ type CadastroSeguroModalProps = {
 };
 
 type SeguradoraOption = {
-  id: string;
-  name: string;
+  value: string;
+  label: string;
+  seguradora_hash: string;
 };
 
 export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: CadastroSeguroModalProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: "",
+      seguradora_hash: "",
       faixa_inicio: "",
       faixa_fim: "",
       valor_seguradora: "",
@@ -56,7 +57,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
 
   const { token } = useAuth();
   const [seguradoras, setSeguradoras] = useState<SeguradoraOption[]>([]);
-  const [seguradoraSelect, setSeguradoraSelect] = useState<SeguradoraOption | null>(null);
+  const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraOption | null>(null);
 
   useEffect(() => {
     if (!token || !isOpen) return;
@@ -68,17 +69,19 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache" // Evitar cache
           }
         });
 
         if (!response.ok) throw new Error("Erro ao buscar seguradoras");
 
         const data = await response.json();
+        
         const options = data.map((seguradora: any) => ({
-          id: seguradora.nome,
-          name: seguradora.nome
+          value: seguradora.seguradora_hash,
+          label: seguradora.nome,
+          seguradora_hash: seguradora.seguradora_hash
         }));
+        
         setSeguradoras(options);
       } catch (error) {
         console.error("Erro ao listar seguradoras:", error);
@@ -89,9 +92,10 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
     fetchSeguradoras();
   }, [token, isOpen]);
 
-  useEffect(() => {
-    methods.setValue("nome", seguradoraSelect?.id ?? "");
-  }, [seguradoraSelect, methods]);
+  const handleSeguradoraChange = (item: SeguradoraOption) => {
+    setSelectedSeguradora(item);
+    methods.setValue("seguradora_hash", item.seguradora_hash);
+  };
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -111,19 +115,17 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
 
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(JSON.stringify(err));
+        throw new Error(err.message || "Erro ao cadastrar");
       }
 
       toast.success("Faixa de seguro cadastrada com sucesso!");
       methods.reset();
-      setSeguradoraSelect(null);
-      if (onRefresh) {
-        await onRefresh();
-      }
+      setSelectedSeguradora(null);
+      onRefresh?.();
       onClose();
     } catch (error: any) {
       console.error("Erro ao cadastrar faixa de seguro:", error);
-      toast.error("Erro ao cadastrar faixa de seguro: " + error.message || error);
+      toast.error(error.message || "Erro ao cadastrar faixa de seguro");
     }
   };
 
@@ -160,17 +162,17 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                   <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={methods.control}
-                      name="nome"
+                      name="seguradora_hash"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Seguradora</FormLabel>
                           <FormControl>
                             <Combobox
                               data={seguradoras}
-                              displayField="name"
-                              value={seguradoraSelect}
-                              onChange={setSeguradoraSelect}
-                              searchFields={["name"]}
+                              displayField="label"
+                              value={selectedSeguradora}
+                              onChange={handleSeguradoraChange}
+                              searchFields={["label"]}
                               placeholder="Selecione uma seguradora"
                             />
                           </FormControl>
@@ -178,6 +180,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         </FormItem>
                       )}
                     />
+                    
                     <FormField
                       control={methods.control}
                       name="faixa_inicio"
@@ -191,6 +194,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         </FormItem>
                       )}
                     />
+                    
                     <FormField
                       control={methods.control}
                       name="faixa_fim"
@@ -204,6 +208,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         </FormItem>
                       )}
                     />
+                    
                     <FormField
                       control={methods.control}
                       name="valor_seguradora"
@@ -217,6 +222,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         </FormItem>
                       )}
                     />
+                    
                     <FormField
                       control={methods.control}
                       name="valor_pago_cliente"
