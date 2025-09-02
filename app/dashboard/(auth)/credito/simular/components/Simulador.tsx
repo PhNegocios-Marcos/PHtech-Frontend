@@ -328,11 +328,11 @@ export default function SimuladorFgts({
 
   if (abrirCadastro && formValues.cpf && produtoId) {
     // Limpa o CPF (remove pontos e traços)
-    // const cpfLimpo = formValues.cpf.replace(/\D/g, "");
+    const cpfLimpo = formValues.cpf.replace(/\D/g, "");
 
     return (
       <Cadastrar
-        cpf={formValues.cpf} // Passa o CPF limpo
+        cpf={cpfLimpo}
         simulacao={resultado?.mensagem}
         produtoId={produtoId}
         isOpen={abrirCadastro}
@@ -351,7 +351,6 @@ export default function SimuladorFgts({
     );
   }
 
-  // Exibir a proposta selecionada
   // Exibir a proposta selecionada
   if (
     cpfProposta &&

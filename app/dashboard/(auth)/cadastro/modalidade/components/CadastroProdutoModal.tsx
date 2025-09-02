@@ -66,7 +66,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/produtos/criar`, {
+      const response = await fetch(`${API_BASE_URL}/modalidade-credito/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Produto } from "./produtos";
 import {
   Form,
   FormControl,
@@ -20,52 +21,61 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
+// Definir a interface Produto para garantir consistência
+// export interface Produto {
+//   id: string;
+//   modalidade_credito_nome: string;
+//   modalidade_credito_status: number;
+//   modalidade_credito_digito_prefixo: number;
+//   id_uy3: string | null;
+//   modalidade_credito_cor_grafico?: string | null;
+// }
+
+// Update your produtoSchema to match the expected structure
 const produtoSchema = z.object({
   id: z.string(),
-  nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  status: z.number(),
-  idade_minima: z.number(),
-  idade_maxima: z.number(),
-  prazo_minimo: z.number(),
-  prazo_maximo: z.number(),
+  modalidade_credito_nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
+  modalidade_credito_status: z.number(),
+  modalidade_credito_digito_prefixo: z.number(),
   id_uy3: z.string().nullable(),
-  cor_grafico: z.string().nullable().optional()
+  modalidade_credito_cor_grafico: z.string().nullable().optional()
 });
 
-type Produto = z.infer<typeof produtoSchema>;
+type ProdutoFormData = z.infer<typeof produtoSchema>;
 
 type ProdutoDrawerProps = {
-  produto: Produto | null;
+  produto: Produto;
   onClose: (() => void) | undefined;
   onRefresh?: () => void;
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
-  const defaultValues: Produto = {
-    id: produto?.id || "",
-    nome: produto?.nome || "",
-    status: produto?.status || 1, // Default to active
-    idade_minima: produto?.idade_minima || 0,
-    idade_maxima: produto?.idade_maxima || 0,
-    prazo_minimo: produto?.prazo_minimo || 0,
-    prazo_maximo: produto?.prazo_maximo || 0,
-    id_uy3: produto?.id_uy3 || null,
-    cor_grafico: produto?.cor_grafico || ""
+  const defaultValues: ProdutoFormData = {
+    id: produto.id || "",
+    modalidade_credito_nome: produto.modalidade_credito_nome || "",
+    modalidade_credito_status: produto.modalidade_credito_status || 1, // Default to active
+    modalidade_credito_digito_prefixo: produto.modalidade_credito_digito_prefixo || 0,
+    id_uy3: produto.id_uy3 || null,
+    modalidade_credito_cor_grafico: produto.modalidade_credito_cor_grafico || ""
   };
 
-  const methods = useForm<Produto>({
+  const methods = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),
     defaultValues
   });
 
   const { token } = useAuth();
-  const originalData = useRef<Produto>(defaultValues);
+  const originalData = useRef<ProdutoFormData>(defaultValues);
 
   useEffect(() => {
     if (produto) {
-      const values = {
-        ...produto,
-        cor_grafico: produto.cor_grafico || ""
+      const values: ProdutoFormData = {
+        id: produto.id,
+        modalidade_credito_nome: produto.modalidade_credito_nome,
+        modalidade_credito_status: produto.modalidade_credito_status,
+        modalidade_credito_digito_prefixo: produto.modalidade_credito_digito_prefixo,
+        id_uy3: produto.id_uy3,
+        modalidade_credito_cor_grafico: produto.modalidade_credito_cor_grafico || ""
       };
       methods.reset(values);
       originalData.current = values;
@@ -77,17 +87,17 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
     { id: 0, name: "Inativo" }
   ];
 
-  const onSubmit = async (data: Produto) => {
+  const onSubmit = async (data: ProdutoFormData) => {
     if (!token) {
       toast.error("Token de autenticação não encontrado.");
       return;
     }
 
-    const updatedFields: Partial<Produto> = { id: data.id };
+    const updatedFields: Partial<ProdutoFormData> = { id: data.id };
 
     // Check each field for changes
     Object.keys(data).forEach((key) => {
-      const fieldKey = key as keyof Produto;
+      const fieldKey = key as keyof ProdutoFormData;
       const newValue = data[fieldKey];
       const oldValue = originalData.current[fieldKey];
 
@@ -154,12 +164,13 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Editar Modalidade: <span className="text-primary">{produto?.nome}</span>
+                Editar Modalidade:{" "}
+                <span className="text-primary">{produto.modalidade_credito_nome}</span>
               </h2>
               <button
                 type="button"
@@ -172,13 +183,12 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
-                <CardHeader>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={methods.control}
-                      name="nome"
+                      name="modalidade_credito_nome"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nome</FormLabel>
@@ -192,7 +202,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
                     <FormField
                       control={methods.control}
-                      name="status"
+                      name="modalidade_credito_status"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Status</FormLabel>
@@ -212,10 +222,10 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
                     <FormField
                       control={methods.control}
-                      name="idade_minima"
+                      name="modalidade_credito_digito_prefixo"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Idade Mínima</FormLabel>
+                          <FormLabel>Dígito Prefixo</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -230,61 +240,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
                     <FormField
                       control={methods.control}
-                      name="idade_maxima"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Idade Máxima</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_minimo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Mínimo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_maximo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Máximo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => handleNumberChange(field, e.target.value)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="cor_grafico"
+                      name="modalidade_credito_cor_grafico"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Cor do Gráfico</FormLabel>

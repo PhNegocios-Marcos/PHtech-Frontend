@@ -27,13 +27,13 @@ import {
 } from "@/components/ui/card";
 
 const schema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
-  idade_minima: z.number().min(0, "Idade mínima deve ser positiva"),
-  idade_maxima: z.number().min(0, "Idade máxima deve ser positiva"),
-  prazo_minimo: z.number().min(1, "Prazo mínimo deve ser pelo menos 1"),
-  prazo_maximo: z.number().min(1, "Prazo máximo deve ser pelo menos 1"),
-  id_uy3: z.string().optional(),
-  cor_grafico: z.string().optional()
+  modalidade_credito_nome: z.string().min(1, "Nome é obrigatório"),
+  modalidade_credito_id: z.string().optional(),
+  modalidade_credito_cor_grafico: z.string().optional(),
+  modalidade_credito_digito_prefixo: z.preprocess(
+    (val) => val === "" ? undefined : Number(val),
+    z.number().min(1).optional()
+  )
 });
 
 type FormData = z.infer<typeof schema>;
@@ -47,13 +47,10 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: "",
-      idade_minima: 0,
-      idade_maxima: 0,
-      prazo_minimo: 1,
-      prazo_maximo: 1,
-      id_uy3: "809ebc8f-a1b4-4202-9a4e-da2b7f388cc6",
-      cor_grafico: ""
+      modalidade_credito_nome: "",
+      modalidade_credito_id: "",
+      modalidade_credito_cor_grafico: "",
+      modalidade_credito_digito_prefixo: undefined,
     },
   });
 
@@ -66,7 +63,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/produtos/criar`, {
+      const response = await fetch(`${API_BASE_URL}/modalidade-credito/criar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +120,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={methods.control}
-                      name="nome"
+                      name="modalidade_credito_nome"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nome</FormLabel>
@@ -137,16 +134,17 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
 
                     <FormField
                       control={methods.control}
-                      name="idade_minima"
+                      name="modalidade_credito_digito_prefixo"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Idade Mínima</FormLabel>
+                          <FormLabel>Prefixo</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               placeholder="Idade mínima"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseInt(e.target.value))}
+                              value={field.value === undefined ? "" : field.value}
                             />
                           </FormControl>
                           <FormMessage />
@@ -156,64 +154,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
 
                     <FormField
                       control={methods.control}
-                      name="idade_maxima"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Idade Máxima</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Idade máxima"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_minimo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Mínimo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Prazo mínimo"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="prazo_maximo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prazo Máximo</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Prazo máximo"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={methods.control}
-                      name="cor_grafico"
+                      name="modalidade_credito_cor_grafico"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Cor do Gráfico</FormLabel>

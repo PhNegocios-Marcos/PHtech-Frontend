@@ -2,14 +2,22 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Produto } from "./produtos";
 import { ProdutoEdit } from "./InformacoesProduto";
-import RelacionamentoProduto from "./RelacionamentoProduto";
-import { Button } from "@/components/ui/button";
-import TabelaProduto from "./taxa"
+import { Produto } from "./produtos";
+// import RelacionamentoProduto from "./RelacionamentoProduto";
+
+// Import or define the Produto interface to match ProdutoEdit's expectations
+// export interface Produto {
+//   id: string;
+//   modalidade_credito_nome: string;
+//   modalidade_credito_status: number;
+//   modalidade_credito_digito_prefixo: number;
+//   id_uy3: string | null;
+//   modalidade_credito_cor_grafico?: string | null;
+// }
 
 type Props = {
-  produto: Produto | null;
+  produto: Produto;
   onClose: () => void;
   onRefresh?: () => void; // pode ser opcional
 };

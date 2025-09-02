@@ -107,11 +107,10 @@ const fixedFormSections: FormSection[] = [
         type: "select",
         required: true,
         options: [
-          { value: "cpf", label: "CPF" },
-          { value: "cnpj", label: "CNPJ" },
-          { value: "email", label: "E-mail" },
-          { value: "telefone", label: "Telefone" },
-          { value: "aleatoria", label: "Chave Aleatória" }
+          { value: "1", label: "CPF" },
+          { value: "3", label: "E-mail" },
+          { value: "2", label: "Telefone" },
+          { value: "4", label: "Chave Aleatória" }
         ]
       },
       { name: "dados_bancarios.0.pix", label: "Chave Pix/TED", type: "text", required: true }
@@ -223,7 +222,11 @@ const DadosPessoais = forwardRef<
             <div key={field.name} className="space-y-2">
               <span>{field.label}</span>
               <Combobox
-                value={field.options?.find((opt) => Number(opt.value) === Number(formData[field.name])) || null}
+                value={
+                  field.options?.find(
+                    (opt) => Number(opt.value) === Number(formData[field.name])
+                  ) || null
+                }
                 onChange={(selected) => {
                   setValue(field.name, selected?.value ? Number(selected.value) : undefined);
                   onChange(field.name, selected?.value ? Number(selected.value) : undefined);
@@ -616,17 +619,6 @@ const Enderecos = forwardRef<
     <div className="m-10">
       <form className="grid grid-cols-1 gap-5 md:grid-cols-3" onSubmit={(e) => e.preventDefault()}>
         {fields.map(renderField)}
-        <div className="grid gap-1">
-          <span>Complemento</span>
-          <Input
-            placeholder="Complemento"
-            value={e.complemento || ""}
-            onChange={(ev) => {
-              onChange("enderecos.0.complemento", ev.target.value);
-            }}
-            className="mt-1"
-          />
-        </div>
       </form>
     </div>
   );
@@ -643,7 +635,7 @@ const DadosBancarios = forwardRef<
     const schemaObj: Record<string, any> = {};
     uniqueFields.forEach((field) => {
       if (field.required) {
-        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
+        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`).optional();
       } else {
         schemaObj[field.name] = z.string().optional();
       }
@@ -848,19 +840,19 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
 
   const handleNext = async () => {
     const ref = tabRefs[activeTab];
-    if (ref?.current?.validate) {
-      const isValid = await ref.current.validate();
-      if (!isValid) {
-        toast.warning("Preencha todos os campos obrigatórios antes de continuar", {
-          style: {
-            background: "var(--toast-warning)",
-            color: "var(--toast-warning-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
-        return;
-      }
-    }
+    // if (ref?.current?.validate) {
+    //   const isValid = await ref.current.validate();
+    //   if (!isValid) {
+    //     toast.warning("Preencha todos os campos obrigatórios antes de continuar", {
+    //       style: {
+    //         background: "var(--toast-warning)",
+    //         color: "var(--toast-warning-foreground)",
+    //         boxShadow: "var(--toast-shadow)"
+    //       }
+    //     });
+    //     return;
+    //   }
+    // }
     const currentIndex = tabOrder.indexOf(activeTab);
     const nextTab = tabOrder[currentIndex + 1];
     if (nextTab) {

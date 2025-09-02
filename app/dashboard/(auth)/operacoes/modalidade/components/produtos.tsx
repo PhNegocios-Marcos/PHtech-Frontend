@@ -39,9 +39,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 export type Produto = {
-  id: string;
+  modalidade_credito_id: string;
   nome: string;
-  status: number;
+  id: string;
+  modalidade_credito_nome: string;
+  modalidade_credito_status: number;
+  modalidade_credito_digito_prefixo: number;
+  modalidade_credito_cor_grafico?: string | null;
   idade_minima: number;
   idade_maxima: number;
   prazo_minimo: number;
@@ -69,25 +73,23 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   const { token } = useAuth();
 
   const columns: ColumnDef<Produto>[] = [
-    { accessorKey: "nome", header: "Nome" },
-    { accessorKey: "idade_minima", header: "Idade Mínima" },
-    { accessorKey: "idade_maxima", header: "Idade Máxima" },
-    { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
-    { accessorKey: "prazo_maximo", header: "Prazo Máximo" },
+    { accessorKey: "modalidade_credito_nome", header: "Nome" },
+    { accessorKey: "modalidade_credito_digito_prefixo", header: "Prefixo" },
+    { accessorKey: "modalidade_credito_cor_grafico", header: "Cor Gráfico" },
     {
-      accessorKey: "status_toggle",
+      accessorKey: "modalidade_credito_status",
       header: "Alterar Status",
       cell: ({ row }) => {
-        const ativo = row.original.status === 1;
+        const ativo = row.original.modalidade_credito_status === 1;
 
         const toggleStatus = async () => {
           try {
             const novoStatus = ativo ? 0 : 1;
 
             await axios.put(
-              `${API_BASE_URL}/produtos/atualizar`,
+              `${API_BASE_URL}/modalidade-credito/atualizar`,
               {
-                id: row.original.id,
+                id: row.original.modalidade_credito_id,
                 status: novoStatus
               },
               {
@@ -101,7 +103,9 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
             // 🔥 Atualiza diretamente no estado produtos
             setProdutos((prev) =>
               prev.map((item) =>
-                item.id === row.original.id ? { ...item, status: novoStatus } : item
+                item.modalidade_credito_id === row.original.modalidade_credito_id
+                  ? { ...item, status: novoStatus }
+                  : item
               )
             );
 
@@ -160,7 +164,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
     async function fetchProdutos() {
       if (!token) return;
       try {
-        const response = await fetch(`${API_BASE_URL}/produtos/listar`, {
+        const response = await fetch(`${API_BASE_URL}/modalidade-credito/listar`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
