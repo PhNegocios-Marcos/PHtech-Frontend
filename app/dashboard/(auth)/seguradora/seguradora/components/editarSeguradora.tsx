@@ -53,7 +53,6 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (asideRef.current && !asideRef.current.contains(event.target as Node)) {
-        onClose();
       }
     };
 
