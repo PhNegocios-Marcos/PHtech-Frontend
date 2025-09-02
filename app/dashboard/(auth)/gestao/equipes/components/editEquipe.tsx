@@ -22,6 +22,7 @@ import { toast } from "sonner";
 
 const equipeSchema = z.object({
   id: z.string(),
+  nome: z.string().min(2).max(100),
   descricao: z.string().optional(),
   status: z.number()
 });
