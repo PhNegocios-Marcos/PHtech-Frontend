@@ -89,7 +89,11 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
           (rel) => rel.equipe?.nome === equipeNome
         );
 
-        const usuariosComStatus: UsuarioComStatus[] = usuariosData.map((user: any) => {
+        const listagemUsuarioPromotor = usuariosData?.filter(
+          (user: any) => user?.tipo_usuario === 'Promotora'
+        );
+
+        const usuariosComStatus: UsuarioComStatus[] = listagemUsuarioPromotor.map((user: any) => {
           const relacionamento = relacionadosComEquipe.find((rel) => rel.usuario?.id === user.id);
 
           return {
@@ -97,7 +101,7 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
             nome: user.nome,
             email: user.email,
             status_relacionamento: relacionamento?.status_relacionamento,
-            id_relacionamento: relacionamento?.id_relacionamento
+            id_relacionamento: relacionamento?.id_relacionamento,
           };
         });
 
@@ -107,9 +111,9 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
         toast.error("Erro ao carregar membros da equipe", {
           description: "Tente novamente mais tarde",
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -147,9 +151,9 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
 
         toast.success(novoStatus === 1 ? "Membro ativado" : "Membro desativado", {
           style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-success)",
+            color: "var(--toast-success-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } else {
@@ -165,6 +169,10 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
             nome: equipeNome
           })
         });
+
+
+        console.log(response);
+        console.log(response.ok);
 
         if (!response.ok) {
           throw new Error("Falha ao adicionar membro");
@@ -195,9 +203,9 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
 
         toast.success("Membro adicionado à equipe", {
           style: {
-            background: 'var(--toast-success)',
-            color: 'var(--toast-success-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-success)",
+            color: "var(--toast-success-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -206,9 +214,9 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
       toast.error("Operação falhou", {
         description: "Não foi possível atualizar o membro",
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
