@@ -24,7 +24,7 @@ export default function Page() {
 
         {podeCriar && (
           <Button onClick={() => setIsCadastroOpen(true)} id="Produtos_criar">
-            Novo Bancalizador
+            Novo Bancarizador
           </Button>
         )}
       </div>

@@ -50,14 +50,6 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
   useEffect(() => {
     methods.reset(permissoes);
-    // toast.info("Dados da equipe carregados", {
-    //   style: {
-    //     background: 'var(--toast-info)',
-    //     color: 'var(--toast-info-foreground)',
-    //     boxShadow: 'var(--toast-shadow)'
-    //   },
-    //   description: `Editando: ${permissoes.nome}`
-    // });
   }, [permissoes, methods]);
 
   const statusOptions = [
@@ -145,7 +137,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
   return (
     <>
-      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true"></div>
 
       <aside
         role="dialog"
@@ -153,7 +145,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
         className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Permissão: <span className="text-primary">{permissoes.nome}</span></h2>
                 <button
@@ -165,18 +157,6 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                 </button>
               </div>
                 <Card className="col-span-2">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      {/* <CardTitle>
-                        <h2>
-                          Editar Averbador: <span className="text-primary">{permissoes.nome}</span>
-                        </h2>
-                      </CardTitle> */}
-                      {/* <Button onClick={handleClose} variant="outline">
-                      Voltar
-                    </Button> */}
-                    </div>
-                  </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
@@ -218,11 +198,12 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                       <Button type="button" variant="outline" onClick={handleClose}>
                         Cancelar
                       </Button>
-                      <Button type="submit">Salvar Alterações</Button>
+                      
+                      <Button type="submit" >Salvar Alterações</Button>
                     </div>
                   </CardContent>
                 </Card>
-            </div>
+            </form>
           </Form>
         </FormProvider>
       </aside>

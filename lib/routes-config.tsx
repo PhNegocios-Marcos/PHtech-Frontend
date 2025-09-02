@@ -183,7 +183,7 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "Bancalizador_ver",
-            title: "Bancalizador",
+            title: "Bancarizador",
             href: "/dashboard/operacoes/bancalizador"
           }
         ]
