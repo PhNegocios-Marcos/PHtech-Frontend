@@ -54,3 +54,7 @@ example-app/.env
 .vscode/launch.json
 package-lock.json
 package-lock.json
+
+.env
+.env.example
+.env.local
