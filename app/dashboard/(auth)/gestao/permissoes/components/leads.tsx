@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import axios from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { CarregandoTable } from "./leads_carregando";
@@ -130,11 +131,56 @@ export function PermissoesTable() {
       header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/permissoes/atualizar`,
+              {
+                id: row.original.id,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setPermissoes((prev) =>
+              prev.map((item) =>
+                item.id === row.original.id ? { ...item, status: novoStatus } : item
+              )
+            );
+
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          }
+        };
+
         return (
           <Badge
-            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
             variant={ativo ? "default" : "outline"}>
-            {ativo ? "Ativa" : "Inativa"}
+            {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
       }

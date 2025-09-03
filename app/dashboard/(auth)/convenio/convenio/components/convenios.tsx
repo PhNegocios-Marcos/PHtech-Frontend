@@ -37,6 +37,7 @@ import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import ConvenioEdit from "./editConvenio";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -70,9 +71,56 @@ export function ConveniosTable() {
       header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.convenio_status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/convenio/${row.original.convenio_hash}`,
+              {
+                id: row.original.convenio_hash,
+                convenio_status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setConvenios((prev) =>
+              prev.map((item) =>
+                item.convenio_hash === row.original.convenio_hash ? { ...item, convenio_status: novoStatus } : item
+              )
+            );
+
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          }
+        };
+
         return (
           <Badge
-            className={ativo ? "w-24" : "w-24 border border-red-500 bg-transparent text-red-500"}
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
@@ -101,9 +149,9 @@ export function ConveniosTable() {
       if (!token) {
         toast.error("Token de autenticação não encontrado.", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         return;
@@ -128,9 +176,9 @@ export function ConveniosTable() {
         console.error("Erro na requisição:", error.message || error);
         toast.error(`Erro: ${error.message || error}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }

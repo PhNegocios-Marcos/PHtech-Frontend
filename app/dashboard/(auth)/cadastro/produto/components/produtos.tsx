@@ -151,17 +151,28 @@ export default function Produto({ produto }: Props) {
               )
             );
 
-            toast.success("Status atualizado com sucesso!");
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
           } catch (error: any) {
-            console.error("Erro ao atualizar status", error);
-            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
           }
         };
 
         return (
           <Badge
             onClick={toggleStatus}
-            className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border border-primary bg-transparent text-primary"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
@@ -196,8 +207,13 @@ export default function Produto({ produto }: Props) {
         });
         setProdutosRelacionados(res.data);
       } catch (error: any) {
-        console.error("Erro ao carregar convênios", error);
-        toast.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`);
+        toast.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`, {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
       }
     }
 

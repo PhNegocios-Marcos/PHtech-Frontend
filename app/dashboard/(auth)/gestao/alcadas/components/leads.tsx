@@ -89,48 +89,6 @@ export function AlcadasTable() {
     fetchAlcadas();
   }, [token]);
 
-  const toggleStatus = async (row: AlcadaLinha) => {
-    try {
-      const novoStatus = row.status === 1 ? 0 : 1;
-
-      await axios.put(
-        `${API_BASE_URL}/alcada/atualizar`,
-        {
-          id: row.id,
-          status: novoStatus
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-
-      // Atualiza diretamente no estado alcadas
-      setAlcadas((prev) =>
-        prev.map((item) => (item.id === row.id ? { ...item, status: novoStatus } : item))
-      );
-
-      toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
-        style: {
-          background: "var(--toast-success)",
-          color: "var(--toast-success-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
-    } catch (error: any) {
-      console.error("Erro ao atualizar status", error);
-      toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
-    }
-  };
-
   const columns: ColumnDef<AlcadaLinha>[] = [
     {
       accessorKey: "nome",
@@ -151,18 +109,60 @@ export function AlcadasTable() {
       }
     },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.status ?? 1;
-        const ativo = status === 1;
+        const ativo = row.original.status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/alcada/atualizar`,
+              {
+                id: row.original.id,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setAlcadas((prev) =>
+              prev.map((item) =>
+                item.id === row.original.id ? { ...item, status: novoStatus } : item
+              )
+            );
+
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          }
+        };
 
         return (
           <Badge
-            onClick={() => toggleStatus(row.original)}
-            className={`w-24 cursor-pointer ${
-              ativo ? "" : "border border-red-500 bg-transparent text-red-500"
-            }`}
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
