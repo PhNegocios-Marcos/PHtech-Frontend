@@ -111,6 +111,15 @@ export default function CadastroRoteiroModal({
     }
   });
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos ou vazio
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value);
+    }
+  };
+
   const formFields: FormFieldConfig[] = [
     { name: "nome", label: "Nome", placeholder: "Digite o nome do roteiro", type: "text" },
     { name: "descricao", label: "Descrição", placeholder: "Digite a descrição", type: "text" },
@@ -278,6 +287,16 @@ export default function CadastroRoteiroModal({
                     ))}
                   </SelectContent>
                 </Select>
+              ) : type === "number" ? (
+                <FormControl>
+                  <Input
+                    placeholder={placeholder}
+                    type={type}
+                    value={field.value || ""}
+                    onChange={(e) => handleNumberChange(e, field)}
+                    min="0"
+                  />
+                </FormControl>
               ) : (
                 <FormControl>
                   <Input placeholder={placeholder} type={type} {...field} />
@@ -296,7 +315,13 @@ export default function CadastroRoteiroModal({
               <FormItem>
                 <FormLabel>{showInputOnTrue.label}</FormLabel>
                 <FormControl>
-                  <Input placeholder={showInputOnTrue.placeholder} type="number" {...field} />
+                  <Input
+                    placeholder={showInputOnTrue.placeholder}
+                    type="number"
+                    value={field.value || ""}
+                    onChange={(e) => handleNumberChange(e, field)}
+                    min="0"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
