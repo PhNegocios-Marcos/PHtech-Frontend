@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Form,
   FormField,
   FormItem,
   FormLabel,
@@ -41,8 +40,6 @@ const createSchema = z.object({
   taxa_maxima: z.string().min(1, "Taxa máxima é obrigatória"),
   usa_margem_seguranca: z.enum(["true", "false"], { message: "Selecione uma opção" }),
   valor_margem_seguranca: z.string().optional(),
-  tac_min: z.string().min(1, "TAC mínima é obrigatória"),
-  tac_max: z.string().min(1, "TAC máxima é obrigatória"),
   usa_limite_proposta: z.enum(["true", "false"], { message: "Selecione uma opção" }),
   valor_limite_proposta: z.string().optional(),
   quantidade_propostas_ativas: z.string()
@@ -93,8 +90,6 @@ export default function CadastroRoteiroModal({
       taxa_maxima: "",
       usa_margem_seguranca: "false",
       valor_margem_seguranca: "",
-      tac_min: "",
-      tac_max: "",
       usa_limite_proposta: "false",
       valor_limite_proposta: "",
       quantidade_propostas_ativas: ""
@@ -122,8 +117,6 @@ export default function CadastroRoteiroModal({
     },
     { name: "taxa_minima", label: "Taxa Mínima (% a.m.)", placeholder: "1.5", type: "number" },
     { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
-    { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
-    { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -162,6 +155,8 @@ export default function CadastroRoteiroModal({
   ];
 
   const onSubmit = async (data: CreateFormData) => {
+    console.log('onSubmit chamado!', data);
+    
     if (!token) {
       toast.error("Token de autenticação não encontrado.");
       return;
@@ -186,8 +181,6 @@ export default function CadastroRoteiroModal({
         valor_limite_proposta:
           data.usa_limite_proposta === "true" ? parseFloat(data.valor_limite_proposta || "0") : 0,
         limite_propostas_ativas: parseInt(data.quantidade_propostas_ativas),
-        tarifa_cadastro_minima: parseFloat(data.tac_min),
-        tarifa_cadastro_maxima: parseFloat(data.tac_max),
         usuario_criacao: userData?.id
       };
 
@@ -288,40 +281,39 @@ export default function CadastroRoteiroModal({
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2"
+        onClick={(e) => e.stopPropagation()}
+      >
         <FormProvider {...methods}>
-          <Form {...methods}>
-            <form
-              onSubmit={methods.handleSubmit(onSubmit, (errors) => {
-                console.log("Erros de validação:", errors);
-              })}
-              className="flex h-full flex-col">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Roteiro</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
-              </div>
-              <Card className="flex-grow overflow-auto">
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {formFields.map(renderFormField)}
-                    {formFields2.map(renderFormField)}
-                  </div>
-                </CardContent>
-              </Card>
-              <div className="mt-6 flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Cadastrar</Button>
-              </div>
-            </form>
-          </Form>
+          <form
+            onSubmit={methods.handleSubmit(onSubmit)}
+            className="flex h-full flex-col"
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Cadastrar Novo Roteiro</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-2xl font-bold hover:text-gray-900"
+                aria-label="Fechar">
+                ×
+              </button>
+            </div>
+            <Card className="flex-grow overflow-auto">
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {formFields.map(renderFormField)}
+                  {formFields2.map(renderFormField)}
+                </div>
+              </CardContent>
+            </Card>
+            <div className="mt-6 flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit">Cadastrar</Button>
+            </div>
+          </form>
         </FormProvider>
       </aside>
     </>
