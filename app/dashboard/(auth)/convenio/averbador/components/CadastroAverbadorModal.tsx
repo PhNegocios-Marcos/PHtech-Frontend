@@ -98,7 +98,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg">
+        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">

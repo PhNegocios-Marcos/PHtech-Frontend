@@ -138,13 +138,13 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div className="fixed inset-0 z-40 bg-black/50 mb-0" aria-hidden="true" />
 
       <aside
         ref={asideRef}
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">

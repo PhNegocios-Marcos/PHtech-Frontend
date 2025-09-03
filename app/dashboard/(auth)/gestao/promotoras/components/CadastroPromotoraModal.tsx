@@ -567,7 +567,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     <>
       <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
-      <aside className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg">
+      <aside className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg rounded-l-2xl">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">

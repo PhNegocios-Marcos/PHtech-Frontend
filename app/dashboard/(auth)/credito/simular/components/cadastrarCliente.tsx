@@ -2006,7 +2006,7 @@ export default function CadastroClienteModal({
       <aside
         role="dialog"
         aria-modal="true"
-        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2 rounded-l-2xl">
         <Card className="mx-auto mt-10 max-w-6xl space-y-6 p-6">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold">Cadastro de Cliente</h1>

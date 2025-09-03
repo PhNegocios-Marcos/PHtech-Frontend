@@ -189,7 +189,7 @@ export function AlcadasTable() {
         <CardTitle>Alçada</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <Input
             placeholder="Filtrar alçadas..."
             value={filtro}

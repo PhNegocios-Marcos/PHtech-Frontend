@@ -140,7 +140,7 @@ export default function AtualizarProdutoModal({
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto bg-background p-6 shadow-lg md:w-1/2">
+        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
