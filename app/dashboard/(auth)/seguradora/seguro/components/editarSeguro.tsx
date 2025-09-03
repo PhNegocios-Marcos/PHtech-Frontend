@@ -45,6 +45,41 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
 
   const { token } = useAuth();
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos ou vazio
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value);
+    }
+  };
+
+  // Função para formatar valores monetários
+  const formatCurrency = (value: string): string => {
+    if (!value) return "";
+    
+    // Remove tudo que não é número ou ponto decimal
+    let cleaned = value.replace(/[^\d.]/g, '');
+    
+    // Permite apenas um ponto decimal
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limita a 2 casas decimais após o ponto
+    if (parts.length === 2) {
+      cleaned = parts[0] + '.' + parts[1].slice(0, 2);
+    }
+    
+    return cleaned;
+  };
+
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const formattedValue = formatCurrency(e.target.value);
+    field.onChange(formattedValue);
+  };
+
   useEffect(() => {
     const subscription = methods.watch((value, { name, type }) => {
       console.log("📋 Form values:", value);
@@ -178,7 +213,12 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                         <FormItem>
                           <FormLabel>Faixa Inicial</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              value={field.value || ""}
+                              onChange={(e) => handleNumberChange(e, field)}
+                              min="0"
+                              type="number"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -191,7 +231,12 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                         <FormItem>
                           <FormLabel>Faixa Final</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              value={field.value || ""}
+                              onChange={(e) => handleNumberChange(e, field)}
+                              min="0"
+                              type="number"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -202,9 +247,14 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                       name="valor_seguradora"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor da Seguradora</FormLabel>
+                          <FormLabel>Valor da Seguradora (R$)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              value={field.value || ""}
+                              onChange={(e) => handleCurrencyChange(e, field)}
+                              min="0"
+                              type="text"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -215,9 +265,14 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
                       name="valor_pago_cliente"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor Pago pelo Cliente</FormLabel>
+                          <FormLabel>Valor Pago pelo Cliente (R$)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              value={field.value || ""}
+                              onChange={(e) => handleCurrencyChange(e, field)}
+                              min="0"
+                              type="text"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
