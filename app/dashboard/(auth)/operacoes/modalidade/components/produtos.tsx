@@ -143,21 +143,21 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
         );
       }
     },
-    {
-      id: "editar",
-      header: "Editar",
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onSelectProduto(row.original)}
-          title="Editar produto">
-          <Pencil className="h-4 w-4" />
-        </Button>
-      ),
-      enableSorting: false,
-      enableHiding: false
-    }
+    // {
+    //   id: "editar",
+    //   header: "Editar",
+    //   cell: ({ row }) => (
+    //     <Button
+    //       variant="ghost"
+    //       size="icon"
+    //       onClick={() => onSelectProduto(row.original)}
+    //       title="Editar produto">
+    //       <Pencil className="h-4 w-4" />
+    //     </Button>
+    //   ),
+    //   enableSorting: false,
+    //   enableHiding: false
+    // }
   ];
 
   useEffect(() => {
