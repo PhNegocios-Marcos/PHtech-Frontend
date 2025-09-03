@@ -178,6 +178,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       return;
     }
 
+    console.log(data);
+
     const payload = {
       ...data,
       valor_limite_proposta:

@@ -153,7 +153,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
   // Handle number input more gracefully
   const handleNumberChange = (field: any, value: string) => {
-    const numValue = value === "" ? 0 : parseInt(value, 10) || 0;
+    const numValue = value === "" ? '' : parseInt(value, 10) || '';
     field.onChange(numValue);
   };
 
@@ -167,23 +167,22 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
         className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                Editar Modalidade:{" "}
-                <span className="text-primary">{produto.modalidade_credito_nome}</span>
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
-            </div>
-
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  Editar Modalidade:{" "}
+                  <span className="text-primary">{produto.modalidade_credito_nome}</span>
+                </h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-2xl font-bold hover:text-gray-900"
+                  aria-label="Fechar">
+                  ×
+                </button>
+              </div>
+
               <Card>
-                <CardHeader></CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
@@ -228,7 +227,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                           <FormLabel>Dígito Prefixo</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
+                              type="text"
                               value={field.value}
                               onChange={(e) => handleNumberChange(field, e.target.value)}
                             />

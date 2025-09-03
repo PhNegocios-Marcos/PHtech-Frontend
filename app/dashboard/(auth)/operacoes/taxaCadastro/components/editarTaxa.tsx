@@ -65,6 +65,8 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
         }
       });
 
+      console.log(payload);
+
       toast.success("Faixa de taxa atualizada com sucesso!");
       onClose();
     } catch (error: any) {
