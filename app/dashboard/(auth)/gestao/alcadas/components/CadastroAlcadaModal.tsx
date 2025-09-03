@@ -123,14 +123,14 @@ export default function CadastroAlcadaModal({
     <>
       <div
         onClick={onClose}
-        className="fixed inset-0 z-40 bg-black/50"
+        className="fixed inset-0 z-40 bg-black/50 mb-0"
         aria-hidden="true"
       />
 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6"
+        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6 rounded-l-2xl"
       >
         <FormProvider {...methods}>
           <Form {...methods}>
