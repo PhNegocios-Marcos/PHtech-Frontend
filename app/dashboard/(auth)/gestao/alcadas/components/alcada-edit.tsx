@@ -65,7 +65,7 @@ export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
       ...alcada,
       status: alcada.status ?? 1
     };
-    
+
     methods.reset({
       ...alcadaComStatus
     });
@@ -149,40 +149,30 @@ export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
                 <FormField
                   control={methods.control}
                   name="valor"
+                  rules={{
+                    min: {
+                      value: 0,
+                      message: "O valor não pode ser negativo"
+                    }
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Valor</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
+                          min="0"
                           value={field.value ?? 0}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value);
+                            field.onChange(isNaN(value) ? 0 : Math.max(0, value));
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {/* <FormField
-                  control={methods.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Combobox
-                          data={statusOptions}
-                          displayField="name"
-                          value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected?.id ?? 1)}
-                          searchFields={["name"]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
 
                 <FormField
                   control={methods.control}
@@ -191,11 +181,7 @@ export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
                     <FormItem className="md:col-span-2">
                       <FormLabel>Descrição</FormLabel>
                       <FormControl>
-                        <Textarea
-                          value={field.value ?? ""}
-                          onChange={field.onChange}
-                          rows={3}
-                        />
+                        <Textarea value={field.value ?? ""} onChange={field.onChange} rows={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

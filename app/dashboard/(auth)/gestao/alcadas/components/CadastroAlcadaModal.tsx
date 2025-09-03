@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -17,26 +17,21 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-// ✅ Novo schema de validação para Alçada
+// ✅ Schema de validação para Alçada
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
   valor: z
-    .string()
-    .min(1, "Valor é obrigatório")
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-      message: "Valor deve ser um número válido",
-    }),
+    .union([z.number(), z.string()])
+    .transform((val) => (typeof val === "string" ? parseFloat(val) || 0 : val))
+    .refine((val) => !isNaN(val) && val >= 0, {
+      message: "Valor deve ser um número válido e não negativo"
+    })
 });
 
 type FormData = z.infer<typeof schema>;
@@ -46,17 +41,31 @@ type CadastroAlcadaModalProps = {
   onClose: () => void;
 };
 
-export default function CadastroAlcadaModal({
-  isOpen,
-  onClose,
-}: CadastroAlcadaModalProps) {
+// Componente para o campo de valor com tratamento numérico
+const ValorInput = ({ field }: { field: any }) => {
+  return (
+    <Input
+      type="number"
+      min="0"
+      step="0.01"
+      value={field.value}
+      onChange={(e) => {
+        const value = e.target.value;
+        field.onChange(value === "" ? "" : parseFloat(value) || 0);
+      }}
+      onBlur={field.onBlur}
+    />
+  );
+};
+
+export default function CadastroAlcadaModal({ isOpen, onClose }: CadastroAlcadaModalProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       nome: "",
       descricao: "",
-      valor: "",
-    },
+      valor: 0
+    }
   });
 
   const { token } = useAuth();
@@ -68,8 +77,8 @@ export default function CadastroAlcadaModal({
         style: {
           background: "var(--toast-error)",
           color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)",
-        },
+          boxShadow: "var(--toast-shadow)"
+        }
       });
       return;
     }
@@ -77,7 +86,7 @@ export default function CadastroAlcadaModal({
     const payload = {
       nome: data.nome,
       descricao: data.descricao,
-      valor: Number(data.valor),
+      valor: data.valor
     };
 
     try {
@@ -85,9 +94,9 @@ export default function CadastroAlcadaModal({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -99,8 +108,8 @@ export default function CadastroAlcadaModal({
         style: {
           background: "var(--toast-success)",
           color: "var(--toast-success-foreground)",
-          boxShadow: "var(--toast-shadow)",
-        },
+          boxShadow: "var(--toast-shadow)"
+        }
       });
       onClose();
       methods.reset();
@@ -111,8 +120,8 @@ export default function CadastroAlcadaModal({
         style: {
           background: "var(--toast-error)",
           color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)",
-        },
+          boxShadow: "var(--toast-shadow)"
+        }
       });
     }
   };
@@ -121,33 +130,22 @@ export default function CadastroAlcadaModal({
 
   return (
     <>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-40 bg-black/50 mb-0"
-        aria-hidden="true"
-      />
+      <div onClick={onClose} className="fixed inset-0 z-40 mb-0 bg-black/50" aria-hidden="true" />
 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6 rounded-l-2xl"
-      >
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form
-              onSubmit={methods.handleSubmit(onSubmit)}
-              className="flex flex-col h-full"
-            >
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">
-                  Cadastrar Nova Alçada
-                </h2>
+                <h2 className="text-xl font-semibold">Cadastrar Nova Alçada</h2>
                 <button
                   type="button"
                   onClick={onClose}
                   className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
+                  aria-label="Fechar">
                   ×
                 </button>
               </div>
@@ -166,10 +164,7 @@ export default function CadastroAlcadaModal({
                         <FormItem>
                           <FormLabel>Nome da Alçada</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="Digite o nome da alçada"
-                              {...field}
-                            />
+                            <Input placeholder="Digite o nome da alçada" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -183,10 +178,7 @@ export default function CadastroAlcadaModal({
                         <FormItem>
                           <FormLabel>Descrição</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="Descreva a alçada"
-                              {...field}
-                            />
+                            <Input placeholder="Descreva a alçada" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -200,12 +192,7 @@ export default function CadastroAlcadaModal({
                         <FormItem>
                           <FormLabel>Valor</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="Digite o valor"
-                              {...field}
-                            />
+                            <ValorInput field={field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
