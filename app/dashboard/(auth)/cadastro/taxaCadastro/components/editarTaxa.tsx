@@ -54,13 +54,13 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
       const payload: any = { id: data.cad_tac_id };
 
       if (data.cad_tac_valor_minimo !== taxa.cad_tac_valor_minimo) {
-        payload.valor_minimo = data.cad_tac_valor_minimo;
+        payload.cad_tac_valor_minimo = data.cad_tac_valor_minimo;
       }
       if (data.cad_tac_valor_maximo !== taxa.cad_tac_valor_maximo) {
-        payload.valor_maximo = data.cad_tac_valor_maximo;
+        payload.cad_tac_valor_maximo = data.cad_tac_valor_maximo;
       }
       if (data.cad_tac_valor_cobrado !== taxa.cad_tac_valor_cobrado) {
-        payload.valor_cobrado = data.cad_tac_valor_cobrado;
+        payload.cad_tac_valor_cobrado = data.cad_tac_valor_cobrado;
       }
 
       await axios.put(`${API_BASE_URL}/faixa-valor-cobrado/atualizar`, payload, {
