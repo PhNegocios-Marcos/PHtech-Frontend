@@ -20,10 +20,11 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const equipeSchema = z.object({
   id: z.string(),
-  nome: z.string().optional(),
+  nome: z.string().min(5, "Por favor, defina um nome para o módulo."),
   status: z.number()
 });
 
@@ -58,10 +59,6 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
   const onSubmit = async (data: ModulosFormValues) => {
     try {
       const payload = { ...data };
-
-      if (data.nome === modulos.nome || !data.nome?.trim()) {
-        delete payload.nome;
-      }
 
       await axios.put(`${API_BASE_URL}/modulo/atualizar`, payload, {
         headers: {
@@ -122,28 +119,10 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)}>
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Detalhes do Módulo: <span className="text-primary">{modulos.nome}</span></h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Editar módulo: <span className="text-primary">{modulos.nome}</span></h2>
+                <X onClick={handleClose} className="cursor-pointer"/>
               </div>
               <Card className="col-span-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    {/* <CardTitle>
-                      <h2>
-                        Detalhes do Módulo: <span className="text-primary">{modulos.nome}</span>
-                      </h2>
-                    </CardTitle>
-                    <Button onClick={onClose} variant="outline">
-                      Voltar
-                    </Button> */}
-                  </div>
-                </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
@@ -151,7 +130,7 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
                       name="nome"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome do Módulo</FormLabel>
+                          <FormLabel>Nome do módulo</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -185,7 +164,7 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
                     <Button type="button" variant="outline" onClick={onClose}>
                       Cancelar
                     </Button>
-                    <Button type="submit">Salvar Alterações</Button>
+                    <Button type="submit">Salvar alterações</Button>
                   </div>
                 </CardContent>
               </Card>

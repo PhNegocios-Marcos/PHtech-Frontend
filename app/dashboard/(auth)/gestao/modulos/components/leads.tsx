@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -155,14 +155,14 @@ export function ModulosTable() {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleRowDoubleClick(row.original)}
           title="Editar usuário">
-          <Search className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,

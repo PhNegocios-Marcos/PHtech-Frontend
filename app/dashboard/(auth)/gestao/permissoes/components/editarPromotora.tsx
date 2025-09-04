@@ -20,10 +20,11 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
+import { X } from "lucide-react";
 
 const permissoesSchema = z.object({
   id: z.string(),
-  nome: z.string().optional(),
+  nome: z.string().min(5, "Por favor, defina um nome para esta permissão."),
   status: z.number()
 });
 
@@ -148,13 +149,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Permissão: <span className="text-primary">{permissoes.nome}</span></h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
                 <Card className="col-span-2">
                   <CardContent>
@@ -164,7 +159,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                         name="nome"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nome da Equipe</FormLabel>
+                            <FormLabel>Nome da permissão</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -199,7 +194,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                         Cancelar
                       </Button>
                       
-                      <Button type="submit" >Salvar Alterações</Button>
+                      <Button type="submit" >Salvar alterações</Button>
                     </div>
                   </CardContent>
                 </Card>

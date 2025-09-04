@@ -26,9 +26,10 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 const schema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório")
+  nome: z.string().min(5, "Por favor, defina um nome para o módulo")
 });
 
 type FormData = z.infer<typeof schema>;
@@ -113,38 +114,29 @@ export default function CadastroModulosModal({
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Módulo</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar novo módulo</h2>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
 
-              <Card className="flex-grow overflow-auto">
+              <Card>
                 <CardHeader>
                   <CardTitle>Dados do Módulo</CardTitle>
                 </CardHeader>
 
                 <CardContent>
-                  <div className="grid grid-cols-1 gap-4">
-                    <FormField
-                      control={methods.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome do Modulo</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite o nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={methods.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do módulo</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite o nome" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
@@ -152,7 +144,7 @@ export default function CadastroModulosModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Cadastrar Módulo</Button>
+                <Button type="submit">Cadastrar módulo</Button>
               </div>
             </form>
           </Form>

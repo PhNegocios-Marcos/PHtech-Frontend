@@ -31,7 +31,7 @@ export default function Page() {
     <ProtectedRoute requiredPermission="Gestão_Permissões">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
-        <Button onClick={handleOpenCadastro}>Novo Módulo</Button>
+        <Button onClick={handleOpenCadastro}>Novo módulo</Button>
       </div>
 
       <ModulosTable />

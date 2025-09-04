@@ -187,14 +187,14 @@ export function PermissoesTable() {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleRowDoubleClick(row.original)}
           title="Editar permissão">
-          <Search className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
