@@ -21,9 +21,9 @@ import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const schema = z.object({
-  valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
-  valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
-  valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
+  valor_minimo: z.number().min(0, "Valor mínimo é obrigatório. Valor mínimo não pode ser negativo"),
+  valor_maximo: z.number().min(0, "Valor máximo é obrigatório. Valor máximo não pode ser negativo"),
+  valor_cobrado: z.number().min(0, "Valor cobrado é obrigatório. Valor cobrado não pode ser negativo")
 });
 
 type FormData = z.infer<typeof schema>;
@@ -38,9 +38,9 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      valor_minimo: "",
-      valor_maximo: "",
-      valor_cobrado: ""
+      valor_minimo: 0,
+      valor_maximo: 0,
+      valor_cobrado: 0
     }
   });
 
@@ -116,12 +116,22 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                         <FormItem>
                           <FormLabel>Valor Mínimo</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o valor mínimo" {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor mínimo"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={methods.control}
                       name="valor_maximo"
@@ -129,12 +139,22 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                         <FormItem>
                           <FormLabel>Valor Máximo</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o valor máximo" {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor máximo"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={methods.control}
                       name="valor_cobrado"
@@ -142,7 +162,16 @@ export default function CadastroTaxaModal({ isOpen, onClose, onRefresh }: Cadast
                         <FormItem>
                           <FormLabel>Valor Cobrado</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o valor cobrado" {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor cobrado"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

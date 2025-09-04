@@ -21,17 +21,25 @@ import { toast } from "sonner";
 
 const taxaSchema = z.object({
   cad_tac_id: z.number(),
-  cad_tac_valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
-  cad_tac_valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
-  cad_tac_valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
+  cad_tac_valor_minimo: z
+    .number()
+    .min(1, "Valor mínimo é obrigatório. Valor mínimo não pode ser negativo"),
+  cad_tac_valor_maximo: z
+    .number()
+    .min(1, "Valor máximo é obrigatório. Valor máximo não pode ser negativo"),
+  cad_tac_valor_cobrado: z
+    .number()
+    .min(1, "Valor cobrado é obrigatório. Valor cobrado não pode ser negativo")
 });
 
 const putTaxaSchema = z.object({
   id: z.number(),
-  valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
-  valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
-  valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
-})
+  valor_minimo: z.number().min(1, "Valor mínimo é obrigatório. Valor mínimo não pode ser negativo"),
+  valor_maximo: z.number().min(1, "Valor máximo é obrigatório. Valor máximo não pode ser negativo"),
+  valor_cobrado: z
+    .number()
+    .min(1, "Valor cobrado é obrigatório. Valor cobrado não pode ser negativo")
+});
 
 type TaxaFormValues = z.infer<typeof taxaSchema>;
 type TaxaFormValuePUT = z.infer<typeof putTaxaSchema>;
@@ -71,15 +79,15 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
       console.log(payload);
 
       const removePrefixOfData = (data: TaxaFormValues[]): TaxaFormValuePUT | null => {
-        if(!data.length) return null;
-        
+        if (!data.length) return null;
+
         const obj = data[0];
 
         return {
           id: obj.cad_tac_id,
           valor_cobrado: obj.cad_tac_valor_cobrado,
           valor_maximo: obj.cad_tac_valor_maximo,
-          valor_minimo: obj.cad_tac_valor_minimo,
+          valor_minimo: obj.cad_tac_valor_minimo
         };
       };
 
@@ -116,12 +124,16 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
 
   return (
     <>
-      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50 mb-0" aria-hidden="true" />
+      <div
+        onClick={handleClose}
+        className="fixed inset-0 z-40 mb-0 bg-black/50"
+        aria-hidden="true"
+      />
 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
@@ -147,7 +159,16 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
                         <FormItem>
                           <FormLabel>Valor Mínimo</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor cobrado"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -160,7 +181,16 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
                         <FormItem>
                           <FormLabel>Valor Máximo</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor cobrado"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -173,7 +203,16 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
                         <FormItem>
                           <FormLabel>Valor Cobrado</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input
+                              type="number"
+                              min={0}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(val);
+                              }}
+                              placeholder="Digite o valor cobrado"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
