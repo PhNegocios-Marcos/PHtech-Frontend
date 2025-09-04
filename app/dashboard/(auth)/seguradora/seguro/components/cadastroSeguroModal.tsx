@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormField,
@@ -44,6 +45,7 @@ type SeguradoraOption = {
 };
 
 export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: CadastroSeguroModalProps) {
+  const router = useRouter();
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -58,6 +60,32 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
   const { token } = useAuth();
   const [seguradoras, setSeguradoras] = useState<SeguradoraOption[]>([]);
   const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraOption | null>(null);
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     if (!token || !isOpen) return;

@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -66,15 +67,28 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const { token } = useAuth();
+  const router = useRouter();
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
   useEffect(() => {
     async function fetchUsuariosRelacionados() {
       if (!token || !cnpj) {
         toast.error("Autenticação necessária", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: "Token ou CNPJ não encontrado"
         });
@@ -124,9 +138,9 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         console.error("Erro na requisição:", error.message || error);
         toast.error("Falha ao carregar usuários", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: error.message || "Erro desconhecido"
         });
@@ -158,9 +172,9 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
   const handleClose = () => {
     toast.info("Fechando lista de usuários", {
       style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
     onClose();

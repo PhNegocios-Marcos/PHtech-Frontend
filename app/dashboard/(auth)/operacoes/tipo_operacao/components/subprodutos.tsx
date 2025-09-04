@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -58,6 +59,7 @@ export function SubprodutosTable() {
   const [selectedSubproduto, setSelectedSubproduto] = useState<Subproduto | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useAuth();
+  const router = useRouter();
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const columns: ColumnDef<Subproduto>[] = [
@@ -140,6 +142,19 @@ export function SubprodutosTable() {
       enableHiding: false
     }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchSubprodutos() {

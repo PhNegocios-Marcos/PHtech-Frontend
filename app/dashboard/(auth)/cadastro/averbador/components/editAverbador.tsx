@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+
 import {
   Form,
   FormControl,
@@ -35,12 +37,28 @@ type AverbadorDrawerProps = {
 };
 
 export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawerProps) {
+  const router = useRouter();
+
   const methods = useForm<Averbador>({
     resolver: zodResolver(averbadorSchema),
     defaultValues: averbador
   });
 
   const { token } = useAuth();
+
+  useEffect(() => {
+    if (!token) {
+      console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+      router.push("/dashboard/login");
+    }
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset(averbador);
@@ -56,9 +74,9 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
       console.error("Token global não definido!");
       toast.error("Token de autenticação não encontrado", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -76,9 +94,9 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
     if (Object.keys(changedFields).length === 0) {
       toast.info("Nenhuma alteração detectada", {
         style: {
-          background: 'var(--toast-info)',
-          color: 'var(--toast-info-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-info)",
+          color: "var(--toast-info-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -94,12 +112,12 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/averbador/atualizar`, changedFields, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       toast.success("Averbador atualizado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -108,9 +126,9 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
       console.error("Erro ao atualizar usuário:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }

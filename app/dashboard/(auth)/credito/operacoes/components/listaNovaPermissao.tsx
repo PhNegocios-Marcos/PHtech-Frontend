@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,6 +27,7 @@ type PermissoesProps = {
 };
 
 export function Permissoes({ equipeNome, perfilId }: PermissoesProps) {
+  const router = useRouter();
   const [permissoes, setPermissoes] = useState<PermissaoMapeada>({});
   const [equipeLabel, setEquipeLabel] = useState<string>(equipeNome);
   const { token } = useAuth();
@@ -34,6 +36,19 @@ export function Permissoes({ equipeNome, perfilId }: PermissoesProps) {
 
   // Estado para as permissões selecionadas (checkboxes marcados)
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   // Buscar permissões do backend
   useEffect(() => {

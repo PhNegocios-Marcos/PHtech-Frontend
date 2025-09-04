@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
@@ -33,6 +34,7 @@ type CadastroConvenioModalProps = {
 };
 
 export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConvenioModalProps) {
+  const router = useRouter();
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -41,6 +43,19 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
   });
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {

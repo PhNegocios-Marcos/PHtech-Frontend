@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 const schema = z
   .object({
     // Dados do produto
+    promotora_hash: z.string().min(1, "Promotora é obrigatória"),
     convenio_hash: z.string().min(1, "Convênio é obrigatório"),
     modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
     tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
@@ -113,6 +114,7 @@ const prazoFields = [
 export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompletoModalProps) {
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
+  const [promotora, setPromotora] = useState<Option[]>([]);
   const [modalidade, setModalidade] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
   const [RO, setRO] = useState<Option[]>([]);
@@ -128,6 +130,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      promotora_hash: "",
       convenio_hash: "",
       modalidade_hash: "",
       tipo_operacao_hash: "",
@@ -146,6 +149,34 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       seguro: ""
     }
   });
+
+  // Modifique o useEffect que busca as promotoras para debug
+  // Substitua este useEffect
+  useEffect(() => {
+    async function fetchPromotoras() {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/promotora/listar`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = res.data.map((pp: any) => ({
+          id: pp.id, // Mudança importante aqui
+          nome: pp.nome
+        }));
+        setPromotora(data);
+      } catch (error: any) {
+        console.error("Erro ao carregar promotoras", error);
+        toast.error("Erro ao carregar promotoras: " + (error.message || "Erro desconhecido"));
+      }
+    }
+
+    if (isOpen && token) {
+      fetchPromotoras();
+    }
+  }, [isOpen, token]);
 
   // Carrega os convênios
   useEffect(() => {
@@ -355,7 +386,19 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           convenio_hash: data.convenio_hash,
           modalidade_hash: data.modalidade_hash,
           tipo_operacao_hash: data.tipo_operacao_hash,
-          // dias_validade_ccb: data.dias_validade_ccb
+          nome_tabela: data.nome_taxa,
+          prazo_minimo: data.prazo_minimo,
+          prazo_maximo: data.prazo_maximo,
+          taxa_mensal: data.taxa_mensal,
+          usuario_criacao_hash: (userData as any)?.id ?? "id_user",
+          incrementador: data.incrementador,
+          periodicidade: data.periodiciade,
+          vigencia_inicio: format(data.inicio, "yyyy-MM-dd"),
+          vigencia_fim: format(data.fim, "yyyy-MM-dd"),
+          bancarizador: data.bancalizador,
+          seguradora: data.seguradora,
+          seguro: data.seguro,
+          rotina_operacional_hash: data.RO,
         },
         {
           headers: {
@@ -367,12 +410,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
       const relacionamentoId = produtoResponse.data.rel_produto_subproduto_convenio_id;
 
-      // Criar relação com rotina operacional
       await axios.post(
-        `${API_BASE_URL}/rel-rotina-operacional-prod-convenio/criar`,
+        `${API_BASE_URL}/rel-produto-promotora/criar`,
         {
-          rotina_operacional_hash: data.RO,
-          relacionamento_hash: relacionamentoId
+          produto_hash: relacionamentoId,
+          promotora_hash: data.promotora_hash
         },
         {
           headers: {
@@ -382,38 +424,53 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
         }
       );
 
-      // Segundo: Criar a taxa com o relacionamento
-      const taxaPayload = {
-        relacionamento_produto_hash: relacionamentoId,
-        nome_tabela: data.nome_taxa,
-        prazo_minimo: data.prazo_minimo,
-        prazo_maximo: data.prazo_maximo,
-        taxa_mensal: data.taxa_mensal,
-        usuario_criacao_hash: (userData as any)?.id ?? "id_user",
-        incrementador: data.incrementador,
-        periodicidade: data.periodiciade,
-        vigencia_inicio: format(data.inicio, "yyyy-MM-dd"),
-        vigencia_fim: format(data.fim, "yyyy-MM-dd"),
-        bancarizador: data.bancalizador,
-        seguradora: data.seguradora,
-        seguro: data.seguro
-      };
+      // Criar relação com rotina operacional
+      // await axios.post(
+      //   `${API_BASE_URL}/rel-rotina-operacional-prod-convenio/criar`,
+      //   {
+      //     rotina_operacional_hash: data.RO,
+      //     relacionamento_hash: relacionamentoId
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json"
+      //     }
+      //   }
+      // );
 
-      console.log("Enviando payload:", taxaPayload);
+      // // Segundo: Criar a taxa com o relacionamento
+      // const taxaPayload = {
+      //   relacionamento_produto_hash: relacionamentoId,
+      //   nome_tabela: data.nome_taxa,
+      //   prazo_minimo: data.prazo_minimo,
+      //   prazo_maximo: data.prazo_maximo,
+      //   taxa_mensal: data.taxa_mensal,
+      //   usuario_criacao_hash: (userData as any)?.id ?? "id_user",
+      //   incrementador: data.incrementador,
+      //   periodicidade: data.periodiciade,
+      //   vigencia_inicio: format(data.inicio, "yyyy-MM-dd"),
+      //   vigencia_fim: format(data.fim, "yyyy-MM-dd"),
+      //   bancarizador: data.bancalizador,
+      //   seguradora: data.seguradora,
+      //   seguro: data.seguro
+      // };
 
-      const taxaResponse = await fetch(`${API_BASE_URL}/produtos-config-tabelas/criar`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(taxaPayload)
-      });
+      // console.log("Enviando payload:", taxaPayload);
 
-      if (!taxaResponse.ok) {
-        const err = await taxaResponse.json();
-        throw new Error(JSON.stringify(err));
-      }
+      // const taxaResponse = await fetch(`${API_BASE_URL}/produtos-config-tabelas/criar`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`
+      //   },
+      //   body: JSON.stringify(taxaPayload)
+      // });
+
+      // if (!taxaResponse.ok) {
+      //   const err = await taxaResponse.json();
+      //   throw new Error(JSON.stringify(err));
+      // }
 
       toast.success("Produto e taxa cadastrados com sucesso!");
       methods.reset();
@@ -441,11 +498,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
   const handleCheckedTacChange = (checked: any) => {
     setaTac(checked);
-  }
+  };
 
-    const handleCheckedSegChange = (checked: any) => {
+  const handleCheckedSegChange = (checked: any) => {
     setaSeguro(checked);
-  }
+  };
 
   return (
     <>
@@ -471,12 +528,46 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </button>
             </div>
 
-            <div className="flex-1 space-y-6 px-2 overflow-y-auto">
+            <div className="flex-1 space-y-6 overflow-y-auto px-2">
+              <Card className="w-full rounded-2xl border p-8 px-1">
+                <CardHeader>
+                  <CardTitle>Promotora</CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-200">
+                    Determine qual a promotora do produto a ser cadastrado
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 gap-5">
+                    <FormField
+                      control={methods.control}
+                      name="promotora_hash"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Promotora</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={promotora}
+                              displayField="nome"
+                              value={promotora.find((p) => p.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              searchFields={["nome"]}
+                              placeholder="Selecione uma Promotora"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               {/* Seção do Produto */}
               <Card className="w-full rounded-2xl border p-8 px-1">
                 <CardHeader>
                   <CardTitle>Segmento do Produto</CardTitle>
-                  <p className="text-gray-600 dark:text-gray-200 text-sm">Determine as regras e segmentação do produto a ser cadastrado</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-200">
+                    Determine as regras e segmentação do produto a ser cadastrado
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 gap-5">
@@ -543,8 +634,6 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       )}
                     />
                   </div>
-                  
-                  
 
                   {/* <FormField
                     control={methods.control}
@@ -652,7 +741,9 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               <Card>
                 <CardHeader>
                   <CardTitle>Condições Comerciais</CardTitle>
-                  <p className="text-gray-600 dark:text-gray-200 text-sm">Determine as condições comerciais deste produto respeitando as normas.</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-200">
+                    Determine as condições comerciais deste produto respeitando as normas.
+                  </p>
                 </CardHeader>
                 <CardContent>
                   {/* Campos de texto mapeados */}
@@ -706,17 +797,17 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       control={methods.control}
                       name="incrementador"
                       render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Incrementador</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="w-full border"
-                            placeholder="Digite o incrementador"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                        <FormItem>
+                          <FormLabel>Incrementador</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="w-full border"
+                              placeholder="Digite o incrementador"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
 
@@ -745,14 +836,21 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
                   <Card className="mt-6">
                     <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
+                      <CardTitle className="flex items-center justify-between">
                         Seguro
-                        <Label htmlFor="useSeguro" className="cursor-pointer flex gap-2 items-center text-sm text-gray-600 dark:text-200">
-                          <Checkbox checked={usaSeguro} onCheckedChange={handleCheckedSegChange} id="useSeguro"/> O produto usa seguro?
+                        <Label
+                          htmlFor="useSeguro"
+                          className="dark:text-200 flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                          <Checkbox
+                            checked={usaSeguro}
+                            onCheckedChange={handleCheckedSegChange}
+                            id="useSeguro"
+                          />{" "}
+                          O produto usa seguro?
                         </Label>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className={usaSeguro ? 'block' : 'hidden'}>
+                    <CardContent className={usaSeguro ? "block" : "hidden"}>
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={methods.control}
@@ -801,14 +899,21 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
                   <Card className="mt-6">
                     <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
+                      <CardTitle className="flex items-center justify-between">
                         Taxa de abertura de Crédito - TAC
-                        <Label htmlFor="useTac" className="cursor-pointer flex gap-2 items-center text-sm text-gray-600 dark:text-200">
-                          <Checkbox checked={usaTac} onCheckedChange={handleCheckedTacChange} id="useTac"/> O produto usa TAC?
+                        <Label
+                          htmlFor="useTac"
+                          className="dark:text-200 flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                          <Checkbox
+                            checked={usaTac}
+                            onCheckedChange={handleCheckedTacChange}
+                            id="useTac"
+                          />{" "}
+                          O produto usa TAC?
                         </Label>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className={usaTac ? 'flex' : 'hidden'}>
+                    <CardContent className={usaTac ? "flex" : "hidden"}>
                       <FormField
                         control={methods.control}
                         name="nome_taxa"
@@ -838,7 +943,9 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               <Card>
                 <CardHeader>
                   <CardTitle>Regra do produto</CardTitle>
-                  <p className="text-gray-600 dark:text-200 text-sm">Selecione o Roteiro Operacional deste produto.</p>
+                  <p className="dark:text-200 text-sm text-gray-600">
+                    Selecione o Roteiro Operacional deste produto.
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField

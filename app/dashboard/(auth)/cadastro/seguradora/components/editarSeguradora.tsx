@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -38,12 +39,26 @@ type SeguradoraEditProps = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps) {
+  const router = useRouter();
   const methods = useForm<SeguradoraFormValues>({
     resolver: zodResolver(seguradoraSchema),
     defaultValues: seguradora
   });
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset(seguradora);

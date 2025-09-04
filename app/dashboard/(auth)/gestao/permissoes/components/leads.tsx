@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { CarregandoTable } from "./leads_carregando";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -44,6 +45,21 @@ export function PermissoesTable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [selectedEquipe, setSelectedEquipe] = React.useState<PermissaoLinha | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
+
+  const router = useRouter();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   React.useEffect(() => {
     async function fetchPermissoes() {

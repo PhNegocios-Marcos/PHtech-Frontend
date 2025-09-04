@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Usuario } from "./leads";
 import { CarregandoTable } from "./leads_carregando";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -63,6 +64,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [isLoadingPerfis, setIsLoadingPerfis] = React.useState(true);
+  const router = useRouter();
 
   const perfilColumns = React.useMemo<ColumnDef<Option>[]>(
     () => [
@@ -133,6 +135,19 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
     ],
     [token]
   );
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   // Fetch todos os perfis para o Combobox
   useEffect(() => {

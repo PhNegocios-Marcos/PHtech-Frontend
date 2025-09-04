@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import { Pencil, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import {
   Table,
@@ -97,6 +98,7 @@ export function UsuariosTable() {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
+  const router = useRouter();
 
   const { token } = useAuth();
 
@@ -195,6 +197,19 @@ export function UsuariosTable() {
     ],
     []
   );
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   React.useEffect(() => {
     async function fetchUsuarios() {

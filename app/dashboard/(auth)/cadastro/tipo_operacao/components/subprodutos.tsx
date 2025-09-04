@@ -13,6 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -48,6 +49,7 @@ export type Subproduto = {
 };
 
 export function SubprodutosTable() {
+  const router = useRouter();
   const [subprodutos, setSubprodutos] = useState<Subproduto[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -74,8 +76,7 @@ export function SubprodutosTable() {
           variant="ghost"
           size="icon"
           onClick={() => setSelectedSubproduto(row.original)}
-          title="Editar subproduto"
-        >
+          title="Editar subproduto">
           <Pencil className="h-4 w-4" />
         </Button>
       ),
@@ -83,6 +84,19 @@ export function SubprodutosTable() {
       enableHiding: false
     }
   ];
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchSubprodutos() {
@@ -186,8 +200,7 @@ export function SubprodutosTable() {
                           key={column.id}
                           className="capitalize"
                           checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                        >
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}>
                           {column.id}
                         </DropdownMenuCheckboxItem>
                       ))}
@@ -235,16 +248,14 @@ export function SubprodutosTable() {
                     variant="outline"
                     size="icon"
                     onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                  >
+                    disabled={!table.getCanPreviousPage()}>
                     <ChevronLeft />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
+                    disabled={!table.getCanNextPage()}>
                     <ChevronRight />
                   </Button>
                 </div>

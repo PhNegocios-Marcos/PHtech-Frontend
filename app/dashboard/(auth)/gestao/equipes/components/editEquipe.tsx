@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -44,6 +45,8 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
     defaultValues: equipe
   });
 
+  const router = useRouter();
+
   const { token } = useAuth();
 
   useEffect(() => {
@@ -54,6 +57,19 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: EquipeFormValues) => {
     if (!token) {

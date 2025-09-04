@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormField,
@@ -33,6 +33,8 @@ type CadastroConvenioModalProps = {
 };
 
 export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConvenioModalProps) {
+  const router = useRouter();
+
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -42,13 +44,26 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
 
   const { token } = useAuth();
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Token não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -71,21 +86,24 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
 
       toast.success("Averbador cadastrado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
     } catch (error) {
       console.error("Erro ao cadastrar averbador:", error);
-      toast.error(`Erro ao cadastrar averbador: ${error instanceof Error ? error.message : String(error)}`, {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+      toast.error(
+        `Erro ao cadastrar averbador: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
         }
-      });
+      );
     }
   };
 
@@ -98,7 +116,7 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">

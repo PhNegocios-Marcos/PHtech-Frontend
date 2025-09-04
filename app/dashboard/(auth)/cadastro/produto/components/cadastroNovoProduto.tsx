@@ -135,6 +135,19 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
   const router = useRouter();
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
+  useEffect(() => {
     async function fetchConvenios() {
       try {
         const res = await axios.get(`${API_BASE_URL}/convenio`, {
@@ -283,7 +296,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-2/2 overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,22 +9,17 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -44,6 +39,7 @@ type CadastroProdutoModalProps = {
 };
 
 export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdutoModalProps) {
+  const router = useRouter();
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -54,10 +50,23 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
       prazo_maximo: 1,
       id_uy3: "809ebc8f-a1b4-4202-9a4e-da2b7f388cc6",
       cor_grafico: ""
-    },
+    }
   });
 
   const { token } = useAuth();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -70,9 +79,9 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
@@ -97,19 +106,17 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6 rounded-l-2xl"
-      >
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar Novo Produto</h2>
                 <button
                   type="button"
                   onClick={onClose}
                   className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
+                  aria-label="Fechar">
                   ×
                 </button>
               </div>
@@ -120,7 +127,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                 </CardHeader>
 
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={methods.control}
                       name="nome"

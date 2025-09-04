@@ -17,12 +17,12 @@ import { Label } from "@/components/ui/label";
 type ComboboxProps<T> = {
   data: T[];
   displayField: keyof T;
-  value: T | null;
+  value: T | any;
   onChange: (item: T) => void;
   label?: string;
   placeholder?: string;
   searchFields?: (keyof T)[];
-  className?: any; // ✅ Adicionado
+  className?: any;
 };
 
 export function Combobox<T extends Record<string, any>>({
@@ -32,7 +32,8 @@ export function Combobox<T extends Record<string, any>>({
   onChange,
   label,
   placeholder = "Selecione",
-  searchFields = [displayField]
+  searchFields = [displayField],
+  className
 }: ComboboxProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -48,7 +49,7 @@ export function Combobox<T extends Record<string, any>>({
   }, [data, search, searchFields]);
 
   return (
-    <div className="grid gap-1.5">
+    <div className={cn("grid gap-1.5", className)}>
       {label && <Label>{label}</Label>}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -56,19 +57,19 @@ export function Combobox<T extends Record<string, any>>({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="justify-between">
+            className="justify-between w-full">
             {value ? value[displayField] : placeholder}
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <PopoverContent className="w-full p-0" align="start">
           <Command>
             <CommandInput placeholder="Buscar..." value={search} onValueChange={setSearch} />
             <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
-            <CommandGroup>
-              {filteredData.map((item) => (
+            <CommandGroup className="max-h-64 overflow-y-auto">
+              {filteredData.map((item, index) => (
                 <CommandItem
-                  key={item[displayField]}
+                  key={index}
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);

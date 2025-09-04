@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import InputMask from "react-input-mask";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -49,6 +49,21 @@ export function SeguradorasTable() {
   const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraLinha | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [cnpj, setCnpj] = useState("");
+
+  const router = useRouter();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchSeguradoras() {

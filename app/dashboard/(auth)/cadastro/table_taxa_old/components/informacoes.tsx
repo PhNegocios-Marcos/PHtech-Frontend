@@ -15,6 +15,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormField,
@@ -48,6 +49,7 @@ type SubprodutoDrawerProps = {
 };
 
 export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDrawerProps) {
+  const router = useRouter();
   const { token, userData } = useAuth();
 
   const methods = useForm<Subproduto>({
@@ -64,6 +66,19 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
       fim: undefined
     }
   });
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset({

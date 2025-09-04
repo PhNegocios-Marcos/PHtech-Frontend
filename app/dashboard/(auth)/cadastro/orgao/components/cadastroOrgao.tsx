@@ -56,6 +56,19 @@ export default function CadastroOrgao({ isOpen, onClose }: CadastroProdutoModalP
   const router = useRouter();
   const [convenios, setConvenios] = useState<Convenio[]>([]);
 
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
   useEffect(() => {
     if (!token || !isOpen) return;
 
