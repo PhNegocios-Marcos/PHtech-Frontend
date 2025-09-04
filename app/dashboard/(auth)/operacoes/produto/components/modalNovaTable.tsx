@@ -111,6 +111,7 @@ const formFields = [
 export default function CadastroTabelaModal({ isOpen, onClose, produto }: CadastroTabelaModalProps) {
   const [idProduto, setIdProduto] = useState<any>(null);
   const { token, userData } = useAuth();
+  const router = useRouter();
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -131,6 +132,19 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
     }
   });
   const { inicio, fim } = dateForm.getValues();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {

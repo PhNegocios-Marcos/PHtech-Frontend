@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,6 +32,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
   const [permissoesPorSecao, setPermissoesPorSecao] = useState<PermissoesPorSecao>({});
   const [equipeLabel, setEquipeLabel] = useState<string>("");
   const { token } = useAuth();
+  const router = useRouter();
 
   const atualizarStatusPermissao = async (id: string, novoStatus: 0 | 1) => {
     try {
@@ -81,6 +83,19 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
       });
     }
   };
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchPermissoes() {

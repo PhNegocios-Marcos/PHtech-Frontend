@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Produto } from "./produtos";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -50,6 +51,7 @@ type ProdutoDrawerProps = {
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
+  const router = useRouter();
   const defaultValues: ProdutoFormData = {
     id: produto.id || "",
     modalidade_credito_nome: produto.modalidade_credito_nome || "",
@@ -86,6 +88,19 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: ProdutoFormData) => {
     if (!token) {

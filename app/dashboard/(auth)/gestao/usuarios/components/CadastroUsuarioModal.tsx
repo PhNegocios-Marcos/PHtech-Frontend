@@ -386,6 +386,19 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
     if (isOpen) fetchPromotoras();
   }, [isOpen, token]);
 
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Token de autenticação não encontrado. Faça login.", {

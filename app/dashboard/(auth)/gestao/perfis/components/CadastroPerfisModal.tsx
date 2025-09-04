@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+
 
 import {
   Form,
@@ -58,13 +59,26 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
   const router = useRouter();
   const { token } = useAuth();
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Autenticação necessária", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: "Faça login para continuar"
       });
@@ -95,9 +109,9 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
 
       toast.success("Perfil cadastrado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -106,9 +120,9 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
       console.error("Erro ao cadastrar perfil:", error);
       toast.error("Falha ao cadastrar perfil", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         },
         description: error.message || "Erro desconhecido"
       });
@@ -118,9 +132,9 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
   const handleClose = () => {
     toast.info("Cadastro cancelado", {
       style: {
-        background: 'var(--toast-info)',
-        color: 'var(--toast-info-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-info)",
+        color: "var(--toast-info-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
     onClose();
@@ -135,7 +149,7 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">

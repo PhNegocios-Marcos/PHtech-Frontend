@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -41,6 +42,7 @@ type ProdutoDrawerProps = {
 };
 
 export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps) {
+  const router = useRouter();
   const methods = useForm<Produto>({
     resolver: zodResolver(produtoSchema),
     defaultValues: {
@@ -50,7 +52,21 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
   });
 
   const { token } = useAuth();
+
   const originalData = useRef<Produto>({ ...produto, cor_grafico: produto.cor_grafico || "" });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset({
@@ -118,7 +134,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={methods.control}
                   name="nome"

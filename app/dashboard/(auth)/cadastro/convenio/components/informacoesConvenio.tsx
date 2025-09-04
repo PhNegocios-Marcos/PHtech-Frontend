@@ -12,6 +12,7 @@ import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,6 +34,8 @@ type ConvenioDrawerProps = {
 };
 
 export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerProps) {
+  const router = useRouter();
+
   const methods = useForm<Convenio>({
     resolver: zodResolver(convenioSchema),
     defaultValues: {
@@ -42,6 +45,19 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
   });
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset({
@@ -55,14 +71,27 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
     { id: 0, name: "Inativo" }
   ];
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
+
   const onSubmit = async (data: Convenio) => {
     if (!token) {
       console.error("Token global não definido!");
       toast.error("Token de autenticação não encontrado.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -83,9 +112,9 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
       });
       toast.success("Convênio atualizado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -94,9 +123,9 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
       console.error("Erro ao atualizar convênio:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }

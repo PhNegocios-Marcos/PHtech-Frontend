@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -35,6 +36,7 @@ type AverbadorDrawerProps = {
 };
 
 export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawerProps) {
+  const router = useRouter();
   const defaultValues: Averbador = averbador || {
     averbador_hash: "",
     averbador_nome: "",
@@ -47,6 +49,19 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
   });
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset(averbador || defaultValues);

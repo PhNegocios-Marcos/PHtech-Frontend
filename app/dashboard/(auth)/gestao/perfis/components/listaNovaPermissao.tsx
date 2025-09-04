@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,10 +33,24 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
   const [permissoes, setPermissoes] = useState<PermissaoMapeada>({});
   const [equipeLabel, setEquipeLabel] = useState<string>(equipeNome);
   const { token } = useAuth();
+  const router = useRouter();
 
   const acoes: Acao[] = ["criar", "ver", "atualizar", "desativar"];
 
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchPermissoes() {

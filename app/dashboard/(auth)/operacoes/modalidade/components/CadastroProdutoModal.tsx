@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormField,
@@ -44,6 +44,7 @@ type CadastroProdutoModalProps = {
 };
 
 export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdutoModalProps) {
+  const router = useRouter();
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -64,6 +65,19 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
       field.onChange(value === "" ? undefined : parseInt(value));
     }
   };
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {

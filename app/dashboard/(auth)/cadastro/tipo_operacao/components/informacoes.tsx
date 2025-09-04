@@ -12,6 +12,7 @@ import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner"; // ✅ adicionado
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,6 +34,7 @@ type SubprodutoDrawerProps = {
 };
 
 export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDrawerProps) {
+  const router = useRouter();
   const methods = useForm<Subproduto>({
     resolver: zodResolver(subprodutoSchema),
     defaultValues: {
@@ -42,6 +44,19 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
   });
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     methods.reset({

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -45,6 +47,7 @@ export type Averbador = {
 };
 
 export function AverbadorTable() {
+  const router = useRouter();
   const [averbadors, setAverbadors] = React.useState<Averbador[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -55,6 +58,20 @@ export function AverbadorTable() {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { token } = useAuth();
+
+  useEffect(() => {
+    if (!token) {
+      console.error("Token global não definido!");
+      toast.error("Token de autenticação não encontrado", {
+        style: {
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
+        }
+      });
+      router.push("/dashboard/login");
+    }
+  }, [token, router]);
 
   const averbadorColumns = React.useMemo<ColumnDef<Averbador>[]>(
     () => [
@@ -120,9 +137,9 @@ export function AverbadorTable() {
         console.error("Erro ao buscar usuários:", error.message);
         toast.error(`Erro ao buscar averbadores: ${error.message}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -159,9 +176,9 @@ export function AverbadorTable() {
     setRefreshKey((prev) => prev + 1);
     toast.success("Tabela de averbadores atualizada!", {
       style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
+        background: "var(--toast-success)",
+        color: "var(--toast-success-foreground)",
+        boxShadow: "var(--toast-shadow)"
       }
     });
   };

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -44,6 +45,7 @@ type AlcadaEditProps = {
 };
 
 export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
+  const router = useRouter();
   // Garantir que status tenha um valor padrão
   const alcadaComStatus = {
     ...alcada,
@@ -76,6 +78,19 @@ export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: Alcada) => {
     if (!token) {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -64,6 +65,7 @@ type ProdutosTableProps = {
 };
 
 export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
+  const router = useRouter();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -151,6 +153,19 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
     //   enableHiding: false
     // }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchProdutos() {

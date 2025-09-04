@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -41,6 +41,7 @@ type EquipeEditProps = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
+  const router = useRouter();
   const methods = useForm<EquipeFormValues>({
     resolver: zodResolver(permissoesSchema),
     defaultValues: permissoes
@@ -56,6 +57,19 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
     { id: 1, name: "Ativo" },
     { id: 0, name: "Inativo" }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: EquipeFormValues) => {
     if (!token) {

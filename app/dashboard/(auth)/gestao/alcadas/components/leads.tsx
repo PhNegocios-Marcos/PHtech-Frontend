@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   useReactTable,
@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -38,10 +39,24 @@ type AlcadaLinha = {
 };
 
 export function AlcadasTable() {
+  const router = useRouter();
   const { token } = useAuth();
   const [alcadas, setAlcadas] = React.useState<AlcadaLinha[]>([]);
   const [filtro, setFiltro] = React.useState("");
   const [loading, setLoading] = React.useState(true);
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   React.useEffect(() => {
     async function fetchAlcadas() {

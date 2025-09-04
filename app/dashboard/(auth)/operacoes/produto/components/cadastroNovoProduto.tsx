@@ -89,6 +89,14 @@ export type Taxa = {
   tipo_operacao_nome: string;
 };
 
+// Novo tipo para os produtos
+type Produto = {
+  id: string;
+  name: string;
+  produtos_subprodutos_id?: string;
+  produtos_subprodutos_nome?: string;
+};
+
 export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaModalProps) {
   const [loading, setLoading] = useState(false);
   const [convenio, setConvenio] = useState<Option[]>([]);
@@ -100,12 +108,12 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
   const [produtosRelacionados, setProdutosRelacionados] = useState<Taxa[]>([]);
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
   const [selectedProduto, setSelectedProduto] = useState<any>(null);
-  const [produtos, setProdutos] = useState<Taxa[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [selectedCategoria, setSelectedCategoria] = useState<Option | null>(null);
   const [modalidadeSelected, setModalidadeSelected] = useState<any>(null);
   const [idProduto, setIdProduto] = useState<any>(null);
 
-  const [modalidade, setModalidade] = useState<Taxa[]>([]);
+  const [modalidade, setModalidade] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Option[]>([]);
   const [selectedTaxa, setSelectedTaxa] = useState<Taxa | null>(null);
 
@@ -133,6 +141,19 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
 
   const { token, userData } = useAuth();
   const router = useRouter();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     async function fetchConvenios() {

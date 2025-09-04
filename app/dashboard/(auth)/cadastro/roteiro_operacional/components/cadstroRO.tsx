@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
-import {
+import { useRouter } from "next/navigation";import {
   Select,
   SelectTrigger,
   SelectValue,
@@ -74,6 +74,7 @@ export default function CadastroRoteiroModal({
   onSuccess
 }: CadastroRoteiroModalProps) {
   const { token, userData } = useAuth();
+  const router = useRouter();
 
   const methods = useForm<CreateFormData>({
     resolver: zodResolver(createSchema),
@@ -153,6 +154,19 @@ export default function CadastroRoteiroModal({
       }
     }
   ];
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: CreateFormData) => {
     console.log('onSubmit chamado!', data);

@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Orgao } from "./leads";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -38,6 +39,7 @@ type OrgaoDrawerProps = {
 };
 
 export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
+  const router = useRouter();
   const methods = useForm<Orgao>({
     resolver: zodResolver(usuarioSchema),
     defaultValues: orgao
@@ -63,6 +65,19 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
     });
     return modified;
   }
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const onSubmit = async (data: Orgao) => {
     if (!token) {
@@ -133,7 +148,7 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">

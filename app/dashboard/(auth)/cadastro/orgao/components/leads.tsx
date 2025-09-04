@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -49,6 +50,7 @@ export type Orgao = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function OrgaoModal() {
+  const router = useRouter();
   const [orgaos, setOrgaos] = useState<Orgao[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -59,6 +61,19 @@ export function OrgaoModal() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const { token } = useAuth();
+
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   const columns: ColumnDef<Orgao>[] = [
     { accessorKey: "orgao_nome", header: "Nome" },

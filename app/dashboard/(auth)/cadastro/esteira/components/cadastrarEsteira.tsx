@@ -74,7 +74,7 @@ const formSchema = z.object({
       esteira_acao_edita_cadastro: z.number().default(0),
       esteira_acao_anexa_arquivo: z.number().default(0),
       esteira_acao_resolve_pendencia: z.number().default(0),
-      esteira_acao_notifica_cadastro: z.number().default(0),
+      esteira_acao_notifica_cadastro: z.number().default(0)
     })
   )
 });
@@ -116,14 +116,22 @@ interface Alcada {
   valor: number;
 }
 
-export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function CadastroEsteira({
+  isOpen,
+  onClose
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const { token, userData } = useAuth();
   const router = useRouter();
   const [statusList, setStatusList] = useState<Status[]>([]);
   const [processosList, setProcessosList] = useState<Processo[]>([]);
   const [alcadasList, setAlcadasList] = useState<Alcada[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedNotifications, setSelectedNotifications] = useState<{ [key: number]: string[] }>({});
+  const [selectedNotifications, setSelectedNotifications] = useState<{ [key: number]: string[] }>(
+    {}
+  );
 
   const methods = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -137,6 +145,19 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
     control: methods.control,
     name: "acoes"
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (token == null) {
+        // console.log("token null");
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000); // espera 2 segundos antes de verificar
+
+    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+  }, [token, router]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,9 +181,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
         console.error("Erro ao carregar dados:", error);
         toast.error("Erro ao carregar dados", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -176,9 +197,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
     if (!token) {
       toast.error("Token não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -232,9 +253,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
 
       toast.success("Esteira e ações cadastradas com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -242,9 +263,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
       console.error("Erro ao cadastrar:", error);
       toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : String(error)}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -257,9 +278,12 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
         ? prev[index].filter((item) => item !== notificationType)
         : [...(prev[index] || []), notificationType]
     }));
-    
+
     if (notificationType === "cadastro") {
-      methods.setValue(`acoes.${index}.esteira_acao_notifica_cadastro`, selectedNotifications[index]?.includes("cadastro") ? 0 : 1);
+      methods.setValue(
+        `acoes.${index}.esteira_acao_notifica_cadastro`,
+        selectedNotifications[index]?.includes("cadastro") ? 0 : 1
+      );
     }
   };
 
@@ -291,7 +315,8 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
             aria-expanded={open}
             className="w-full justify-between">
             {value
-              ? statusList.find((status) => status.status_hash === value)?.status_nome || placeholder
+              ? statusList.find((status) => status.status_hash === value)?.status_nome ||
+                placeholder
               : placeholder}
             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -343,10 +368,10 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
-          >
+            className="w-full justify-between">
             {value !== undefined
-              ? alcadasList.find((alcada) => alcada.valor.toString() === value)?.nome || "Selecione uma alçada"
+              ? alcadasList.find((alcada) => alcada.valor.toString() === value)?.nome ||
+                "Selecione uma alçada"
               : "Selecione uma alçada"}
             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -363,8 +388,7 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                   onSelect={() => {
                     onValueChange(index, alcada.valor.toString());
                     setOpen(false);
-                  }}
-                >
+                  }}>
                   {alcada.nome}
                   <CheckIcon
                     className={cn(
@@ -396,7 +420,7 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
@@ -433,7 +457,7 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">Ações</h3>
                   {fields.map((field, index) => (
-                    <Card key={field.id} className="mt-4 p-4 shadow-lg border-3 border-solid">
+                    <Card key={field.id} className="mt-4 border-3 border-solid p-4 shadow-lg">
                       <div className="flex justify-between">
                         <h4 className="font-medium">Ação {index + 1}</h4>
                         <Button variant="destructive" onClick={() => remove(index)}>
@@ -453,7 +477,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                               </SelectTrigger>
                               <SelectContent>
                                 {processosList.map((processo) => (
-                                  <SelectItem key={processo.processo_hash} value={processo.processo_hash}>
+                                  <SelectItem
+                                    key={processo.processo_hash}
+                                    value={processo.processo_hash}>
                                     {processo.processo_nome}
                                   </SelectItem>
                                 ))}
@@ -464,7 +490,7 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                         )}
                       />
 
-                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mt-4">
+                      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                         <FormItem>
                           <FormLabel>Atual</FormLabel>
                           <FormControl>
@@ -483,7 +509,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                           <FormLabel>Aprovação</FormLabel>
                           <FormControl>
                             <StatusCombobox
-                              value={methods.watch(`acoes.${index}.esteira_acao_status_aprova`) || ""}
+                              value={
+                                methods.watch(`acoes.${index}.esteira_acao_status_aprova`) || ""
+                              }
                               placeholder="Nenhum"
                               field="esteira_acao_status_aprova"
                               index={index}
@@ -496,7 +524,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                           <FormLabel>Reprovação</FormLabel>
                           <FormControl>
                             <StatusCombobox
-                              value={methods.watch(`acoes.${index}.esteira_acao_status_reprova`) || ""}
+                              value={
+                                methods.watch(`acoes.${index}.esteira_acao_status_reprova`) || ""
+                              }
                               placeholder="Nenhum"
                               field="esteira_acao_status_reprova"
                               index={index}
@@ -509,7 +539,9 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                           <FormLabel>Pendência</FormLabel>
                           <FormControl>
                             <StatusCombobox
-                              value={methods.watch(`acoes.${index}.esteira_acao_status_pendencia`) || ""}
+                              value={
+                                methods.watch(`acoes.${index}.esteira_acao_status_pendencia`) || ""
+                              }
                               placeholder="Nenhum"
                               field="esteira_acao_status_pendencia"
                               index={index}
@@ -529,7 +561,10 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                               <AlcadaCombobox
                                 value={field.value}
                                 onValueChange={(index, newValue) => {
-                                  methods.setValue(`acoes.${index}.esteira_acao_atuacao_alcada`, newValue);
+                                  methods.setValue(
+                                    `acoes.${index}.esteira_acao_atuacao_alcada`,
+                                    newValue
+                                  );
                                 }}
                                 index={index}
                               />
@@ -550,19 +585,37 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                           <DropdownMenuContent className="w-full p-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                               <div>
-                                <h4 className="text-md mb-2 font-semibold">Opções de Notificação</h4>
+                                <h4 className="text-md mb-2 font-semibold">
+                                  Opções de Notificação
+                                </h4>
                                 <div className="flex flex-col space-y-2">
                                   {[
-                                    { key: "cadastro", label: "Cadastro PEN", icons: [EnvelopeOpenIcon, EnvelopeClosedIcon] },
-                                    { key: "responsavel", label: "Responsável", icons: [PersonIcon, AvatarIcon] },
-                                    { key: "aprovar", label: "Aprovar", icons: [CheckCircledIcon, CircleIcon] }
+                                    {
+                                      key: "cadastro",
+                                      label: "Cadastro PEN",
+                                      icons: [EnvelopeOpenIcon, EnvelopeClosedIcon]
+                                    },
+                                    {
+                                      key: "responsavel",
+                                      label: "Responsável",
+                                      icons: [PersonIcon, AvatarIcon]
+                                    },
+                                    {
+                                      key: "aprovar",
+                                      label: "Aprovar",
+                                      icons: [CheckCircledIcon, CircleIcon]
+                                    }
                                   ].map(({ key, label, icons: [ActiveIcon, InactiveIcon] }) => (
                                     <Button
                                       key={key}
                                       variant="outline"
                                       className={`flex items-center space-x-2 ${selectedNotifications[index]?.includes(key) ? "bg-red-500 text-white" : ""}`}
                                       onClick={() => handleNotificationToggle(index, key)}>
-                                      {selectedNotifications[index]?.includes(key) ? <ActiveIcon className="h-4 w-4" /> : <InactiveIcon className="h-4 w-4" />}
+                                      {selectedNotifications[index]?.includes(key) ? (
+                                        <ActiveIcon className="h-4 w-4" />
+                                      ) : (
+                                        <InactiveIcon className="h-4 w-4" />
+                                      )}
                                       <span>{label}</span>
                                     </Button>
                                   ))}
@@ -574,14 +627,30 @@ export default function CadastroEsteira({ isOpen, onClose }: { isOpen: boolean; 
                                   {[
                                     { field: "esteira_acao_paradinha", label: "Paradinha" },
                                     { field: "esteira_acao_reinicio", label: "Reinício" },
-                                    { field: "esteira_acao_edita_cadastro", label: "Edita Cadastro" },
+                                    {
+                                      field: "esteira_acao_edita_cadastro",
+                                      label: "Edita Cadastro"
+                                    },
                                     { field: "esteira_acao_anexa_arquivo", label: "Anexa Arquivo" },
-                                    { field: "esteira_acao_resolve_pendencia", label: "Resolve Pendência" }
+                                    {
+                                      field: "esteira_acao_resolve_pendencia",
+                                      label: "Resolve Pendência"
+                                    }
                                   ].map(({ field, label }) => (
                                     <div key={field} className="flex items-center space-x-2">
                                       <Checkbox
-                                        checked={methods.watch(`acoes.${index}.${field as ActionField}`) === 1}
-                                        onCheckedChange={(checked) => handleCheckboxChange(index, field as ActionField, checked as boolean)}
+                                        checked={
+                                          methods.watch(
+                                            `acoes.${index}.${field as ActionField}`
+                                          ) === 1
+                                        }
+                                        onCheckedChange={(checked) =>
+                                          handleCheckboxChange(
+                                            index,
+                                            field as ActionField,
+                                            checked as boolean
+                                          )
+                                        }
                                       />
                                       <Label>{label}</Label>
                                     </div>
