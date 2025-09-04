@@ -91,7 +91,7 @@ export function EquipesTable() {
             const novoStatus = ativo ? 0 : 1;
 
             await axios.put(
-              `${API_BASE_URL}/usuario/atualizar`,
+              `${API_BASE_URL}/equipe/atualizar`,
               {
                 id: row.original.id,
                 status: novoStatus
