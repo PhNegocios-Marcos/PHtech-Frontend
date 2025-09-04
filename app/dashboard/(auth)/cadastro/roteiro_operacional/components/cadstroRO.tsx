@@ -290,7 +290,7 @@ export default function CadastroRoteiroModal({
             className="flex h-full flex-col"
           >
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Cadastrar Novo Roteiro</h2>
+              <h2 className="text-xl font-semibold">Cadastrar novo roteiro</h2>
               <button
                 type="button"
                 onClick={onClose}

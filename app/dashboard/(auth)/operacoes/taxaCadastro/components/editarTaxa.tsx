@@ -26,10 +26,19 @@ const taxaSchema = z.object({
   cad_tac_valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
 });
 
+const putTaxaSchema = z.object({
+  id: z.number(),
+  valor_minimo: z.string().min(1, "Valor mínimo é obrigatório"),
+  valor_maximo: z.string().min(1, "Valor máximo é obrigatório"),
+  valor_cobrado: z.string().min(1, "Valor cobrado é obrigatório")
+})
+
 type TaxaFormValues = z.infer<typeof taxaSchema>;
+type TaxaFormValuePUT = z.infer<typeof putTaxaSchema>;
 
 type TaxaEditProps = {
   taxa: TaxaFormValues;
+  putTaxa: TaxaFormValuePUT;
   onClose: () => void;
 };
 
@@ -50,6 +59,7 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
   const onSubmit = async (data: TaxaFormValues) => {
     try {
       const payload: Partial<TaxaFormValues> = { cad_tac_id: data.cad_tac_id };
+      const body: TaxaFormValues[] = [data];
 
       if (data.cad_tac_valor_minimo !== taxa.cad_tac_valor_minimo)
         payload.cad_tac_valor_minimo = data.cad_tac_valor_minimo;
@@ -58,14 +68,31 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
       if (data.cad_tac_valor_cobrado !== taxa.cad_tac_valor_cobrado)
         payload.cad_tac_valor_cobrado = data.cad_tac_valor_cobrado;
 
-      await axios.put(`${API_BASE_URL}/faixa-valor-cobrado/atualizar`, payload, {
+      console.log(payload);
+
+      const removePrefixOfData = (data: TaxaFormValues[]): TaxaFormValuePUT | null => {
+        if(!data.length) return null;
+        
+        const obj = data[0];
+
+        return {
+          id: obj.cad_tac_id,
+          valor_cobrado: obj.cad_tac_valor_cobrado,
+          valor_maximo: obj.cad_tac_valor_maximo,
+          valor_minimo: obj.cad_tac_valor_minimo,
+        };
+      };
+
+      const dataOutPrefix = removePrefixOfData(body);
+      console.log(body);
+      console.log(dataOutPrefix);
+
+      await axios.put(`${API_BASE_URL}/faixa-valor-cobrado/atualizar`, dataOutPrefix, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       });
-
-      console.log(payload);
 
       toast.success("Faixa de taxa atualizada com sucesso!");
       onClose();
@@ -99,7 +126,7 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Faixa de Taxa: <span className="text-primary">{taxa.cad_tac_id}</span>
+                Editar faixa de taxa: <span className="text-primary">{taxa.cad_tac_id}</span>
               </h2>
               <button
                 type="button"
@@ -111,11 +138,6 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
             </div>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
               <Card className="col-span-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle></CardTitle>
-                  </div>
-                </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField

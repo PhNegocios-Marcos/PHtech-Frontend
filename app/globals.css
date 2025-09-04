@@ -166,7 +166,8 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--primary) transparent;
+  scrollbar-arrow-color: transparent transparent;
 }
 
 @layer base {

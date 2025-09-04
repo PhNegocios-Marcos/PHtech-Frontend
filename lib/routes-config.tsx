@@ -172,13 +172,13 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "RO_ver",
-            title: "Roteiro Operacional (RO)",
+            title: "Roteiro Operacional",
             href: "/dashboard/operacoes/roteiro_operacional"
             // icon: "ChartPie"
           },
           {
             id: "TaxaCadastro_ver",
-            title: "Taxa Cadastro",
+            title: "Faixas de taxa",
             href: "/dashboard/operacoes/taxaCadastro"
           },
           {

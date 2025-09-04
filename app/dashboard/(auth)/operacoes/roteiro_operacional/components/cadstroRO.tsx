@@ -41,8 +41,8 @@ const createSchema = z.object({
   taxa_maxima: z.string().min(1, "Taxa máxima é obrigatória"),
   usa_margem_seguranca: z.enum(["true", "false"], { message: "Selecione uma opção" }),
   valor_margem_seguranca: z.string().optional(),
-  tac_min: z.string().min(1, "TAC mínima é obrigatória"),
-  tac_max: z.string().min(1, "TAC máxima é obrigatória"),
+  // tac_min: z.string().min(1, "TAC mínima é obrigatória"),
+  // tac_max: z.string().min(1, "TAC máxima é obrigatória"),
   usa_limite_proposta: z.enum(["true", "false"], { message: "Selecione uma opção" }),
   valor_limite_proposta: z.string().optional(),
   quantidade_propostas_ativas: z.string(),
@@ -209,14 +209,16 @@ export default function CadastroRoteiroModal({
         valor_limite_proposta:
           data.usa_limite_proposta === "true" ? parseFloat(data.valor_limite_proposta || "0") : 0,
         limite_propostas_ativas: parseInt(data.quantidade_propostas_ativas),
-        tarifa_cadastro_minima: parseFloat(data.tac_min),
-        tarifa_cadastro_maxima: parseFloat(data.tac_max),
+        // tarifa_cadastro_minima: parseFloat(data.tac_min),
+        // tarifa_cadastro_maxima: parseFloat(data.tac_max),
         dia_corte_competencia: parseInt(data.dia_corte_competencia),
         dia_recebimento: parseInt(data.dia_recebimento),
         dia_corte_folha_pagamento: parseInt(data.dia_corte_folha_pagamento),
         status: parseInt(data.status),
         usuario_criacao: userData?.id
       };
+
+      console.log(payload);
 
       const response = await axios.post(`${API_BASE_URL}/rotina-operacional/criar`, payload, {
         headers: {

@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "./Combobox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 // Schema de validação combinado
 const schema = z
@@ -34,7 +36,7 @@ const schema = z
     convenio_hash: z.string().min(1, "Convênio é obrigatório"),
     modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
     tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
-    dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
+    // dias_validade_ccb: z.string().min(1, "Validade da CCB é obrigatório"),
     bancalizador: z.string().min(1, "Bancarizador é obrigatório"),
     seguradora: z.string().min(1, "Seguradora é obrigatória"),
     seguro: z.string().min(1, "Seguro é obrigatório"),
@@ -98,9 +100,9 @@ type Option = {
 // Campos de texto repetidos (para reduzir código)
 // Campos de texto repetidos (para reduzir código)
 const textFields = [
-  { name: "nome_taxa", label: "Nome Tabela", placeholder: "Digite o nome", type: "text" },
+  { name: "nome_taxa", label: "Nome do produto", placeholder: "Digite o nome", type: "text" },
   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6", type: "number" },
-  { name: "periodiciade", label: "Periodicidade", placeholder: "12", type: "number" }
+  { name: "periodiciade", label: "Cálculo de operação", placeholder: "12", type: "number" }
 ] as const;
 
 const prazoFields = [
@@ -117,6 +119,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
   const [bancarizador, setBancarizador] = useState<Option[]>([]);
   const [seguro, setSeguro] = useState<Option[]>([]);
   const [seguradora, setSeguradora] = useState<Option[]>([]);
+  const [usaSeguro, setaSeguro] = useState(false);
+  const [usaTac, setaTac] = useState(false);
 
   const { token, userData } = useAuth();
   const router = useRouter();
@@ -127,7 +131,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       convenio_hash: "",
       modalidade_hash: "",
       tipo_operacao_hash: "",
-      dias_validade_ccb: "",
+      // dias_validade_ccb: "",
       nome_taxa: "",
       prazo_minimo: "",
       prazo_maximo: "",
@@ -351,7 +355,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           convenio_hash: data.convenio_hash,
           modalidade_hash: data.modalidade_hash,
           tipo_operacao_hash: data.tipo_operacao_hash,
-          dias_validade_ccb: data.dias_validade_ccb
+          // dias_validade_ccb: data.dias_validade_ccb
         },
         {
           headers: {
@@ -435,6 +439,14 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
   if (!isOpen) return null;
 
+  const handleCheckedTacChange = (checked: any) => {
+    setaTac(checked);
+  }
+
+    const handleCheckedSegChange = (checked: any) => {
+    setaSeguro(checked);
+  }
+
   return (
     <>
       <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
@@ -448,6 +460,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
                 Cadastrar Produto: <span className="text-primary">(Novo)</span>
+                <p className="text-xs font-normal text-gray-500 dark:text-gray-200">Versão: </p>
               </h2>
               <button
                 type="button"
@@ -458,77 +471,82 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </button>
             </div>
 
-            <div className="flex-1 space-y-6 overflow-y-auto">
+            <div className="flex-1 space-y-6 px-2 overflow-y-auto">
               {/* Seção do Produto */}
-              <Card className="w-full rounded-2xl border p-8">
+              <Card className="w-full rounded-2xl border p-8 px-1">
                 <CardHeader>
-                  <CardTitle>Seguimento do Produto</CardTitle>
+                  <CardTitle>Segmento do Produto</CardTitle>
+                  <p className="text-gray-600 dark:text-gray-200 text-sm">Determine as regras e segmentação do produto a ser cadastrado</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <FormField
-                    control={methods.control}
-                    name="convenio_hash"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Convênio</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={convenio}
-                            displayField="nome"
-                            value={convenio.find((c) => c.id === field.value) || null}
-                            onChange={(selected) => field.onChange(selected?.id || "")}
-                            searchFields={["nome"]}
-                            placeholder="Selecione um Convênio"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 gap-5">
+                    <FormField
+                      control={methods.control}
+                      name="convenio_hash"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Convênio</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={convenio}
+                              displayField="nome"
+                              value={convenio.find((c) => c.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              searchFields={["nome"]}
+                              placeholder="Selecione um Convênio"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={methods.control}
-                    name="modalidade_hash"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Modalidade</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={modalidade}
-                            displayField="nome"
-                            value={modalidade.find((m) => m.id === field.value) || null}
-                            onChange={(selected) => field.onChange(selected?.id || "")}
-                            searchFields={["nome"]}
-                            placeholder="Selecione uma Modalidade"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={methods.control}
+                      name="modalidade_hash"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Modalidade</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={modalidade}
+                              displayField="nome"
+                              value={modalidade.find((m) => m.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              searchFields={["nome"]}
+                              placeholder="Selecione uma Modalidade"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={methods.control}
-                    name="tipo_operacao_hash"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Operação</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={produtos}
-                            displayField="nome"
-                            value={produtos.find((p) => p.id === field.value) || null}
-                            onChange={(selected) => field.onChange(selected?.id || "")}
-                            searchFields={["nome"]}
-                            placeholder="Selecione o Tipo de Operação"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={methods.control}
+                      name="tipo_operacao_hash"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Operação</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={produtos}
+                              displayField="nome"
+                              value={produtos.find((p) => p.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              searchFields={["nome"]}
+                              placeholder="Selecione o Tipo de Operação"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  
 
-                  <FormField
+                  {/* <FormField
                     control={methods.control}
                     name="dias_validade_ccb"
                     render={({ field }) => (
@@ -545,7 +563,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
@@ -634,6 +652,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               <Card>
                 <CardHeader>
                   <CardTitle>Condições Comerciais</CardTitle>
+                  <p className="text-gray-600 dark:text-gray-200 text-sm">Determine as condições comerciais deste produto respeitando as normas.</p>
                 </CardHeader>
                 <CardContent>
                   {/* Campos de texto mapeados */}
@@ -659,7 +678,9 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                         )}
                       />
                     ))}
+                  </div>
 
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
                     <FormField
                       control={methods.control}
                       name="bancalizador"
@@ -683,97 +704,141 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
                     <FormField
                       control={methods.control}
-                      name="seguradora"
+                      name="incrementador"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Seguradora</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={seguradora}
-                              displayField="nome"
-                              value={seguradora.find((m) => m.id === field.value) || null}
-                              onChange={(selected) => field.onChange(selected?.id || "")}
-                              searchFields={["nome"]}
-                              placeholder="Selecione"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Incrementador</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="w-full border"
+                            placeholder="Digite o incrementador"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
-                    <FormField
-                      control={methods.control}
-                      name="seguro"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Seguro</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={seguro}
-                              displayField="nome"
-                              value={seguro.find((p) => p.id === field.value) || null}
-                              onChange={(selected) => field.onChange(selected?.id || "")}
-                              searchFields={["nome"]}
-                              placeholder="Selecione"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {prazoFields.map((conf) => (
+                      <FormField
+                        key={conf.name}
+                        control={methods.control}
+                        name={conf.name}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{conf.label}</FormLabel>
+                            <FormControl>
+                              <Input
+                                className="w-full border"
+                                placeholder={conf.placeholder}
+                                type={conf.type || "text"}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {prazoFields.map((conf) => (
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-center">
+                        Seguro
+                        <Label htmlFor="useSeguro" className="cursor-pointer flex gap-2 items-center text-sm text-gray-600 dark:text-200">
+                          <Checkbox checked={usaSeguro} onCheckedChange={handleCheckedSegChange} id="useSeguro"/> O produto usa seguro?
+                        </Label>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className={usaSeguro ? 'block' : 'hidden'}>
+                      <div className="grid grid-cols-2 gap-4">
                         <FormField
-                          key={conf.name}
                           control={methods.control}
-                          name={conf.name}
+                          name="seguro"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{conf.label}</FormLabel>
+                              <FormLabel>Seguro</FormLabel>
                               <FormControl>
-                                <Input
-                                  className="w-full border"
-                                  placeholder={conf.placeholder}
-                                  type={conf.type || "text"}
-                                  {...field}
+                                <Combobox
+                                  data={seguro}
+                                  displayField="nome"
+                                  value={seguro.find((p) => p.id === field.value) || null}
+                                  onChange={(selected) => field.onChange(selected?.id || "")}
+                                  searchFields={["nome"]}
+                                  placeholder="Selecione"
                                 />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      ))}
-                    </div>
 
-                    <FormField
-                      control={methods.control}
-                      name="incrementador"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Incrementador</FormLabel>
-                          <FormControl>
-                            <Input
-                              className="w-full border"
-                              placeholder="Digite o incrementador"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                        <FormField
+                          control={methods.control}
+                          name="seguradora"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Seguradora</FormLabel>
+                              <FormControl>
+                                <Combobox
+                                  data={seguradora}
+                                  displayField="nome"
+                                  value={seguradora.find((m) => m.id === field.value) || null}
+                                  onChange={(selected) => field.onChange(selected?.id || "")}
+                                  searchFields={["nome"]}
+                                  placeholder="Selecione"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-center">
+                        Taxa de abertura de Crédito - TAC
+                        <Label htmlFor="useTac" className="cursor-pointer flex gap-2 items-center text-sm text-gray-600 dark:text-200">
+                          <Checkbox checked={usaTac} onCheckedChange={handleCheckedTacChange} id="useTac"/> O produto usa TAC?
+                        </Label>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className={usaTac ? 'flex' : 'hidden'}>
+                      <FormField
+                        control={methods.control}
+                        name="nome_taxa"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Selecionar taxa</FormLabel>
+                            <FormControl>
+                              <Combobox
+                                data={seguro}
+                                displayField="nome"
+                                value={seguro.find((m) => m.id === field.value) || null}
+                                onChange={(selected) => field.onChange(selected?.id || "")}
+                                searchFields={["nome"]}
+                                placeholder="Selecione"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </Card>
 
               {/* Seção do RO */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Roteiro Operacional</CardTitle>
+                  <CardTitle>Regra do produto</CardTitle>
+                  <p className="text-gray-600 dark:text-200 text-sm">Selecione o Roteiro Operacional deste produto.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
