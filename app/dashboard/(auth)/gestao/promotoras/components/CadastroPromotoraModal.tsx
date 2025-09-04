@@ -184,9 +184,9 @@ const EnderecoForm = forwardRef<
       if (data.erro) {
         toast.error("CEP não encontrado", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         return;
@@ -207,18 +207,18 @@ const EnderecoForm = forwardRef<
 
       toast.success("Endereço encontrado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
       toast.error("Não foi possível buscar o endereço. Verifique sua conexão.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -291,7 +291,7 @@ const EnderecoForm = forwardRef<
 
   return (
     <div className="mt-4">
-      <h3 className="text-lg font-medium mb-4">Endereço</h3>
+      <h3 className="mb-4 text-lg font-medium">Endereço</h3>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {fields.map(renderField)}
         <div className="grid gap-1">
@@ -313,7 +313,6 @@ const EnderecoForm = forwardRef<
 EnderecoForm.displayName = "EnderecoForm";
 
 export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroPromotoraModalProps) {
-
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -326,16 +325,18 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       rateio_sub: 0,
       master_id: undefined,
       radius: "md",
-      enderecos: [{
-        cep: "",
-        logradouro: "",
-        numero: "",
-        complemento: "",
-        bairro: "",
-        cidade: "",
-        estado: "",
-        uf: ""
-      }]
+      enderecos: [
+        {
+          cep: "",
+          logradouro: "",
+          numero: "",
+          complemento: "",
+          bairro: "",
+          cidade: "",
+          estado: "",
+          uf: ""
+        }
+      ]
     }
   });
 
@@ -387,9 +388,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
         console.error("Erro ao carregar masters", error);
         toast.error("Erro ao carregar lista de promotoras master", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -401,9 +402,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     if (!token) {
       toast.error("Token de autenticação não encontrado. Faça login.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -415,9 +416,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       if (!isValid) {
         toast.error("Por favor, corrija os erros no endereço", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
         return;
@@ -469,9 +470,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
 
       toast.success("Promotora cadastrada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -480,9 +481,9 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
       console.error("Erro ao cadastrar promotora:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     }
@@ -574,17 +575,19 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
 
   // useTokenMonitor();
 
+  if (!isOpen) return null;
+
   return (
     <>
       <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
-      <aside className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg rounded-l-2xl">
+      <aside className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl bg-white p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar nova promotora</h2>
-                <X onClick={onClose} className="cursor-pointer"/>
+                <X onClick={onClose} className="cursor-pointer" />
               </div>
 
               <Card className="flex-grow overflow-auto">

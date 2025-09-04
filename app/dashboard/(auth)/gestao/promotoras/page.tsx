@@ -8,45 +8,33 @@ import CampoBoasVindas from "@/components/boasvindas";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { PromotoraDrawer, Promotora } from "./components/PromotoraModal";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+
 import CadastroPromotoraModal from "./components/CadastroPromotoraModal";
 
 export default function Page() {
-  const router = useRouter();
+  const podeCriar = useHasPermission("Produtos_criar");
+
   const [selectedPromotora, setSelectedPromotora] = useState<Promotora | null>(null);
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
-  const handleCloseDrawer = () => setSelectedPromotora(null);
   const handleCloseCadastro = () => setIsCadastroOpen(false);
 
   return (
     <ProtectedRoute requiredPermission="Promotora_ver">
-      <div className="space-y-4">
-        <div className="mb-4 flex justify-between space-y-4">
-          <CampoBoasVindas />
-            <Button onClick={() => setIsCadastroOpen(true)}>Nova promotora</Button>
-          </div>
-          {!selectedPromotora && (
-            <>
-              <PromotorasTable onSelectPromotora={setSelectedPromotora} />
-            </>
-          )}
-        </div>
+      <div className="mb-4 flex justify-between space-y-4">
+        <CampoBoasVindas />
+        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Nova promotora</Button>}
+      </div>
 
-        <div>
-          {selectedPromotora && (
-            <>
-              <div className="mb-4"></div>
-              <PromotoraDrawer
-                isOpen={true}
-                onClose={handleCloseDrawer}
-                promotora={selectedPromotora}
-              />
-            </>
-          )}
+      <PromotorasTable onSelectPromotora={setSelectedPromotora} />
 
-          {/* Modal de cadastro nova promotora */}
-          <CadastroPromotoraModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
-        </div>
+      {selectedPromotora && (
+        <PromotoraDrawer onClose={() => setSelectedPromotora(null)} promotora={selectedPromotora} />
+      )}
+
+      {/* Modal de cadastro nova promotora */}
+      <CadastroPromotoraModal isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
     </ProtectedRoute>
   );
 }
