@@ -38,7 +38,6 @@ type TaxaFormValuePUT = z.infer<typeof putTaxaSchema>;
 
 type TaxaEditProps = {
   taxa: TaxaFormValues;
-  putTaxa: TaxaFormValuePUT;
   onClose: () => void;
 };
 
@@ -68,8 +67,6 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
       if (data.cad_tac_valor_cobrado !== taxa.cad_tac_valor_cobrado)
         payload.cad_tac_valor_cobrado = data.cad_tac_valor_cobrado;
 
-      console.log(payload);
-
       const removePrefixOfData = (data: TaxaFormValues[]): TaxaFormValuePUT | null => {
         if(!data.length) return null;
         
@@ -84,8 +81,6 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
       };
 
       const dataOutPrefix = removePrefixOfData(body);
-      console.log(body);
-      console.log(dataOutPrefix);
 
       await axios.put(`${API_BASE_URL}/faixa-valor-cobrado/atualizar`, dataOutPrefix, {
         headers: {
