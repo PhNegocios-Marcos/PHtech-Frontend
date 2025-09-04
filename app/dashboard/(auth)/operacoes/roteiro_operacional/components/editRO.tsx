@@ -32,18 +32,18 @@ const roteiroSchema = z
     rotina_operacional_hash: z.string(),
     nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }).optional(),
     descricao: z.string(),
-    idade_minima: z.number(),
-    idade_maxima: z.number(),
-    prazo_maximo: z.number(),
-    valor_bruto_minimo: z.number(),
-    valor_bruto_maximo: z.number(),
-    taxa_minima: z.number(),
-    taxa_maxima: z.number(),
+    idade_minima: z.number().min(0, { message: "Idade mínima não pode ser negativa" }),
+    idade_maxima: z.number().min(0, { message: "Idade máxima não pode ser negativa" }),
+    prazo_maximo: z.number().min(0, { message: "Prazo máximo não pode ser negativo" }),
+    valor_bruto_minimo: z.number().min(0, { message: "Valor bruto mínimo não pode ser negativo" }),
+    valor_bruto_maximo: z.number().min(0, { message: "Valor bruto máximo não pode ser negativo" }),
+    taxa_minima: z.number().min(0, { message: "Taxa mínima não pode ser negativa" }),
+    taxa_maxima: z.number().min(0, { message: "Taxa máxima não pode ser negativa" }),
     usuario_atualizacao: z.string().optional(),
     usa_limite_proposta: z.number().int().min(0).max(1).default(0),
-    valor_limite_proposta: z.number().optional(),
+    valor_limite_proposta: z.number().min(0, { message: "Valor limite não pode ser negativo" }).optional(),
     usa_margem_seguranca: z.number().int().min(0).max(1).default(0),
-    valor_margem_seguranca: z.number().optional()
+    valor_margem_seguranca: z.number().min(0, { message: "Valor da margem não pode ser negativo" }).optional()
   })
   .refine((data) => data.usa_limite_proposta === 0 || data.valor_limite_proposta !== undefined, {
     message:
@@ -70,7 +70,7 @@ type FormFieldConfig = {
   placeholder?: string;
   type?: string;
   readOnly?: boolean;
-  component?: "select" | "input" | "numberFormat" | undefined; // Adicione "numberFormat" aqui
+  component?: "select" | "input" | "numberFormat" | undefined;
   options?: Array<{ value: string; label: string }>;
   showInputOnTrue?: {
     fieldName: keyof Roteiro;
@@ -123,15 +123,15 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       name: "valor_bruto_minimo",
       label: "Valor Bruto Mínimo",
       placeholder: "500.00",
-      type: "text", // Alterado para text
-      component: "numberFormat" // Adicione esta linha para identificar o componente
+      type: "text",
+      component: "numberFormat"
     },
     {
       name: "valor_bruto_maximo",
       label: "Valor Bruto Máximo",
       placeholder: "15500.50",
-      type: "text", // Alterado para text
-      component: "numberFormat" // Adicione esta linha para identificar o componente
+      type: "text",
+      component: "numberFormat"
     },
     { name: "taxa_minima", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
     { name: "taxa_maxima", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
@@ -277,6 +277,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                                 <Input
                                   placeholder={fieldConfig.placeholder}
                                   type={fieldConfig.type}
+                                  min={fieldConfig.type === "number" ? 0 : undefined}
                                   value={
                                     field.value === undefined || field.value === null
                                       ? ""
@@ -344,6 +345,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                                       <Input
                                         placeholder={fieldConfig.showInputOnTrue!.placeholder}
                                         type={fieldConfig.showInputOnTrue!.type}
+                                        min={0}
                                         value={
                                           field.value === undefined || field.value === null
                                             ? ""
