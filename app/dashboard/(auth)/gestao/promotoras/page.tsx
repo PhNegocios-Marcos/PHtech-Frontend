@@ -23,7 +23,7 @@ export default function Page() {
       <div className="space-y-4">
         <div className="mb-4 flex justify-between space-y-4">
           <CampoBoasVindas />
-            <Button onClick={() => setIsCadastroOpen(true)}>Nova Promotora</Button>
+            <Button onClick={() => setIsCadastroOpen(true)}>Nova promotora</Button>
           </div>
           {!selectedPromotora && (
             <>

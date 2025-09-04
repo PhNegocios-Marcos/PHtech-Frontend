@@ -21,7 +21,7 @@ export default function Page() {
 
         {podeCriar && (
           <Button onClick={() => setIsCadastroOpen(true)}>
-            Nova Permissão
+            Nova permissão
           </Button>
         )}
       </div>

@@ -15,12 +15,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-[99vh] flex-col items-start gap-4 px-2 py-8">
+    <div className="flex h-screen w-full items-center text-left justify-center flex-col gap-4 px-2 py-8">
       <div className="space-y-2 lg:space-y-4">
-        <h2 className="text-3xl font-bold lg:text-5xl">Oops!</h2>
-        <p className="text-muted-foreground">Something went wrong!</p>
+        <h2 className="text-5xl font-bold lg:text-7xl">Oops!</h2>
+        <p className="text-muted-foreground">Parece que tivemos um problema, por favor tente novamente.</p>
       </div>
-      <Button onClick={() => reset()}>Try again</Button>
+      <Button className="mt-5 py-8 px-6" onClick={() => reset()}>Tentar novamente</Button>
     </div>
   );
 }

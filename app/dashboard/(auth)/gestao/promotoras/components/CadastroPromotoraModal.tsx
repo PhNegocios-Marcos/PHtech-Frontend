@@ -1,5 +1,6 @@
 "use client";
 
+// import useTokenMonitor  from "@/hooks/useTokenMonitor";
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import axios from "axios";
 import { useForm, FormProvider } from "react-hook-form";
@@ -29,7 +30,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageIcon, UploadIcon, XIcon } from "lucide-react";
+import { ImageIcon, UploadIcon, X, XIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -312,6 +313,7 @@ const EnderecoForm = forwardRef<
 EnderecoForm.displayName = "EnderecoForm";
 
 export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroPromotoraModalProps) {
+
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -394,21 +396,6 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     }
     fetchMasters();
   }, [token]);
-
-  if (!isOpen) return null;
-
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
 
   async function onSubmit(data: FormData) {
     if (!token) {
@@ -585,6 +572,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     }
   ];
 
+  // useTokenMonitor();
+
   return (
     <>
       <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
@@ -594,18 +583,13 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Nova Promotora</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar nova promotora</h2>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados da Promotora</CardTitle>
+                  <CardTitle>Dados da promotora</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

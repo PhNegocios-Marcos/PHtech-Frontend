@@ -50,8 +50,6 @@ export default function CadastroModulosModal({
     },
   });
 
-
-
   const router = useRouter();
 
   const { token } = useAuth();

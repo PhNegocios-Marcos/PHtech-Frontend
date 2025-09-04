@@ -223,7 +223,7 @@ const router = useRouter();
     <>
       <Card className="col-span-2">
         <CardHeader className="flex flex-col justify-between">
-          <CardTitle>Módulos</CardTitle>
+          <CardTitle>Lista de módulos</CardTitle>
         </CardHeader>
 
         <CardContent>

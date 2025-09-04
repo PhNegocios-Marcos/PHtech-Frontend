@@ -272,7 +272,7 @@ export function PermissoesTable() {
       <Card className="col-span-2">
         <>
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Permissões</CardTitle>
+            <CardTitle>Lista de permissões</CardTitle>
           </CardHeader>
 
           <CardContent>

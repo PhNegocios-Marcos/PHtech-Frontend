@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 // ✅ Schema de validação para Alçada
 const schema = z.object({
@@ -156,19 +157,13 @@ export default function CadastroAlcadaModal({ isOpen, onClose }: CadastroAlcadaM
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Nova Alçada</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar nova alçada</h2>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados da Alçada</CardTitle>
+                  <CardTitle>Dados da alçada</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -178,7 +173,7 @@ export default function CadastroAlcadaModal({ isOpen, onClose }: CadastroAlcadaM
                       name="nome"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome da Alçada</FormLabel>
+                          <FormLabel>Nome da alçada</FormLabel>
                           <FormControl>
                             <Input placeholder="Digite o nome da alçada" {...field} />
                           </FormControl>
@@ -222,7 +217,7 @@ export default function CadastroAlcadaModal({ isOpen, onClose }: CadastroAlcadaM
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Cadastrar Alçada</Button>
+                <Button type="submit">Cadastrar alçada</Button>
               </div>
             </form>
           </Form>

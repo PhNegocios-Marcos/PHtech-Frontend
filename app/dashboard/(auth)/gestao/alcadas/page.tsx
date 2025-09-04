@@ -40,7 +40,7 @@ export default function Page() {
               onClick={handleNewAlcadaClick}
               aria-label="Criar nova alçada"
               disabled={!podeCriar}>
-              Nova Alçada
+              Nova alçada
             </Button>
           </div>
         </div>

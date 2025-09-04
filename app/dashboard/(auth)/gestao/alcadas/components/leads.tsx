@@ -201,7 +201,7 @@ export function AlcadasTable() {
   return (
     <Card className="col-span-2 space-y-4">
       <CardHeader>
-        <CardTitle>Alçada</CardTitle>
+        <CardTitle>Lista de alçadas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-2 mb-4">
