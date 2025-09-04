@@ -21,16 +21,15 @@ export type Promotora = {
 };
 
 type PromotoraDrawerProps = {
-  isOpen: boolean;
   onClose: () => void;
   promotora: Promotora | null;
 };
 
-export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerProps) {
+export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
   const [formData, setFormData] = useState<Promotora | null>(null);
 
   useEffect(() => {
-    if (isOpen && promotora) {
+    if ( promotora) {
       try {
         setFormData({ ...promotora });
         // toast.success("Dados da promotora carregados", {
@@ -53,9 +52,9 @@ export function PromotoraDrawer({ isOpen, onClose, promotora }: PromotoraDrawerP
         onClose();
       }
     }
-  }, [promotora, isOpen, onClose]);
+  }, [promotora, onClose]);
 
-  if (!isOpen || !formData) {
+  if (!formData) {
     return null;
   }
 
