@@ -239,7 +239,7 @@ export function AlcadaDrawer({ isOpen, onClose, usuario, onSuccess }: AlcadasDra
             className="w-full"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+            {isSubmitting ? "Salvando..." : "Salvar alterações"}
           </Button>
         </div>
       </aside>

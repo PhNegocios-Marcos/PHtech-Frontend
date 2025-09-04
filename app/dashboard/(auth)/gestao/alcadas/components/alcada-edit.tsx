@@ -210,7 +210,7 @@ export function AlcadaEdit({ alcada, onClose, onRefresh }: AlcadaEditProps) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit">Salvar Alterações</Button>
+            <Button type="submit">Salvar alterações</Button>
           </div>
         </form>
       </Form>

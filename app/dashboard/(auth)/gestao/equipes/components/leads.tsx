@@ -261,7 +261,7 @@ export function EquipesTable() {
       {!selectedEquipe ? (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Equipes</CardTitle>
+            <CardTitle>Lista de equipes</CardTitle>
           </CardHeader>
 
           <CardContent>

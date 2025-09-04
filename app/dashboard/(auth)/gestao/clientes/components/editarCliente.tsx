@@ -998,7 +998,7 @@ export default function EditarCliente({
               Voltar
             </Button>
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Salvando..." : "Salvar Alterações"}
+              {loading ? "Salvando..." : "Salvar alterações"}
             </Button>
           </div>
         </div>

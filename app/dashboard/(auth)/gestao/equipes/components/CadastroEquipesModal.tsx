@@ -26,6 +26,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -141,20 +142,13 @@ export default function CadastroEquipeModal({
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Nova Equipe</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar nova equipe</h2>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados da Equipe</CardTitle>
+                  <CardTitle>Dados da equipe</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -214,7 +208,7 @@ export default function CadastroEquipeModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Cadastrar Equipe</Button>
+                <Button type="submit">Cadastrar equipe</Button>
               </div>
             </form>
           </Form>

@@ -55,7 +55,7 @@ export default function Page() {
             onClick={handleOpenCadastro}
             aria-label="Criar nova equipe"
           >
-            Nova Equipe
+            Nova equipe
           </Button>
         )}
       </div>

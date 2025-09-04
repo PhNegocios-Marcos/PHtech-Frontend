@@ -220,7 +220,7 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar Alterações</Button>
+                <Button type="submit">Salvar alterações</Button>
               </div>
             </form>
           </Form>

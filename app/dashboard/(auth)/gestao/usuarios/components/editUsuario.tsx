@@ -158,14 +158,14 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  Editar Usuário: <span className="text-primary">{usuario.nome}</span>
+                  Editar usuário: <span className="text-primary">{usuario.nome}</span>
                 </CardTitle>
                 <div>
                   <Button onClick={onClose} variant="outline">
                     Voltar
                   </Button>
                   <Button className="ml-4" type="submit">
-                    Salvar Alterações
+                    Salvar alterações
                   </Button>
                 </div>
               </div>

@@ -252,7 +252,7 @@ export function SeguradoraEditForm({ seguradora, onClose }: SeguradoraEditProps)
                 <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar Alterações</Button>
+                <Button type="submit">Salvar alterações</Button>
               </div>
             </form>
           </Form>

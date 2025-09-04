@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 const telefoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
 
@@ -72,36 +73,36 @@ function validarCPF(cpf: string) {
 
 // Schema para endereço
 const enderecoSchema = z.object({
-  cep: z.string().min(8, "CEP é obrigatório"),
-  logradouro: z.string().min(1, "Logradouro é obrigatório"),
-  numero: z.string().min(1, "Número é obrigatório"),
+  cep: z.string().min(8, "Por favor, digite um CEP válido"),
+  logradouro: z.string().min(1, "Por favor, digite um logradouro válido"),
+  numero: z.string().min(1, "Por favor, digite o número corretamente."),
   complemento: z.string().optional(),
-  bairro: z.string().min(1, "Bairro é obrigatório"),
-  cidade: z.string().min(1, "Cidade é obrigatória"),
-  estado: z.string().min(1, "Estado é obrigatório"),
-  uf: z.string().min(2, "UF é obrigatória").max(2, "UF deve ter 2 caracteres")
+  bairro: z.string().min(1, "Por favor, digite o bairro."),
+  cidade: z.string().min(1, "Por favor, defina a cidade"),
+  estado: z.string().min(1, "Por favor, nos diga o estado"),
+  uf: z.string().min(2, "Por favor, digite o UF corretamente").max(2, "UF deve ter 2 caracteres")
 });
 
 const schema = z
   .object({
-    nome: z.string().min(1, "Nome é obrigatório"),
+    nome: z.string().min(4, "Por favor, digite um nome"),
     cpf: z
       .string()
-      .min(11, "CPF incompleto")
+      .min(11, "Por favor, digite o CPF corretamente")
       .refine((val) => validarCPF(val), {
-        message: "CPF inválido"
+        message: "CPF inválido, tente novamente"
       }),
-    email: z.string().email("Email inválido"),
-    telefone: z.string().regex(telefoneRegex, "Telefone inválido"),
-    senha: z.string().min(6, "Senha deve ter ao menos 6 caracteres"),
-    confirmar_senha: z.string().min(6, "Confirmação deve ter ao menos 6 caracteres"),
+    email: z.string().email("Email inválido, tente novamente"),
+    telefone: z.string().regex(telefoneRegex, "Telefone inválido, tente novamente"),
+    senha: z.string().min(6, "A senha deve ter ao menos 6 caractere"),
+    confirmar_senha: z.string().min(6, "A confirmação deve ter ao menos 6 caracteres"),
     tipo_acesso: z.enum(["externo", "interno"]),
-    promotora: z.string().min(1, "Promotora é obrigatória"),
+    promotora: z.string().min(1, "Por favor, selecione a promotora"),
     usa_2fa: z.enum(["0", "1"]),
-    enderecos: z.array(enderecoSchema).min(1, "Pelo menos um endereço é obrigatório")
+    enderecos: z.array(enderecoSchema).min(1, "Cadastre ao menos um endereço")
   })
   .refine((data) => data.senha === data.confirmar_senha, {
-    message: "As senhas não conferem",
+    message: "Senha incorreta, tente novamente ",
     path: ["confirmar_senha"]
   });
 
@@ -495,19 +496,13 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Usuário</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar novo usuário</h2>
+                <X onClick={onClose} className="cursor-pointer"/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados do Usuário</CardTitle>
+                  <CardTitle>Dados do usuário</CardTitle>
                 </CardHeader>
 
                 <CardContent className="space-y-4">

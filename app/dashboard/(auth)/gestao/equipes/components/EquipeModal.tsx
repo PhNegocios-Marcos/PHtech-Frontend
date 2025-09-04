@@ -98,7 +98,7 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
         <TabsList className="w-full">
           <TabsTrigger value="overview">Informações</TabsTrigger>
           <TabsTrigger value="members">Membros</TabsTrigger>
-          <TabsTrigger value="ADD_novo_members">Novo Membro</TabsTrigger>
+          <TabsTrigger value="ADD_novo_members">Novo membro</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

@@ -153,7 +153,7 @@ export function EquipeEditForm({ perfil, onClose }: PerfilDrawerProps) {
                   <Button onClick={handleClose} variant="outline">
                     Voltar
                   </Button>
-                  <Button className="ml-4" type="submit">Salvar Alterações</Button>
+                  <Button className="ml-4" type="submit">Salvar alterações</Button>
                 </div>
               </div>
             </CardHeader>

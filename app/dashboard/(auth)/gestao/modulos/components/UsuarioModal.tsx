@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Usuario = {
@@ -129,13 +130,8 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
         role="dialog"
         aria-modal="true">
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-lg font-semibold">Editar Usuário</h2>
-          <button
-            onClick={onClose}
-            aria-label="Fechar painel"
-            className="text-2xl leading-none text-gray-600 hover:text-gray-900">
-            ×
-          </button>
+          <h2 className="text-lg font-semibold">Editar usuário</h2>
+          <X onClick={onClose} className="cursor-pointer"/>
         </div>
 
         <div className="grid grid-cols-2 gap-3 overflow-y-auto p-6">
@@ -215,7 +211,7 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
         </div>
 
         <div className="p-4">
-          <Button onClick={handleSubmit}>Salvar Alterações</Button>
+          <Button onClick={handleSubmit}>Salvar alterações</Button>
         </div>
       </aside>
     </>

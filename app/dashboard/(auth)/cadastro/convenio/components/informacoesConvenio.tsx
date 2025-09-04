@@ -240,7 +240,7 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
           <Button type="button" variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit">Salvar Alterações</Button>
+          <Button type="submit">Salvar alterações</Button>
         </div>
       </form>
     </FormProvider>

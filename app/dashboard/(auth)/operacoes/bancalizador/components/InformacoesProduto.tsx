@@ -265,7 +265,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={methods.formState.isSubmitting}>
-                  {methods.formState.isSubmitting ? "Salvando..." : "Salvar Alterações"}
+                  {methods.formState.isSubmitting ? "Salvando..." : "Salvar alterações"}
                 </Button>
               </div>
             </form>

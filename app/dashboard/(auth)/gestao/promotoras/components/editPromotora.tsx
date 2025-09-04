@@ -140,7 +140,7 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
                   <Button onClick={onClose} variant="outline">
                     Voltar
                   </Button>
-                  <Button className="ml-4" type="submit">Salvar Alterações</Button>
+                  <Button className="ml-4" type="submit">Salvar alterações</Button>
                 </div>
               </div>
             </CardHeader>
