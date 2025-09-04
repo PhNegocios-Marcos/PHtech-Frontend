@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 type ComboboxProps<T> = {
   data: T[];
   displayField: keyof T;
-  value: T | null;
+  value: T | any;
   onChange: (item: T) => void;
   label?: string;
   placeholder?: string;
