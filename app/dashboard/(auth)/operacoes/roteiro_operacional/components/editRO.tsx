@@ -37,8 +37,8 @@ const roteiroSchema = z
     prazo_maximo: z.number().min(0, { message: "Prazo máximo não pode ser negativo" }),
     valor_bruto_minimo: z.number().min(0, { message: "Valor bruto mínimo não pode ser negativo" }),
     valor_bruto_maximo: z.number().min(0, { message: "Valor bruto máximo não pode ser negativo" }),
-    tac_min: z.number().min(0, { message: "Taxa mínima não pode ser negativa" }),
-    tac_max: z.number().min(0, { message: "Taxa máxima não pode ser negativa" }),
+    taxa_minima: z.number().min(0, { message: "Taxa mínima não pode ser negativa" }),
+    taxa_maxima: z.number().min(0, { message: "Taxa máxima não pode ser negativa" }),
     usuario_atualizacao: z.string().optional(),
     usa_limite_proposta: z.number().int().min(0).max(1).default(0),
     valor_limite_proposta: z.number().min(0, { message: "Valor limite não pode ser negativo" }).optional(),
@@ -133,8 +133,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       type: "text",
       component: "numberFormat"
     },
-    { name: "tac_min", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
-    { name: "tac_max", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
+    { name: "taxa_minima", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
+    { name: "taxa_maxima", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [
