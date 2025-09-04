@@ -177,7 +177,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
           throw new Error("Token de autenticação ou ID do usuário não encontrado");
         }
 
-        const res = await axios.get(`${API_BASE_URL}/perfil/${usuario.id}`, {
+        const res = await axios.get(`${API_BASE_URL}/rel_usuario_perfil/${usuario.id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
