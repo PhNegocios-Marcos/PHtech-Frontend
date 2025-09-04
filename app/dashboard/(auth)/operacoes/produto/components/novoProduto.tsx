@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
 
 // Schema de validação combinado
 const schema = z
@@ -558,13 +559,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                 Cadastrar Produto: <span className="text-primary">(Novo)</span>
                 <p className="text-xs font-normal text-gray-500 dark:text-gray-200">Versão: </p>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
 
             <div className="flex-1 space-y-6 overflow-y-auto px-2">

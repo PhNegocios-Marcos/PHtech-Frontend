@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";import {
   SelectItem
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -305,13 +306,7 @@ export default function CadastroRoteiroModal({
           >
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Cadastrar novo roteiro</h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <Card className="flex-grow overflow-auto">
               <CardContent>

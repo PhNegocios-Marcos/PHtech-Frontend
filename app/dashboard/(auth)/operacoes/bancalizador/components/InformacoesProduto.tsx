@@ -20,6 +20,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 // Schema baseado apenas nos campos presentes no JSON
 const produtoSchema = z.object({
@@ -181,13 +182,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
               <h2 className="text-xl font-semibold">
                 Editar Modalidade: <span className="text-primary">{produto?.nome}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
 
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">

@@ -21,6 +21,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner"; // <- adicionado
+import { X } from "lucide-react";
 
 // Schema com coerção para number
 const usuarioSchema = z.object({
@@ -155,13 +156,7 @@ export function OrgaoEdit({ orgao, onClose, onRefresh }: OrgaoDrawerProps) {
               <h2 className="text-xl font-semibold">
                 Órgão: <span className="text-primary">{orgao.orgao_nome}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 p-6">
               <Card className="col-span-2">

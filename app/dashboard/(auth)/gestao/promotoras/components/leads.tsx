@@ -260,14 +260,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
   const handleRowClick = (promotora: Promotora) => {
     try {
       onSelectPromotora(promotora);
-      // toast.success("Promotora selecionada", {
-      //   style: {
-      //     background: "var(--toast-success)",
-      //     color: "var(--toast-success-foreground)",
-      //     boxShadow: "var(--toast-shadow)"
-      //   },
-      //   description: `Editando: ${promotora.nome}`
-      // });
+
     } catch (error: any) {
       toast.error("Erro ao selecionar promotora", {
         style: {

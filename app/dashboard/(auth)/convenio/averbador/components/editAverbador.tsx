@@ -20,6 +20,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const averbadorSchema = z.object({
   averbador_hash: z.string(),
@@ -162,13 +163,7 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
               <h2 className="text-xl font-semibold">
                 Averbador: <span className="text-primary">{averbador?.averbador_nome}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 pt-6">
               <Card className="col-span-2">
