@@ -34,19 +34,6 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
   const router = useRouter();
 
   useEffect(() => {
-    if (usuario) {
-      setFormData({ ...usuario });
-    }
-  }, [usuario]);
-
-  if (!isOpen || !formData) return null;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => (prev ? { ...prev, [name]: value } : prev));
-  };
-
-    useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -59,13 +46,26 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
     return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
   }, [token, router]);
 
+  useEffect(() => {
+    if (usuario) {
+      setFormData({ ...usuario });
+    }
+  }, [usuario]);
+
+  if (!isOpen || !formData) return null;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : prev));
+  };
+
   const handleSubmit = async () => {
     if (!token) {
       toast.error("Token de autenticação não encontrado. Faça login novamente.", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -88,9 +88,9 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
 
       toast.success("Usuário atualizado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
@@ -106,9 +106,9 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
         }`,
         {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           }
         }
       );
@@ -125,7 +125,7 @@ export function UsuarioDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) 
       <div onClick={onClose} className="fixed inset-0 z-40 bg-gray-900/50" aria-hidden="true" />
 
       <aside
-        className="fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col bg-background shadow-lg md:w-1/2"
+        className="bg-background fixed top-0 right-0 z-50 flex h-full w-2/2 flex-col shadow-lg md:w-1/2"
         role="dialog"
         aria-modal="true">
         <div className="flex items-center justify-between border-b p-4">
