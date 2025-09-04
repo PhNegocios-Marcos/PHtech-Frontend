@@ -42,6 +42,10 @@ const schema = z
     seguradora: z.string().min(1, "Seguradora é obrigatória"),
     seguro: z.string().min(1, "Seguro é obrigatório"),
     RO: z.string().min(1, "RO é obrigatório"),
+    valor_bruto_minimo: z.string().optional(),
+    valor_bruto_maximo: z.string().optional(),
+    idade_minima: z.string().optional(),
+    idade_maxima: z.string().optional(),
 
     // Dados da taxa
     nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
@@ -96,6 +100,7 @@ type Option = {
   }>;
   credenciais?: any[];
   cadastros?: any[];
+  dadosCompletos?: any; // ADICIONE ESTA LINHA
 };
 
 // Campos de texto repetidos (para reduzir código)
@@ -117,12 +122,12 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
   const [promotora, setPromotora] = useState<Option[]>([]);
   const [modalidade, setModalidade] = useState<Option[]>([]);
   const [produtos, setProdutos] = useState<Option[]>([]);
-  const [RO, setRO] = useState<Option[]>([]);
   const [bancarizador, setBancarizador] = useState<Option[]>([]);
   const [seguro, setSeguro] = useState<Option[]>([]);
   const [seguradora, setSeguradora] = useState<Option[]>([]);
   const [usaSeguro, setaSeguro] = useState(false);
   const [usaTac, setaTac] = useState(false);
+  const [roList, setRO] = useState<Array<Option & { dadosCompletos?: any }>>([]);
 
   const { token, userData } = useAuth();
   const router = useRouter();
@@ -146,7 +151,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       RO: "",
       bancalizador: "",
       seguradora: "",
-      seguro: ""
+      seguro: "",
+      valor_bruto_minimo: "",
+      valor_bruto_maximo: "",
+      idade_minima: "",
+      idade_maxima: ""
     }
   });
 
@@ -259,7 +268,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
         const formatado = response.data.map((item: any) => ({
           id: item.rotina_operacional_hash,
           name: item.nome,
-          nome: item.nome
+          nome: item.nome,
+          dadosCompletos: item // Armazena todos os dados para uso posterior
         }));
         setRO(formatado);
       } catch (error: any) {
@@ -373,6 +383,35 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
     }
   }, [isOpen, token]);
 
+  // Função para preencher automaticamente os campos quando uma RO é selecionada
+  const preencherCamposDaRO = (roSelecionada: Option) => {
+    if (!roSelecionada?.dadosCompletos) return;
+
+    const dados = roSelecionada.dadosCompletos;
+
+    // Preencher campos principais
+    methods.setValue("prazo_minimo", dados.prazo_minimo?.toString() || "");
+    methods.setValue("prazo_maximo", dados.prazo_maximo?.toString() || "");
+
+    // Usar taxa mínima como taxa mensal padrão
+    methods.setValue("taxa_mensal", dados.taxa_minima?.toString() || "");
+
+    // Preencher campos de valor (se existirem no seu schema)
+    methods.setValue("valor_bruto_minimo", dados.valor_bruto_minimo?.toString() || "");
+    methods.setValue("valor_bruto_maximo", dados.valor_bruto_maximo?.toString() || "");
+
+    // Preencher campos de idade (se existirem no seu schema)
+    methods.setValue("idade_minima", dados.idade_minima?.toString() || "");
+    methods.setValue("idade_maxima", dados.idade_maxima?.toString() || "");
+
+    // Configurar checkboxes baseado nos dados da RO
+    setaSeguro(dados.usa_seguro === 1);
+    setaTac(dados.usa_tac === 1);
+
+    // Mostrar mensagem de sucesso
+    toast.success(`Campos preenchidos com os dados da RO: ${roSelecionada.nome}`);
+  };
+
   // Função para salvar tudo de uma vez
   const onSubmit = async (data: FormData) => {
     console.log("Dados do formulário:", data);
@@ -398,7 +437,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           bancarizador: data.bancalizador,
           seguradora: data.seguradora,
           seguro: data.seguro,
-          rotina_operacional_hash: data.RO,
+          rotina_operacional_hash: data.RO
         },
         {
           headers: {
@@ -511,7 +550,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto rounded-2xl border bg-white p-6 sm:w-1/2">
+        className="fixed top-0 right-0 z-50 h-full w-full rounded-2xl border bg-white p-6 sm:w-1/2">
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
@@ -737,6 +776,48 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                 </CardContent>
               </Card>
 
+              {/* Seção do RO */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Regra do produto</CardTitle>
+                  <p className="dark:text-200 text-sm text-gray-600">
+                    Selecione o Roteiro Operacional deste produto.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={methods.control}
+                    name="RO"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de RO</FormLabel>
+                        <FormControl>
+                          <Combobox
+                            data={roList}
+                            displayField="nome"
+                            value={roList.find((p) => p.id === field.value) || null}
+                            onChange={(selected) => {
+                              field.onChange(selected?.id || "");
+                              if (selected) {
+                                preencherCamposDaRO(selected); // ADICIONE ESTA LINHA
+                              } else {
+                                // Opcional: Limpar campos se nenhuma RO for selecionada
+                                methods.setValue("prazo_minimo", "");
+                                methods.setValue("prazo_maximo", "");
+                                methods.setValue("taxa_mensal", "");
+                              }
+                            }}
+                            searchFields={["nome"]}
+                            placeholder="Selecione o Tipo de RO"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
               {/* Seção da Taxa */}
               <Card>
                 <CardHeader>
@@ -936,38 +1017,6 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       />
                     </CardContent>
                   </Card>
-                </CardContent>
-              </Card>
-
-              {/* Seção do RO */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Regra do produto</CardTitle>
-                  <p className="dark:text-200 text-sm text-gray-600">
-                    Selecione o Roteiro Operacional deste produto.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={methods.control}
-                    name="RO"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de RO</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={RO}
-                            displayField="nome"
-                            value={RO.find((p) => p.id === field.value) || null}
-                            onChange={(selected) => field.onChange(selected?.id || "")}
-                            searchFields={["nome"]}
-                            placeholder="Selecione o Tipo de RO"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
               </Card>
             </div>

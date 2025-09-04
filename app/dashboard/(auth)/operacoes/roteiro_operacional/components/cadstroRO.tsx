@@ -50,6 +50,7 @@ const createSchema = z.object({
 
   // novos campos
   dia_corte_competencia: z.string().min(1, "Dia de corte da competência é obrigatório"),
+  validade_ccb: z.string().min(1, "Validade CCB é obrigatória"),
   dia_recebimento: z.string().min(1, "Dia de recebimento é obrigatório"),
   dia_corte_folha_pagamento: z.string().min(1, "Dia de corte da folha é obrigatório"),
   status: z.enum(["0", "1"], { message: "Selecione um status" })
@@ -99,6 +100,7 @@ export default function CadastroRoteiroModal({
       valor_bruto_maximo: "",
       taxa_minima: "",
       taxa_maxima: "",
+      validade_ccb: "",
       usa_margem_seguranca: "false",
       valor_margem_seguranca: "",
       // tac_min: "",
@@ -145,9 +147,25 @@ export default function CadastroRoteiroModal({
     { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
     // { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
     // { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" },
-    { name: "dia_corte_competencia", label: "Dia de Corte da Competência", placeholder: "1", type: "number" },
+    {
+      name: "dia_corte_competencia",
+      label: "Dia de Corte da Competência",
+      placeholder: "1",
+      type: "number"
+    },
     { name: "dia_recebimento", label: "Dia de Recebimento", placeholder: "1", type: "number" },
-    { name: "dia_corte_folha_pagamento", label: "Dia de Corte da Folha", placeholder: "1", type: "number" }
+    {
+      name: "dia_corte_folha_pagamento",
+      label: "Dia de Corte da Folha",
+      placeholder: "1",
+      type: "number"
+    },
+    {
+      name: "validade_ccb",
+      label: "Validade CCB",
+      placeholder: "Dias que o CCB é válido",
+      type: "number"
+    }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -195,7 +213,7 @@ export default function CadastroRoteiroModal({
     }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -226,6 +244,7 @@ export default function CadastroRoteiroModal({
         valor_bruto_maximo: parseFloat(data.valor_bruto_maximo),
         taxa_minima: parseFloat(data.taxa_minima),
         taxa_maxima: parseFloat(data.taxa_maxima),
+        validade_ccb: data.validade_ccb,
         usa_margem_seguranca: data.usa_margem_seguranca === "true" ? 1 : 0,
         margem_seguranca:
           data.usa_margem_seguranca === "true" ? parseFloat(data.valor_margem_seguranca || "0") : 0,
@@ -357,7 +376,7 @@ export default function CadastroRoteiroModal({
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form

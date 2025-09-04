@@ -54,6 +54,7 @@ export type RoteiroOperacional = {
   valor_bruto_maximo: string;
   taxa_minima: number; // Add this
   taxa_maxima: number; // Add this
+  validade_ccb: number;
   usa_limite_proposta: number;
   usa_margem_seguranca: number;
   valor_limite_proposta: number;
@@ -155,16 +156,21 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
     {
       accessorKey: "taxa_minima",
       header: "Taxa Mínima",
-      cell: ({ row }) => <span>R$ {Number(row.original.taxa_minima).toFixed(2)}</span>
+      cell: ({ row }) => <span>{Number(row.original.taxa_minima)}</span>
     },
     {
       accessorKey: "taxa_maxima",
       header: "Taxa Máxima",
-      cell: ({ row }) => <span>R$ {Number(row.original.taxa_maxima).toFixed(2)}</span>
+      cell: ({ row }) => <span>{Number(row.original.taxa_maxima)}</span>
     },
     {
       accessorKey: "usa_limite_proposta",
       header: "Usa Limite Proposta",
+      cell: ({ row }) => <span>{row.original.usa_limite_proposta ? "Sim" : "Não"}</span>
+    },
+    {
+      accessorKey: "validade_ccb",
+      header: "Validade CCB",
       cell: ({ row }) => <span>{row.original.usa_limite_proposta ? "Sim" : "Não"}</span>
     },
     {
@@ -193,7 +199,9 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
 
             setRoteiros((prev) =>
               prev.map((item) =>
-                item.rotina_operacional_hash === row.original.rotina_operacional_hash ? { ...item, status: novoStatus } : item
+                item.rotina_operacional_hash === row.original.rotina_operacional_hash
+                  ? { ...item, status: novoStatus }
+                  : item
               )
             );
 
