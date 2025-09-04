@@ -21,7 +21,7 @@ export default function Page() {
         <CampoBoasVindas />
 
         <Button id="" onClick={() => setIsCadastroOpen(true)}>
-          Novo Produto
+          Novo produto
         </Button>
       </div>
       

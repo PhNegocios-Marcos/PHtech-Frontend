@@ -196,7 +196,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
@@ -206,7 +206,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
             setIsEditarOpen(true);
           }}
           title="Editar produto">
-          <Search className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
