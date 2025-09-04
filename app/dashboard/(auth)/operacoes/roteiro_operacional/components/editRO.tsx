@@ -37,8 +37,8 @@ const roteiroSchema = z
     prazo_maximo: z.number(),
     valor_bruto_minimo: z.number(),
     valor_bruto_maximo: z.number(),
-    tac_min: z.number(),
-    tac_max: z.number(),
+    taxa_minima: z.number(),
+    taxa_maxima: z.number(),
     usuario_atualizacao: z.string().optional(),
     usa_limite_proposta: z.number().int().min(0).max(1).default(0),
     valor_limite_proposta: z.number().optional(),
@@ -133,8 +133,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       type: "text", // Alterado para text
       component: "numberFormat" // Adicione esta linha para identificar o componente
     },
-    { name: "tac_min", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
-    { name: "tac_max", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
+    { name: "taxa_minima", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
+    { name: "taxa_maxima", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [

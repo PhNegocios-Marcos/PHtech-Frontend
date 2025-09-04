@@ -52,8 +52,8 @@ export type RoteiroOperacional = {
   prazo_maximo: number;
   valor_bruto_minimo: string;
   valor_bruto_maximo: string;
-  tac_min: number; // Add this
-  tac_max: number; // Add this
+  taxa_minima: number; // Add this
+  taxa_maxima: number; // Add this
   usa_limite_proposta: number;
   usa_margem_seguranca: number;
   valor_limite_proposta: number;
@@ -153,15 +153,15 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
       cell: ({ row }) => <span>{row.original.usa_margem_seguranca ? "Sim" : "Não"}</span>
     },
     {
-      accessorKey: "tac_min",
-      header: "TAC Mínima",
+      accessorKey: "taxa_minima",
+      header: "Taxa Mínima",
       cell: ({ row }) => (
         <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
       )
     },
     {
-      accessorKey: "tac_max",
-      header: "TAC Máxima",
+      accessorKey: "taxa_maxima",
+      header: "Taxa Máxima",
       cell: ({ row }) => (
         <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
       )
