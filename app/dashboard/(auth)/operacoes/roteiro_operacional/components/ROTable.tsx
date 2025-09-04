@@ -156,14 +156,14 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
       accessorKey: "taxa_minima",
       header: "Taxa Mínima",
       cell: ({ row }) => (
-        <span>R$ {parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
+        <span>{parseFloat(row.original.tarifa_cadastro_minima).toFixed(2)}</span>
       )
     },
     {
       accessorKey: "taxa_maxima",
       header: "Taxa Máxima",
       cell: ({ row }) => (
-        <span>R$ {parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
+        <span>{parseFloat(row.original.tarifa_cadastro_maxima).toFixed(2)}</span>
       )
     },
     {
