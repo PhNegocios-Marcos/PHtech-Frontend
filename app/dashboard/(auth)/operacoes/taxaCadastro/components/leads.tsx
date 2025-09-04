@@ -30,9 +30,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type TaxaLinha = {
   cad_tac_id: number;
-  cad_tac_valor_minimo: string;
-  cad_tac_valor_maximo: string;
-  cad_tac_valor_cobrado: string;
+  cad_tac_valor_minimo: number;
+  cad_tac_valor_maximo: number;
+  cad_tac_valor_cobrado: number;
 };
 
 export function TaxaCadastroTable() {
@@ -87,7 +87,7 @@ export function TaxaCadastroTable() {
     const filtroLower = filtro.toLowerCase();
     return taxas.filter((s) =>
       [s.cad_tac_valor_minimo, s.cad_tac_valor_maximo, s.cad_tac_valor_cobrado].some((campo) =>
-        (campo || "").toLowerCase().includes(filtroLower)
+        String(campo).toLowerCase().includes(filtroLower)
       )
     );
   }, [filtro, taxas]);
