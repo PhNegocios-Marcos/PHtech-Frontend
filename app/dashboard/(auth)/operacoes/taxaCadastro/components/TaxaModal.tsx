@@ -7,9 +7,9 @@ import { toast } from "sonner";
 
 export type Taxa = {
   cad_tac_id: number;
-  cad_tac_valor_minimo: string;
-  cad_tac_valor_maximo: string;
-  cad_tac_valor_cobrado: string;
+  cad_tac_valor_minimo: number;
+  cad_tac_valor_maximo: number;
+  cad_tac_valor_cobrado: number;
 };
 
 type TaxaDrawerProps = {
