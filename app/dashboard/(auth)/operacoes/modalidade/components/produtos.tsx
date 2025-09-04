@@ -76,9 +76,9 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
     { accessorKey: "modalidade_credito_nome", header: "Nome" },
     { accessorKey: "modalidade_credito_digito_prefixo", header: "Prefixo" },
     { accessorKey: "modalidade_credito_cor_grafico", header: "Cor Gráfico" },
-    {
-      accessorKey: "modalidade_credito_status",
-      header: "Alterar Status",
+       {
+      id: "status",
+      header: "Status",
       cell: ({ row }) => {
         const ativo = row.original.modalidade_credito_status === 1;
 
@@ -100,16 +100,13 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
               }
             );
 
-            // 🔥 Atualiza diretamente no estado produtos
             setProdutos((prev) =>
               prev.map((item) =>
-                item.modalidade_credito_id === row.original.modalidade_credito_id
-                  ? { ...item, status: novoStatus }
-                  : item
+                item.modalidade_credito_id === row.original.modalidade_credito_id ? { ...item, modalidade_credito_status: novoStatus } : item
               )
             );
 
-            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
+            toast.success("Status atualizado com sucesso!", {
               style: {
                 background: "var(--toast-success)",
                 color: "var(--toast-success-foreground)",
@@ -117,26 +114,21 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
               }
             });
           } catch (error: any) {
-            console.error("Erro ao atualizar status", error);
             toast.error(
-              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
-              {
-                style: {
-                  background: "var(--toast-error)",
-                  color: "var(--toast-error-foreground)",
-                  boxShadow: "var(--toast-shadow)"
-                }
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
               }
-            );
+            });
           }
         };
 
         return (
           <Badge
             onClick={toggleStatus}
-            className={`w-24 cursor-pointer ${
-              ativo ? "" : "border border-red-500 bg-transparent text-red-500"
-            }`}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>

@@ -121,7 +121,7 @@ export default function ListaClientes() {
         return new Date(row.original.nome).toLocaleDateString();
       }
     },
-    {
+        {
       id: "status",
       header: "Status",
       cell: ({ row }) => {
@@ -130,10 +130,11 @@ export default function ListaClientes() {
         const toggleStatus = async () => {
           try {
             const novoStatus = ativo ? 0 : 1;
+
             await axios.put(
-              `${API_BASE_URL}/cliente/atualizar`,
+              `${API_BASE_URL}/cliente/${row.original.hash}`,
               {
-                cpf: row.original.cpf,
+                id: row.original.hash,
                 status: novoStatus
               },
               {
@@ -144,23 +145,35 @@ export default function ListaClientes() {
               }
             );
 
-            setClientes(prev =>
-              prev.map(item =>
-                item.cpf === row.original.cpf ? { ...item, status: novoStatus } : item
+            setClientes((prev) =>
+              prev.map((item) =>
+                item.hash === row.original.hash ? { ...item, status: novoStatus } : item
               )
             );
 
-            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`);
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
           } catch (error: any) {
-            console.error("Erro ao atualizar status", error);
-            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
           }
         };
 
         return (
           <Badge
             onClick={toggleStatus}
-            className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
             variant={ativo ? "default" : "outline"}>
             {ativo ? "Ativo" : "Inativo"}
           </Badge>

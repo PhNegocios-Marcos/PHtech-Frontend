@@ -92,6 +92,41 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
     fetchSeguradoras();
   }, [token, isOpen]);
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos ou vazio
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value);
+    }
+  };
+
+  // Função para formatar valores monetários
+  const formatCurrency = (value: string): string => {
+    if (!value) return "";
+    
+    // Remove tudo que não é número ou ponto decimal
+    let cleaned = value.replace(/[^\d.]/g, '');
+    
+    // Permite apenas um ponto decimal
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limita a 2 casas decimais após o ponto
+    if (parts.length === 2) {
+      cleaned = parts[0] + '.' + parts[1].slice(0, 2);
+    }
+    
+    return cleaned;
+  };
+
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const formattedValue = formatCurrency(e.target.value);
+    field.onChange(formattedValue);
+  };
+
   const handleSeguradoraChange = (item: SeguradoraOption) => {
     setSelectedSeguradora(item);
     methods.setValue("seguradora_hash", item.seguradora_hash);
@@ -188,7 +223,13 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         <FormItem>
                           <FormLabel>Faixa Inicial</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite a faixa inicial" {...field} />
+                            <Input 
+                              placeholder="Digite a faixa inicial" 
+                              value={field.value || ""}
+                              onChange={(e) => handleNumberChange(e, field)}
+                              min="0"
+                              type="number"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -202,7 +243,13 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                         <FormItem>
                           <FormLabel>Faixa Final</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite a faixa final" {...field} />
+                            <Input 
+                              placeholder="Digite a faixa final" 
+                              value={field.value || ""}
+                              onChange={(e) => handleNumberChange(e, field)}
+                              min="0"
+                              type="number"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -214,9 +261,15 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                       name="valor_seguradora"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor da Seguradora</FormLabel>
+                          <FormLabel>Valor da Seguradora (R$)</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o valor da seguradora" {...field} />
+                            <Input 
+                              placeholder="Digite o valor da seguradora" 
+                              value={field.value || ""}
+                              onChange={(e) => handleCurrencyChange(e, field)}
+                              min="0"
+                              type="text"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -228,9 +281,15 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
                       name="valor_pago_cliente"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor Pago pelo Cliente</FormLabel>
+                          <FormLabel>Valor Pago pelo Cliente (R$)</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o valor pago pelo cliente" {...field} />
+                            <Input 
+                              placeholder="Digite o valor pago pelo cliente" 
+                              value={field.value || ""}
+                              onChange={(e) => handleCurrencyChange(e, field)}
+                              min="0"
+                              type="text"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

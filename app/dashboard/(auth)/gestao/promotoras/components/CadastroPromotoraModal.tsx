@@ -488,6 +488,15 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     }
   }
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value === "" ? "" : Number(value));
+    }
+  };
+
   // Campos fixos
   const formFields = [
     { name: "nome", label: "Nome", placeholder: "Digite o nome" },
@@ -555,8 +564,8 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
           step="0.01"
           min={0}
           max={100}
-          {...field}
-          onChange={(e) => field.onChange(Number(e.target.value))}
+          value={field.value || ""}
+          onChange={(e) => handleNumberChange(e, field)}
         />
       ),
       showIf: () => masterValue === "0"
@@ -611,6 +620,17 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                               <FormControl>
                                 {component ? (
                                   component(field)
+                                ) : name === "rateio_master" ? (
+                                  <Input
+                                    type={type || "text"}
+                                    placeholder={placeholder}
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    maxLength={maxLength}
+                                    value={field.value || ""}
+                                    onChange={(e) => handleNumberChange(e, field)}
+                                  />
                                 ) : (
                                   <Input
                                     type={type || "text"}

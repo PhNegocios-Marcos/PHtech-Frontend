@@ -48,9 +48,17 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
     methods.reset(data);
   }, [data, methods]);
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value);
+    }
+  };
+
   const onSubmit = async (formData: Promotora) => {
     if (!token) {
-      // console.error("Token global não definido! Autenticação inválida.");
       toast.error("Token de autenticação não encontrado.", {
         style: {
           background: "var(--toast-error)",
@@ -86,7 +94,6 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       onClose();
       window.location.reload();
     } catch (error: any) {
-      // console.error("Erro ao atualizar promotora:", error.response?.data || error.message);
       toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
         style: {
           background: "var(--toast-error)",
@@ -191,7 +198,10 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
                     <FormItem>
                       <FormLabel>Rateio Master</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          value={field.value || ""}
+                          onChange={(e) => handleNumberChange(e, field)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -205,7 +215,10 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
                     <FormItem>
                       <FormLabel>Rateio Sub</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          value={field.value || ""}
+                          onChange={(e) => handleNumberChange(e, field)}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

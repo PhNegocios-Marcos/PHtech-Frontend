@@ -56,6 +56,15 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
 
   const { token } = useAuth();
 
+  // Função para evitar números negativos
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    // Permite apenas números positivos ou vazio
+    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+      field.onChange(value === "" ? undefined : parseInt(value));
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Token não encontrado. Faça login.");
@@ -142,9 +151,9 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                             <Input
                               type="number"
                               placeholder="Idade mínima"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseInt(e.target.value))}
                               value={field.value === undefined ? "" : field.value}
+                              onChange={(e) => handleNumberChange(e, field)}
+                              min="0"
                             />
                           </FormControl>
                           <FormMessage />

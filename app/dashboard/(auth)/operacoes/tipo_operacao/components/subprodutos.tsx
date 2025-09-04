@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   ColumnDef,
   flexRender,
@@ -24,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -62,9 +64,65 @@ export function SubprodutosTable() {
     { accessorKey: "produtos_subprodutos_nome", header: "Nome" },
     { accessorKey: "produtos_subprodutos_atividade", header: "Atividade" },
     {
-      accessorKey: "produtos_subprodutos_status",
+      id: "status",
       header: "Status",
-      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+      cell: ({ row }) => {
+        const ativo = row.original.produtos_subprodutos_status === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/subprodutos/atualizar`,
+              {
+                id: row.original.produtos_subprodutos_id,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setSubprodutos((prev) =>
+              prev.map((item) =>
+                item.produtos_subprodutos_id === row.original.produtos_subprodutos_id ? { ...item, produtos_subprodutos_status: novoStatus } : item
+              )
+            );
+
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            toast.error(
+              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
+              {
+                style: {
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  boxShadow: "var(--toast-shadow)"
+                }
+              }
+            );
+          }
+        };
+
+        return (
+          <Badge
+            onClick={toggleStatus}
+            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
+            variant={ativo ? "default" : "outline"}>
+            {ativo ? "Ativo" : "Inativo"}
+          </Badge>
+        );
+      }
     },
     {
       id: "editar",

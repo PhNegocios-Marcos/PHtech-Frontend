@@ -45,6 +45,26 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
 
   const { token } = useAuth();
 
+  // Função para formatar o CNPJ
+  const formatCNPJ = (value: string): string => {
+    const cleaned = value.replace(/\D/g, "");
+    
+    if (cleaned.length <= 2) {
+      return cleaned;
+    }
+    if (cleaned.length <= 5) {
+      return `${cleaned.slice(0, 2)}.${cleaned.slice(2)}`;
+    }
+    if (cleaned.length <= 8) {
+      return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5)}`;
+    }
+    if (cleaned.length <= 12) {
+      return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5, 8)}/${cleaned.slice(8)}`;
+    }
+    
+    return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5, 8)}/${cleaned.slice(8, 12)}-${cleaned.slice(12, 14)}`;
+  };
+
   const onSubmit = async (data: FormData) => {
     if (!token) {
       toast.error("Token não encontrado. Faça login.");
@@ -138,7 +158,15 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
                         <FormItem>
                           <FormLabel>CNPJ</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o CNPJ (ex: 12.345.678/0001-90)" {...field} />
+                            <Input 
+                              placeholder="Digite o CNPJ (ex: 12.345.678/0001-90)" 
+                              value={field.value}
+                              onChange={(e) => {
+                                const formattedValue = formatCNPJ(e.target.value);
+                                field.onChange(formattedValue);
+                              }}
+                              maxLength={18}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
