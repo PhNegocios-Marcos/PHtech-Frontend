@@ -178,8 +178,6 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       return;
     }
 
-    console.log(data);
-
     const payload = {
       ...data,
       valor_limite_proposta:
@@ -228,7 +226,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
     });
     onClose();
   };
-
+  
   return (
     <>
       <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
@@ -265,6 +263,8 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      
+
                       {formFields.map((fieldConfig) => (
                         <FormField
                           key={fieldConfig.name}
@@ -280,10 +280,12 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                                   min={fieldConfig.type === "number" ? 0 : undefined}
                                   value={
                                     field.value === undefined || field.value === null
-                                      ? ""
-                                      : String(field.value)
+                                      ? "" : 
+                                    String(field.value)
                                   }
                                   onChange={(e) => {
+                                    console.log(field.value);
+
                                     if (fieldConfig.type === "number") {
                                       const numValue = e.target.value
                                         ? Number(e.target.value)
