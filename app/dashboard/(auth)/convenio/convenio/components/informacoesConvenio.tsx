@@ -144,6 +144,7 @@ export function ConvenioEdit({ convenio, onClose, onRefresh }: ConvenioDrawerPro
                     <FormLabel>Prefixo</FormLabel>
                     <FormControl>
                       <Input
+                        min={0}
                         type="number"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
