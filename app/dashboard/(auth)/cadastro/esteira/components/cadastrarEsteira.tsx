@@ -57,6 +57,7 @@ import {
   CheckCircledIcon,
   CircleIcon
 } from "@radix-ui/react-icons";
+import { X } from "lucide-react";
 
 // Definição do schema com Zod
 const formSchema = z.object({
@@ -425,13 +426,7 @@ export default function CadastroEsteira({
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Cadastrar Nova Esteira</h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
 
             <Card className="flex-grow overflow-auto">

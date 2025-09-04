@@ -18,6 +18,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const taxaSchema = z.object({
   cad_tac_id: z.number(),
@@ -135,13 +136,7 @@ export function TaxaEditForm({ taxa, onClose }: TaxaEditProps) {
               <h2 className="text-xl font-semibold">
                 Editar faixa de taxa: <span className="text-primary">{taxa.cad_tac_id}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
               <Card className="col-span-2">

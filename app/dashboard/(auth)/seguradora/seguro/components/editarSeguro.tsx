@@ -19,6 +19,7 @@ import {
   Form
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const seguroSchema = z.object({
   seguro_faixa_hash: z.string(),
@@ -188,13 +189,7 @@ export function SeguroEditForm({ seguro, onClose }: SeguroEditProps) {
               <h2 className="text-xl font-semibold">
                 Faixa de Seguro: <span className="text-primary">{seguro.nome}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <form
               onSubmit={(e) => {

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/form";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 const schema = z.object({
   nome_taxa: z.string().min(1, "Nome da tabela é obrigatório"),
@@ -223,13 +224,7 @@ export default function CadastroTabelaModal({ isOpen, onClose, produto }: Cadast
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Cadastrar Nova Tabela</h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
 
             <Card className="mt-5 flex-grow overflow-auto">

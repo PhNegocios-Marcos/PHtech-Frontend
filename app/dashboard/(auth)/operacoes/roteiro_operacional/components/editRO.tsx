@@ -27,6 +27,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 const roteiroSchema = z
   .object({
@@ -256,13 +257,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
               <h2 className="text-xl font-semibold">
                 Roteiro Operacional: <span className="text-primary">{roteiro.nome}</span>
               </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-2xl font-bold hover:text-gray-900"
-                aria-label="Fechar">
-                ×
-              </button>
+              <X onClick={onClose} className="cursor-pointer"/>
             </div>
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
