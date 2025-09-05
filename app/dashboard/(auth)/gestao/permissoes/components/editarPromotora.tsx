@@ -22,6 +22,13 @@ import {
 } from "@/components/ui/form";
 import { X } from "lucide-react";
 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+
 const permissoesSchema = z.object({
   id: z.string(),
   nome: z.string().min(5, "Por favor, defina um nome para esta permissão."),
@@ -34,9 +41,9 @@ type EquipeFormValues = z.infer<typeof permissoesSchema> & {
 };
 
 type EquipeEditProps = {
-  permissoes: EquipeFormValues;
+  permissoes: EquipeFormValues | null;
   onClose: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -45,13 +52,13 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
   const router = useRouter();
   const methods = useForm<EquipeFormValues>({
     resolver: zodResolver(permissoesSchema),
-    defaultValues: permissoes
+    defaultValues: permissoes || { id: "", nome: "", status: 1 }
   });
 
   const { token } = useAuth();
 
   useEffect(() => {
-    methods.reset(permissoes);
+    methods.reset(permissoes || { id: "", nome: "", status: 1 });
   }, [permissoes, methods]);
 
   const statusOptions = [
@@ -59,17 +66,14 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
     { id: 0, name: "Inativo" }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   const onSubmit = async (data: EquipeFormValues) => {
@@ -88,7 +92,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
     try {
       const payload: Partial<EquipeFormValues> = { id: data.id, status: data.status };
 
-      if (data.nome && data.nome !== permissoes.nome) {
+      if (data.nome && data.nome !== permissoes?.nome) {
         payload.nome = data.nome;
       }
 
@@ -151,71 +155,67 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
   };
 
   return (
-    <>
-      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true"></div>
+    <Sheet open={!!permissoes} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="w-1/3 max-w-full! px-5 rounded-l-xl">
+        <SheetHeader className="px-0">
+          <SheetTitle className="text-xl font-semibold">
+            Editar permissão: <span className="text-primary">{permissoes?.nome}</span>
+          </SheetTitle>
+        </SheetHeader>
 
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Permissão: <span className="text-primary">{permissoes.nome}</span></h2>
-                <X onClick={onClose} className="cursor-pointer"/>
+              <Card>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={methods.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome da permissão</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={methods.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={statusOptions}
+                              displayField="name"
+                              value={statusOptions.find((opt) => opt.id === field.value) ?? null}
+                              onChange={(selected) => field.onChange(selected?.id)}
+                              searchFields={["name"]}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="mb-6 flex flex-col mt-auto justify-end gap-4">
+                <Button type="submit" className="py-6">Salvar alterações</Button>
+                <Button type="button" variant="outline" onClick={handleClose}>
+                  Cancelar
+                </Button>
               </div>
-                <Card className="col-span-2">
-                  <CardContent>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <FormField
-                        control={methods.control}
-                        name="nome"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome da permissão</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={methods.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <FormControl>
-                              <Combobox
-                                data={statusOptions}
-                                displayField="name"
-                                value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                                onChange={(selected) => field.onChange(selected?.id)}
-                                searchFields={["name"]}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button type="button" variant="outline" onClick={handleClose}>
-                        Cancelar
-                      </Button>
-                      
-                      <Button type="submit" >Salvar alterações</Button>
-                    </div>
-                  </CardContent>
-                </Card>
             </form>
           </Form>
         </FormProvider>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -380,7 +380,6 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
         </div>
 
         <PromotoraDrawer
-          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           promotora={selectedPromotora as any}
         />

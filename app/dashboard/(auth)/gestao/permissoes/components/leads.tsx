@@ -6,7 +6,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { CarregandoTable } from "./leads_carregando";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -18,16 +17,11 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Ellipsis, Pencil, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { PermissoesDrawer } from "./PermissoesModal";
 import { toast } from "sonner";
+
+import { EquipeEditForm } from "../components/editarPromotora";
+import { Pencil } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -41,40 +35,29 @@ type PermissaoLinha = {
 export function PermissoesTable() {
   const { token } = useAuth();
   const [permissoes, setPermissoes] = React.useState<PermissaoLinha[]>([]);
-  const [filtro, setFiltro] = React.useState("");
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [selectedEquipe, setSelectedEquipe] = React.useState<PermissaoLinha | null>(null);
+  const [selectedPermissao, setSelectedPermissao] = React.useState<PermissaoLinha | null>(null);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   const router = useRouter();
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
+      if (!token) {
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    }, 2000);
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchPermissoes() {
       if (!token) {
         toast.error("Autenticação necessária", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: "Faça login para acessar as permissões"
+          description: "Faça login para acessar as permissões",
         });
         return;
       }
-
       try {
         const res = await fetch(`${API_BASE_URL}/permissoes/listar`, {
           headers: {
@@ -83,13 +66,12 @@ export function PermissoesTable() {
           }
         });
         if (!res.ok) throw new Error("Erro ao buscar permissões");
-
         const data = await res.json();
 
-        const arr: PermissaoLinha[] = [];
+        const lista: PermissaoLinha[] = [];
         for (const [categoria, permissoesArray] of Object.entries(data)) {
           for (const p of permissoesArray as any[]) {
-            arr.push({
+            lista.push({
               categoria,
               id: p.id,
               nome: p.nome,
@@ -97,40 +79,22 @@ export function PermissoesTable() {
             });
           }
         }
-
-        setPermissoes(arr);
-        // toast.success("Permissões carregadas", {
-        //   style: {
-        //     background: 'var(--toast-success)',
-        //     color: 'var(--toast-success-foreground)',
-        //     boxShadow: 'var(--toast-shadow)'
-        //   },
-        //   description: `${arr.length} permissões encontradas`
-        // });
+        setPermissoes(lista);
       } catch (error) {
-        console.error("Erro ao carregar permissões:", error);
-        toast.error("Falha ao carregar permissões", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: "Tente novamente mais tarde"
-        });
+        toast.error("Falha ao carregar permissões. Tente novamente mais tarde.");
       }
     }
-
     fetchPermissoes();
   }, [token, refreshKey]);
 
   const filteredPermissoes = React.useMemo(() => {
-    const filtroLower = filtro.toLowerCase();
+    const filtroLower = globalFilter.toLowerCase();
     return permissoes.filter(
       (p) =>
         p.nome.toLowerCase().includes(filtroLower) ||
         p.categoria.toLowerCase().includes(filtroLower)
     );
-  }, [filtro, permissoes]);
+  }, [globalFilter, permissoes]);
 
   const columns: ColumnDef<PermissaoLinha>[] = [
     {
@@ -154,16 +118,8 @@ export function PermissoesTable() {
 
             await axios.put(
               `${API_BASE_URL}/permissoes/atualizar`,
-              {
-                id: row.original.id,
-                status: novoStatus
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json"
-                }
-              }
+              { id: row.original.id, status: novoStatus },
+              { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
             );
 
             setPermissoes((prev) =>
@@ -172,22 +128,9 @@ export function PermissoesTable() {
               )
             );
 
-            toast.success("Status atualizado com sucesso!", {
-              style: {
-                background: "var(--toast-success)",
-                color: "var(--toast-success-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toast.success("Status atualizado com sucesso!");
           } catch (error: any) {
-            toast.error(
-              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
-              style: {
-                background: "var(--toast-error)",
-                color: "var(--toast-error-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
           }
         };
 
@@ -195,7 +138,8 @@ export function PermissoesTable() {
           <Badge
             onClick={toggleStatus}
             className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
-            variant={ativo ? "default" : "outline"}>
+            variant={ativo ? "default" : "outline"}
+          >
             {ativo ? "Ativo" : "Inativo"}
           </Badge>
         );
@@ -208,9 +152,12 @@ export function PermissoesTable() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => handleRowDoubleClick(row.original)}
-          title="Editar permissão">
-          <Pencil className="h-4 w-4" />
+          onClick={() => {
+            setSelectedPermissao(row.original);
+          }}
+          title="Editar permissão"
+        >
+          <Pencil />
         </Button>
       ),
       enableSorting: false,
@@ -222,146 +169,72 @@ export function PermissoesTable() {
     data: filteredPermissoes,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { globalFilter },
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      return String(row.getValue(columnId))
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
-    },
-    state: {
-      globalFilter
-    }
+    globalFilterFn: (row, columnId, filterValue) =>
+      String(row.getValue(columnId)).toLowerCase().includes(String(filterValue).toLowerCase())
   });
 
-  const handleRowDoubleClick = (equipe: PermissaoLinha) => {
-    setSelectedEquipe(equipe);
-    // toast.info("Editando permissão", {
-    //   style: {
-    //     background: 'var(--toast-info)',
-    //     color: 'var(--toast-info-foreground)',
-    //     boxShadow: 'var(--toast-shadow)'
-    //   },
-    //   description: equipe.nome
-    // });
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedEquipe(null);
-    // toast.info("Edição concluída", {
-    //   style: {
-    //     background: 'var(--toast-info)',
-    //     color: 'var(--toast-info-foreground)',
-    //     boxShadow: 'var(--toast-shadow)'
-    //   }
-    // });
-  };
-
-  const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
-    // toast.success("Lista atualizada", {
-    //   style: {
-    //     background: "var(--toast-success)",
-    //     color: "var(--toast-success-foreground)",
-    //     boxShadow: "var(--toast-shadow)"
-    //   }
-    // });
-  };
+  function closeSheet() {
+    setSelectedPermissao(null);  // fechar Sheet porque permissao=null fecha o sheet no componente filho
+    setRefreshKey((prev) => prev + 1);  // força recarregar lista atualizada
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <>
       <Card className="col-span-2">
-        <>
-          <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Lista de permissões</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <div className="mb-4 flex items-center gap-2">
-              <Input
-                placeholder="Filtrar por qualquer campo..."
-                value={globalFilter}
-                onChange={(event) => setGlobalFilter(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-auto">
-                    Colunas <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
+        <CardHeader className="flex justify-between">
+          <CardTitle>Lista de permissões</CardTitle>
+          <Input
+            placeholder="Filtrar por qualquer campo..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="max-w-sm"
+          />
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {!header.isPlaceholder && (
+                          typeof header.column.columnDef.header === "function"
+                            ? header.column.columnDef.header(header.getContext() as any)
+                            : String(header.column.columnDef.header)
+                        )}
+                      </TableHead>
                     ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {!header.isPlaceholder &&
-                            (typeof header.column.columnDef.header === "function"
-                              ? header.column.columnDef.header(header.getContext() as any)
-                              : String(header.column.columnDef.header))}
-                        </TableHead>
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
                       ))}
                     </TableRow>
-                  ))}
-                </TableHeader>
-
-                <TableBody>
-                  {table.getRowModel().rows.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        onDoubleClick={() => handleRowDoubleClick(row.original)}
-                        className="hover:bg-muted cursor-pointer">
-                        {row.getVisibleCells().map((cell, index) => {
-                          const isLast = index === row.getVisibleCells().length - 1;
-                          return (
-                            <TableCell
-                              key={cell.id}
-                              className={`truncate overflow-hidden whitespace-nowrap ${
-                                isLast ? "w-16" : "w-auto"
-                              }`}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <CarregandoTable />
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </>
+                  ))
+                ) : (
+                  <CarregandoTable />
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
       </Card>
-      <PermissoesDrawer
-        isOpen={!!selectedEquipe}
-        permissao={selectedEquipe}
-        onClose={() => {
-          handleCloseDrawer();
-          handleRefresh();
-        }}
-        onRefresh={handleRefresh}
+
+      {/* Sheet para editar permissões */}
+      <EquipeEditForm
+        permissoes={selectedPermissao}
+        onClose={closeSheet}
       />
-    </div>
+    </>
   );
 }
