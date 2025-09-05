@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Usuario } from "./leads";
 import { CarregandoTable } from "./leads_carregando";
 import { useRouter } from "next/navigation";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+
 import {
   ColumnDef,
   flexRender,
@@ -52,6 +54,8 @@ type Option = {
 };
 
 export default function Perfil({ usuario, perfis, onClose }: Option) {
+  const podeCriar = useHasPermission("Usuarios_atualizar");
+
   const [loading, setLoading] = useState(false);
   const [perfil, setPerfil] = React.useState<Option[]>([]);
   const [perfisDisponiveis, setPerfisDisponiveis] = React.useState<Option[]>([]);
@@ -103,32 +107,42 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
 
               toast.success("Status atualizado com sucesso!", {
                 style: {
-                  background: 'var(--toast-success)',
-                  color: 'var(--toast-success-foreground)',
-                  border: '1px solid var(--toast-border)',
-                  boxShadow: 'var(--toast-shadow)'
+                  background: "var(--toast-success)",
+                  color: "var(--toast-success-foreground)",
+                  border: "1px solid var(--toast-border)",
+                  boxShadow: "var(--toast-shadow)"
                 }
               });
             } catch (error: any) {
               console.error("Erro ao atualizar status", error);
               toast.error(`Erro ao atualizar status: ${error.message}`, {
                 style: {
-                  background: 'var(--toast-error)',
-                  color: 'var(--toast-error-foreground)',
-                  border: '1px solid var(--toast-border)',
-                  boxShadow: 'var(--toast-shadow)'
+                  background: "var(--toast-error)",
+                  color: "var(--toast-error-foreground)",
+                  border: "1px solid var(--toast-border)",
+                  boxShadow: "var(--toast-shadow)"
                 }
               });
             }
           };
 
           return (
-            <Badge
-              onClick={toggleStatus}
-              className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
-              variant={ativo ? "default" : "outline"}>
-              {ativo ? "Ativo" : "Inativo"}
-            </Badge>
+            <>
+              {podeCriar ? (
+                <Badge
+                  onClick={toggleStatus}
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+                  variant={ativo ? "default" : "outline"}>
+                  {ativo ? "Ativo" : "Inativo"}
+                </Badge>
+              ) : (
+                <Badge
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+                  variant={ativo ? "default" : "outline"}>
+                  {ativo ? "Ativo" : "Inativo"}
+                </Badge>
+              )}
+            </>
           );
         }
       }
@@ -136,7 +150,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
     [token]
   );
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -172,10 +186,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         console.error("Erro ao carregar perfis disponíveis", error);
         toast.error(`Erro ao carregar perfis: ${error.message}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            border: '1px solid var(--toast-border)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            border: "1px solid var(--toast-border)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       }
@@ -212,10 +226,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         console.error("Erro ao carregar perfis do usuário", error);
         toast.error(`Erro ao carregar perfis do usuário: ${error.message}`, {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            border: '1px solid var(--toast-border)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            border: "1px solid var(--toast-border)",
+            boxShadow: "var(--toast-shadow)"
           }
         });
       } finally {
@@ -229,10 +243,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
     if (!perfisSelect) {
       toast.error("Selecione um perfil para vincular", {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -248,7 +262,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
       await axios.post(
         `${API_BASE_URL}/rel_usuario_perfil/criar`,
         {
-          promotora_hash : selectedPromotoraId,
+          promotora_hash: selectedPromotoraId,
           nome: perfisSelect.nome,
           email: usuario.email
         },
@@ -261,10 +275,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
 
       toast.success("Perfil vinculado com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       setRefreshKey((prev) => prev + 1);
@@ -273,10 +287,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
       console.error(error);
       toast.error(`Erro ao vincular perfil: ${error.response?.data?.detail || error.message}`, {
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          border: '1px solid var(--toast-border)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          border: "1px solid var(--toast-border)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
     } finally {
@@ -321,27 +335,29 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="mt-5 mb-5">
-          <div className="space-y-2">
-            <span className="text-muted-foreground text-sm">Perfil</span>
-            <Combobox
-              data={perfisDisponiveis}
-              displayField="nome"
-              value={perfisSelect}
-              onChange={setPerfisSelect}
-              searchFields={["nome"]}
-              placeholder="Selecione um Perfil"
-              className="w-full"
-            />
-            <Button onClick={relacionarPerfil} disabled={loading} className="mt-2">
-              {loading ? "Salvando..." : "Relacionar Perfil"}
-            </Button>
+      {podeCriar && (
+        <CardContent>
+          <div className="mt-5 mb-5">
+            <div className="space-y-2">
+              <span className="text-muted-foreground text-sm">Perfil</span>
+              <Combobox
+                data={perfisDisponiveis}
+                displayField="nome"
+                value={perfisSelect}
+                onChange={setPerfisSelect}
+                searchFields={["nome"]}
+                placeholder="Selecione um Perfil"
+                className="w-full"
+              />
+              <Button onClick={relacionarPerfil} disabled={loading} className="mt-2">
+                {loading ? "Salvando..." : "Relacionar Perfil"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-      
-      <div className="rounded-md border mx-6">
+        </CardContent>
+      )}
+
+      <div className="mx-6 rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

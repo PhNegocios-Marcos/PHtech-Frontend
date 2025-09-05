@@ -91,7 +91,8 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Operacoes_Banco_ver",
       "Chat_ai",
       "Bancalizador_ver",
-      "Credito_ver"
+      "Credito_ver",
+      "Usuarios_atualizar"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

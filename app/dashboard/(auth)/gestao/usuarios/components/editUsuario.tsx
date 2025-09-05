@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import {
   Form,
   FormControl,
@@ -79,6 +80,8 @@ function formatTelefone(telefone: string): string {
 }
 
 export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps) {
+  const podeCriar = useHasPermission("Usuarios_atualizar");
+
   const router = useRouter();
   const methods = useForm<Usuario>({
     resolver: zodResolver(usuarioSchema),
@@ -96,7 +99,7 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
     { id: 0, name: "Inativo" }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -164,9 +167,11 @@ export function UsuarioEdit({ usuario, onClose, onRefresh }: UsuarioDrawerProps)
                   <Button onClick={onClose} variant="outline">
                     Voltar
                   </Button>
-                  <Button className="ml-4" type="submit">
-                    Salvar alterações
-                  </Button>
+                  {podeCriar && (
+                    <Button id="Usuarios_atualizar" className="ml-4" type="submit">
+                      Salvar alterações
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
