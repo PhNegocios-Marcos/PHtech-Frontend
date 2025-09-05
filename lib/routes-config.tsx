@@ -84,7 +84,7 @@ export const page_routes: PageRoutesType[] = [
             // icon: "DoorClosedLocked"
           },
           {
-            id: "Promotoras_ver",
+            id: "Promotora_ver",
             title: "Promotoras",
             href: "/dashboard/gestao/promotoras"
             // icon: "Building"

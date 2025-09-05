@@ -55,7 +55,7 @@ export function useFilteredPageRoutes(): PageRoutesType {
   if (userPermissoes === "acesso_total") {
     allowedRoutes = [
       "Equipes_ver",
-      "Promotoras_ver",
+      "Promotora_ver",
       "Usuarios_ver",
       "Perfis_ver",
       "Gestão_Permissões",
