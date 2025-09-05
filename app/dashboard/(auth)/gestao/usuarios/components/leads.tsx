@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -89,6 +90,8 @@ function formatCpf(cpf: string): string {
 }
 
 export function UsuariosTable() {
+  const podeCriar = useHasPermission("Usuarios_atualizar");
+
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -170,12 +173,22 @@ export function UsuariosTable() {
           };
 
           return (
-            <Badge
-              onClick={toggleStatus}
-              className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
-              variant={ativo ? "default" : "outline"}>
-              {ativo ? "Ativo" : "Inativo"}
-            </Badge>
+            <>
+              {podeCriar ? (
+                <Badge
+                  onClick={toggleStatus}
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border-primary border bg-transparent text-primary"}`}
+                  variant={ativo ? "default" : "outline"}>
+                  {ativo ? "Ativo" : "Inativo"}
+                </Badge>
+              ) : (
+                <Badge
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border-primary border bg-transparent text-primary"}`}
+                  variant={ativo ? "default" : "outline"}>
+                  {ativo ? "Ativo" : "Inativo"}
+                </Badge>
+              )}
+            </>
           );
         }
       },
@@ -198,7 +211,7 @@ export function UsuariosTable() {
     []
   );
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");

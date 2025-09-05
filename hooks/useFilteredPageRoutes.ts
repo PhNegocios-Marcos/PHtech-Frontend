@@ -55,7 +55,7 @@ export function useFilteredPageRoutes(): PageRoutesType {
   if (userPermissoes === "acesso_total") {
     allowedRoutes = [
       "Equipes_ver",
-      "Promotoras_ver",
+      "Promotora_ver",
       "Usuarios_ver",
       "Perfis_ver",
       "Gestão_Permissões",
@@ -90,7 +90,9 @@ export function useFilteredPageRoutes(): PageRoutesType {
       "Config_Banco_ver",
       "Operacoes_Banco_ver",
       "Chat_ai",
-      "Bancalizador_ver"
+      "Bancalizador_ver",
+      "Credito_ver",
+      "Usuarios_atualizar"
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;

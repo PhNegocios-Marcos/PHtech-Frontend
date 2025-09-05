@@ -10,7 +10,7 @@ import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 
 export default function Page() {
   const router = useRouter();
-  const podeCriar = useHasPermission("Operacoes_criar");
+  const podeCriar = useHasPermission("Credito_criar");
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
@@ -19,14 +19,14 @@ export default function Page() {
   };
 
   return (
-    <ProtectedRoute requiredPermission="Operacoes_ver">
+    <ProtectedRoute requiredPermission="Credito_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
           {/* <CustomDateRangePicker /> */}
 
           {podeCriar && (
-            <Button id="Operacoes_criar" onClick={irParaOutraPagina}>
+            <Button id="Credito_criar" onClick={irParaOutraPagina}>
               Nova Simulação
             </Button>
           )}

@@ -18,6 +18,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import {
   Table,
   TableBody,
@@ -50,6 +51,7 @@ type Option = {
 };
 
 export default function Equipes({ usuario, equipes, onClose }: Option) {
+  const podeCriar = useHasPermission("Usuarios_atualizar");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [equipe, setEquipe] = React.useState<Option[]>([]); // para tabela: equipes vinculadas ao usuário
@@ -257,9 +259,11 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
               placeholder="Selecione uma Equipe"
               className="w-full"
             />
-            <Button onClick={relacionarEquipe} disabled={loading} className="mt-2">
-              {loading ? "Salvando..." : "Relacionar Equipe"}
-            </Button>
+            {podeCriar && (
+              <Button onClick={relacionarEquipe} disabled={loading} className="mt-2">
+                {loading ? "Salvando..." : "Relacionar Equipe"}
+              </Button>
+            )}
           </div>
         </div>
 

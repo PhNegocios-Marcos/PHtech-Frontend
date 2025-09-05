@@ -46,7 +46,7 @@ export const page_routes: PageRoutesType[] = [
           //   // icon: "Trash"
           // },
           {
-            id: "Operacoes_ver",
+            id: "Credito_ver",
             title: "Operações",
             href: "/dashboard/credito/operacoes"
             // icon: "Handshake"
@@ -84,7 +84,7 @@ export const page_routes: PageRoutesType[] = [
             // icon: "DoorClosedLocked"
           },
           {
-            id: "Promotoras_ver",
+            id: "Promotora_ver",
             title: "Promotoras",
             href: "/dashboard/gestao/promotoras"
             // icon: "Building"
