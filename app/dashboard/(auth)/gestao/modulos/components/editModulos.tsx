@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { X } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const equipeSchema = z.object({
   id: z.string(),
@@ -108,23 +109,20 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
     };
 
   return (
-    <>
-      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-white p-6 shadow-lg rounded-l-2xl">
+    <Sheet open={!!modulos} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="w-1/3 max-w-full! px-5 rounded-l-xl">
+        <SheetHeader className="px-0">
+          <SheetTitle className="text-xl font-semibold">
+            Editar módulo: <span className="text-primary">{modulos.nome}</span>
+          </SheetTitle>
+        </SheetHeader>
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)}>
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Editar módulo: <span className="text-primary">{modulos.nome}</span></h2>
-                <X onClick={handleClose} className="cursor-pointer"/>
-              </div>
-              <Card className="col-span-2">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="h-full flex flex-col">
+              
+              <Card>
                 <CardContent>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={methods.control}
                       name="nome"
@@ -159,19 +157,19 @@ export function ModulosEditForm({ modulos, onClose }: ModulosEditProps) {
                       )}
                     />
                   </div>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={onClose}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit">Salvar alterações</Button>
-                  </div>
                 </CardContent>
               </Card>
+
+              <div className="mb-6 flex flex-col mt-auto justify-end gap-4">
+                <Button type="submit" className="py-6">Salvar alterações</Button>
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+              </div>
             </form>
           </Form>
         </FormProvider>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
