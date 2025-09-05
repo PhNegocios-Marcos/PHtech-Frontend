@@ -58,6 +58,7 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { maskDate, maskMonth, maskPercentage } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -121,13 +122,13 @@ export default function TabelaProduto({ produto, onClose }: Props) {
 
   const columns: ColumnDef<Produto>[] = [
     { accessorKey: "nome_tabela", header: "Nome" },
-    { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
-    { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
-    { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
-    { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
-    { accessorKey: "vigencia_fim", header: "Vigencia Fim" },
-    { accessorKey: "incrementador", header: "incrementador" },
-    { accessorKey: "periodicidade", header: "periodicidade" },
+    { accessorKey: "taxa_mensal", header: "Taxa mensal", cell: (info) => maskPercentage(info)},
+    { accessorKey: "prazo_minimo", header: "Prazo mínimo", cell: (info) => maskMonth(info)},
+    { accessorKey: "prazo_maximo", header: "Prazo máximo", cell: (info) => maskMonth(info)},
+    { accessorKey: "vigencia_inicio", header: "Início da vigência", cell: (info) => maskDate(info)},
+    { accessorKey: "vigencia_fim", header: "Fim da vigência", cell: (info) => maskDate(info)},
+    { accessorKey: "incrementador", header: "Incrementador", cell: (info) => maskPercentage(info)},
+    { accessorKey: "periodicidade", header: "Periodicidade", cell: (info) => maskMonth(info)},
     {
       id: "status_relacionamento",
       header: "Status",
@@ -266,6 +267,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
             Authorization: `Bearer ${token}`
           }
         });
+        console.log(res);
         setProdutosRelacionados(res.data);
       } catch (error) {
         console.error("Erro ao carregar convênios", error);
@@ -356,7 +358,7 @@ export default function TabelaProduto({ produto, onClose }: Props) {
         <CardHeader>
           <div className="flex flex-row justify-between">
             <div>
-              <CardTitle>Produtos</CardTitle>
+              <CardTitle>Lista de produtos</CardTitle>
             </div>
             {/* <div className="flex flex-row gap-3">
               <Button id="" onClick={() => setIsCadastroOpen(true)}>

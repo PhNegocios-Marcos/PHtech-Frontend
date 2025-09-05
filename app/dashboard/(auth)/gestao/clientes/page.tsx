@@ -21,7 +21,7 @@ export default function Page() {
         
         {podeCriar && (
           <Button onClick={() => setIsCadastroOpen(true)}>
-            Novo Cliente
+            Novo cliente
           </Button>
         )}
       </div>

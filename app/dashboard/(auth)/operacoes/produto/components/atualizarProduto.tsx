@@ -30,6 +30,8 @@ import {
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { CalendarBR } from "@/components/ui/calendar-locale";
 
 // Schema de validação
 const schema = z.object({
@@ -135,19 +137,15 @@ export default function AtualizarProdutoModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-y-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
-        <FormProvider {...methods}>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-1/3 max-w-full! px-5 rounded-l-xl">
+        <SheetHeader className="px-0">
+          <SheetTitle className="text-xl font-semibold">
+            Editar produto
+          </SheetTitle>
+        </SheetHeader>
+                <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Editar Taxa</h2>
-              <X onClick={onClose} className="cursor-pointer"/>
-            </div>
 
             <div className="flex-1 space-y-6 overflow-y-auto">
               {/* Seção da Taxa */}
@@ -331,7 +329,7 @@ export default function AtualizarProdutoModal({
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
+                            <CalendarBR
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
@@ -348,17 +346,17 @@ export default function AtualizarProdutoModal({
               </Card>
             </div>
 
-            <div className="mt-6 flex justify-end gap-4">
+            <div className="mt-auto mb-6 flex flex-col justify-end gap-4 px-4">
+              <Button type="submit" className="py-6" disabled={loading}>
+                {loading ? "Atualizando..." : "Atualizar produto"}
+              </Button>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                 Cancelar
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Atualizando..." : "Atualizar Taxa"}
               </Button>
             </div>
           </form>
         </FormProvider>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

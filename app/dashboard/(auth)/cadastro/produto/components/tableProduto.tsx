@@ -117,14 +117,14 @@ export default function TabelaProduto({ produto, onClose }: Props) {
   });
 
   const columns: ColumnDef<Produto>[] = [
-    { accessorKey: "nome_tabela", header: "Nome" },
-    { accessorKey: "taxa_mensal", header: "Taxa Mensal" },
+    { accessorKey: "nome_tabela", header: "Nome do produto" },
+    { accessorKey: "taxa_mensal", header: "Taxa mensal" },
     { accessorKey: "prazo_minimo", header: "Prazo Mínimo" },
-    { accessorKey: "prazo_maximo", header: "Prozo Máximo" },
-    { accessorKey: "vigencia_inicio", header: "Vigencia Inicio" },
-    { accessorKey: "vigencia_fim", header: "Vigencia Fim" },
-    { accessorKey: "incrementador", header: "incrementador" },
-    { accessorKey: "periodicidade", header: "periodicidade" },
+    { accessorKey: "prazo_maximo", header: "Prazo Máximo" },
+    { accessorKey: "vigencia_inicio", header: "Início da vigência" },
+    { accessorKey: "vigencia_fim", header: "Fim da vigência" },
+    { accessorKey: "incrementador", header: "Incrementador" },
+    { accessorKey: "periodicidade", header: "Periodicidade" },
     {
       id: "status_relacionamento",
       header: "Status",

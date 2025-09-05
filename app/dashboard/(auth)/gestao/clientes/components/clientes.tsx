@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./tabela_carregando";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Search } from "lucide-react";
 import { ModalCliente } from "./ClienteModal";
 import {
   Table,
@@ -38,6 +38,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
+import { maskCPF, maskDate } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -110,16 +111,14 @@ export default function ListaClientes() {
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const columns: ColumnDef<Cliente>[] = [
-    { accessorKey: "cpf", header: "CPF" },
+    { accessorKey: "cpf", header: "CPF", cell: (info) => maskCPF(info.getValue())},
     { accessorKey: "nome", header: "Nome" },
     { accessorKey: "email", header: "E-mail" },
     { accessorKey: "telefone", header: "Telefone" },
     { 
-      accessorKey: "data_nascimento", 
+      accessorKey: "data_nascimento",
       header: "Data Nascimento",
-      cell: ({ row }) => {
-        return new Date(row.original.nome).toLocaleDateString();
-      }
+      cell: (info) => maskDate(info.getValue())
     },
         {
       id: "status",
@@ -182,14 +181,14 @@ export default function ListaClientes() {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSelectedCliente(row.original)}
           title="Editar cliente">
-          <Search className="h-4 w-4" />
+          <Pencil className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -253,7 +252,7 @@ export default function ListaClientes() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Clientes</CardTitle>
+            <CardTitle>Lista de clientes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex items-center gap-2">

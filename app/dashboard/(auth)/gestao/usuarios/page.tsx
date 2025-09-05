@@ -28,7 +28,7 @@ export default function Page() {
 
           {podeCriar && (
             <Button id="Usuarios_criar" onClick={() => setIsCadastroOpen(true)}>
-              Novo Usuário
+              Novo usuário
             </Button>
           )}
         </div>
