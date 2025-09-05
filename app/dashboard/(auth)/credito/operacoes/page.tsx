@@ -19,7 +19,7 @@ export default function Page() {
   };
 
   return (
-    <ProtectedRoute requiredPermission="Operacoes_ver">
+    <ProtectedRoute requiredPermission="Credito_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 

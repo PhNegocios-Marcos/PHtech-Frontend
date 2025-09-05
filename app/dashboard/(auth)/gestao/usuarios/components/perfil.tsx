@@ -56,7 +56,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
   const [perfil, setPerfil] = React.useState<Option[]>([]);
   const [perfisDisponiveis, setPerfisDisponiveis] = React.useState<Option[]>([]);
   const [perfisSelect, setPerfisSelect] = useState<Option | null>(null);
-  const { token } = useAuth();
+  const { token, selectedPromotoraId } = useAuth();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -248,6 +248,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
       await axios.post(
         `${API_BASE_URL}/rel_usuario_perfil/criar`,
         {
+          promotora_hash : selectedPromotoraId,
           nome: perfisSelect.nome,
           email: usuario.email
         },
