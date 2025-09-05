@@ -10,7 +10,7 @@ import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 
 export default function Page() {
   const router = useRouter();
-  const podeCriar = useHasPermission("Operacoes_criar");
+  const podeCriar = useHasPermission("Credito_criar");
 
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
@@ -26,7 +26,7 @@ export default function Page() {
           {/* <CustomDateRangePicker /> */}
 
           {podeCriar && (
-            <Button id="Operacoes_criar" onClick={irParaOutraPagina}>
+            <Button id="Credito_criar" onClick={irParaOutraPagina}>
               Nova Simulação
             </Button>
           )}
