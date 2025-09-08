@@ -29,6 +29,8 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { CalendarBR } from "@/components/ui/calendar-locale";
 
 // Schema de validação combinado
 const schema = z
@@ -109,7 +111,7 @@ type Option = {
 const textFields = [
   { name: "nome_taxa", label: "Nome do produto", placeholder: "Digite o nome", type: "text" },
   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6", type: "number" },
-  { name: "periodiciade", label: "Cálculo de operação", placeholder: "12", type: "number" }
+  { name: "periodiciade", label: "Cálculo de operação", placeholder: "Digite o período da operação", type: "number" }
 ] as const;
 
 const prazoFields = [
@@ -129,6 +131,12 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
   const [usaSeguro, setaSeguro] = useState(false);
   const [usaTac, setaTac] = useState(false);
   const [roList, setRO] = useState<Array<Option & { dadosCompletos?: any }>>([]);
+
+  // Selects
+  const [convenioSelect, setConvenioSelect] = React.useState<Option | null>(null);
+  const [modalidadeSelect, setModalidadeSelect] = React.useState<Option | null>(null);
+  const [tipoDeOperacaoSelect, setTipoDeOperacaoSelect] = React.useState<Option | null>(null);
+
 
   const { token, userData } = useAuth();
   const router = useRouter();
@@ -448,6 +456,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
         }
       );
 
+      console.log(produtoResponse);
+
       const relacionamentoId = produtoResponse.data.rel_produto_subproduto_convenio_id;
 
       await axios.post(
@@ -515,6 +525,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
       toast.success("Produto e taxa cadastrados com sucesso!");
       methods.reset();
       onClose();
+      window.location.reload;
     } catch (error: any) {
       console.error("Erro ao cadastrar:", error);
       toast.error("Erro ao cadastrar: " + (error.message || "Erro desconhecido"));
@@ -527,7 +538,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
   useEffect(() => {
     const subscription = methods.watch((value, { name, type }) => {
       if (methods.formState.errors) {
-        console.log("Erros atuais:", methods.formState.errors);
+        // console.log("Erros atuais:", methods.formState.errors);
       }
     });
 
@@ -544,57 +555,22 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
     setaSeguro(checked);
   };
 
+
+
   return (
-    <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full rounded-2xl border bg-white p-6 sm:w-1/2">
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                Cadastrar Produto: <span className="text-primary">(Novo)</span>
-                <p className="text-xs font-normal text-gray-500 dark:text-gray-200">Versão: </p>
-              </h2>
-              <X onClick={onClose} className="cursor-pointer"/>
-            </div>
-
-            <div className="flex-1 space-y-6 overflow-y-auto px-2">
-              <Card className="w-full rounded-2xl border p-8 px-1">
-                <CardHeader>
-                  <CardTitle>Promotora</CardTitle>
-                  <p className="text-sm text-gray-600 dark:text-gray-200">
-                    Determine qual a promotora do produto a ser cadastrado
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-5">
-                    <FormField
-                      control={methods.control}
-                      name="promotora_hash"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Promotora</FormLabel>
-                          <FormControl>
-                            <Combobox
-                              data={promotora}
-                              displayField="nome"
-                              value={promotora.find((p) => p.id === field.value) || null}
-                              onChange={(selected) => field.onChange(selected?.id || "")}
-                              searchFields={["nome"]}
-                              placeholder="Selecione uma Promotora"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="w-1/3 max-w-full! px-5 rounded-l-xl">
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold">
+            Cadastrar produto: <span className="text-primary">(Novo)</span>
+          </SheetTitle>
+          {/* <SheetDescription className="text-xs font-normal text-gray-500 dark:text-gray-200">
+            Versão: 
+          </SheetDescription> */}
+        </SheetHeader>
+            <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-y-auto">
+            <div className="flex-1 space-y-6 px-2">
               {/* Seção do Produto */}
               <Card className="w-full rounded-2xl border p-8 px-1">
                 <CardHeader>
@@ -616,7 +592,11 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               data={convenio}
                               displayField="nome"
                               value={convenio.find((c) => c.id === field.value) || null}
-                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              onChange={(selected) => {
+                                field.onChange(selected?.id || "");
+                                setConvenioSelect(selected || null);
+                                setModalidadeSelect(null);
+                              }}
                               searchFields={["nome"]}
                               placeholder="Selecione um Convênio"
                             />
@@ -637,9 +617,13 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               data={modalidade}
                               displayField="nome"
                               value={modalidade.find((m) => m.id === field.value) || null}
-                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              onChange={(selected) => {
+                                field.onChange(selected?.id || "")
+                                setModalidadeSelect(selected || null);
+                              }}
                               searchFields={["nome"]}
                               placeholder="Selecione uma Modalidade"
+                              className={!convenioSelect ? "*:bg-gray-200! *:text-gray-400! *:cursor-not-allowed! pointer-events-none" : "pointer-events-auto *:bg-background *:text-black *:dark:text-white cursor-pointer"}
                             />
                           </FormControl>
                           <FormMessage />
@@ -661,6 +645,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               onChange={(selected) => field.onChange(selected?.id || "")}
                               searchFields={["nome"]}
                               placeholder="Selecione o Tipo de Operação"
+                              className={!modalidadeSelect ? "*:bg-gray-200! *:text-gray-400! *:cursor-not-allowed! pointer-events-none" : "pointer-events-auto *:bg-background *:text-black *:dark:text-white cursor-pointer"}
                             />
                           </FormControl>
                           <FormMessage />
@@ -694,7 +679,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                       name="inicio"
                       render={({ field }) => (
                         <FormItem className="mt-4 flex flex-col">
-                          <FormLabel>Inicio da vigência</FormLabel>
+                          <FormLabel>Início da vigência</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -714,7 +699,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
+                              <CalendarBR
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
@@ -754,7 +739,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
+                              <CalendarBR
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
@@ -771,6 +756,39 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                 </CardContent>
               </Card>
 
+              <Card className="w-full rounded-2xl border p-8 px-1">
+                <CardHeader>
+                  <CardTitle>Promotora</CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-200">
+                    Determine qual a promotora do produto a ser cadastrado
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 gap-5">
+                    <FormField
+                      control={methods.control}
+                      name="promotora_hash"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Promotora(s)</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              data={promotora}
+                              displayField="nome"
+                              value={promotora.find((p) => p.id === field.value) || null}
+                              onChange={(selected) => field.onChange(selected?.id || "")}
+                              searchFields={["nome"]}
+                              placeholder="Selecione uma ou mais promotoras"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+                      
               {/* Seção do RO */}
               <Card>
                 <CardHeader>
@@ -1016,17 +1034,17 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               </Card>
             </div>
 
-            <div className="mt-6 flex justify-end gap-4">
+            <div className="mt-8 mb-6 flex flex-col justify-end gap-4 px-4">
+              <Button type="submit" className="py-6" disabled={loading}>
+                {loading ? "Cadastrando..." : "Cadastrar"}
+              </Button>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                 Cancelar
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Cadastrando..." : "Cadastrar"}
               </Button>
             </div>
           </form>
         </FormProvider>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

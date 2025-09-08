@@ -96,7 +96,7 @@ export function ModalCliente({ onClose, onRefresh, cliente }: ClienteProps) {
       <Tabs defaultValue="dados" className="space-y-4">
         <div className="mb-4 flex items-center justify-between">
           <TabsList className="w-full">
-            <TabsTrigger value="dados">Dados do Cliente</TabsTrigger>
+            <TabsTrigger value="dados">Dados do cliente</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
           </TabsList>
         </div>

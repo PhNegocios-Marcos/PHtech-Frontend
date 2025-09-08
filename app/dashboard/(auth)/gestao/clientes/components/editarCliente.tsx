@@ -86,8 +86,9 @@ const fixedFormSections: FormSection[] = [
   {
     section: "Contato",
     fields: [
-      { name: "ddd", label: "DDD", type: "text", required: true },
-      { name: "numero", label: "Número", type: "text", required: true },
+      // { name: "ddd", label: "DDD", type: "text", required: true },
+      // { name: "numero", label: "Número", type: "text", required: true },
+      { name: "numero", label: "Número de telefone", type: "text", required: true},
       { name: "email", label: "Email", type: "text", required: true }
     ]
   },
@@ -318,7 +319,6 @@ const Contato = forwardRef<
   const form = useForm<ContatoFormData>({
     resolver: zodResolver(contatoSchema),
     defaultValues: {
-      ddd: "",
       numero: "",
       email: formData.emails?.email || ""
     }
@@ -327,8 +327,10 @@ const Contato = forwardRef<
   useEffect(() => {
     // Pegar o primeiro telefone do objeto - agora vem com detalhe_telefone_numero
     const primeiroTelefone = Object.values(formData.telefones || {})[0] as any;
-    form.setValue("ddd", primeiroTelefone?.ddd?.toString() || "");
-    form.setValue("numero", primeiroTelefone?.numero?.toString() || "");
+    const ddd = form.setValue("ddd", primeiroTelefone?.ddd?.toString() || "");
+    const number = form.setValue("numero", primeiroTelefone?.numero?.toString() || "");
+    const completeNumber = `${ddd}` + `${number}`;
+
     form.setValue("email", formData.emails?.email || "");
   }, [formData, form]);
 
@@ -963,6 +965,8 @@ export default function EditarCliente({
       const response = await axios.put(`${API_BASE_URL}/cliente/${formData.hash}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      console.log(formData);
 
       toast.success("Dados atualizados com sucesso!", {
       style: {

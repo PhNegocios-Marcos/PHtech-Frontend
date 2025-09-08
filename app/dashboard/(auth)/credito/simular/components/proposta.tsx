@@ -310,7 +310,7 @@ export default function PropostaCliente({
       </div>
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Dados do Cliente</CardTitle>
+          <CardTitle>Dados do cliente</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
