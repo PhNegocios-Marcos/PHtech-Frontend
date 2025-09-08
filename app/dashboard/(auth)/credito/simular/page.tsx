@@ -215,8 +215,8 @@ export default function CreditSimular() {
                     setSelectedCategoria(val);
                     setSimuladorKey((prev) => prev + 1);
                   }}
-                  label="Tipo de Operação"
-                  placeholder="Selecione o Tipo de Operação"
+                  label="Tipo de operação"
+                  placeholder="Selecione o Tipo de operação"
                   searchFields={["name"]}
                 />
               )}
