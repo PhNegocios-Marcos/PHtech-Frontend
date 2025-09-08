@@ -10,6 +10,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Interface para tipar os dados esperados da API
 interface SummaryData {
@@ -39,38 +40,44 @@ export function SummaryCards() {
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Função para buscar dados da API
-  const fetchData = async () => {
+
+
+  const dadosDashboard = async () => {
+
     try {
-      setLoading(true);
-      // Simulando uma chamada à API com timeout
-      // Substitua pela sua chamada real à API
-      /*
-      const response = await fetch('https://api.example.com/summary');
+      const response = await fetch(`${API_BASE_URL}/dashboard`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       if (!response.ok) {
-        throw new Error('Falha ao carregar dados');
+        const errorData = await response.json();
+        throw new Error(errorData?.detail || "Erro ao buscar dados dashboard");
       }
-      const apiData = await response.json();
-      setData(apiData);
-      */
-      
-      // Usando mock data por enquanto
-      setTimeout(() => {
-        setData(mockSummaryData);
-        setLoading(false);
-      }, 1000);
-      
-    } catch (err) {
-      setError('Erro ao carregar os dados. Tente novamente.');
+
+
+      const result = await response.json();
+      setData(result);
       setLoading(false);
-      console.error(err);
+
+    } catch (error: any) {
+      console.error("Erro na requisição:", error.message || error);
+
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
+    dadosDashboard();
   }, []);
+
 
   // Formatar número como moeda (BRL)
   const formatCurrency = (value: number) => {
@@ -123,8 +130,8 @@ export function SummaryCards() {
       <div className="flex items-center justify-center h-40">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <button 
-            onClick={fetchData}
+          <button
+            // onClick={fetchData}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Tentar Novamente
