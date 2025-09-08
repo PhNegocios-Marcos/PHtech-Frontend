@@ -131,13 +131,13 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
               {podeCriar ? (
                 <Badge
                   onClick={toggleStatus}
-                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-primary bg-transparent text-primary"}`}
                   variant={ativo ? "default" : "outline"}>
                   {ativo ? "Ativo" : "Inativo"}
                 </Badge>
               ) : (
                 <Badge
-                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-red-500 bg-transparent text-red-500"}`}
+                  className={`w-24 cursor-pointer ${ativo ? "" : "border border-primary bg-transparent text-primary"}`}
                   variant={ativo ? "default" : "outline"}>
                   {ativo ? "Ativo" : "Inativo"}
                 </Badge>

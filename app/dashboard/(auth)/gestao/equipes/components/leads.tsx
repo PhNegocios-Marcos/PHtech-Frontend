@@ -24,6 +24,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -57,6 +58,7 @@ type EquipeDrawerProps = {
 };
 
 export function EquipesTable() {
+  const podeCriar = useHasPermission("Equipes_atualizar");
   const [equipes, setEquipes] = React.useState<Equipe[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -132,12 +134,22 @@ export function EquipesTable() {
         };
 
         return (
-          <Badge
-            onClick={toggleStatus}
-            className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
-            variant={ativo ? "default" : "outline"}>
-            {ativo ? "Ativo" : "Inativo"}
-          </Badge>
+          <>
+            {podeCriar ? (
+              <Badge
+                onClick={toggleStatus}
+                className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
+                variant={ativo ? "default" : "outline"}>
+                {ativo ? "Ativo" : "Inativo"}
+              </Badge>
+            ) : (
+              <Badge
+                className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
+                variant={ativo ? "default" : "outline"}>
+                {ativo ? "Ativo" : "Inativo"}
+              </Badge>
+            )}
+          </>
         );
       }
     },

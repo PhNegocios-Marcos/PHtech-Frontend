@@ -11,6 +11,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
+
 import {
   Form,
   FormControl,
@@ -40,6 +42,8 @@ type EquipeEditProps = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
+  const podeCriar = useHasPermission("Equipes_atualizar");
+
   const methods = useForm<EquipeFormValues>({
     resolver: zodResolver(equipeSchema),
     defaultValues: equipe
@@ -58,7 +62,7 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
     { id: 0, name: "Inativo" }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -76,9 +80,9 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
       toast.error("Autenticação necessária", {
         description: "Faça login para continuar",
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       return;
@@ -94,22 +98,22 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
 
       toast.success("Equipe atualizada com sucesso!", {
         style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-success)",
+          color: "var(--toast-success-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
       onClose();
     } catch (error: any) {
       console.error("Erro ao atualizar equipe:", error);
       const errorMessage = error.response?.data?.message || "Erro ao atualizar equipe";
-      
+
       toast.error("Falha na atualização", {
         description: errorMessage,
         style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
+          background: "var(--toast-error)",
+          color: "var(--toast-error-foreground)",
+          boxShadow: "var(--toast-shadow)"
         }
       });
 
@@ -133,7 +137,9 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  <h2>Equipe: <span className="text-primary">{equipe.nome}</span></h2>
+                  <h2>
+                    Equipe: <span className="text-primary">{equipe.nome}</span>
+                  </h2>
                 </CardTitle>
                 <Button onClick={onClose} variant="outline">
                   Voltar
@@ -195,7 +201,7 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar alterações</Button>
+                {podeCriar && <Button type="submit">Salvar alterações</Button>}
               </div>
             </CardContent>
           </Card>
