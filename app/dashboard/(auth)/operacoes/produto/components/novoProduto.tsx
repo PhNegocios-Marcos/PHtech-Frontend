@@ -559,7 +559,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-3/5 max-w-full! px-5 rounded-l-xl">
+      <SheetContent side="right" className="w-3/5 max-w-full! px-5 rounded-l-xl ">
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             Cadastrar produto: <span className="text-primary">(Novo)</span>
@@ -569,7 +569,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
           </SheetDescription> */}
         </SheetHeader>
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col">
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col overflow-y-auto">
             <div className="flex-1 space-y-6 px-2">
               {/* Seção do Produto */}
               <Card className="w-full rounded-2xl border p-8 px-1">

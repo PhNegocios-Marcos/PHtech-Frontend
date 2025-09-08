@@ -97,8 +97,9 @@ const schema = z
     senha: z.string().min(6, "A senha deve ter ao menos 6 caractere"),
     confirmar_senha: z.string().min(6, "A confirmação deve ter ao menos 6 caracteres"),
     tipo_acesso: z.enum(["externo", "interno"]),
-    promotora: z.string().min(1, "Por favor, selecione a promotora"),
+    promotora: z.string().min(1, "Por favor, selecione a promotora").optional(),
     usa_2fa: z.enum(["0", "1"]),
+    gp: z.enum(["g", "p"]),
     enderecos: z.array(enderecoSchema).min(1, "Cadastre ao menos um endereço")
   })
   .refine((data) => data.senha === data.confirmar_senha, {
@@ -334,6 +335,13 @@ const EnderecoForm = forwardRef<
 EnderecoForm.displayName = "EnderecoForm";
 
 export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuarioModalProps) {
+  const [promotoras, setPromotoras] = useState<Promotora[]>([]);
+  const [promotoraSelecionada, setPromotoraSelecionada] = useState<Promotora | null>(null);
+  const { token, selectedPromotoraId } = useAuth();
+  const router = useRouter();
+  const podeCriar = useHasPermission("Tipo_de_Acesso_criar");
+  const enderecoFormRef = React.useRef<{ validate: () => Promise<boolean> }>(null);
+
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -344,8 +352,9 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
       nome: "",
       senha: "",
       confirmar_senha: "",
-      promotora: "",
+      promotora: selectedPromotoraId || undefined,
       usa_2fa: "0",
+      gp: "p",
       enderecos: [
         {
           cep: "",
@@ -361,12 +370,15 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
     }
   });
 
-  const [promotoras, setPromotoras] = useState<Promotora[]>([]);
-  const [promotoraSelecionada, setPromotoraSelecionada] = useState<Promotora | null>(null);
-  const { token } = useAuth();
-  const router = useRouter();
-  const podeCriar = useHasPermission("Tipo_de_Acesso_criar");
-  const enderecoFormRef = React.useRef<{ validate: () => Promise<boolean> }>(null);
+  // Adicione este useEffect para monitorar erros
+  useEffect(() => {
+    console.log("Erros de validação:", methods.formState.errors);
+  }, [methods.formState.errors]);
+
+  // Adicione este useEffect para monitorar valores
+  useEffect(() => {
+    console.log("Valores do formulário:", methods.getValues());
+  }, [methods.getValues()]);
 
   useEffect(() => {
     async function fetchPromotoras() {
@@ -387,7 +399,7 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
     if (isOpen) fetchPromotoras();
   }, [isOpen, token]);
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -439,10 +451,15 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
       tipo_acesso: data.tipo_acesso,
       promotora: data.promotora,
       usa_2fa: data.usa_2fa,
+      visao: data.gp,
       enderecos: data.enderecos.map((endereco) => ({
         ...endereco,
         cep: endereco.cep.replace(/\D/g, "")
       }))
+    };
+
+    const payload2 = {
+      promotora_hash: data.promotora
     };
 
     try {
@@ -455,7 +472,16 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
+      const response2 = await fetch(`${API_BASE_URL}/gestao-promotora-gerente/criar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload2)
+      });
+
+      if (!response.ok && !response2.ok) {
         const err = await response.json();
         throw new Error(err.detail || "Erro ao cadastrar usuário");
       }
@@ -468,6 +494,7 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
           boxShadow: "var(--toast-shadow)"
         }
       });
+      methods.reset();
       onClose();
     } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
@@ -482,22 +509,27 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
     }
   };
 
+  const handleClose = () => {
+    methods.reset(); // Limpa todos os campos
+    onClose(); // Fecha o modal
+  };
+
   if (!isOpen) return null;
 
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto rounded-l-2xl p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar novo usuário</h2>
-                <X onClick={onClose} className="cursor-pointer"/>
+                <X onClick={onClose} className="cursor-pointer" />
               </div>
 
               <Card className="flex-grow overflow-auto">
@@ -633,13 +665,13 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
                       />
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       {podeCriar && (
                         <FormField
                           control={methods.control}
                           name="tipo_acesso"
                           render={({ field }) => (
-                            <FormItem className="flex flex-col justify-center items-center">
+                            <FormItem className="flex flex-col items-center justify-center">
                               <FormLabel>Tipo de Acesso</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
@@ -662,7 +694,7 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
                         control={methods.control}
                         name="usa_2fa"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col justify-center items-center">
+                          <FormItem className="flex flex-col items-center justify-center">
                             <FormLabel>Usa 2FA?</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
@@ -673,6 +705,28 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
                               <SelectContent>
                                 <SelectItem value="1">Sim</SelectItem>
                                 <SelectItem value="0">Não</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={methods.control}
+                        name="gp"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col items-center justify-center">
+                            <FormLabel>É Gerente?</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="p">Sim</SelectItem>
+                                <SelectItem value="g">Não</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -693,7 +747,7 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
               </Card>
 
               <div className="mt-6 flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
                 <Button type="submit">Cadastrar</Button>
