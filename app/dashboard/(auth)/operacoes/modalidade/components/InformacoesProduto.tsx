@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Produto } from "./produtos";
+import { Produto } from "./modalidades";
 import { useRouter } from "next/navigation";
 import {
   Form,

@@ -22,6 +22,7 @@ const toastComponent = {
 
   error: (message: string, options?: ToastOptions) =>
     toast.error(message, {
+        style: { background: "var(--toast-error)", color: "var(--toast-error-foreground)", boxShadow: "var(--toast-shadow)"},
         description: options?.description,
         duration: options?.duration ?? 5000,
         action: options?.action,

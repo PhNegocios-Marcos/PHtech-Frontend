@@ -75,9 +75,9 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   const { token } = useAuth();
 
   const columns: ColumnDef<Produto>[] = [
-    { accessorKey: "modalidade_credito_nome", header: "Nome" },
+    { accessorKey: "modalidade_credito_nome", header: "Nome da modalidade" },
     { accessorKey: "modalidade_credito_digito_prefixo", header: "Prefixo" },
-    { accessorKey: "modalidade_credito_cor_grafico", header: "Cor Gráfico" },
+    // { accessorKey: "modalidade_credito_cor_grafico", header: "Cor Gráfico" },
        {
       id: "status",
       header: "Status",
@@ -179,6 +179,8 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
           }
         });
 
+        console.log(response);
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData?.detail || "Erro ao buscar produtos");
@@ -216,14 +218,14 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Modalidade</CardTitle>
+        <CardTitle>Lista de modalidades</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">
           <Input
             placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("modalidade_credito_nome")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("modalidade_credito_nome")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -239,10 +241,15 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
                 .map((column) => (
                   <DropdownMenuCheckboxItem
                     key={column.id}
-                    className="capitalize"
                     checked={column.getIsVisible()}
+                    className="capitalize"
                     onCheckedChange={(value) => column.toggleVisibility(!!value)}>
-                    {column.id}
+                    {
+                      column.id  === 
+                      'modalidade_credito_nome' 
+                      ? column.id.replace('modalidade_credito_', '') 
+                      : column.id.replace('modalidade_credito_digito_', '') 
+                    }
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>

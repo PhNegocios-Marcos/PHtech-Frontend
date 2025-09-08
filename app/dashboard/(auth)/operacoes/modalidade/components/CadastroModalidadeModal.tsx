@@ -26,15 +26,16 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import toastComponent from "@/utils/toastComponent";
 
 const schema = z.object({
   modalidade_credito_nome: z.string().min(1, "Definir o nome da modalidade é obrigatório"),
   modalidade_credito_id: z.string().optional(),
-  modalidade_credito_cor_grafico: z.string().optional(),
-  modalidade_credito_digito_prefixo: z.preprocess(
-    (val) => val === "" ? undefined : Number(val),
-    z.number().min(1, "Definir um prefixo é obrigatório")
-  )
+  // modalidade_credito_cor_grafico: z.string().optional(),
+  // modalidade_credito_digito_prefixo: z.preprocess(
+  //   (val) => val === "" ? undefined : Number(val),
+  //   z.number().min(1, "Definir um prefixo é obrigatório")
+  // )
 });
 
 type FormData = z.infer<typeof schema>;
@@ -51,8 +52,8 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
     defaultValues: {
       modalidade_credito_nome: "",
       modalidade_credito_id: "",
-      modalidade_credito_cor_grafico: "",
-      modalidade_credito_digito_prefixo: undefined,
+      // modalidade_credito_cor_grafico: "",
+      // modalidade_credito_digito_prefixo: undefined,
     },
   });
 
@@ -87,6 +88,8 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
     }
 
     try {
+      console.log(data);
+
       const response = await fetch(`${API_BASE_URL}/modalidade-credito/criar`, {
         method: "POST",
         headers: {
@@ -101,11 +104,11 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
         throw new Error(err?.detail || "Erro desconhecido");
       }
 
-      toast.success("Produto cadastrado com sucesso!");
+      toastComponent.success("Modalidade cadastrada com sucesso!");
       onClose();
     } catch (error: any) {
       console.error("Erro ao cadastrar produto:", error);
-      toast.error("Erro ao cadastrar produto: " + (error.message || error));
+      toastComponent.error("Erro ao cadastrar modalidade");
     }
   };
 
@@ -113,15 +116,13 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-1/3 max-w-full! px-5 rounded-l-xl">
+      <SheetContent className="px-5 rounded-l-xl">
         <SheetHeader className="px-0">
           <SheetTitle className="text-xl font-semibold">
             Cadastrar nova modalidade
           </SheetTitle>
           <SheetDescription>
             Cadastre uma modalidade e defina o prefixo dela. 
-            <br/>
-            * Lembre-se: este prefixo será usado para definir o nome do produto cadastrado!
           </SheetDescription>
         </SheetHeader>
                 <FormProvider {...methods}>
@@ -133,7 +134,7 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
                 </CardHeader>
 
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <FormField
                       control={methods.control}
                       name="modalidade_credito_nome"
@@ -141,14 +142,14 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
                         <FormItem>
                           <FormLabel>Nome</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o nome da modalidade a ser cadastrada" {...field} />
+                            <Input placeholder="Digite o nome da modalidade" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <FormField
+                    {/* <FormField
                       control={methods.control}
                       name="modalidade_credito_digito_prefixo"
                       render={({ field }) => (
@@ -166,8 +167,8 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
-
+                    /> */}
+{/* 
                     <FormField
                       control={methods.control}
                       name="modalidade_credito_cor_grafico"
@@ -180,7 +181,7 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
+                    /> */}
                   </div>
                 </CardContent>
               </Card>

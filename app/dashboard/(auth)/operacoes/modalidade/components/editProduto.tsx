@@ -3,7 +3,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProdutoEdit } from "./InformacoesProduto";
-import { Produto } from "./produtos";
+import { Produto } from "./modalidades";
 // import RelacionamentoProduto from "./RelacionamentoProduto";
 
 // Import or define the Produto interface to match ProdutoEdit's expectations
