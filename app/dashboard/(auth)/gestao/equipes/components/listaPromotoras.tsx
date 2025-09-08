@@ -35,6 +35,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import axios from "axios";
+import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -53,19 +56,6 @@ type UsuariosTableProps = {
   onClose: () => void;
 };
 
-const promotoraColumns: ColumnDef<Promotora>[] = [
-  {
-    accessorKey: "usuario.nome",
-    header: "Nome do Usuário",
-    cell: ({ row }) => row.original.usuario.nome
-  },
-  {
-    accessorKey: "status_relacionamento",
-    header: "Status",
-    cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
-  }
-];
-
 export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTableProps) {
   const [promotoras, setPromotoras] = useState<Promotora[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -75,8 +65,93 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { token } = useAuth();
+  const podeCriar = useHasPermission("Equipes_atualizar");
 
-    useEffect(() => {
+  const promotoraColumns: ColumnDef<Promotora>[] = [
+    {
+      accessorKey: "usuario.nome",
+      header: "Nome do Usuário",
+      cell: ({ row }) => row.original.usuario.nome
+    },
+    {
+      accessorKey: "status_relacionamento",
+      header: "Status",
+      cell: ({ getValue }) => (getValue<number>() === 1 ? "Ativo" : "Inativo")
+    },
+    {
+      id: "status_relacionamento",
+      header: "Status",
+      cell: ({ row }) => {
+        const ativo = row.original.status_relacionamento === 1;
+
+        const toggleStatus = async () => {
+          try {
+            const novoStatus = ativo ? 0 : 1;
+
+            await axios.put(
+              `${API_BASE_URL}/rel_usuario_perfil/atualizar`,
+              {
+                id: row.original.id,
+                status: novoStatus
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+              }
+            );
+
+            setPromotoras((prev) =>
+              prev.map((item) =>
+                item.id === row.original.id ? { ...item, status_relacionamento: novoStatus } : item
+              )
+            );
+
+            toast.success("Status atualizado com sucesso!", {
+              style: {
+                background: "var(--toast-success)",
+                color: "var(--toast-success-foreground)",
+                border: "1px solid var(--toast-border)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          } catch (error: any) {
+            console.error("Erro ao atualizar status", error);
+            toast.error(`Erro ao atualizar status: ${error.message}`, {
+              style: {
+                background: "var(--toast-error)",
+                color: "var(--toast-error-foreground)",
+                border: "1px solid var(--toast-border)",
+                boxShadow: "var(--toast-shadow)"
+              }
+            });
+          }
+        };
+
+        return (
+          <>
+            {podeCriar ? (
+              <Badge
+                onClick={toggleStatus}
+                className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
+                variant={ativo ? "default" : "outline"}>
+                {ativo ? "Ativo" : "Inativo"}
+              </Badge>
+            ) : (
+              <Badge
+                className={`w-24 cursor-pointer ${ativo ? "" : "border-primary text-primary border bg-transparent"}`}
+                variant={ativo ? "default" : "outline"}>
+                {ativo ? "Ativo" : "Inativo"}
+              </Badge>
+            )}
+          </>
+        );
+      }
+    }
+  ];
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
