@@ -27,7 +27,7 @@ export default function Page() {
 
           {podeCriar && (
             <Button id="Credito_criar" onClick={irParaOutraPagina}>
-              Nova Simulação
+              Nova simulação
             </Button>
           )}
         </div>

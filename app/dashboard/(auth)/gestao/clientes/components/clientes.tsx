@@ -205,6 +205,7 @@ export default function ListaClientes() {
             Authorization: `Bearer ${token}`
           }
         });
+        console.log(res.data);
         setClientes(res.data);
       } catch (error: any) {
         console.error("Erro ao carregar clientes", error);

@@ -26,6 +26,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Combobox } from "@/components/Combobox";
 import { FileText, Upload, X } from "lucide-react";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -966,8 +967,6 @@ export default function EditarCliente({
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      console.log(formData);
-
       toast.success("Dados atualizados com sucesso!", {
       style: {
         background: 'var(--toast-success)',
@@ -978,13 +977,7 @@ export default function EditarCliente({
       console.log("Cliente atualizado:", response.data);
     } catch (error) {
       console.error("Erro ao atualizar cliente:", error);
-      toast.error("Erro ao atualizar dados do cliente", {
-      style: {
-        background: 'var(--toast-error)',
-        color: 'var(--toast-error-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+      toastComponent.error("Erro ao atualizar dados do cliente");
     } finally {
       setLoading(false);
     }
