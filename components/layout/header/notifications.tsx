@@ -60,7 +60,7 @@ const Notifications = () => {
           <div className="flex justify-between border-b px-6 py-4">
             <div className="font-medium">Notifications</div>
             <Button variant="link" className="h-auto p-0 text-xs" size="sm" asChild>
-              <Link href="#">View all</Link>
+              <Link href="#">Ver todos</Link>
             </Button>
           </div>
         </DropdownMenuLabel>

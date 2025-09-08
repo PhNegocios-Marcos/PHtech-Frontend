@@ -47,7 +47,7 @@ export type Equipe = {
 
 const equipeColumns: ColumnDef<Equipe>[] = [
   { accessorKey: "promotora", header: "Promotora" },
-  { accessorKey: "nome", header: "Nome da Equipe" },
+  { accessorKey: "nome", header: "Nome da equipe" },
   { accessorKey: "descricao", header: "Descrição" },
   {
     accessorKey: "status",

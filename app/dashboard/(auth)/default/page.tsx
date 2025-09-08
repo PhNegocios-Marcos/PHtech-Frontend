@@ -1,4 +1,3 @@
-import CalendarDateRangePicker from "@/components/custom-date-range-picker";
 import { ExportButton } from "@/components/CardActionMenus";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -19,7 +18,6 @@ export default function Page() {
         <div className="mb-4 flex flex-row items-center justify-between space-y-2">
           <CampoBoasVindas />
           <div className="flex items-center space-x-2">
-            <CalendarDateRangePicker />
             {/* <ExportButton /> */}
          
           </div>
