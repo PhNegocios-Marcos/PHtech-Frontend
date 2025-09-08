@@ -25,25 +25,26 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const schema = z.object({
-  modalidade_credito_nome: z.string().min(1, "Nome é obrigatório"),
+  modalidade_credito_nome: z.string().min(1, "Definir o nome da modalidade é obrigatório"),
   modalidade_credito_id: z.string().optional(),
   modalidade_credito_cor_grafico: z.string().optional(),
   modalidade_credito_digito_prefixo: z.preprocess(
     (val) => val === "" ? undefined : Number(val),
-    z.number().min(1).optional()
+    z.number().min(1, "Definir um prefixo é obrigatório")
   )
 });
 
 type FormData = z.infer<typeof schema>;
 
-type CadastroProdutoModalProps = {
+type CadastroModalidadeModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdutoModalProps) {
+export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModalidadeModalProps) {
   const router = useRouter();
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -111,32 +112,24 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
   if (!isOpen) return null;
 
   return (
-    <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 bg-background shadow-lg overflow-auto p-6 rounded-l-2xl"
-      >
-        <FormProvider {...methods}>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-1/3 max-w-full! px-5 rounded-l-xl">
+        <SheetHeader className="px-0">
+          <SheetTitle className="text-xl font-semibold">
+            Cadastrar nova modalidade
+          </SheetTitle>
+          <SheetDescription>
+            Cadastre uma modalidade e defina o prefixo dela. 
+            <br/>
+            * Lembre-se: este prefixo será usado para definir o nome do produto cadastrado!
+          </SheetDescription>
+        </SheetHeader>
+                <FormProvider {...methods}>
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Produto</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
-              </div>
-
-              <Card className="flex-grow overflow-auto">
+              <Card className="overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados do Produto</CardTitle>
+                  <CardTitle>Dados da modalidade</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -148,7 +141,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                         <FormItem>
                           <FormLabel>Nome</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o nome" {...field} />
+                            <Input placeholder="Digite o nome da modalidade a ser cadastrada" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -164,7 +157,7 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                           <FormControl>
                             <Input
                               type="number"
-                              placeholder="Idade mínima"
+                              placeholder="Defina o prefixo desta modalidade"
                               value={field.value === undefined ? "" : field.value}
                               onChange={(e) => handleNumberChange(e, field)}
                               min="0"
@@ -192,16 +185,16 @@ export default function CadastroProdutoModal({ isOpen, onClose }: CadastroProdut
                 </CardContent>
               </Card>
 
-              <div className="mt-6 flex justify-end gap-4">
+              <div className="mb-6 flex flex-col mt-auto justify-end gap-4">
+                 <Button type="submit" className="py-6">Cadastrar</Button>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Cadastrar</Button>
               </div>
             </form>
           </Form>
         </FormProvider>
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

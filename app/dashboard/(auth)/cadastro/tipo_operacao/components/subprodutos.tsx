@@ -173,7 +173,7 @@ export function SubprodutosTable() {
       ) : (
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Tipo de Operação</CardTitle>
+            <CardTitle>Tipo de operação</CardTitle>
           </CardHeader>
 
           <CardContent>

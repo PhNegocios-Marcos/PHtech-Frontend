@@ -128,7 +128,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>
-                Editar Tipo de Operação:{" "}
+                Editar tipo de operação:{" "}
                 <span className="text-primary">{subproduto.produtos_subprodutos_nome}</span>
               </CardTitle>
               <Button onClick={onClose} variant="outline">

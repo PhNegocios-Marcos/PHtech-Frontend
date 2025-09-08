@@ -357,7 +357,7 @@ export default function CadastroTabelaModal({ isOpen, onClose }: CadastroTabelaM
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-sm font-bold text-black">Tipo de Operação</span>
+                    <span className="text-sm font-bold text-black">Tipo de operação</span>
                     <div className="w-full">
                       <Combobox
                         data={produtos}

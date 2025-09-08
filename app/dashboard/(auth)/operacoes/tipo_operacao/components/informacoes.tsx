@@ -138,7 +138,7 @@ export function SubprodutoEdit({ subproduto, onClose, onRefresh }: SubprodutoDra
         <FormProvider {...methods}>
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              Tipo de Operação:{" "}
+              Tipo de operação:{" "}
               <span className="text-primary">{subproduto.produtos_subprodutos_nome}</span>
             </h2>
             <button

@@ -154,7 +154,7 @@ export const page_routes: PageRoutesType[] = [
         items: [
           {
             id: "TipoOperacao_ver",
-            title: "Tipo de Operação",
+            title: "Tipo de operação",
             href: "/dashboard/operacoes/tipo_operacao"
             // icon: "ChartPie"
           },
