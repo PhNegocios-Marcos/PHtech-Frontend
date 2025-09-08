@@ -16,7 +16,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
+import { MultiSelect, type MultiSelectOption } from "@/components/multi-select";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 import {
@@ -37,7 +37,7 @@ import { CalendarBR } from "@/components/ui/calendar-locale";
 const schema = z
   .object({
     // Dados do produto
-    promotora_hash: z.string().min(1, "Promotora é obrigatória"),
+    promotora_hash: z.array(z.string()).min(1, "Pelo menos uma promotora é obrigatória"),
     convenio_hash: z.string().min(1, "Convênio é obrigatório"),
     modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
     tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
@@ -99,7 +99,12 @@ type AtualizarProdutoModalProps = {
 const textFields = [
   { name: "nome_taxa", label: "Nome do produto", placeholder: "Digite o nome", type: "text" },
   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6", type: "number" },
-  { name: "periodiciade", label: "Cálculo de operação", placeholder: "Digite o período da operação", type: "number" }
+  {
+    name: "periodiciade",
+    label: "Cálculo de operação",
+    placeholder: "Digite o período da operação",
+    type: "number"
+  }
 ] as const;
 
 const prazoFields = [
@@ -124,13 +129,14 @@ export default function AtualizarProdutoModal({
   const [roList, setRO] = useState<Option[]>([]);
   const [usaSeguro, setaSeguro] = useState(false);
   const [usaTac, setaTac] = useState(false);
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const { token, userData } = useAuth();
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      promotora_hash: "",
+      promotora_hash: [],
       convenio_hash: "",
       modalidade_hash: "",
       tipo_operacao_hash: "",
@@ -157,7 +163,7 @@ export default function AtualizarProdutoModal({
   useEffect(() => {
     if (isOpen && produto) {
       methods.reset({
-        promotora_hash: produto.promotora_hash || "",
+        promotora_hash: produto.promotora_hash ? [produto.promotora_hash] : [],
         convenio_hash: produto.convenio_hash || "",
         modalidade_hash: produto.modalidade_hash || "",
         tipo_operacao_hash: produto.tipo_operacao_hash || "",
@@ -191,69 +197,80 @@ export default function AtualizarProdutoModal({
 
       try {
         // Carregar convênios
-        const convenioRes = await axios.get(`${API_BASE_URL}/convenio`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setConvenio(convenioRes.data.map((c: any) => ({ id: c.convenio_hash, nome: c.convenio_nome })));
+        // const convenioRes = await axios.get(`${API_BASE_URL}/convenio`, {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        // setConvenio(
+        //   convenioRes.data.map((c: any) => ({ id: c.convenio_hash, nome: c.convenio_nome }))
+        // );
 
-        // Carregar promotoras
+        // // Carregar promotoras
         const promotoraRes = await axios.get(`${API_BASE_URL}/promotora/listar`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPromotora(promotoraRes.data.map((pp: any) => ({ id: pp.id, nome: pp.nome })));
 
-        // Carregar modalidades
-        const modalidadeRes = await axios.get(`${API_BASE_URL}/produtos/listar`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setModalidade(modalidadeRes.data.map((item: any) => ({ id: item.id, nome: item.nome })));
+        // // Carregar modalidades
+        // const modalidadeRes = await axios.get(`${API_BASE_URL}/produtos/listar`, {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        // setModalidade(modalidadeRes.data.map((item: any) => ({ id: item.id, nome: item.nome })));
 
-        // Carregar produtos (tipos de operação)
-        const produtosRes = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setProdutos(produtosRes.data.map((item: any) => ({ 
-          id: item.produtos_subprodutos_id, 
-          nome: item.produtos_subprodutos_nome 
-        })));
+        // // Carregar produtos (tipos de operação)
+        // const produtosRes = await axios.get(`${API_BASE_URL}/subprodutos/listar`, {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        // setProdutos(
+        //   produtosRes.data.map((item: any) => ({
+        //     id: item.produtos_subprodutos_id,
+        //     nome: item.produtos_subprodutos_nome
+        //   }))
+        // );
 
         // Carregar RO
         const roRes = await axios.get(`${API_BASE_URL}/rotina-operacional/listar`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setRO(roRes.data.map((item: any) => ({ 
-          id: item.rotina_operacional_hash, 
-          nome: item.nome,
-          dadosCompletos: item
-        })));
+        setRO(
+          roRes.data.map((item: any) => ({
+            id: item.rotina_operacional_hash,
+            nome: item.nome,
+            dadosCompletos: item
+          }))
+        );
 
         // Carregar bancarizadores
         const bancarizadorRes = await axios.get(`${API_BASE_URL}/bancarizador/listar`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setBancarizador(bancarizadorRes.data.map((item: any) => {
-          const uuid = Object.keys(item)[0];
-          return { id: uuid, nome: item[uuid].nome };
-        }));
+        setBancarizador(
+          bancarizadorRes.data.map((item: any) => {
+            const uuid = Object.keys(item)[0];
+            return { id: uuid, nome: item[uuid].nome };
+          })
+        );
 
         // Carregar seguradoras
         const seguradoraRes = await axios.get(`${API_BASE_URL}/seguradoras/listar`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setSeguradora(seguradoraRes.data.map((item: any) => ({ 
-          id: item.seguradora_hash, 
-          nome: item.nome 
-        })));
+        setSeguradora(
+          seguradoraRes.data.map((item: any) => ({
+            id: item.seguradora_hash,
+            nome: item.nome
+          }))
+        );
 
         // Carregar seguros
         const seguroRes = await axios.get(`${API_BASE_URL}/seguro-faixas/listar`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setSeguro(seguroRes.data.map((item: any) => ({ 
-          id: item.seguro_faixa_hash, 
-          nome: item.nome 
-        })));
-
+        setSeguro(
+          seguroRes.data.map((item: any) => ({
+            id: item.seguro_faixa_hash,
+            nome: item.nome
+          }))
+        );
       } catch (error: any) {
         console.error("Erro ao carregar dados:", error);
         toast.error("Erro ao carregar dados: " + (error.message || "Erro desconhecido"));
@@ -263,11 +280,24 @@ export default function AtualizarProdutoModal({
     fetchData();
   }, [isOpen, token]);
 
+  // Adicione este useEffect para monitorar erros
+  useEffect(() => {
+    console.log("Erros de validação:", methods.formState.errors);
+  }, [methods.formState.errors]);
+
+  // Adicione este useEffect para monitorar valores
+  useEffect(() => {
+    console.log("Valores do formulário:", methods.getValues());
+  }, [methods.getValues()]);
+
   // Função para atualizar o produto
   const onSubmit = async (data: FormData) => {
+    console.log("Dados do formulário:", data); // Debug
     setLoading(true);
 
     try {
+      const promotoraHash = data.promotora_hash.length > 0 ? data.promotora_hash[0] : "";
+
       const payload = {
         config_tabela_hash: produto.tabela_hash,
         relacionamento_hash: produto.relacionamento_hash,
@@ -292,24 +322,37 @@ export default function AtualizarProdutoModal({
         idade_minima: data.idade_minima,
         idade_maxima: data.idade_maxima,
         usa_seguro: usaSeguro ? 1 : 0,
-        usa_tac: usaTac ? 1 : 0
+        usa_tac: usaTac ? 1 : 0,
+        promotora_hash: promotoraHash
       };
 
-      await axios.put(`${API_BASE_URL}/produtos-config-tabelas/atualizar-completo`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+      console.log("Payload:", payload); // Debug
+
+      const response = await axios.put(
+        `${API_BASE_URL}/produtos-config-tabelas/atualizar-completo`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
         }
-      });
+      );
+
+      console.log("Resposta da API:", response.data); // Debug
 
       // Atualizar também a relação com promotora se necessário
       if (data.promotora_hash && produto.relacionamento_hash) {
-        await axios.put(`${API_BASE_URL}/rel-produto-promotora/atualizar`, {
-          relacionamento_hash: produto.relacionamento_hash,
-          promotora_hash: data.promotora_hash
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(
+          `${API_BASE_URL}/rel-produto-promotora/atualizar`,
+          {
+            relacionamento_hash: produto.relacionamento_hash,
+            promotora_hash: data.promotora_hash
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
       }
 
       toast.success("Produto atualizado com sucesso!");
@@ -317,10 +360,19 @@ export default function AtualizarProdutoModal({
       onClose();
     } catch (error: any) {
       console.error("Erro ao atualizar:", error);
-      toast.error(`Erro ao atualizar: ${error.response?.data?.detail || error.message}`);
+      const errorMessage =
+        error.response?.data?.detail || error.response?.data?.message || error.message;
+      toast.error(`Erro ao atualizar: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Adicione esta função para debug
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Formulário submetido manualmente");
+    methods.handleSubmit(onSubmit)();
   };
 
   if (!isOpen) return null;
@@ -335,7 +387,7 @@ export default function AtualizarProdutoModal({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-3/5 max-w-full! px-5 rounded-l-xl">
+      <SheetContent side="right" className="w-3/5 max-w-full! rounded-l-xl px-5">
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             Editar produto: <span className="text-primary">{produto.nome}</span>
@@ -343,7 +395,9 @@ export default function AtualizarProdutoModal({
         </SheetHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-y-auto">
+          <form
+            onSubmit={methods.handleSubmit(onSubmit)}
+            className="flex h-full flex-col overflow-y-auto">
             <div className="flex-1 space-y-6 px-2">
               {/* Seção do Produto */}
               <Card className="w-full rounded-2xl border p-8 px-1">
@@ -441,26 +495,31 @@ export default function AtualizarProdutoModal({
                   <FormField
                     control={methods.control}
                     name="promotora_hash"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Promotora(s)</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            data={promotora}
-                            displayField="nome"
-                            value={promotora.find((p) => p.id === field.value) || null}
-                            onChange={(selected) => field.onChange(selected?.id || "")}
-                            searchFields={["nome"]}
-                            placeholder="Selecione uma ou mais promotoras"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const promotoraOptions: MultiSelectOption[] = promotora.map((p) => ({
+                        label: String(p.nome),
+                        value: String(p.id || p.hash || "")
+                      }));
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Promotora(s)</FormLabel>
+                          <FormControl>
+                            <MultiSelect
+                              options={promotoraOptions}
+                              onValueChange={field.onChange} // Já é array
+                              defaultValue={field.value}
+                              placeholder="Selecione as promotoras..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </CardContent>
               </Card>
-                      
+
               {/* Seção do RO */}
               <Card>
                 <CardHeader>
@@ -690,7 +749,11 @@ export default function AtualizarProdutoModal({
             </div>
 
             <div className="mt-8 mb-6 flex flex-col justify-end gap-4 px-4">
-              <Button type="submit" className="py-6" disabled={loading}>
+              <Button
+                type="submit"
+                className="py-6"
+                disabled={loading}
+                onClick={() => console.log("Botão clicado")}>
                 {loading ? "Atualizando..." : "Atualizar produto"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>

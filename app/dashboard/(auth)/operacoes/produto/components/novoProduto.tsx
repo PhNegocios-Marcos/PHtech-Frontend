@@ -559,7 +559,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-1/3 max-w-full! px-5 rounded-l-xl">
+      <SheetContent side="right" className="w-3/5 max-w-full! px-5 rounded-l-xl">
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             Cadastrar produto: <span className="text-primary">(Novo)</span>
