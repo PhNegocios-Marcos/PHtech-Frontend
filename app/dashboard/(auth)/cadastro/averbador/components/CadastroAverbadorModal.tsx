@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import toastComponent from "@/utils/toastComponent";
 
 const schema = z.object({
   averbador_nome: z.string().min(1, "Nome é obrigatório")
@@ -59,13 +60,8 @@ export default function CadastroAverbadorModal({ isOpen, onClose }: CadastroConv
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      toast.error("Token não encontrado. Faça login.", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error("Token não encontrado. Faça login.");
+      
       return;
     }
 

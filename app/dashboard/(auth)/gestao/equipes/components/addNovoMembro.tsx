@@ -247,6 +247,7 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
     }
   ];
 
+  // @ts-ignore
   const sortedUsers = usuarios.sort((a, b) => b.status_relacionamento - a.status_relacionamento);
   const table = useReactTable({
     data: sortedUsers,
