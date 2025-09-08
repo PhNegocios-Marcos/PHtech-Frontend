@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import CustomDateRangePicker from "@/components/custom-date-range-picker";
 import { Button } from "@/components/ui/button";
 import { EquipesTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";

@@ -9,42 +9,42 @@ export type ThemeType = typeof DEFAULT_THEME;
 
 export const THEMES = [
   {
-    name: "Default",
+    name: "Preto",
     value: "default",
     colors: ["oklch(0.33 0 0)"]
   },
   {
-    name: "Underground",
+    name: "Verde musgo",
     value: "underground",
     colors: ["oklch(0.5315 0.0694 156.19)"]
   },
   {
-    name: "Rose Garden",
+    name: "Rosa vibrante",
     value: "rose-garden",
     colors: ["oklch(0.5827 0.2418 12.23)"]
   },
   {
-    name: "Lake View",
+    name: "Verde vibrante",
     value: "lake-view",
     colors: ["oklch(0.765 0.177 163.22)"]
   },
   {
-    name: "Sunset Glow",
+    name: "Padrão",
     value: "sunset-glow",
     colors: ["oklch(0.5827 0.2187 36.98)"]
   },
   {
-    name: "Forest Whisper",
+    name: "Verde floresta",
     value: "forest-whisper",
     colors: ["oklch(0.5276 0.1072 182.22)"]
   },
   {
-    name: "Ocean Breeze",
+    name: "Azul marinho",
     value: "ocean-breeze",
     colors: ["oklch(0.59 0.20 277.12)"]
   },
   {
-    name: "Lavender Dream",
+    name: "Violeta",
     value: "lavender-dream",
     colors: ["oklch(0.71 0.16 293.54)"]
   }

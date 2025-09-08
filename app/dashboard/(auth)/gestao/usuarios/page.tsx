@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import CustomDateRangePicker from "@/components/custom-date-range-picker";
 import { Button } from "@/components/ui/button";
 import { UsuariosTable } from "./components/leads";
 import CampoBoasVindas from "@/components/boasvindas";
@@ -23,8 +22,6 @@ export default function Page() {
     <ProtectedRoute requiredPermission="Usuarios_ver">
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
-
-          {/* <CustomDateRangePicker /> */}
 
           {podeCriar && (
             <Button id="Usuarios_criar" onClick={() => setIsCadastroOpen(true)}>

@@ -34,6 +34,7 @@ import { ImageIcon, UploadIcon, X, XIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
@@ -386,13 +387,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
         setMaster(data);
       } catch (error) {
         console.error("Erro ao carregar masters", error);
-        toast.error("Erro ao carregar lista de promotoras master", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Erro ao carregar lista de promotoras master");
       }
     }
     fetchMasters();
@@ -400,13 +395,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
 
   async function onSubmit(data: FormData) {
     if (!token) {
-      toast.error("Token de autenticação não encontrado. Faça login.", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error("Falha na autenticação, faça login novamente.")
       return;
     }
 
@@ -414,13 +403,7 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
     if (enderecoFormRef.current) {
       const isValid = await enderecoFormRef.current.validate();
       if (!isValid) {
-        toast.error("Por favor, corrija os erros no endereço", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Por favor, corrija os erros no endereço");
         return;
       }
     }
@@ -695,11 +678,11 @@ export default function CadastroPromotoraModal({ isOpen, onClose }: CadastroProm
                       ))}
 
                     {/* Seletor de tema */}
-                    <div className="flex flex-col gap-4">
-                      <Label>Theme preset:</Label>
+                    <div className="flex flex-col">
+                      <Label className="mb-2">Definir tema</Label>
                       <Select value={selectedPreset} onValueChange={handlePreset}>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a theme" />
+                          <SelectValue placeholder="Escolha o tema da aplicação" />
                         </SelectTrigger>
                         <SelectContent align="end">
                           {THEMES.map((theme) => (

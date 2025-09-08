@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ProdutosTable, Produto } from "./components/produtos";
+import { ProdutosTable, Produto } from "./components/modalidades";
 import CampoBoasVindas from "@/components/boasvindas";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
-import CadastroProdutoModal from "./components/CadastroProdutoModal";
+import CadastroProdutoModal from "./components/CadastroModalidadeModal";
 import ProdutoDetalhesTabs from "./components/editProduto";
 
 export default function Page() {

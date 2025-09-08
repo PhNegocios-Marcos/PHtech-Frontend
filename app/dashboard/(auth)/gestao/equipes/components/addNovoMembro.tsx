@@ -32,6 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -164,13 +165,7 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
           prev.map((u) => (u.id === user.id ? { ...u, status_relacionamento: novoStatus } : u))
         );
 
-        toast.success(novoStatus === 1 ? "Membro ativado" : "Membro desativado", {
-          style: {
-            background: "var(--toast-success)",
-            color: "var(--toast-success-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.success(novoStatus === 1 ? "Membro ativado" : "Membro desativado");
       } else {
         // Criar novo relacionamento
         const response = await fetch(`${API_BASE_URL}/rel_usuario_equipe/criar`, {
@@ -216,24 +211,11 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
           )
         );
 
-        toast.success("Membro adicionado à equipe", {
-          style: {
-            background: "var(--toast-success)",
-            color: "var(--toast-success-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.success("Membro adicionado à equipe");
       }
     } catch (err) {
       console.error("Erro ao alterar status:", err);
-      toast.error("Operação falhou", {
-        description: "Não foi possível atualizar o membro",
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error("Operação falhou", {description: "Não foi possível atualizar o membro"});
     }
   }
 
@@ -265,8 +247,9 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
     }
   ];
 
+  const sortedUsers = usuarios.sort((a, b) => b.status_relacionamento - a.status_relacionamento);
   const table = useReactTable({
-    data: usuarios,
+    data: sortedUsers,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

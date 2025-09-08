@@ -181,14 +181,14 @@ export default function ListaClientes() {
     },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSelectedCliente(row.original)}
           title="Editar cliente">
-          <Pencil className="h-4 w-4" />
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -205,6 +205,7 @@ export default function ListaClientes() {
             Authorization: `Bearer ${token}`
           }
         });
+        console.log(res.data);
         setClientes(res.data);
       } catch (error: any) {
         console.error("Erro ao carregar clientes", error);

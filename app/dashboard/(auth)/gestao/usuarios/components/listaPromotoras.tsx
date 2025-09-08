@@ -48,7 +48,7 @@ type UsuariosTableProps = {
 };
 
 const equipeColumns: ColumnDef<EquipeRelacionada>[] = [
-  { accessorKey: "nome", header: "Nome da Equipe" },
+  { accessorKey: "nome", header: "Nome da equipe" },
   { 
     accessorKey: "status_relacionamento", 
     header: "Status",
