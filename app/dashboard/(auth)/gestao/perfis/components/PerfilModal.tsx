@@ -64,7 +64,7 @@ export function PerfilDrawer({ isOpen, onClose, usuario }: UsuarioDrawerProps) {
         <TabsList className="w-full">
           <TabsTrigger value="overview">Informações</TabsTrigger>
           <TabsTrigger value="reports">Permissões</TabsTrigger>
-          <TabsTrigger value="activities">ADD Nova Permissão</TabsTrigger>
+          <TabsTrigger value="activities">Adicionar permissões</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

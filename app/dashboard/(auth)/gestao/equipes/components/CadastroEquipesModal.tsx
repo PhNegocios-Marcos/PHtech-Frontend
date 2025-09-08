@@ -158,7 +158,7 @@ export default function CadastroEquipeModal({
                       name="nome"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome da Equipe</FormLabel>
+                          <FormLabel>Nome da equipe</FormLabel>
                           <FormControl>
                             <Input placeholder="Digite o nome" {...field} />
                           </FormControl>

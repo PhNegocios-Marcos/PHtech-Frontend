@@ -109,7 +109,7 @@ type Option = {
 // Campos de texto repetidos (para reduzir código)
 // Campos de texto repetidos (para reduzir código)
 const textFields = [
-  { name: "nome_taxa", label: "Nome do produto", placeholder: "Digite o nome", type: "text" },
+  { name: "nome_taxa", label: "Apelido do produto", placeholder: "Digite o nome", type: "text" },
   { name: "taxa_mensal", label: "Taxa mensal", placeholder: "1.6", type: "number" },
   { name: "periodiciade", label: "Cálculo de operação", placeholder: "Digite o período da operação", type: "number" }
 ] as const;
@@ -559,7 +559,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-3/5 max-w-full! px-5 rounded-l-xl">
+      <SheetContent side="right" className="w-1/3 max-w-full! px-5 rounded-l-xl">
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             Cadastrar produto: <span className="text-primary">(Novo)</span>
@@ -568,8 +568,8 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
             Versão: 
           </SheetDescription> */}
         </SheetHeader>
-            <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-y-auto">
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col">
             <div className="flex-1 space-y-6 px-2">
               {/* Seção do Produto */}
               <Card className="w-full rounded-2xl border p-8 px-1">
@@ -834,7 +834,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
               {/* Seção da Taxa */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Condições Comerciais</CardTitle>
+                  <CardTitle>Condições comerciais</CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-200">
                     Determine as condições comerciais deste produto respeitando as normas.
                   </p>

@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
+import { Pencil, PencilIcon } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -63,7 +63,7 @@ export function EquipesTable() {
   const { token } = useAuth();
 
   const equipeColumns: ColumnDef<Equipe>[] = [
-    { accessorKey: "nome", header: "Nome da Equipe" },
+    { accessorKey: "nome", header: "Nome da equipe" },
     { accessorKey: "descricao", header: "Descrição" },
         {
       id: "status",
@@ -126,14 +126,14 @@ export function EquipesTable() {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleEditClick(row.original)}
           title="Editar usuário">
-          <Search className="h-4 w-4" />
+          <PencilIcon className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -271,7 +271,7 @@ export function EquipesTable() {
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Perfis</CardTitle>
+            <CardTitle>Lista de perfis</CardTitle>
           </CardHeader>
           <CardContent>
             <>

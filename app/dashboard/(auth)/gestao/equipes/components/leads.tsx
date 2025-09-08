@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Pencil, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, PencilIcon, Search } from "lucide-react";
 import axios from "axios";
 import {
   Table,
@@ -155,14 +155,14 @@ export function EquipesTable() {
     },
     {
       id: "editar",
-      header: "Ver",
+      header: "Editar",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => handleRowDoubleClick(row.original)}
           title="Editar equipe">
-          <Search className="h-4 w-4" />
+          <PencilIcon className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,

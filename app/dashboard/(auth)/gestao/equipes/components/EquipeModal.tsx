@@ -97,17 +97,17 @@ export function EquipeDrawer({ isOpen, onClose, equipe, onRefresh }: EquipeDrawe
       >
         <TabsList className="w-full">
           <TabsTrigger value="overview">Informações</TabsTrigger>
-          <TabsTrigger value="members">Membros</TabsTrigger>
-          <TabsTrigger value="ADD_novo_members">Novo membro</TabsTrigger>
+          {/* <TabsTrigger value="members">Membros</TabsTrigger> */}
+          <TabsTrigger value="ADD_novo_members">Gestão de membros</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <EquipeEditForm equipe={formData} onClose={handleSuccess} />
         </TabsContent>
 
-        <TabsContent value="members">
+        {/* <TabsContent value="members">
           <UsuariosPorEquipeTable onClose={onClose} equipeNome={formData.nome} />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="ADD_novo_members">
           <NovoMembro equipeNome={formData.nome} onClose={onClose} />

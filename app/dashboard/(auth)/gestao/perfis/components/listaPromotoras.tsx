@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,13 +66,8 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         return atualizado;
       });
 
-      toast.success("Permissão atualizada com sucesso!", {
-        style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.success("Permissão atualizada com sucesso!");
+
     } catch (error: any) {
       console.error("Erro ao atualizar permissão:", error.message || error);
       toast.error(`Erro ao atualizar permissão: ${error.message || error}`, {
@@ -116,6 +112,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         }
 
         const data = await response.json();
+        console.log(data.length);
         setEquipeLabel(data.perfil ?? equipeNome);
 
         const permissoes = data.permissões || {};
@@ -172,7 +169,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         </div>
       </CardHeader>
       <CardContent className="overflow-auto">
-        <table className="min-w-full border text-sm">
+        <table className={`min-w-full border text-sm `}>
           <thead className="bg-muted">
             <tr>
               <th className="border px-2 py-1 text-left">Seção</th>

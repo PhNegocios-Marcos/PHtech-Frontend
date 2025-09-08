@@ -27,7 +27,7 @@ export default function Page() {
 
           {podeCriar && (
             <Button id="Perfis_criar" onClick={() => setIsCadastroOpen(true)}>
-              Novo Perfil
+              Novo perfil
             </Button>
           )}
         </div>

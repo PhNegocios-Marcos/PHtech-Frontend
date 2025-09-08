@@ -115,7 +115,7 @@ export default function CadastroPerfilModal({
             className="flex flex-col h-full"
           >
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Cadastrar Novo Perfil</h2>
+              <h2 className="text-xl font-semibold">Cadastrar novo perfil</h2>
               <button
                 type="button"
                 onClick={onClose}
