@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -150,13 +151,8 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
         throw new Error(erro?.detail || "Erro ao enviar permissões");
       }
 
-      toast.success("Permissões atualizadas com sucesso!", {
-        style: {
-          background: "var(--toast-success)",
-          color: "var(--toast-success-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.success("Permissões atualizadas com sucesso!");
+
     } catch (error: any) {
       console.error("Erro ao enviar permissões:", error.message || error);
       toast.error(`Erro ao enviar permissões: ${error.message || error}`, {

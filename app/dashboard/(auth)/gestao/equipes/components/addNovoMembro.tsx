@@ -248,7 +248,7 @@ export function NovoMembro({ equipeNome, onClose }: UsuariosTableProps) {
     },
     {
       id: "vinculo",
-      header: "Na Equipe",
+      header: "Na equipe",
       cell: ({ row }) => {
         const user = row.original;
         const checked = user.status_relacionamento === 1;

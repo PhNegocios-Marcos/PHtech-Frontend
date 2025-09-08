@@ -147,7 +147,7 @@ export function EquipeEditForm({ equipe, onClose }: EquipeEditProps) {
                   name="nome"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome da Equipe</FormLabel>
+                      <FormLabel>Nome da equipe</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
