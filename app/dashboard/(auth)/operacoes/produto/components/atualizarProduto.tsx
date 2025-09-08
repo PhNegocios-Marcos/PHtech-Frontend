@@ -38,13 +38,13 @@ const schema = z
   .object({
     // Dados do produto
     promotora_hash: z.array(z.string()).min(1, "Pelo menos uma promotora é obrigatória"),
-    convenio_hash: z.string().min(1, "Convênio é obrigatório"),
-    modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
-    tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
-    bancalizador: z.string().min(1, "Bancarizador é obrigatório"),
-    seguradora: z.string().min(1, "Seguradora é obrigatória"),
-    seguro: z.string().min(1, "Seguro é obrigatório"),
-    RO: z.string().min(1, "RO é obrigatório"),
+    // convenio_hash: z.string().min(1, "Convênio é obrigatório"),
+    // modalidade_hash: z.string().min(1, "Modalidade é obrigatória"),
+    // tipo_operacao_hash: z.string().min(1, "Tipo de operação é obrigatório"),
+    // bancalizador: z.string().min(1, "Bancarizador é obrigatório"),
+    // seguradora: z.string().min(1, "Seguradora é obrigatória"),
+    // seguro: z.string().min(1, "Seguro é obrigatório"),
+    // RO: z.string().min(1, "RO é obrigatório"),
     valor_bruto_minimo: z.string().optional(),
     valor_bruto_maximo: z.string().optional(),
     idade_minima: z.string().optional(),
@@ -137,9 +137,9 @@ export default function AtualizarProdutoModal({
     resolver: zodResolver(schema),
     defaultValues: {
       promotora_hash: [],
-      convenio_hash: "",
-      modalidade_hash: "",
-      tipo_operacao_hash: "",
+      // convenio_hash: "",
+      // modalidade_hash: "",
+      // tipo_operacao_hash: "",
       nome_taxa: "",
       prazo_minimo: "",
       prazo_maximo: "",
@@ -148,10 +148,10 @@ export default function AtualizarProdutoModal({
       periodiciade: "",
       inicio: undefined,
       fim: undefined,
-      RO: "",
-      bancalizador: "",
-      seguradora: "",
-      seguro: "",
+      // RO: "",
+      // bancalizador: "",
+      // seguradora: "",
+      // seguro: "",
       valor_bruto_minimo: "",
       valor_bruto_maximo: "",
       idade_minima: "",
@@ -164,9 +164,9 @@ export default function AtualizarProdutoModal({
     if (isOpen && produto) {
       methods.reset({
         promotora_hash: produto.promotora_hash ? [produto.promotora_hash] : [],
-        convenio_hash: produto.convenio_hash || "",
-        modalidade_hash: produto.modalidade_hash || "",
-        tipo_operacao_hash: produto.tipo_operacao_hash || "",
+        // convenio_hash: produto.convenio_hash || "",
+        // modalidade_hash: produto.modalidade_hash || "",
+        // tipo_operacao_hash: produto.tipo_operacao_hash || "",
         nome_taxa: produto.nome_tabela || "",
         prazo_minimo: produto.prazo_minimo?.toString() || "",
         prazo_maximo: produto.prazo_maximo?.toString() || "",
@@ -175,10 +175,10 @@ export default function AtualizarProdutoModal({
         periodiciade: produto.periodicidade?.toString() || "",
         inicio: produto.vigencia_inicio ? new Date(produto.vigencia_inicio) : undefined,
         fim: produto.vigencia_fim ? new Date(produto.vigencia_fim) : undefined,
-        RO: produto.rotina_operacional_hash || "",
-        bancalizador: produto.bancarizador || "",
-        seguradora: produto.seguradora || "",
-        seguro: produto.seguro || "",
+        // RO: produto.rotina_operacional_hash || "",
+        // bancalizador: produto.bancarizador || "",
+        // seguradora: produto.seguradora || "",
+        // seguro: produto.seguro || "",
         valor_bruto_minimo: produto.valor_bruto_minimo?.toString() || "",
         valor_bruto_maximo: produto.valor_bruto_maximo?.toString() || "",
         idade_minima: produto.idade_minima?.toString() || "",
@@ -280,15 +280,7 @@ export default function AtualizarProdutoModal({
     fetchData();
   }, [isOpen, token]);
 
-  // Adicione este useEffect para monitorar erros
-  useEffect(() => {
-    console.log("Erros de validação:", methods.formState.errors);
-  }, [methods.formState.errors]);
 
-  // Adicione este useEffect para monitorar valores
-  useEffect(() => {
-    console.log("Valores do formulário:", methods.getValues());
-  }, [methods.getValues()]);
 
   // Função para atualizar o produto
   const onSubmit = async (data: FormData) => {
@@ -301,9 +293,9 @@ export default function AtualizarProdutoModal({
       const payload = {
         config_tabela_hash: produto.tabela_hash,
         relacionamento_hash: produto.relacionamento_hash,
-        convenio_hash: data.convenio_hash,
-        modalidade_hash: data.modalidade_hash,
-        tipo_operacao_hash: data.tipo_operacao_hash,
+        // convenio_hash: data.convenio_hash,
+        // modalidade_hash: data.modalidade_hash,
+        // tipo_operacao_hash: data.tipo_operacao_hash,
         nome_tabela: data.nome_taxa,
         prazo_minimo: data.prazo_minimo,
         prazo_maximo: data.prazo_maximo,
@@ -313,10 +305,10 @@ export default function AtualizarProdutoModal({
         periodicidade: data.periodiciade,
         vigencia_inicio: format(data.inicio, "yyyy-MM-dd"),
         vigencia_fim: format(data.fim, "yyyy-MM-dd"),
-        bancarizador: data.bancalizador,
-        seguradora: data.seguradora,
-        seguro: data.seguro,
-        rotina_operacional_hash: data.RO,
+        // bancarizador: data.bancalizador,
+        // seguradora: data.seguradora,
+        // seguro: data.seguro,
+        // rotina_operacional_hash: data.RO,
         valor_bruto_minimo: data.valor_bruto_minimo,
         valor_bruto_maximo: data.valor_bruto_maximo,
         idade_minima: data.idade_minima,
@@ -521,7 +513,7 @@ export default function AtualizarProdutoModal({
               </Card>
 
               {/* Seção do RO */}
-              <Card>
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Regra do produto</CardTitle>
                 </CardHeader>
@@ -547,7 +539,7 @@ export default function AtualizarProdutoModal({
                     )}
                   />
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Seção da Taxa */}
               <Card>
@@ -580,7 +572,7 @@ export default function AtualizarProdutoModal({
                   </div>
 
                   <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
-                    <FormField
+                    {/* <FormField
                       control={methods.control}
                       name="bancalizador"
                       render={({ field }) => (
@@ -599,7 +591,7 @@ export default function AtualizarProdutoModal({
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
+                    /> */}
 
                     <FormField
                       control={methods.control}
@@ -642,7 +634,7 @@ export default function AtualizarProdutoModal({
                     ))}
                   </div>
 
-                  <Card className="mt-6">
+                  {/* <Card className="mt-6">
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
                         Seguro
@@ -703,7 +695,7 @@ export default function AtualizarProdutoModal({
                         />
                       </div>
                     </CardContent>
-                  </Card>
+                  </Card> */}
 
                   <Card className="mt-6">
                     <CardHeader>
