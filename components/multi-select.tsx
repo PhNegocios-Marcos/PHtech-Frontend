@@ -1071,7 +1071,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 												<CheckIcon className="h-4 w-4" />
 											</div>
 											<span>
-												(Select All
+												(Selecionar Tudo
 												{getAllOptions().length > 20
 													? ` - ${getAllOptions().length} options`
 													: ""}
@@ -1166,7 +1166,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 									</CommandGroup>
 								)}
 								<CommandSeparator />
-								<CommandGroup>
+								{/* <CommandGroup>
 									<div className="flex items-center justify-between">
 										{selectedValues.length > 0 && (
 											<>
@@ -1187,7 +1187,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 											Close
 										</CommandItem>
 									</div>
-								</CommandGroup>
+								</CommandGroup> */}
 							</CommandList>
 						</Command>
 					</PopoverContent>
