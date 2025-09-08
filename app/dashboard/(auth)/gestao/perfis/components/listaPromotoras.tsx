@@ -70,13 +70,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
 
     } catch (error: any) {
       console.error("Erro ao atualizar permissão:", error.message || error);
-      toast.error(`Erro ao atualizar permissão: ${error.message || error}`, {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error(`Erro ao atualizar permissão: ${error.message || error}`);
     }
   };
 
@@ -113,6 +107,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
 
         const data = await response.json();
         console.log(data.length);
+
         setEquipeLabel(data.perfil ?? equipeNome);
 
         const permissoes = data.permissões || {};
@@ -141,13 +136,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         setPermissoesPorSecao(novoFormato);
       } catch (error: any) {
         console.error("Erro ao buscar dados:", error.message || error);
-        toast.error(`Erro ao buscar permissões: ${error.message || error}`, {
-          style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
-        });
+        toastComponent.error(`Erro ao buscar permissões: ${error.message || error}`);
       }
     }
 

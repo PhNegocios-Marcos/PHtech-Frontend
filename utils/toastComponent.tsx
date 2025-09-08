@@ -22,14 +22,15 @@ const toastComponent = {
 
   error: (message: string, options?: ToastOptions) =>
     toast.error(message, {
-        style: { background: "var(--toast-error)", color: "var(--toast-error-foreground)", boxShadow: "var(--toast-shadow)"},
+        style: { background: "var(--toast-error)", color: "var(--toast-error-foreground)", boxShadow: "var(--toast-shadow)" },
         description: options?.description,
         duration: options?.duration ?? 5000,
         action: options?.action,
     }),
 
   info: (message: string, options?: ToastOptions) =>
-    toast(message, {
+    toast.info(message, {
+        style: { background: "var(--toast-info)", color: "var(--toast-info-foreground)", boxShadow: "var(--toast-shadow)" },
         description: options?.description,
         duration: options?.duration ?? 4000,
         action: options?.action,
@@ -37,6 +38,7 @@ const toastComponent = {
 
   warning: (message: string, options?: ToastOptions) =>
     toast.warning?.(message, {
+        style: { background: "var(--toast-warning)", color: "var(--toast-warning-foreground)", boxShadow: "var(--toast-shadow)" },
         description: options?.description,
         duration: options?.duration ?? 4000,
         action: options?.action,
