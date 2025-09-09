@@ -20,7 +20,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { maskDate, maskMoneyReal } from "@/utils/maskTable";
+import { maskDate, maskMoneyReal, maskPercentage } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -248,7 +248,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Conta de liquidação", value: proposta.informacoes.contaLiquidacao },
             { label: "Valor líquido", value: formatToBRL(proposta.valor) },
             { label: "Código IPOC", value: proposta.informacoes.codigoIpoc },
-            { label: "Data de início", value: maskDate(proposta.data) },
+            { label: "Data de cadastro", value: maskDate(proposta.data) },
             { label: "Observações", value: proposta.informacoes.observacoes },
             { label: "Correspondente", value: proposta.historico.correspondente },
             { label: "Operador", value: proposta.historico.operador },
@@ -372,11 +372,9 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
       <CardContent>
         <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {proposta.operacaoParametros.map((item, index) => (
-            <div
-              key={index}
-              className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
+            <div key={index} className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
               <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
-              <p className="text-lg font-bold">{item.taxaJurosAM || "-"}</p>
+              <p className="text-lg font-bold">{`${item.taxaJurosAM} %` || "-"}</p>
             </div>
           ))}
         </div>
