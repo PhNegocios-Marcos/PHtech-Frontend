@@ -21,7 +21,7 @@ export type Promotora = {
 };
 
 type PromotoraDrawerProps = {
-  onClose: () => void;
+  onClose: (promotora?: Promotora) => void; // Make it accept an optional parameter
   promotora: Promotora | null;
 };
 
@@ -29,7 +29,7 @@ export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
   const [formData, setFormData] = useState<Promotora | null>(null);
 
   useEffect(() => {
-    if ( promotora) {
+    if (promotora) {
       try {
         setFormData({ ...promotora });
         // toast.success("Dados da promotora carregados", {
@@ -43,9 +43,9 @@ export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
       } catch (error: any) {
         toast.error("Erro ao carregar dados", {
           style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
           },
           description: error.message || "Não foi possível carregar os dados da promotora"
         });
@@ -58,24 +58,14 @@ export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
     return null;
   }
 
-  const handleTabChange = (value: string) => {
-    // toast.info(`Aba alterada para ${value === "overview" ? "Informações" : "Usuários"}`, {
-    //   style: {
-    //     background: 'var(--toast-info)',
-    //     color: 'var(--toast-info-foreground)',
-    //     boxShadow: 'var(--toast-shadow)'
-    //   }
-    // });
-  };
-
   return (
-    <Tabs defaultValue="overview" className="space-y-4" onValueChange={handleTabChange}>
+    <Tabs defaultValue="overview" className="space-y-4">
       <TabsList className="w-full">
         <TabsTrigger value="overview">Informações</TabsTrigger>
         <TabsTrigger value="reports">Usuários</TabsTrigger>
       </TabsList>
       <TabsContent value="overview">
-        <PromotorEdit data={formData} onClose={onClose} />
+        <PromotorEdit id={formData.id} cnpj={formData.cnpj} data={formData} onClose={onClose} />
       </TabsContent>
       <TabsContent value="reports">
         <UsuariosTable cnpj={formData.cnpj} onClose={onClose} promotora={formData} />

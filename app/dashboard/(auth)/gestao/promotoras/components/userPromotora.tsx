@@ -81,6 +81,8 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
 
     return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
   }, [token, router]);
+
+  
   useEffect(() => {
     async function fetchUsuariosRelacionados() {
       if (!token || !cnpj) {

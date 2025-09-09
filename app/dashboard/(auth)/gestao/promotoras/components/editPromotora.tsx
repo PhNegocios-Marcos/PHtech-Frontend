@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { MultiSelect, type MultiSelectOption } from "@/components/multi-select";
 import {
   Form,
   FormControl,
@@ -32,19 +33,32 @@ export type Promotora = {
   rateio_master: string;
   rateio_sub: string;
   status: number;
+  gerentes?: string[]; // Adicione esta linha
+};
+
+type Usuario = {
+  nome: string;
+  id: string;
+  hash?: string;
+  email: string;
+  tipo_usuario: string;
+  status: number;
 };
 
 type PromotorEditProps = {
   data: Promotora;
+  cnpj: string;
+  id: string;
   onClose: () => void;
 };
 
-export function PromotorEdit({ data, onClose }: PromotorEditProps) {
+export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
   const methods = useForm({
     defaultValues: data
   });
   const { token } = useAuth();
   const router = useRouter();
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
   useEffect(() => {
     methods.reset(data);
@@ -59,7 +73,7 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
         // console.log("token null");
@@ -71,6 +85,76 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
 
     return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
   }, [token, router]);
+
+  useEffect(() => {
+    async function fetchUsuariosRelacionados() {
+      if (!token || !cnpj) {
+        toast.error("Autenticação necessária", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          },
+          description: "Token ou CNPJ não encontrado"
+        });
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/rel_usuario_promotora/${cnpj}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.detail || "Erro ao buscar relacionamentos");
+        }
+
+        const data = await response.json();
+        const usuariosArray: Usuario[] = [];
+
+        Object.values(data.promotoras).forEach((prom: any) => {
+          prom.usuarios.forEach((relUsuario: any) => {
+            if (relUsuario.usuario) {
+              usuariosArray.push({
+                nome: relUsuario.usuario.nome,
+                email: relUsuario.usuario.email,
+                tipo_usuario: relUsuario.usuario.tipo_usuario,
+                status: relUsuario.usuario.status,
+                id: relUsuario.usuario.id
+              });
+            }
+          });
+        });
+
+        setUsuarios(usuariosArray);
+        // toast.success("Usuários carregados com sucesso", {
+        //   style: {
+        //     background: 'var(--toast-success)',
+        //     color: 'var(--toast-success-foreground)',
+        //     boxShadow: 'var(--toast-shadow)'
+        //   },
+        //   description: `${usuariosArray.length} usuários encontrados`
+        // });
+      } catch (error: any) {
+        console.error("Erro na requisição:", error.message || error);
+        toast.error("Falha ao carregar usuários", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          },
+          description: error.message || "Erro desconhecido"
+        });
+      }
+    }
+
+    fetchUsuariosRelacionados();
+  }, [token, cnpj]);
 
   const onSubmit = async (formData: Promotora) => {
     if (!token) {
@@ -92,12 +176,33 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
       status: Number(formData.status)
     };
 
+    // Usar os IDs dos gerentes selecionados (que agora estão no formData.gerentes)
+    const payload2 = {
+      usuarios_hash: formData.gerentes || [], // Agora são IDs, não emails
+      promotora_hash: formData.id
+    };
+
     try {
+      // Primeiro atualiza os dados da promotora
       await axios.put(`${API_BASE_URL}/promotora/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
+      // Depois atualiza os relacionamentos com gerentes
+      const response2 = await fetch(`${API_BASE_URL}/gestao-promotora-gerente/criar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload2)
+      });
+
+      if (!response2.ok) {
+        throw new Error("Erro ao atualizar relacionamentos com gerentes");
+      }
 
       toast.success("Promotora atualizada com sucesso!", {
         style: {
@@ -140,7 +245,9 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
                   <Button onClick={onClose} variant="outline">
                     Voltar
                   </Button>
-                  <Button className="ml-4" type="submit">Salvar alterações</Button>
+                  <Button className="ml-4" type="submit">
+                    Salvar alterações
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -195,15 +302,67 @@ export function PromotorEdit({ data, onClose }: PromotorEditProps) {
                 <FormField
                   control={methods.control}
                   name="representante"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Representante</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    // Converter usuários para opções do Combobox
+                    const representanteOptions = usuarios
+                      .filter((usuario) => usuario.email && usuario.email.trim() !== "")
+                      .map((usuario) => ({
+                        id: usuario.email, // Usar email como ID
+                        name: usuario.nome || usuario.email || "Usuário sem nome"
+                      }));
+
+                    // Encontrar o valor selecionado atual
+                    const selectedValue =
+                      representanteOptions.find((opt) => opt.id === field.value) || null;
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Representante</FormLabel>
+                        <FormControl>
+                          <Combobox
+                            data={representanteOptions}
+                            displayField="name"
+                            value={selectedValue}
+                            onChange={(selected) => field.onChange(selected?.id || "")}
+                            searchFields={["name"]}
+                            placeholder="Selecione um representante..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                <FormField
+                  control={methods.control}
+                  name="gerentes"
+                  render={({ field }) => {
+                    const promotoraOptions: MultiSelectOption[] = usuarios
+                      .filter((usuario) => usuario.email && usuario.email.trim() !== "")
+                      .map((p) => ({
+                        label: String(p.nome || p.email || "Usuário sem nome"),
+                        value: String(p.id)
+                      }));
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Gerentes</FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={promotoraOptions}
+                            onValueChange={(values) => {
+                              field.onChange(values);
+                            }}
+                            defaultValue={field.value || []}
+                            placeholder="Selecione os usuários..."
+                            deduplicateOptions={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
