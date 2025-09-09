@@ -377,7 +377,7 @@ export default function CadastroUsuarioModal({ isOpen, onClose }: CadastroUsuari
 
   // Adicione este useEffect para monitorar valores
   useEffect(() => {
-    console.log("Valores do formulário:", methods.getValues());
+    // console.log("Valores do formulário:", methods.getValues());
   }, [methods.getValues()]);
 
   useEffect(() => {

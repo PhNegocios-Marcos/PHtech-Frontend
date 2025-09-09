@@ -32,28 +32,28 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const createSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  idade_minima: z.string().min(1, "Idade mínima é obrigatória"),
-  idade_maxima: z.string().min(1, "Idade máxima é obrigatória"),
-  prazo_minimo: z.string().min(1, "Prazo mínimo é obrigatório"),
-  prazo_maximo: z.string().min(1, "Prazo máximo é obrigatória"),
-  valor_bruto_minimo: z.string().min(1, "Valor bruto mínimo é obrigatório"),
-  valor_bruto_maximo: z.string().min(1, "Valor bruto máximo é obrigatório"),
-  taxa_minima: z.string().min(1, "Taxa mínima é obrigatória"),
-  taxa_maxima: z.string().min(1, "Taxa máxima é obrigatória"),
-  usa_margem_seguranca: z.enum(["true", "false"], { message: "Selecione uma opção" }),
-  valor_margem_seguranca: z.string().optional(),
-  // tac_min: z.string().min(1, "TAC mínima é obrigatória"),
-  // tac_max: z.string().min(1, "TAC máxima é obrigatória"),
-  usa_limite_proposta: z.enum(["true", "false"], { message: "Selecione uma opção" }),
-  valor_limite_proposta: z.string().optional(),
-  quantidade_propostas_ativas: z.string(),
-
-  // novos campos
-  dia_corte_competencia: z.string().min(1, "Dia de corte da competência é obrigatório"),
-  validade_ccb: z.string().min(1, "Validade CCB é obrigatória"),
-  dia_recebimento: z.string().min(1, "Dia de recebimento é obrigatório"),
-  dia_corte_folha_pagamento: z.string().min(1, "Dia de corte da folha é obrigatório"),
-  status: z.enum(["0", "1"], { message: "Selecione um status" })
+  idade_minima: z.coerce.number().min(1, "Idade mínima é obrigatória"),
+  idade_maxima: z.coerce.number().min(1, "Idade máxima é obrigatória"),
+  prazo_minimo: z.coerce.number().min(1, "Prazo mínimo é obrigatório"),
+  prazo_maximo: z.coerce.number().min(1, "Prazo máximo é obrigatória"),
+  valor_bruto_minimo: z.coerce
+    .number()
+    .min(0.01, "Valor bruto mínimo é obrigatório"),
+  valor_bruto_maximo: z.coerce.number().min(1.0, "Valor bruto máximo é obrigatório"),
+  taxa_minima: z.coerce.number().min(0.01, "Taxa mínima é obrigatória"),
+  taxa_maxima: z.coerce.number().min(0.01, "Taxa máxima é obrigatória"),
+  usa_margem_seguranca: z.enum(["0", "1"]), // Alterado para 0 e 1
+  valor_margem_seguranca: z.coerce.number().optional(),
+  usa_limite_proposta: z.enum(["0", "1"]), // Alterado para 0 e 1
+  valor_limite_proposta: z.coerce.number().optional(),
+  quantidade_propostas_ativas: z.coerce.number().min(1, "Quantidade é obrigatória"),
+  dia_corte_competencia: z.coerce.number().min(1, "Dia de corte da competência é obrigatório"),
+  validade_ccb: z.coerce.number().min(1, "Validade CCB é obrigatória"),
+  dia_recebimento: z.coerce.number().min(1, "Dia de recebimento é obrigatório"),
+  dia_corte_folha_pagamento: z.coerce.number().min(1, "Dia de corte da folha é obrigatório"),
+  status: z.enum(["0", "1"]),
+  tarifa_cadastro_minima: z.coerce.number().min(0.01, "Tarifa cadastro mínima é obrigatória"),
+  tarifa_cadastro_maxima: z.coerce.number().min(0.01, "Tarifa cadastro máxima é obrigatória")
 });
 
 export type CreateFormData = z.infer<typeof createSchema>;
@@ -92,37 +92,28 @@ export default function CadastroRoteiroModal({
     defaultValues: {
       nome: "",
       descricao: "",
-      idade_minima: "",
-      idade_maxima: "",
-      prazo_minimo: "",
-      prazo_maximo: "",
-      valor_bruto_minimo: "",
-      valor_bruto_maximo: "",
-      taxa_minima: "",
-      taxa_maxima: "",
-      validade_ccb: "",
-      usa_margem_seguranca: "false",
-      valor_margem_seguranca: "",
-      // tac_min: "",
-      // tac_max: "",
-      usa_limite_proposta: "false",
-      valor_limite_proposta: "",
-      quantidade_propostas_ativas: "",
-      dia_corte_competencia: "",
-      dia_recebimento: "",
-      dia_corte_folha_pagamento: "",
-      status: "1"
+      idade_minima: undefined,
+      idade_maxima: undefined,
+      prazo_minimo: undefined,
+      prazo_maximo: undefined,
+      valor_bruto_minimo: undefined,
+      valor_bruto_maximo: undefined,
+      taxa_minima: undefined,
+      taxa_maxima: undefined,
+      validade_ccb: undefined,
+      usa_margem_seguranca: "0", // Alterado para 0 (não)
+      valor_margem_seguranca: undefined,
+      usa_limite_proposta: "0", // Alterado para 0 (não)
+      valor_limite_proposta: undefined,
+      quantidade_propostas_ativas: undefined,
+      dia_corte_competencia: undefined,
+      dia_recebimento: undefined,
+      dia_corte_folha_pagamento: undefined,
+      status: "1",
+      tarifa_cadastro_minima: undefined,
+      tarifa_cadastro_maxima: undefined
     }
   });
-
-  // Função para evitar números negativos
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
-    const value = e.target.value;
-    // Permite apenas números positivos ou vazio
-    if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-      field.onChange(value);
-    }
-  };
 
   const formFields: FormFieldConfig[] = [
     { name: "nome", label: "Nome", placeholder: "Digite o nome do roteiro", type: "text" },
@@ -145,8 +136,18 @@ export default function CadastroRoteiroModal({
     },
     { name: "taxa_minima", label: "Taxa Mínima (% a.m.)", placeholder: "1.5", type: "number" },
     { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
-    // { name: "tac_min", label: "TAC Mínima", placeholder: "100.00", type: "number" },
-    // { name: "tac_max", label: "TAC Máxima", placeholder: "500.00", type: "number" },
+    {
+      name: "tarifa_cadastro_minima",
+      label: "Tarifa Cadastro Mínima",
+      placeholder: "100.00",
+      type: "number"
+    },
+    {
+      name: "tarifa_cadastro_maxima",
+      label: "Tarifa Cadastro Máxima",
+      placeholder: "500.00",
+      type: "number"
+    },
     {
       name: "dia_corte_competencia",
       label: "Dia de Corte da Competência",
@@ -165,6 +166,12 @@ export default function CadastroRoteiroModal({
       label: "Validade CCB",
       placeholder: "Dias que o CCB é válido",
       type: "number"
+    },
+    {
+      name: "quantidade_propostas_ativas",
+      label: "Quantidade de Propostas Ativas",
+      placeholder: "0",
+      type: "number"
     }
   ];
 
@@ -175,8 +182,8 @@ export default function CadastroRoteiroModal({
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "false", label: "Não" },
-        { value: "true", label: "Sim" }
+        { value: "0", label: "Não" }, // Alterado para 0
+        { value: "1", label: "Sim" }   // Alterado para 1
       ],
       showInputOnTrue: {
         fieldName: "valor_limite_proposta",
@@ -191,8 +198,8 @@ export default function CadastroRoteiroModal({
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "false", label: "Não" },
-        { value: "true", label: "Sim" }
+        { value: "0", label: "Não" }, // Alterado para 0
+        { value: "1", label: "Sim" }   // Alterado para 1
       ],
       showInputOnTrue: {
         fieldName: "valor_margem_seguranca",
@@ -216,17 +223,16 @@ export default function CadastroRoteiroModal({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   const onSubmit = async (data: CreateFormData) => {
+    console.log("Dados do formulário:", data);
+    
     if (!token) {
       toast.error("Token de autenticação não encontrado.");
       return;
@@ -236,32 +242,30 @@ export default function CadastroRoteiroModal({
       const payload = {
         nome: data.nome,
         descricao: data.descricao,
-        idade_minima: parseInt(data.idade_minima),
-        idade_maxima: parseInt(data.idade_maxima),
-        prazo_minimo: parseInt(data.prazo_minimo),
-        prazo_maximo: parseInt(data.prazo_maximo),
-        valor_bruto_minimo: parseFloat(data.valor_bruto_minimo),
-        valor_bruto_maximo: parseFloat(data.valor_bruto_maximo),
-        taxa_minima: parseFloat(data.taxa_minima),
-        taxa_maxima: parseFloat(data.taxa_maxima),
-        validade_ccb: data.validade_ccb,
-        usa_margem_seguranca: data.usa_margem_seguranca === "true" ? 1 : 0,
-        margem_seguranca:
-          data.usa_margem_seguranca === "true" ? parseFloat(data.valor_margem_seguranca || "0") : 0,
-        usa_limite_propostas: data.usa_limite_proposta === "true" ? 1 : 0,
-        valor_limite_proposta:
-          data.usa_limite_proposta === "true" ? parseFloat(data.valor_limite_proposta || "0") : 0,
-        limite_propostas_ativas: parseInt(data.quantidade_propostas_ativas),
-        // tarifa_cadastro_minima: parseFloat(data.tac_min),
-        // tarifa_cadastro_maxima: parseFloat(data.tac_max),
-        dia_corte_competencia: parseInt(data.dia_corte_competencia),
-        dia_recebimento: parseInt(data.dia_recebimento),
-        dia_corte_folha_pagamento: parseInt(data.dia_corte_folha_pagamento),
+        idade_minima: Number(data.idade_minima),
+        idade_maxima: Number(data.idade_maxima),
+        prazo_minimo: Number(data.prazo_minimo),
+        prazo_maximo: Number(data.prazo_maximo),
+        valor_bruto_minimo: Number(data.valor_bruto_minimo),
+        valor_bruto_maximo: Number(data.valor_bruto_maximo),
+        taxa_minima: Number(data.taxa_minima),
+        taxa_maxima: Number(data.taxa_maxima),
+        validade_ccb: Number(data.validade_ccb),
+        usa_margem_seguranca: data.usa_margem_seguranca === "1" ? 1 : 0, // Alterado para 0/1
+        margem_seguranca: data.usa_margem_seguranca === "1" ? Number(data.valor_margem_seguranca) || 0 : 0,
+        usa_limite_propostas: data.usa_limite_proposta === "1" ? 1 : 0, // Alterado para 0/1
+        valor_limite_proposta: data.usa_limite_proposta === "1" ? Number(data.valor_limite_proposta) || 0 : 0,
+        limite_propostas_ativas: Number(data.quantidade_propostas_ativas),
+        dia_corte_competencia: Number(data.dia_corte_competencia),
+        dia_recebimento: Number(data.dia_recebimento),
+        dia_corte_folha_pagamento: Number(data.dia_corte_folha_pagamento),
+        tarifa_cadastro_minima: Number(data.tarifa_cadastro_minima),
+        tarifa_cadastro_maxima: Number(data.tarifa_cadastro_maxima),
         status: parseInt(data.status),
         usuario_criacao: userData?.id
       };
 
-      console.log(payload);
+      console.log("Payload enviado:", payload);
 
       const response = await axios.post(`${API_BASE_URL}/rotina-operacional/criar`, payload, {
         headers: {
@@ -283,8 +287,10 @@ export default function CadastroRoteiroModal({
       console.error("Erro ao cadastrar roteiro:", error);
       if (axios.isAxiosError(error)) {
         console.error("Detalhes do erro:", error.response?.data);
+        toast.error(`Erro: ${error.response?.data?.message || "Erro ao cadastrar roteiro"}`);
+      } else {
+        toast.error("Erro ao cadastrar roteiro.");
       }
-      toast.error("Erro ao cadastrar roteiro.");
     }
   };
 
@@ -323,19 +329,21 @@ export default function CadastroRoteiroModal({
                     ))}
                   </SelectContent>
                 </Select>
-              ) : type === "number" ? (
-                <FormControl>
-                  <Input
-                    placeholder={placeholder}
-                    type={type}
-                    value={field.value || ""}
-                    onChange={(e) => handleNumberChange(e, field)}
-                    min="0"
-                  />
-                </FormControl>
               ) : (
                 <FormControl>
-                  <Input placeholder={placeholder} type={type} {...field} />
+                  <Input 
+                    placeholder={placeholder} 
+                    type={type}
+                    {...field}
+                    value={field.value === undefined ? '' : field.value}
+                    onChange={(e) => {
+                      if (type === "number") {
+                        field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                      } else {
+                        field.onChange(e.target.value);
+                      }
+                    }}
+                  />
                 </FormControl>
               )}
               <FormMessage />
@@ -343,7 +351,7 @@ export default function CadastroRoteiroModal({
           )}
         />
 
-        {showInputOnTrue && fieldValue === "true" && (
+        {showInputOnTrue && fieldValue === "1" && ( // Alterado para verificar "1" em vez de "true"
           <FormField
             control={methods.control}
             name={showInputOnTrue.fieldName}
@@ -354,9 +362,10 @@ export default function CadastroRoteiroModal({
                   <Input
                     placeholder={showInputOnTrue.placeholder}
                     type="number"
-                    value={field.value || ""}
-                    onChange={(e) => handleNumberChange(e, field)}
-                    min="0"
+                    value={field.value === undefined ? '' : field.value}
+                    onChange={(e) => {
+                      field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -382,6 +391,7 @@ export default function CadastroRoteiroModal({
             <form
               onSubmit={methods.handleSubmit(onSubmit, (errors) => {
                 console.log("Erros de validação:", errors);
+                toast.error("Por favor, corrija os erros no formulário");
               })}
               className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
