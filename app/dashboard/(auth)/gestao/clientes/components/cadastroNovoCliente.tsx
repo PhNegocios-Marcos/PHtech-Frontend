@@ -968,6 +968,8 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
         });
         onClose();
       }
+              onClose();
+
     } catch (err: any) {
       console.error("Erro ao cadastrar cliente:", err);
       toast.error(`Erro ao cadastrar cliente: ${err.response?.data?.message || err.message}`, {
