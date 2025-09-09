@@ -9,33 +9,22 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroUsuarioModal from "./components/CadastroEquipesModal";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 export default function Page() {
   const router = useRouter();
   const podeCriar = useHasPermission("Equipes_criar");
+  const bankUser = 0;
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
   const handleCloseCadastro = () => {
     setIsCadastroOpen(false);
-    toast.success("Equipe criada com sucesso!", {
-      style: {
-        background: 'var(--toast-success)',
-        color: 'var(--toast-success-foreground)',
-        boxShadow: 'var(--toast-shadow)'
-      }
-    });
+    toastComponent.success("Equipe criada com sucesso!");
   };
 
   const handleOpenCadastro = () => {
     if (!podeCriar) {
-      toast.error("Sem permissão", {
-        description: "Você não tem permissão para criar novas equipes",
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error("Sem permissão", {description: "Você não tem permissão para criar novas equipes"});
       return;
     }
     setIsCadastroOpen(true);

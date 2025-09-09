@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import GlassCard from "@/components/glassCardComponent";
+// import GlassCard from "@/components/glassCardComponent";
 
 type ModalType = "none" | "2FA" | "modal2" | "promotoras" | "usa_2fa";
 
@@ -91,6 +91,7 @@ export default function Page() {
       setPromotoras(data?.promotoras);
       setId(data?.id); // ✅ ID do usuário sendo armazenado
 
+      console.log(data);
       // console.log("data: ", data)
       // console.log("usa_2fa page: ", data?.usa_2fa);
 
