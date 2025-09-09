@@ -21,6 +21,14 @@ import Cleave from "cleave.js/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Componente auxiliar para label com asterisco vermelho
+const RequiredLabel = ({ label, required }: { label: string; required: boolean }) => (
+  <span className="flex items-center gap-1">
+    {label}
+    {required && <span className="text-red-600">*</span>}
+  </span>
+);
+
 // Define FormSection type
 interface FormSection {
   section: string;
@@ -199,7 +207,7 @@ const DadosPessoais = forwardRef<
       case "text":
         return (
           <div key={field.name} className="space-y-2">
-            <span>{field.label}</span>
+            <RequiredLabel label={field.label} required={field.required} />
             <Input
               {...register(field.name)}
               placeholder={field.label}
@@ -219,7 +227,7 @@ const DadosPessoais = forwardRef<
         if (field.name === "tipo_documento") {
           return (
             <div key={field.name} className="space-y-2">
-              <span>{field.label}</span>
+              <RequiredLabel label={field.label} required={field.required} />
               <Combobox
                 value={
                   field.options?.find(
@@ -242,7 +250,7 @@ const DadosPessoais = forwardRef<
         }
         return (
           <div key={field.name} className="space-y-2">
-            <span>{field.label}</span>
+            <RequiredLabel label={field.label} required={field.required} />
             <Combobox
               value={field.options?.find((opt) => opt.value === formData[field.name]) || null}
               onChange={(selected) => {
@@ -262,7 +270,7 @@ const DadosPessoais = forwardRef<
       case "date":
         return (
           <div key={field.name} className="space-y-2">
-            <span>{field.label}</span>
+            <RequiredLabel label={field.label} required={field.required} />
             <div className="flex items-center gap-2">
               <Input
                 type="date"
@@ -325,7 +333,7 @@ const Contato = forwardRef<
     return formData.telefones.map((phone: string, index: number) => (
       <div key={index} className="mb-4 flex items-center gap-2">
         <div className="flex-1">
-          <span>Telefone {index + 1}</span>
+          <RequiredLabel label={`Telefone ${index + 1}`} required={true} />
           <Input
             value={phone}
             onChange={(e) => onPhoneChange(index, e.target.value)}
@@ -355,7 +363,7 @@ const Contato = forwardRef<
 
       {/* Campo de email */}
       <div className="mt-4">
-        <span>Email</span>
+        <RequiredLabel label="Email" required={true} />
         <Input
           value={formData.emails[0]?.email || ""}
           onChange={(e) => onChange("emails.0.email", e.target.value)}
@@ -499,7 +507,7 @@ const Enderecos = forwardRef<
 
     return (
       <div key={field.name} className="grid gap-1">
-        <span>{field.label}</span>
+        <RequiredLabel label={field.label} required={field.required} />
         {field.name === "enderecos.0.cep" ? (
           <Input
             {...register(fieldName)}
@@ -622,7 +630,7 @@ const DadosBancarios = forwardRef<
     if (field.type === "select" && field.name === "dados_bancarios.0.tipo_pix") {
       return (
         <div key={field.name} className="space-y-2">
-          <span>{field.label}</span>
+          <RequiredLabel label={field.label} required={field.required} />
           <Combobox
             data={field.options || []}
             displayField="label"
@@ -644,7 +652,7 @@ const DadosBancarios = forwardRef<
 
     return (
       <div key={field.name} className="space-y-2">
-        <span>{field.label}</span>
+        <RequiredLabel label={field.label} required={field.required} />
         <Input
           {...register(field.name)}
           placeholder={field.label}
@@ -727,11 +735,11 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
     tipo_documento: "",
     numero_documento: "",
     cpf: "",
-    sexo: "",
+    sexo: "N",
     data_nascimento: "",
     estado_civil: "",
-    naturalidade: "",
-    nacionalidade: "",
+    naturalidade: "BR",
+    nacionalidade: "Brasileira",
     telefones: [""],
     enderecos: {
       0: {
