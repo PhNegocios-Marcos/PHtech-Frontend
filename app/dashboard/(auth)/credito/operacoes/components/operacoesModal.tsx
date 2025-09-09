@@ -217,7 +217,7 @@ const ProcessStepper = ({ status }: { status?: string }) => {
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`mx-4 h-0.5 w-16 transition-all duration-300 ${
+              className={`mx-2 xl:mx-4 h-0.5 md:w-8 xl:w-16 transition-all duration-300 ${
                 steps[index + 1].status === "completed" || step.status === "completed"
                   ? "bg-primary"
                   : "bg-muted"
@@ -235,7 +235,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          Dados da Proposta
+          Dados da proposta
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -244,17 +244,17 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Produto", value: proposta.produto },
             { label: "CPF/CNPJ", value: formatCpfOrCnpj(proposta.cpf) },
             { label: "Tomador", value: proposta.tomador },
-            { label: "Modo de Liquidação", value: proposta.informacoes.modoLiquidacao },
-            { label: "Conta de Liquidação", value: proposta.informacoes.contaLiquidacao },
+            { label: "Modo de liquidação", value: proposta.informacoes.modoLiquidacao },
+            { label: "Conta de liquidação", value: proposta.informacoes.contaLiquidacao },
             { label: "Valor líquido", value: formatToBRL(proposta.valor) },
             { label: "Código IPOC", value: proposta.informacoes.codigoIpoc },
-            { label: "Data de Início", value: maskDate(proposta.data) },
+            { label: "Data de início", value: maskDate(proposta.data) },
             { label: "Observações", value: proposta.informacoes.observacoes },
             { label: "Correspondente", value: proposta.historico.correspondente },
             { label: "Operador", value: proposta.historico.operador },
             { label: "Grupo", value: proposta.historico.grupo },
-            { label: "Data da Última Atualização", value: maskDate(proposta.historico.dataUltimaAtualizacao) },
-            { label: "Última Atualização Feita Por", value: proposta.historico.ultimaAtualizacaoPor}  
+            { label: "Data da última atualização", value: maskDate(proposta.historico.dataUltimaAtualizacao) },
+            { label: "Última atualização feita por", value: proposta.historico.ultimaAtualizacaoPor}  
           ].map((item, index) => (
             <div key={index} className="w-full space-y-2">
               <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
@@ -278,7 +278,7 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            Andamento da Operação
+            Andamento da operação
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -304,9 +304,9 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                     )}
                   </div>
                   <div className="ml-10 w-full">
-                    <p className="text-lg font-semibold">{item.event}</p>
+                    <p className="text-lg font-medium">{item.event}</p>
                     <p className="text-muted-foreground text-sm">{item.description}</p>
-                    <p className="text-muted-foreground mt-1 text-sm">Iniciado em {maskDate(item.iniciado)}</p>
+                    <p className="text-muted-foreground text-sm">Iniciado em {maskDate(item.iniciado)}</p>
                     <p className="text-muted-foreground text-sm">Finalizado em {maskDate(item.finalizado)}</p>
 
                     {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
@@ -366,7 +366,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          Parâmetros da Operação
+          Parâmetros da operação
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -411,7 +411,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Detalhes das Parcelas</CardTitle>
+        <CardTitle className="text-lg">Detalhes das parcelas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-x-auto">
@@ -457,7 +457,7 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <FileText className="h-5 w-5" />
-          Documentos da Operação
+          Documentos da operação
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -496,7 +496,7 @@ const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
         <PenTool className="h-5 w-5" />
-        Status das Assinaturas
+        Status das assinaturas
       </CardTitle>
     </CardHeader>
     <CardContent>
@@ -810,9 +810,9 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
           {/* Conteúdo principal SEM scroll interno */}
           <div ref={containerRef} className="flex-1 px-8 pb-16">
             {/* Header */}
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col 2xl:flex-row 2xl:items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
+                <h2 className="text-2xl font-bold">Detalhes da operação</h2>
                 <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
               </div>
 
@@ -830,7 +830,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   }}
                   id={section.id}
                   className="scroll-mt-28">
-                  <div className="mb-3 flex items-center gap-3 pb-3">
+                  <div className="mb-3 flex items-center gap-3">
                     <section.icon className="h-6 w-6 text-primary" />
                     <h3 className="text-xl font-medium">{section.label}</h3>
                   </div>
@@ -843,7 +843,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
             </div>
           </div>
           {/* Sticky lateral */}
-          <div className="min-h-[100vh] w-80 border-l">
+          <div className="min-h-[100vh] w-80 hidden xl:flex border-l">
             <div
               style={{ position: "fixed", marginTop: "131px" }}
               className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8">
