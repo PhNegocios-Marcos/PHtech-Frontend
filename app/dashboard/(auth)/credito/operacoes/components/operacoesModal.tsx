@@ -35,6 +35,7 @@ export type ApiPropostaPayload = {
   valor: string | number;
   data: string;
   status: string; // Alterado de number para string
+  cor_status: string;
   roteiro: string;
   taxa: string; // Adicionado campo que existe no JSON
   informacoes: {
@@ -191,7 +192,7 @@ const ProcessStepper = ({ status }: { status?: string }) => {
   ];
 
   return (
-    <div className="mx-auto mb-6 flex w-full max-w-4xl items-center justify-between">
+    <div className="mb-6 flex w-full items-center justify-between">
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div className="flex flex-col items-center">
@@ -418,9 +419,9 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             <thead>
               <tr className="bg-muted">
                 <th className="px-4 py-3 text-left font-semibold">Nº de parcelas</th>
-                <th className="px-4 py-3 text-left font-semibold">Parcela</th>
+                <th className="px-4 py-3 text-left font-semibold">Valor da parcela</th>
                 <th className="px-4 py-3 text-left font-semibold">Vencimento</th>
-                <th className="px-4 py-3 text-left font-semibold">Saldo Devedor</th>
+                <th className="px-4 py-3 text-left font-semibold">Saldo devedor</th>
                 <th className="px-4 py-3 text-left font-semibold">Amortização</th>
                 <th className="px-4 py-3 text-left font-semibold">Juros</th>
                 <th className="px-4 py-3 text-left font-semibold">Pagamento</th>
@@ -804,20 +805,22 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
   return (
     <Card>
       <div className="min-h-[900px] w-full overflow-hidden">
-        {/* Header */}
-        <div className="mb-2 flex items-center justify-between border-b px-6">
-          <div>
-            <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
-            <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
-          </div>
-        </div>
         {/* Main Content */}
         <div className="flex">
           {/* Conteúdo principal SEM scroll interno */}
           <div ref={containerRef} className="flex-1 px-8 pb-16">
-            <div className="pt-6">
-              <ProcessStepper status={proposta.status} />
+            {/* Header */}
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Detalhes da Operação</h2>
+                <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
+              </div>
+
+              <div className="pt-6">
+                  <ProcessStepper status={proposta.status} />
+              </div>
             </div>
+
             <div className="space-y-10">
               {sections.map((section) => (
                 <section
@@ -827,9 +830,9 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   }}
                   id={section.id}
                   className="scroll-mt-28">
-                  <div className="mb-6 flex items-center gap-3 border-b pb-3">
-                    <section.icon className="h-6 w-6" />
-                    <h3 className="text-2xl font-bold">{section.label}</h3>
+                  <div className="mb-3 flex items-center gap-3 pb-3">
+                    <section.icon className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-medium">{section.label}</h3>
                   </div>
                   <div className="w-full space-y-8">
                     {/* @ts-ignore */}

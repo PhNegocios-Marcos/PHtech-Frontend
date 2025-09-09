@@ -38,6 +38,8 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import OperacoesDrawer from "./operacoesModal";
+import { maskDate } from "@/utils/maskTable";
+import { Badge } from "@/components/ui/badge";
 
 // Function to format any number or string into Brazilian Reais (BRL)
 const formatToBRL = (value: number | string | null | undefined): string => {
@@ -105,6 +107,7 @@ type Proposta = {
   Valor: string;
   Data: string;
   status: number;
+  cor_status: string;
   roteiro: string;
   Tabela: string;
 };
@@ -121,7 +124,7 @@ export function OperacoesTable() {
   const { token } = useAuth();
 
   const equipeColumns: ColumnDef<Proposta>[] = [
-    { accessorKey: "Correspondente", header: "Correspondente" },
+    { accessorKey: "Correspondente", header: "Promotora" },
     { accessorKey: "Operação", header: "Operação" },
     { accessorKey: "Produto", header: "Produto" },
     { accessorKey: "Tomador", header: "Tomador" },
@@ -138,10 +141,18 @@ export function OperacoesTable() {
     {
       accessorKey: "Data",
       header: "Data de início",
-      cell: ({ row }) => <span>{formatToBrazilianDate(row.original.Data)}</span>
+      cell: ({ row }) => <span>{maskDate(row.original.Data)}</span>
     },
-    { accessorKey: "status", header: "Status" },
-    { accessorKey: "roteiro", header: "RO liquidação" },
+    { accessorFn: (row) => ({ status: row.status, cor_status: row.cor_status }), header: "Status" , 
+      cell: ({ row }) => {
+        const { status, cor_status } = row.original;
+        return (
+          <Badge className={`${cor_status}-100`}>
+            {status}
+          </Badge>
+        )},
+    },
+    { accessorKey: "roteiro", header: "Liquidação do RO" },
     // { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",
@@ -188,6 +199,7 @@ export function OperacoesTable() {
           Valor: proposta.valor,
           Data: proposta.data,
           status: proposta.status,
+          cor_status: proposta.cor_status,
           roteiro: proposta.roteiro,
           Tabela: proposta.Tabela
         }));
@@ -245,7 +257,7 @@ export function OperacoesTable() {
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Operações</CardTitle>
+            <CardTitle>Lista de operações</CardTitle>
           </CardHeader>
           <CardContent>
             <>
