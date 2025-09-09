@@ -51,7 +51,7 @@ const fixedFormSections: FormSection[] = [
         name: "sexo",
         label: "Sexo",
         type: "select",
-        required: true,
+        required: false,
         options: [
           { value: "M", label: "Masculino" },
           { value: "F", label: "Feminino" }
@@ -62,7 +62,7 @@ const fixedFormSections: FormSection[] = [
         name: "estado_civil",
         label: "Estado Civil",
         type: "select",
-        required: true,
+        required: false,
         options: [
           { value: "solteiro", label: "Solteiro(a)" },
           { value: "casado", label: "Casado(a)" },
@@ -71,8 +71,8 @@ const fixedFormSections: FormSection[] = [
           { value: "separado", label: "Separado(a)" }
         ]
       },
-      { name: "naturalidade", label: "Naturalidade", type: "text", required: true },
-      { name: "nacionalidade", label: "Nacionalidade", type: "text", required: true }
+      { name: "naturalidade", label: "Naturalidade", type: "text", required: false },
+      { name: "nacionalidade", label: "Nacionalidade", type: "text", required: false }
     ]
   },
   {
@@ -315,156 +315,53 @@ const Contato = forwardRef<
     formData: any;
     onChange: (path: string, value: any) => void;
     fields: FormField[];
-    addPhone?: () => void;
+    onAddPhone: () => void;
+    onPhoneChange: (index: number, value: string) => void;
+    onRemovePhone: (index: number) => void;
   }
->(({ formData, onChange, fields, addPhone }, ref) => {
-  const createSchema = () => {
-    const schemaObj: Record<string, any> = {};
-    fields.forEach((field) => {
-      if (field.required) {
-        schemaObj[field.name] = z.string().min(1, `${field.label} é obrigatório`);
-        if (field.name.includes("email")) {
-          schemaObj[field.name] = schemaObj[field.name].email("Email inválido");
-        }
-      } else {
-        schemaObj[field.name] = z.string().optional();
-      }
-    });
-    return z.object(schemaObj);
-  };
-
-  const contatoSchema = createSchema();
-  type ContatoFormData = z.infer<typeof contatoSchema>;
-
-  const {
-    register,
-    setValue,
-    watch,
-    formState: { errors },
-    trigger
-  } = useForm<ContatoFormData>({
-    resolver: zodResolver(contatoSchema),
-    defaultValues: {
-      ddd1: formData.telefones[0]?.ddd || "",
-      numero1: formData.telefones[0]?.numero || "",
-      ddd2: formData.telefones[1]?.ddd || "",
-      numero2: formData.telefones[1]?.numero || "",
-      email: formData.emails[0]?.email || ""
-    }
-  });
-
-  // Sincroniza os valores do RHF com formData sempre que formData mudar
-  useEffect(() => {
-    setValue("ddd1", formData.telefones[0]?.ddd || "");
-    setValue("numero1", formData.telefones[0]?.numero || "");
-    setValue("ddd2", formData.telefones[1]?.ddd || "");
-    setValue("numero2", formData.telefones[1]?.numero || "");
-    setValue("email", formData.emails[0]?.email || "");
-  }, [formData, setValue]);
-
-  const watchedValues = watch();
-
-  // Atualiza formData imediatamente ao digitar
-  const handleInputChange = (fieldName: string, value: string) => {
-    setValue(fieldName, value);
-    if (fieldName === "email") {
-      onChange("emails.0.email", value);
-    } else if (fieldName.includes("ddd")) {
-      onChange(`telefones.${fieldName.includes("1") ? "0" : "1"}.ddd`, value);
-    } else if (fieldName.includes("numero")) {
-      onChange(`telefones.${fieldName.includes("1") ? "0" : "1"}.numero`, value);
-    }
-  };
-
-  useImperativeHandle(ref, () => ({
-    validate: async () => {
-      const result = await trigger();
-      if (!result) {
-        toast.warning("Preencha os campos obrigatórios corretamente", {
-          style: {
-            background: "var(--toast-warning)",
-            color: "var(--toast-warning-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
-      }
-      return result;
-    }
-  }));
-
-  // Função para formatar o telefone
-  const formatPhone = (value: string): string => {
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length <= 2) {
-      return cleaned;
-    }
-    if (cleaned.length <= 6) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
-    }
-    if (cleaned.length <= 10) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
-    }
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`;
-  };
-
-  const renderField = (field: FormField) => {
-    const fieldName = field.name;
-    const value = watchedValues[fieldName] || "";
-    const errorMessage = errors[field.name]?.message;
-    const isErrorString = typeof errorMessage === "string";
-
-    // Aplicar máscara apenas para campos de número de telefone
-    if (fieldName.includes("numero")) {
-      return (
-        <div key={field.name} className="col-span-3">
-          <span>{field.label}</span>
+>(({ formData, onChange, fields, onAddPhone, onPhoneChange, onRemovePhone }, ref) => {
+  // Renderização dos campos de telefone
+  const renderPhoneFields = () => {
+    return formData.telefones.map((phone: string, index: number) => (
+      <div key={index} className="mb-4 flex items-center gap-2">
+        <div className="flex-1">
+          <span>Telefone {index + 1}</span>
           <Input
-            {...register(fieldName)}
-            placeholder={field.label}
-            value={formatPhone(value)}
-            onChange={(e) => {
-              // Remove a formatação antes de salvar
-              const rawValue = e.target.value.replace(/\D/g, "");
-              handleInputChange(fieldName, rawValue);
-            }}
-            className="mt-1"
+            value={phone}
+            onChange={(e) => onPhoneChange(index, e.target.value)}
+            placeholder="Número do telefone"
           />
-          {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
         </div>
-      );
-    }
-
-    return (
-      <div key={field.name} className={field.name.includes("ddd") ? "col-span-1" : "col-span-3"}>
-        <span>{field.label}</span>
-        <Input
-          {...register(fieldName)}
-          placeholder={field.label}
-          value={value}
-          onChange={(e) => handleInputChange(fieldName, e.target.value)}
-          className="mt-1"
-        />
-        {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+        {formData.telefones.length > 1 && (
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => onRemovePhone(index)}
+            className="mt-6">
+            Remover
+          </Button>
+        )}
       </div>
-    );
+    ));
   };
 
   return (
-    <form className="m-10 grid grid-cols-2 gap-5" onSubmit={(e) => e.preventDefault()}>
-      <div className="grid grid-cols-3 gap-2">
-        {fields.filter((f) => f.name.includes("1")).map(renderField)}
+    <form className="m-10 space-y-4" onSubmit={(e) => e.preventDefault()}>
+      {renderPhoneFields()}
+
+      <Button type="button" onClick={onAddPhone}>
+        Adicionar Telefone
+      </Button>
+
+      {/* Campo de email */}
+      <div className="mt-4">
+        <span>Email</span>
+        <Input
+          value={formData.emails[0]?.email || ""}
+          onChange={(e) => onChange("emails.0.email", e.target.value)}
+          placeholder="Email"
+        />
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        {fields.filter((f) => f.name.includes("2")).map(renderField)}
-      </div>
-      <div>{fields.filter((f) => f.name === "email").map(renderField)}</div>
-      {addPhone && (
-        <div className="col-span-2 mt-4">
-          <Button type="button" onClick={addPhone}>
-            Adicionar Telefone
-          </Button>
-        </div>
-      )}
     </form>
   );
 });
@@ -792,6 +689,30 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
   const enderecosRef = useRef<TabRef | null>(null);
   const bancariosRef = useRef<TabRef | null>(null);
 
+  const handleAddPhone = () => {
+    setFormData((prev) => ({
+      ...prev,
+      telefones: [...prev.telefones, ""]
+    }));
+  };
+
+  const handlePhoneChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const newTelefones = [...prev.telefones];
+      newTelefones[index] = value;
+      return { ...prev, telefones: newTelefones };
+    });
+  };
+
+  const handleRemovePhone = (index: number) => {
+    if (formData.telefones.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        telefones: prev.telefones.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const tabRefs: Record<string, React.RefObject<TabRef | null>> = {
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
@@ -811,9 +732,7 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
     estado_civil: "",
     naturalidade: "",
     nacionalidade: "",
-    telefones: {
-      0: { numero: "" }
-    },
+    telefones: [""],
     enderecos: {
       0: {
         cep: "",
@@ -897,29 +816,9 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
 
   const sanitizeFormData = (data: any): any => {
     const clone = structuredClone(data);
-    const limparCampos = [
-      "cpf",
-      "numero_documento",
-      "telefones.0.ddd",
-      "telefones.0.numero",
-      "telefones.1.ddd",
-      "telefones.1.numero",
-      "enderecos.0.cep"
-    ];
-
-    limparCampos.forEach((path) => {
-      const keys = path.split(".");
-      let obj = clone;
-      for (let i = 0; i < keys.length - 1; i++) {
-        obj = obj?.[keys[i]];
-        if (!obj) return;
-      }
-      const lastKey = keys[keys.length - 1];
-      if (obj && typeof obj[lastKey] === "string") {
-        obj[lastKey] = obj[lastKey].replace(/[.\-]/g, "");
-      }
-    });
-
+    if (clone.telefones && Array.isArray(clone.telefones)) {
+      clone.telefones = clone.telefones.map((phone: string) => phone.replace(/\D/g, ""));
+    }
     return clone;
   };
 
@@ -968,6 +867,7 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
         });
         onClose();
       }
+      onClose();
     } catch (err: any) {
       console.error("Erro ao cadastrar cliente:", err);
       toast.error(`Erro ao cadastrar cliente: ${err.response?.data?.message || err.message}`, {
@@ -1026,19 +926,9 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
                 formData={formData}
                 onChange={handleChange}
                 fields={getFields("Contato")}
-                addPhone={() => {
-                  // Add new phone logic
-                  setFormData((prev) => {
-                    const nextIndex = Object.keys(prev.telefones).length;
-                    return {
-                      ...prev,
-                      telefones: {
-                        ...prev.telefones,
-                        [nextIndex]: { ddd: "", numero: "" }
-                      }
-                    };
-                  });
-                }}
+                onAddPhone={handleAddPhone}
+                onPhoneChange={handlePhoneChange}
+                onRemovePhone={handleRemovePhone}
               />
             </TabsContent>
             <TabsContent value="Enderecos">
