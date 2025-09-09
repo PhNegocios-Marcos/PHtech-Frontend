@@ -408,7 +408,7 @@ export default function CadastroRoteiroModal({
                 </button>
               </div>
               <Card className="flex-grow overflow-auto">
-                <CardContent>
+                <CardContent> 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {formFields.map(renderFormField)}
                     {formFields2.map(renderFormField)}
