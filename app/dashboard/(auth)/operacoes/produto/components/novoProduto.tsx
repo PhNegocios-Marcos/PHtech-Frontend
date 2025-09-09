@@ -168,8 +168,6 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
     }
   });
 
-  // Modifique o useEffect que busca as promotoras para debug
-  // Substitua este useEffect
   useEffect(() => {
     async function fetchPromotoras() {
       try {

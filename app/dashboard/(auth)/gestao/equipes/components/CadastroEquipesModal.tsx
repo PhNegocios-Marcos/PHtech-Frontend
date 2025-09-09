@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -8,8 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import toastComponent from "@/utils/toastComponent";
 
 import {
   Form,
@@ -27,11 +27,16 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { X } from "lucide-react";
+import { Combobox } from "./Combobox";
+import axios from "axios";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Schema validando promotora apenas se for banco
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
   status: z.enum(["0", "1"]),
+  promotora: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -45,46 +50,81 @@ export default function CadastroEquipeModal({
   isOpen,
   onClose,
 }: CadastroEquipeModalProps) {
+  const [promotoras, setPromotoras] = useState<{ id: string; nome: string }[]>([]);
+  const [selectedPromotora, setSelectedPromotora] = useState<{ id: string; nome: string } | null>(null);
+
+  const { token, selectedPromotoraId, userData } = useAuth();
+  const router = useRouter();
+  const isBanco = userData?.tipo_usuario === "Banco";
+
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       nome: "",
       descricao: "",
-      status: "1", // ativo por padrão
+      status: "1",
+      promotora: isBanco ? "" : selectedPromotoraId,
     },
   });
-  const router = useRouter();
 
-  const { token, selectedPromotoraId } = useAuth();
-
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
+  // Redireciona se não tiver token
+  useEffect(() => {
+    if (!token) {
+      const timeout = setTimeout(() => {
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
   }, [token, router]);
+
+  // Carregar promotoras apenas se for banco
+  useEffect(() => {
+    if (isBanco && isOpen) {
+      const fetchPromotoras = async () => {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/promotora/listar`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = response.data.map((item: any) => ({
+            id: item.id,
+            nome: item.nome,
+            nomeUnico: `${item.nome}#${item.id}`
+          }));
+
+          setPromotoras(data);
+        } catch (error) {
+          toastComponent.error("Erro ao carregar promotoras", {
+            description: `${error}`,
+          });
+        }
+      };
+      fetchPromotoras();
+    }
+  }, [isBanco, isOpen, token]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
-      toast.error("Autenticação necessária", {
+      toastComponent.error("Autenticação necessária", {
         description: "Faça login para continuar",
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
       });
       return;
     }
 
+    // Definir promotora: banco precisa escolher, promotora usa a do contexto
+    const promotoraId = isBanco
+      ? selectedPromotora
+      : selectedPromotoraId;
+
+    if (isBanco && !promotoraId) {
+      toastComponent.error("Selecione uma promotora para cadastrar a equipe");
+      return;
+    }
+
     const payload = {
-      promotora: selectedPromotoraId,
+      promotora: isBanco ? selectedPromotora?.id : selectedPromotoraId,
       nome: data.nome,
       descricao: data.descricao,
       status: Number(data.status),
@@ -105,25 +145,12 @@ export default function CadastroEquipeModal({
         throw new Error(err.message || "Erro ao cadastrar equipe");
       }
 
-      toast.success("Equipe cadastrada com sucesso!", {
-        style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.success("Equipe cadastrada com sucesso!");
       onClose();
       methods.reset();
     } catch (error: any) {
       console.error("Erro ao cadastrar equipe:", error);
-      toast.error("Erro ao cadastrar equipe", {
-        description: error.message || "Tente novamente mais tarde",
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error(error.message || "Tente novamente mais tarde");
     }
   };
 
@@ -131,7 +158,11 @@ export default function CadastroEquipeModal({
 
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div
+        onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/50"
+        aria-hidden="true"
+      />
 
       <aside
         role="dialog"
@@ -140,13 +171,16 @@ export default function CadastroEquipeModal({
       >
         <FormProvider {...methods}>
           <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <form
+              onSubmit={methods.handleSubmit(onSubmit)}
+              className="flex flex-col h-full"
+            >
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Cadastrar nova equipe</h2>
-                <X onClick={onClose} className="cursor-pointer"/>
+                <X onClick={onClose} className="cursor-pointer" />
               </div>
 
-              <Card className="flex-grow overflow-auto">
+              <Card>
                 <CardHeader>
                   <CardTitle>Dados da equipe</CardTitle>
                 </CardHeader>
@@ -181,20 +215,50 @@ export default function CadastroEquipeModal({
                       )}
                     />
 
+                    {isBanco && (
+                      <FormField
+                        control={methods.control}
+                        name="promotora"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Promotora da equipe</FormLabel>
+                            <FormControl>
+                              <Combobox
+                                data={promotoras}
+                                displayField="nome"
+                                value={selectedPromotora}
+                                onChange={(item) =>setSelectedPromotora(item)}
+                                searchFields={["id", "nome"]}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     <FormField
                       control={methods.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="w-full">
                           <FormLabel>Status</FormLabel>
                           <FormControl>
-                            <select
-                              {...field}
-                              className="w-full rounded border px-3 py-2"
+                            <Select
+                              value={field.value}         
+                              onValueChange={field.onChange}
                             >
-                              <option value="1">Ativo</option>
-                              <option value="0">Inativo</option>
-                            </select>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione um status" className="w-full"/>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Status</SelectLabel>
+                                  <SelectItem value="1">Ativo</SelectItem>
+                                  <SelectItem value="0">Inativo</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

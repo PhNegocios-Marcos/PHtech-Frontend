@@ -66,7 +66,7 @@ export function Combobox<T extends Record<string, any>>({
             <CommandGroup>
               {filteredData.map(item => (
                 <CommandItem
-                  key={item[displayField]}
+                  key={item.id ??  item[displayField]}
                   onSelect={() => {
                     onChange(item);
                     setOpen(false);
