@@ -42,9 +42,9 @@ const createSchema = z.object({
   valor_bruto_maximo: z.coerce.number().min(1.0, "Valor bruto máximo é obrigatório"),
   taxa_minima: z.coerce.number().min(0.01, "Taxa mínima é obrigatória"),
   taxa_maxima: z.coerce.number().min(0.01, "Taxa máxima é obrigatória"),
-  usa_margem_seguranca: z.enum(["0", "1"]), // Alterado para 0 e 1
+  usa_margem_seguranca: z.enum(["0", "1"]),
   valor_margem_seguranca: z.coerce.number().optional(),
-  usa_limite_proposta: z.enum(["0", "1"]), // Alterado para 0 e 1
+  usa_limite_proposta: z.enum(["0", "1"]),
   valor_limite_proposta: z.coerce.number().optional(),
   quantidade_propostas_ativas: z.coerce.number().min(1, "Quantidade é obrigatória"),
   dia_corte_competencia: z.coerce.number().min(1, "Dia de corte da competência é obrigatório"),
@@ -101,9 +101,9 @@ export default function CadastroRoteiroModal({
       taxa_minima: undefined,
       taxa_maxima: undefined,
       validade_ccb: undefined,
-      usa_margem_seguranca: "0", // Alterado para 0 (não)
+      usa_margem_seguranca: "0",
       valor_margem_seguranca: undefined,
-      usa_limite_proposta: "0", // Alterado para 0 (não)
+      usa_limite_proposta: "0",
       valor_limite_proposta: undefined,
       quantidade_propostas_ativas: undefined,
       dia_corte_competencia: undefined,
@@ -182,8 +182,8 @@ export default function CadastroRoteiroModal({
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "0", label: "Não" }, // Alterado para 0
-        { value: "1", label: "Sim" }   // Alterado para 1
+        { value: "0", label: "Não" },
+        { value: "1", label: "Sim" }
       ],
       showInputOnTrue: {
         fieldName: "valor_limite_proposta",
@@ -198,8 +198,8 @@ export default function CadastroRoteiroModal({
       placeholder: "Selecione",
       component: "select",
       options: [
-        { value: "0", label: "Não" }, // Alterado para 0
-        { value: "1", label: "Sim" }   // Alterado para 1
+        { value: "0", label: "Não" },
+        { value: "1", label: "Sim" }
       ],
       showInputOnTrue: {
         fieldName: "valor_margem_seguranca",
@@ -251,9 +251,9 @@ export default function CadastroRoteiroModal({
         taxa_minima: Number(data.taxa_minima),
         taxa_maxima: Number(data.taxa_maxima),
         validade_ccb: Number(data.validade_ccb),
-        usa_margem_seguranca: data.usa_margem_seguranca === "1" ? 1 : 0, // Alterado para 0/1
+        usa_margem_seguranca: data.usa_margem_seguranca === "1" ? 1 : 0,
         margem_seguranca: data.usa_margem_seguranca === "1" ? Number(data.valor_margem_seguranca) || 0 : 0,
-        usa_limite_propostas: data.usa_limite_proposta === "1" ? 1 : 0, // Alterado para 0/1
+        usa_limite_propostas: data.usa_limite_proposta === "1" ? 1 : 0,
         valor_limite_proposta: data.usa_limite_proposta === "1" ? Number(data.valor_limite_proposta) || 0 : 0,
         limite_propostas_ativas: Number(data.quantidade_propostas_ativas),
         dia_corte_competencia: Number(data.dia_corte_competencia),
@@ -315,7 +315,10 @@ export default function CadastroRoteiroModal({
             <FormItem>
               <FormLabel>{label}</FormLabel>
               {component === "select" ? (
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ? String(field.value) : ""} // Convertendo para string
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={placeholder} />
@@ -351,7 +354,7 @@ export default function CadastroRoteiroModal({
           )}
         />
 
-        {showInputOnTrue && fieldValue === "1" && ( // Alterado para verificar "1" em vez de "true"
+        {showInputOnTrue && fieldValue === "1" && (
           <FormField
             control={methods.control}
             name={showInputOnTrue.fieldName}
