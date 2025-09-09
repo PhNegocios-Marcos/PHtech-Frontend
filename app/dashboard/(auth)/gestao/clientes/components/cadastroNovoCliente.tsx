@@ -78,7 +78,6 @@ const fixedFormSections: FormSection[] = [
   {
     section: "Contato",
     fields: [
-      { name: "ddd1", label: "DDD", type: "text", required: true },
       { name: "numero1", label: "Número", type: "text", required: true },
       { name: "email", label: "Email", type: "text", required: true }
     ]
@@ -393,11 +392,47 @@ const Contato = forwardRef<
     }
   }));
 
+  // Função para formatar o telefone
+  const formatPhone = (value: string): string => {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length <= 2) {
+      return cleaned;
+    }
+    if (cleaned.length <= 6) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    }
+    if (cleaned.length <= 10) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+    }
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`;
+  };
+
   const renderField = (field: FormField) => {
     const fieldName = field.name;
     const value = watchedValues[fieldName] || "";
     const errorMessage = errors[field.name]?.message;
     const isErrorString = typeof errorMessage === "string";
+
+    // Aplicar máscara apenas para campos de número de telefone
+    if (fieldName.includes("numero")) {
+      return (
+        <div key={field.name} className="col-span-3">
+          <span>{field.label}</span>
+          <Input
+            {...register(fieldName)}
+            placeholder={field.label}
+            value={formatPhone(value)}
+            onChange={(e) => {
+              // Remove a formatação antes de salvar
+              const rawValue = e.target.value.replace(/\D/g, "");
+              handleInputChange(fieldName, rawValue);
+            }}
+            className="mt-1"
+          />
+          {isErrorString && <p className="text-sm text-red-600">{errorMessage}</p>}
+        </div>
+      );
+    }
 
     return (
       <div key={field.name} className={field.name.includes("ddd") ? "col-span-1" : "col-span-3"}>
@@ -777,7 +812,7 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
     naturalidade: "",
     nacionalidade: "",
     telefones: {
-      0: { ddd: "", numero: "" }
+      0: { numero: "" }
     },
     enderecos: {
       0: {
@@ -956,7 +991,7 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-full overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-full overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2">
         <Card className="mx-auto mt-10 max-w-6xl space-y-6 p-6">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold">Cadastro de Cliente</h1>
