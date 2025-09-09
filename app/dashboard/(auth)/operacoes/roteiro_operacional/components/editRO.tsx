@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import NumberFormat from "react-number-format";
 import { useRouter } from "next/navigation";
 import {
   Form,
@@ -29,34 +28,30 @@ import {
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
-const roteiroSchema = z
-  .object({
-    rotina_operacional_hash: z.string(),
-    nome: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }).optional(),
-    descricao: z.string(),
-    idade_minima: z.number().min(0, { message: "Idade mínima não pode ser negativa" }),
-    idade_maxima: z.number().min(0, { message: "Idade máxima não pode ser negativa" }),
-    prazo_maximo: z.number().min(0, { message: "Prazo máximo não pode ser negativo" }),
-    valor_bruto_minimo: z.number().min(0, { message: "Valor bruto mínimo não pode ser negativo" }),
-    valor_bruto_maximo: z.number().min(0, { message: "Valor bruto máximo não pode ser negativo" }),
-    taxa_minima: z.number().min(0, { message: "Taxa mínima não pode ser negativa" }),
-    taxa_maxima: z.number().min(0, { message: "Taxa máxima não pode ser negativa" }),
-    usuario_atualizacao: z.string().optional(),
-    usa_limite_proposta: z.number().int().min(0).max(1).default(0),
-    valor_limite_proposta: z.number().min(0, { message: "Valor limite não pode ser negativo" }).optional(),
-    usa_margem_seguranca: z.number().int().min(0).max(1).default(0),
-    valor_margem_seguranca: z.number().min(0, { message: "Valor da margem não pode ser negativo" }).optional()
-  })
-  .refine((data) => data.usa_limite_proposta === 0 || data.valor_limite_proposta !== undefined, {
-    message:
-      "Valor do limite de proposta é obrigatório quando 'Usa Limite de Proposta' está ativado",
-    path: ["valor_limite_proposta"]
-  })
-  .refine((data) => data.usa_margem_seguranca === 0 || data.valor_margem_seguranca !== undefined, {
-    message:
-      "Valor da margem de segurança é obrigatório quando 'Usa Margem de Segurança' está ativado",
-    path: ["valor_margem_seguranca"]
-  });
+const roteiroSchema = z.object({
+  rotina_operacional_hash: z.string(),
+  nome: z.string().min(1, "Nome é obrigatório"),
+  descricao: z.string().min(1, "Descrição é obrigatória"),
+  idade_minima: z.coerce.number().min(1, "Idade mínima é obrigatória"),
+  idade_maxima: z.coerce.number().min(1, "Idade máxima é obrigatória"),
+  prazo_maximo: z.coerce.number().min(1, "Prazo máximo é obrigatória"),
+  valor_bruto_minimo: z.coerce.number().min(0.01, "Valor bruto mínimo é obrigatório"),
+  valor_bruto_maximo: z.coerce.number().min(1.0, "Valor bruto máximo é obrigatório"),
+  taxa_minima: z.coerce.number().min(0.01, "Taxa mínima é obrigatória"),
+  taxa_maxima: z.coerce.number().min(0.01, "Taxa máxima é obrigatória"),
+  usa_margem_seguranca: z.enum(["0", "1"]),
+  valor_margem_seguranca: z.coerce.number().optional(),
+  usa_limite_proposta: z.enum(["0", "1"]),
+  valor_limite_proposta: z.coerce.number().optional(),
+  quantidade_propostas_ativas: z.coerce.number().min(1, "Quantidade é obrigatória"),
+  dia_corte_competencia: z.coerce.number().min(1, "Dia de corte da competência é obrigatório"),
+  validade_ccb: z.coerce.number().min(1, "Validade CCB é obrigatória"),
+  dia_recebimento: z.coerce.number().min(1, "Dia de recebimento é obrigatório"),
+  dia_corte_folha_pagamento: z.coerce.number().min(1, "Dia de corte da folha é obrigatório"),
+  status: z.enum(["0", "1"]),
+  tarifa_cadastro_minima: z.coerce.number().min(0.01, "Tarifa cadastro mínima é obrigatória"),
+  tarifa_cadastro_maxima: z.coerce.number().min(0.01, "Tarifa cadastro máxima é obrigatória")
+});
 
 export type Roteiro = z.infer<typeof roteiroSchema>;
 
@@ -70,9 +65,8 @@ type FormFieldConfig = {
   name: keyof Roteiro;
   label: string;
   placeholder?: string;
-  type?: string;
-  readOnly?: boolean;
-  component?: "select" | "input" | "numberFormat" | undefined;
+  type?: "text" | "number";
+  component?: "input" | "select";
   options?: Array<{ value: string; label: string }>;
   showInputOnTrue?: {
     fieldName: keyof Roteiro;
@@ -85,36 +79,20 @@ type FormFieldConfig = {
 export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
   const methods = useForm<Roteiro>({
     resolver: zodResolver(roteiroSchema),
-    defaultValues: roteiro
+    // No useForm do ROEdit, garanta a conversão:
+    defaultValues: {
+      ...roteiro,
+      idade_minima: Number(roteiro.idade_minima),
+      idade_maxima: Number(roteiro.idade_maxima),
+      // repita para todos os campos numéricos
+      usa_margem_seguranca: String(roteiro.usa_margem_seguranca) as "0" | "1",
+      usa_limite_proposta: String(roteiro.usa_limite_proposta) as "0" | "1",
+      status: String(roteiro.status) as "0" | "1"
+    }
   });
 
   const router = useRouter();
   const { token } = useAuth();
-
-  const [showLimiteProposta, setShowLimiteProposta] = useState(roteiro?.usa_limite_proposta === 1);
-  const [showMargemSeguranca, setShowMargemSeguranca] = useState(
-    roteiro?.usa_margem_seguranca === 1
-  );
-
-  useEffect(() => {
-    if (roteiro) {
-      const initialValues = {
-        ...roteiro,
-        usa_limite_proposta: roteiro.usa_limite_proposta ? 1 : 0,
-        usa_margem_seguranca: roteiro.usa_margem_seguranca ? 1 : 0,
-        valor_limite_proposta: roteiro.usa_limite_proposta
-          ? roteiro.valor_limite_proposta
-          : undefined,
-        valor_margem_seguranca: roteiro.usa_margem_seguranca
-          ? roteiro.valor_margem_seguranca
-          : undefined,
-        relacionamento_hash: ""
-      };
-      methods.reset(initialValues);
-      setShowLimiteProposta(initialValues.usa_limite_proposta === 1);
-      setShowMargemSeguranca(initialValues.usa_margem_seguranca === 1);
-    }
-  }, [roteiro, methods]);
 
   const formFields: FormFieldConfig[] = [
     { name: "nome", label: "Nome", placeholder: "Digite o nome do roteiro", type: "text" },
@@ -126,18 +104,53 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
       name: "valor_bruto_minimo",
       label: "Valor Bruto Mínimo",
       placeholder: "500.00",
-      type: "text",
-      component: "numberFormat"
+      type: "number"
     },
     {
       name: "valor_bruto_maximo",
       label: "Valor Bruto Máximo",
       placeholder: "15500.50",
-      type: "text",
-      component: "numberFormat"
+      type: "number"
     },
-    { name: "taxa_minima", label: "Taxa Mínima", placeholder: "100.00", type: "number" },
-    { name: "taxa_maxima", label: "Taxa Máxima", placeholder: "500.00", type: "number" }
+    { name: "taxa_minima", label: "Taxa Mínima (% a.m.)", placeholder: "1.5", type: "number" },
+    { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
+    {
+      name: "tarifa_cadastro_minima",
+      label: "Tarifa Cadastro Mínima",
+      placeholder: "100.00",
+      type: "number"
+    },
+    {
+      name: "tarifa_cadastro_maxima",
+      label: "Tarifa Cadastro Máxima",
+      placeholder: "500.00",
+      type: "number"
+    },
+    {
+      name: "dia_corte_competencia",
+      label: "Dia de Corte da Competência",
+      placeholder: "1",
+      type: "number"
+    },
+    { name: "dia_recebimento", label: "Dia de Recebimento", placeholder: "1", type: "number" },
+    {
+      name: "dia_corte_folha_pagamento",
+      label: "Dia de Corte da Folha",
+      placeholder: "1",
+      type: "number"
+    },
+    {
+      name: "validade_ccb",
+      label: "Validade CCB",
+      placeholder: "Dias que o CCB é válido",
+      type: "number"
+    },
+    {
+      name: "quantidade_propostas_ativas",
+      label: "Quantidade de Propostas Ativas",
+      placeholder: "0",
+      type: "number"
+    }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -172,35 +185,72 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
         placeholder: "Digite o valor da margem",
         type: "number"
       }
+    },
+    {
+      name: "status",
+      label: "Status",
+      placeholder: "Selecione",
+      component: "select",
+      options: [
+        { value: "0", label: "Inativo" },
+        { value: "1", label: "Ativo" }
+      ]
     }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   const onSubmit = async (data: Roteiro) => {
+    console.log("Dados do formulário (ANTES do processamento):", data);
+
     if (!token) {
       toast.error("Token de autenticação não encontrado.");
       return;
     }
 
+    // Apenas os campos que precisam ser enviados
     const payload = {
-      ...data,
+      rotina_operacional_hash: data.rotina_operacional_hash,
+      nome: data.nome,
+      descricao: data.descricao,
+      idade_minima: Number(data.idade_minima),
+      idade_maxima: Number(data.idade_maxima),
+      prazo_maximo: Number(data.prazo_maximo),
+      valor_bruto_minimo: Number(data.valor_bruto_minimo),
+      valor_bruto_maximo: Number(data.valor_bruto_maximo),
+      taxa_minima: Number(data.taxa_minima),
+      taxa_maxima: Number(data.taxa_maxima),
+
+      // CORREÇÃO: comparar com string
+      usa_margem_seguranca: data.usa_margem_seguranca === "1" ? 1 : 0,
+
+      // CORREÇÃO: comparar com string
+      usa_limite_proposta: data.usa_limite_proposta === "1" ? 1 : 0,
+
       valor_limite_proposta:
-        data.usa_limite_proposta === 1 ? data.valor_limite_proposta : undefined,
+        data.usa_limite_proposta === "1" ? Number(data.valor_limite_proposta) : undefined,
       valor_margem_seguranca:
-        data.usa_margem_seguranca === 1 ? data.valor_margem_seguranca : undefined
-    };
+        data.usa_margem_seguranca === "1" ? Number(data.valor_margem_seguranca) : undefined,
+      quantidade_propostas_ativas: Number(data.quantidade_propostas_ativas),
+      dia_corte_competencia: Number(data.dia_corte_competencia),
+      validade_ccb: Number(data.validade_ccb),
+      dia_recebimento: Number(data.dia_recebimento),
+      dia_corte_folha_pagamento: Number(data.dia_corte_folha_pagamento),
+
+      // CORREÇÃO: comparar com string
+      status: data.status === "1" ? 1 : 0,
+
+      tarifa_cadastro_minima: Number(data.tarifa_cadastro_minima),
+      tarifa_cadastro_maxima: Number(data.tarifa_cadastro_maxima)
+    }; // ← Fechamento correto do objeto
 
     try {
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/rotina-operacional/atualizar`, payload, {
@@ -215,53 +265,113 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
     }
   };
 
+  // Mude a função handleSelectChange para:
   const handleSelectChange = (fieldName: keyof Roteiro, value: string) => {
-    const intValue = value === "1" ? 1 : 0;
-    methods.setValue(fieldName, intValue);
-
-    if (fieldName === "usa_limite_proposta") {
-      setShowLimiteProposta(intValue === 1);
-      if (intValue === 0) {
-        methods.setValue("valor_limite_proposta", undefined);
-      }
-    } else if (fieldName === "usa_margem_seguranca") {
-      setShowMargemSeguranca(intValue === 1);
-      if (intValue === 0) {
-        methods.setValue("valor_margem_seguranca", undefined);
-      }
-    }
+    methods.setValue(fieldName, value as any);
   };
 
-  const handleClose = () => {
-    toast.info("Edição cancelada", {
-      style: {
-        background: "var(--toast-info)",
-        color: "var(--toast-info-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
-    onClose();
+  const renderFormField = (fieldConfig: FormFieldConfig) => {
+    const {
+      name,
+      label,
+      placeholder,
+      type = "text",
+      component = "input",
+      options = [],
+      showInputOnTrue
+    } = fieldConfig;
+    const fieldValue = methods.watch(name);
+
+    return (
+      <React.Fragment key={name}>
+        <FormField
+          control={methods.control}
+          name={name}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{label}</FormLabel>
+              {component === "select" ? (
+                <Select
+                  onValueChange={(value) => handleSelectChange(name, value)}
+                  value={field.value ? String(field.value) : ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={placeholder} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <FormControl>
+                  <Input
+                    placeholder={placeholder}
+                    type={type}
+                    {...field}
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={(e) => {
+                      if (type === "number") {
+                        field.onChange(e.target.value === "" ? undefined : Number(e.target.value));
+                      } else {
+                        field.onChange(e.target.value);
+                      }
+                    }}
+                  />
+                </FormControl>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {showInputOnTrue && fieldValue === "1" && (
+          <FormField
+            control={methods.control}
+            name={showInputOnTrue.fieldName}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{showInputOnTrue.label}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={showInputOnTrue.placeholder}
+                    type="number"
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={(e) => {
+                      field.onChange(e.target.value === "" ? undefined : Number(e.target.value));
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </React.Fragment>
+    );
   };
-  
+
   return (
     <>
-      <div onClick={handleClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
+      <div onClick={onClose} className="fixed inset-0 z-40 bg-black/50" aria-hidden="true" />
 
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto bg-background p-6 shadow-lg">
+        className="bg-background fixed top-0 right-0 z-50 h-full w-1/2 overflow-auto p-6 shadow-lg">
         <FormProvider {...methods}>
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
                 Roteiro Operacional: <span className="text-primary">{roteiro.nome}</span>
               </h2>
-              <X onClick={onClose} className="cursor-pointer"/>
+              <X onClick={onClose} className="cursor-pointer" />
             </div>
-            <form
-              onSubmit={methods.handleSubmit(onSubmit)}
-              className="grid grid-cols-1 gap-4">
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4">
               <Card className="col-span-2">
                 <CardHeader>
                   <div className="flex justify-between">
@@ -273,111 +383,10 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                      
-
-                      {formFields.map((fieldConfig) => (
-                        <FormField
-                          key={fieldConfig.name}
-                          control={methods.control}
-                          name={fieldConfig.name}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{fieldConfig.label}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder={fieldConfig.placeholder}
-                                  type={fieldConfig.type}
-                                  min={fieldConfig.type === "number" ? 0 : undefined}
-                                  value={
-                                    field.value === undefined || field.value === null
-                                      ? "" : 
-                                    String(field.value)
-                                  }
-                                  onChange={(e) => {
-                                    console.log(field.value);
-
-                                    if (fieldConfig.type === "number") {
-                                      const numValue = e.target.value
-                                        ? Number(e.target.value)
-                                        : null;
-                                      field.onChange(numValue);
-                                    } else {
-                                      field.onChange(e.target.value);
-                                    }
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      ))}
+                      {formFields.map(renderFormField)}
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                      {formFields2.map((fieldConfig) => (
-                        <React.Fragment key={fieldConfig.name}>
-                          <FormField
-                            control={methods.control}
-                            name={fieldConfig.name}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{fieldConfig.label}</FormLabel>
-                                <FormControl>
-                                  <Select
-                                    value={String(field.value ?? "0")}
-                                    onValueChange={(value) =>
-                                      handleSelectChange(fieldConfig.name, value)
-                                    }>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder={fieldConfig.placeholder} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="1">Sim</SelectItem>
-                                      <SelectItem value="0">Não</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          {fieldConfig.showInputOnTrue &&
-                            ((fieldConfig.name === "usa_limite_proposta" &&
-                              methods.watch("usa_limite_proposta") === 1) ||
-                              (fieldConfig.name === "usa_margem_seguranca" &&
-                                methods.watch("usa_margem_seguranca") === 1)) && (
-                              <FormField
-                                control={methods.control}
-                                name={fieldConfig.showInputOnTrue!.fieldName}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>{fieldConfig.showInputOnTrue!.label}</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder={fieldConfig.showInputOnTrue!.placeholder}
-                                        type={fieldConfig.showInputOnTrue!.type}
-                                        min={0}
-                                        value={
-                                          field.value === undefined || field.value === null
-                                            ? ""
-                                            : String(field.value)
-                                        }
-                                        onChange={(e) => {
-                                          const numValue = e.target.value
-                                            ? Number(e.target.value)
-                                            : null;
-                                          field.onChange(numValue === null ? undefined : numValue);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                        </React.Fragment>
-                      ))}
+                      {formFields2.map(renderFormField)}
                     </div>
                   </div>
                 </CardContent>
