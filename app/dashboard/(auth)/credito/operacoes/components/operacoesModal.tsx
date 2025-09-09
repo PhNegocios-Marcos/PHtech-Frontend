@@ -20,7 +20,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { maskDate } from "@/utils/maskTable";
+import { maskDate, maskMoneyReal } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -234,7 +234,6 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Info className="h-5 w-5" />
           Dados da Proposta
         </CardTitle>
       </CardHeader>
@@ -253,7 +252,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Correspondente", value: proposta.historico.correspondente },
             { label: "Operador", value: proposta.historico.operador },
             { label: "Grupo", value: proposta.historico.grupo },
-            { label: "Data da Última Atualização", value: proposta.historico.dataUltimaAtualizacao },
+            { label: "Data da Última Atualização", value: maskDate(proposta.historico.dataUltimaAtualizacao) },
             { label: "Última Atualização Feita Por", value: proposta.historico.ultimaAtualizacaoPor}  
           ].map((item, index) => (
             <div key={index} className="w-full space-y-2">
@@ -278,7 +277,6 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <History className="h-5 w-5" />
             Andamento da Operação
           </CardTitle>
         </CardHeader>
@@ -307,8 +305,8 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                   <div className="ml-10 w-full">
                     <p className="text-lg font-semibold">{item.event}</p>
                     <p className="text-muted-foreground text-sm">{item.description}</p>
-                    <p className="text-muted-foreground mt-1 text-sm">Iniciado: {item.iniciado}</p>
-                    <p className="text-muted-foreground text-sm">Finalizado: {item.finalizado}</p>
+                    <p className="text-muted-foreground mt-1 text-sm">Iniciado em {maskDate(item.iniciado)}</p>
+                    <p className="text-muted-foreground text-sm">Finalizado em {maskDate(item.finalizado)}</p>
 
                     {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
                     {(item.status === "pending" || item.status === "failed") &&
@@ -357,12 +355,9 @@ const formatarData = (dataString: string): string => {
 
 const formatarStringNumerica = (valor: string) => {
   const numero = parseFloat(valor);
-  return isNaN(numero)
-    ? valor
-    : numero.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+  const verifyNumber =  isNaN(numero) ? valor : numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  return verifyNumber === "0,00" ? verifyNumber : "R$ " + verifyNumber
 };
 
 const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
@@ -370,7 +365,6 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Calculator className="h-5 w-5" />
           Parâmetros da Operação
         </CardTitle>
       </CardHeader>
@@ -380,7 +374,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             <div
               key={index}
               className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de Juros AM</p>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
               <p className="text-lg font-bold">{item.taxaJurosAM || "-"}</p>
             </div>
           ))}
@@ -423,6 +417,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted">
+                <th className="px-4 py-3 text-left font-semibold">Nº de parcelas</th>
                 <th className="px-4 py-3 text-left font-semibold">Parcela</th>
                 <th className="px-4 py-3 text-left font-semibold">Vencimento</th>
                 <th className="px-4 py-3 text-left font-semibold">Saldo Devedor</th>
@@ -436,13 +431,14 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
                 <tr
                   key={index}
                   className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
-                  <td className="px-4 py-3">{formatarStringNumerica(row.parcela)}</td>
+                  <td className="px-4 py-3">{++index}</td>
+                  <td className="px-4 py-3">{(formatarStringNumerica(row.parcela))}</td>
                   <td className="px-4 py-3">{formatarData(row.vencimento)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.saldo)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.amortizacao)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.juros)}</td>
-                  <td className="px-4 py-3 font-semibold">
-                    {formatarStringNumerica(row.pagamento)}
+                  <td className={`px-4 py-3 ${row.pagamento.length === 0 ? 'font-regular' : 'font-semibold'}`}>
+                    {row.pagamento.length === 0 ? "Pagamento não informado" : formatarStringNumerica(row.pagamento)}
                   </td>
                 </tr>
               ))}
@@ -686,6 +682,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
             Authorization: `Bearer ${token}`
           }
         });
+
         if (!response.ok) {
           throw new Error(`Erro ${response.status}: ${response.statusText}`);
         }
