@@ -55,9 +55,7 @@ export default function CadastroEquipeModal({
 
   const { token, selectedPromotoraId, userData } = useAuth();
   const router = useRouter();
-
   const isBanco = userData?.tipo_usuario === "Banco";
-  console.log(userData);
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -141,8 +139,6 @@ export default function CadastroEquipeModal({
         },
         body: JSON.stringify(payload),
       });
-
-      console.log(payload);
 
       if (!response.ok) {
         const err = await response.json();
