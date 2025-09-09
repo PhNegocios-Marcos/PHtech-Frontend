@@ -38,7 +38,7 @@ export type Promotora = {
 
 type Usuario = {
   nome: string;
-  id?: string;
+  id: string;
   hash?: string;
   email: string;
   tipo_usuario: string;
@@ -48,10 +48,11 @@ type Usuario = {
 type PromotorEditProps = {
   data: Promotora;
   cnpj: string;
+  id: string;
   onClose: () => void;
 };
 
-export function PromotorEdit({ data, onClose, cnpj }: PromotorEditProps) {
+export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
   const methods = useForm({
     defaultValues: data
   });
@@ -123,7 +124,8 @@ export function PromotorEdit({ data, onClose, cnpj }: PromotorEditProps) {
                 nome: relUsuario.usuario.nome,
                 email: relUsuario.usuario.email,
                 tipo_usuario: relUsuario.usuario.tipo_usuario,
-                status: relUsuario.usuario.status
+                status: relUsuario.usuario.status,
+                id: relUsuario.usuario.id
               });
             }
           });
@@ -174,12 +176,33 @@ export function PromotorEdit({ data, onClose, cnpj }: PromotorEditProps) {
       status: Number(formData.status)
     };
 
+    // Usar os IDs dos gerentes selecionados (que agora estão no formData.gerentes)
+    const payload2 = {
+      usuarios_hash: formData.gerentes || [], // Agora são IDs, não emails
+      promotora_hash: formData.id
+    };
+
     try {
+      // Primeiro atualiza os dados da promotora
       await axios.put(`${API_BASE_URL}/promotora/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
+      // Depois atualiza os relacionamentos com gerentes
+      const response2 = await fetch(`${API_BASE_URL}/gestao-promotora-gerente/criar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload2)
+      });
+
+      if (!response2.ok) {
+        throw new Error("Erro ao atualizar relacionamentos com gerentes");
+      }
 
       toast.success("Promotora atualizada com sucesso!", {
         style: {
@@ -319,7 +342,7 @@ export function PromotorEdit({ data, onClose, cnpj }: PromotorEditProps) {
                       .filter((usuario) => usuario.email && usuario.email.trim() !== "")
                       .map((p) => ({
                         label: String(p.nome || p.email || "Usuário sem nome"),
-                        value: String(p.email)
+                        value: String(p.id)
                       }));
 
                     return (

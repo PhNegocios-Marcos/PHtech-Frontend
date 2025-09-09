@@ -65,7 +65,7 @@ export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
         <TabsTrigger value="reports">Usuários</TabsTrigger>
       </TabsList>
       <TabsContent value="overview">
-        <PromotorEdit cnpj={formData.cnpj} data={formData} onClose={onClose} />
+        <PromotorEdit id={formData.id} cnpj={formData.cnpj} data={formData} onClose={onClose} />
       </TabsContent>
       <TabsContent value="reports">
         <UsuariosTable cnpj={formData.cnpj} onClose={onClose} promotora={formData} />
