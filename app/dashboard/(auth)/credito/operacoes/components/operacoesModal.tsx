@@ -20,6 +20,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { maskDate } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -238,17 +239,22 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
           {[
             { label: "Produto", value: proposta.produto },
-            { label: "Modo de Liquidação", value: proposta.informacoes.modoLiquidacao },
-            { label: "Tomador", value: proposta.tomador },
             { label: "CPF/CNPJ", value: formatCpfOrCnpj(proposta.cpf) },
+            { label: "Tomador", value: proposta.tomador },
+            { label: "Modo de Liquidação", value: proposta.informacoes.modoLiquidacao },
             { label: "Conta de Liquidação", value: proposta.informacoes.contaLiquidacao },
+            { label: "Valor líquido", value: formatToBRL(proposta.valor) },
             { label: "Código IPOC", value: proposta.informacoes.codigoIpoc },
-            { label: "Valor", value: formatToBRL(proposta.valor) },
-            { label: "Data de Início", value: formatToBrazilianDate(proposta.data) },
-            { label: "Observações", value: proposta.informacoes.observacoes }
+            { label: "Data de Início", value: maskDate(proposta.data) },
+            { label: "Observações", value: proposta.informacoes.observacoes },
+            { label: "Correspondente", value: proposta.historico.correspondente },
+            { label: "Operador", value: proposta.historico.operador },
+            { label: "Grupo", value: proposta.historico.grupo },
+            { label: "Data da Última Atualização", value: proposta.historico.dataUltimaAtualizacao },
+            { label: "Última Atualização Feita Por", value: proposta.historico.ultimaAtualizacaoPor}  
           ].map((item, index) => (
             <div key={index} className="w-full space-y-2">
               <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
@@ -278,26 +284,6 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
         </CardHeader>
         <CardContent>
           <div className="w-full space-y-6">
-            <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-              {[
-                { label: "Correspondente", value: proposta.historico.correspondente },
-                { label: "Operador", value: proposta.historico.operador },
-                { label: "Grupo", value: proposta.historico.grupo },
-                {
-                  label: "Data da Última Atualização",
-                  value: proposta.historico.dataUltimaAtualizacao
-                },
-                {
-                  label: "Última Atualização Feita Por",
-                  value: proposta.historico.ultimaAtualizacaoPor
-                }
-              ].map((item, index) => (
-                <div key={index} className="w-full space-y-2">
-                  <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
-                  <p className="text-lg font-medium">{item.value}</p>
-                </div>
-              ))}
-            </div>
             <div className="relative w-full">
               <div className="bg-border absolute top-0 left-3 h-full w-0.5" />
               {proposta.historico.eventos.map((item, index) => (
@@ -569,10 +555,10 @@ const transformApiData = (apiData: any): ApiPropostaPayload => {
 // Seções para navegação
 const sections = [
   { id: "informacoes", label: "Informações", component: Informacoes, icon: Info },
-  { id: "historico", label: "Histórico", component: Historico, icon: History },
   { id: "operacao", label: "Operação", component: Operacao, icon: Calculator },
   { id: "documentos", label: "Documentos", component: Documentos, icon: FileText },
-  { id: "assinaturas", label: "Assinaturas", component: Assinaturas, icon: PenTool }
+  { id: "assinaturas", label: "Assinaturas", component: Assinaturas, icon: PenTool },
+  { id: "historico", label: "Histórico", component: Historico, icon: History }
 ];
 
 const LoadingSkeleton = () => (
