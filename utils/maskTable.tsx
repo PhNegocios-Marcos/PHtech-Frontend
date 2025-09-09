@@ -43,3 +43,9 @@ export function maskCPF(value: any): string {
     .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
     .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }
+
+export function maskMoneyReal(value: any) {
+    const valueMasked = value.getValue();
+
+    return 'R$ ' + valueMasked;
+}
