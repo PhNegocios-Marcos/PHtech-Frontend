@@ -51,7 +51,7 @@ const fixedFormSections: FormSection[] = [
         name: "sexo",
         label: "Sexo",
         type: "select",
-        required: true,
+        required: false,
         options: [
           { value: "M", label: "Masculino" },
           { value: "F", label: "Feminino" }
@@ -62,7 +62,7 @@ const fixedFormSections: FormSection[] = [
         name: "estado_civil",
         label: "Estado Civil",
         type: "select",
-        required: true,
+        required: false,
         options: [
           { value: "solteiro", label: "Solteiro(a)" },
           { value: "casado", label: "Casado(a)" },
@@ -71,8 +71,8 @@ const fixedFormSections: FormSection[] = [
           { value: "separado", label: "Separado(a)" }
         ]
       },
-      { name: "naturalidade", label: "Naturalidade", type: "text", required: true },
-      { name: "nacionalidade", label: "Nacionalidade", type: "text", required: true }
+      { name: "naturalidade", label: "Naturalidade", type: "text", required: false },
+      { name: "nacionalidade", label: "Nacionalidade", type: "text", required: false }
     ]
   },
   {
@@ -315,36 +315,11 @@ const Contato = forwardRef<
     formData: any;
     onChange: (path: string, value: any) => void;
     fields: FormField[];
-    addPhone?: () => void;
+    onAddPhone: () => void;
+    onPhoneChange: (index: number, value: string) => void;
+    onRemovePhone: (index: number) => void;
   }
->(({ formData, onChange, fields, addPhone }, ref) => {
-  // Função para adicionar novo telefone
-  const handleAddPhone = () => {
-    formData((prev: { telefones: any; }) => ({
-      ...prev,
-      telefones: [...prev.telefones, ""]
-    }));
-  };
-
-  // Atualiza um telefone específico
-  const handlePhoneChange = (index: number, value: string) => {
-    formData((prev: { telefones: any; }) => {
-      const newTelefones = [...prev.telefones];
-      newTelefones[index] = value;
-      return { ...prev, telefones: newTelefones };
-    });
-  };
-
-  // Remove um telefone
-  const handleRemovePhone = (index: number) => {
-    if (formData.telefones.length > 1) {
-      formData((prev: { telefones: any[]; }) => ({
-        ...prev,
-        telefones: prev.telefones.filter((_, i) => i !== index)
-      }));
-    }
-  };
-
+>(({ formData, onChange, fields, onAddPhone, onPhoneChange, onRemovePhone }, ref) => {
   // Renderização dos campos de telefone
   const renderPhoneFields = () => {
     return formData.telefones.map((phone: string, index: number) => (
@@ -353,7 +328,7 @@ const Contato = forwardRef<
           <span>Telefone {index + 1}</span>
           <Input
             value={phone}
-            onChange={(e) => handlePhoneChange(index, e.target.value)}
+            onChange={(e) => onPhoneChange(index, e.target.value)}
             placeholder="Número do telefone"
           />
         </div>
@@ -361,7 +336,7 @@ const Contato = forwardRef<
           <Button
             type="button"
             variant="destructive"
-            onClick={() => handleRemovePhone(index)}
+            onClick={() => onRemovePhone(index)}
             className="mt-6">
             Remover
           </Button>
@@ -374,7 +349,7 @@ const Contato = forwardRef<
     <form className="m-10 space-y-4" onSubmit={(e) => e.preventDefault()}>
       {renderPhoneFields()}
 
-      <Button type="button" onClick={handleAddPhone}>
+      <Button type="button" onClick={onAddPhone}>
         Adicionar Telefone
       </Button>
 
@@ -714,6 +689,30 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
   const enderecosRef = useRef<TabRef | null>(null);
   const bancariosRef = useRef<TabRef | null>(null);
 
+  const handleAddPhone = () => {
+    setFormData((prev) => ({
+      ...prev,
+      telefones: [...prev.telefones, ""]
+    }));
+  };
+
+  const handlePhoneChange = (index: number, value: string) => {
+    setFormData((prev) => {
+      const newTelefones = [...prev.telefones];
+      newTelefones[index] = value;
+      return { ...prev, telefones: newTelefones };
+    });
+  };
+
+  const handleRemovePhone = (index: number) => {
+    if (formData.telefones.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        telefones: prev.telefones.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const tabRefs: Record<string, React.RefObject<TabRef | null>> = {
     DadosPessoais: dadosPessoaisRef,
     Contato: telefonesRef,
@@ -927,19 +926,9 @@ export default function CadastroClienteModal({ isOpen, onClose }: CadastroClient
                 formData={formData}
                 onChange={handleChange}
                 fields={getFields("Contato")}
-                addPhone={() => {
-                  // Add new phone logic
-                  setFormData((prev) => {
-                    const nextIndex = Object.keys(prev.telefones).length;
-                    return {
-                      ...prev,
-                      telefones: {
-                        ...prev.telefones,
-                        [nextIndex]: { ddd: "", numero: "" }
-                      }
-                    };
-                  });
-                }}
+                onAddPhone={handleAddPhone}
+                onPhoneChange={handlePhoneChange}
+                onRemovePhone={handleRemovePhone}
               />
             </TabsContent>
             <TabsContent value="Enderecos">
