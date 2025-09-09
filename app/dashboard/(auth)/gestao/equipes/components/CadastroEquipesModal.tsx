@@ -145,7 +145,12 @@ export default function CadastroEquipeModal({
         throw new Error(err.message || "Erro ao cadastrar equipe");
       }
 
-      toastComponent.success("Equipe cadastrada com sucesso!");
+      console.log(response);
+
+      if (response.ok) {
+        toastComponent.success("Equipe cadastrada com sucesso!");
+      }
+
       onClose();
       methods.reset();
     } catch (error: any) {

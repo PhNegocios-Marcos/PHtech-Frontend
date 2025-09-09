@@ -19,7 +19,6 @@ export default function Page() {
 
   const handleCloseCadastro = () => {
     setIsCadastroOpen(false);
-    toastComponent.success("Equipe criada com sucesso!");
   };
 
   const handleOpenCadastro = () => {
