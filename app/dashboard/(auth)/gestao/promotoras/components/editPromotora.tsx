@@ -33,7 +33,7 @@ export type Promotora = {
   rateio_master: string;
   rateio_sub: string;
   status: number;
-  gerentes?: string[]; // Adicione esta linha
+  gerentes?: string[];
 };
 
 type Usuario = {
@@ -56,18 +56,18 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
   const methods = useForm({
     defaultValues: data
   });
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuariosBanco, setUsuariosBanco] = useState<Usuario[]>([]);
+  const isBanco = userData?.tipo_usuario === "Banco";
 
   useEffect(() => {
     methods.reset(data);
   }, [data, methods]);
 
-  // Função para evitar números negativos
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
-    // Permite apenas números positivos
     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
       field.onChange(value);
     }
@@ -76,14 +76,11 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   useEffect(() => {
@@ -132,14 +129,6 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
         });
 
         setUsuarios(usuariosArray);
-        // toast.success("Usuários carregados com sucesso", {
-        //   style: {
-        //     background: 'var(--toast-success)',
-        //     color: 'var(--toast-success-foreground)',
-        //     boxShadow: 'var(--toast-shadow)'
-        //   },
-        //   description: `${usuariosArray.length} usuários encontrados`
-        // });
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
         toast.error("Falha ao carregar usuários", {
@@ -155,6 +144,56 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
 
     fetchUsuariosRelacionados();
   }, [token, cnpj]);
+
+  React.useEffect(() => {
+    async function fetchUsuarios() {
+      try {
+        if (!token) {
+          throw new Error("Token de autenticação não encontrado");
+        }
+
+        const response = await fetch(`${API_BASE_URL}/usuario/listar`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.detail || "Erro ao buscar usuários");
+        }
+
+        const data = await response.json();
+
+        // Filter users to only include those with tipo_usuario === "Banco"
+        const usuariosFiltrados = data
+          .filter((usuario: any) => usuario.tipo_usuario === "Banco")
+          .map((usuario: any) => ({
+            id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            tipo_usuario: usuario.tipo_usuario,
+            status: usuario.status
+          }));
+
+        setUsuariosBanco(usuariosFiltrados);
+      } catch (error: any) {
+        console.error("Erro ao buscar usuários:", error.message);
+        toast.error(`Erro ao carregar usuários: ${error.message}`, {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            border: "1px solid var(--toast-border)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+      }
+    }
+
+    fetchUsuarios();
+  }, [token]);
 
   const onSubmit = async (formData: Promotora) => {
     if (!token) {
@@ -176,21 +215,18 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
       status: Number(formData.status)
     };
 
-    // Usar os IDs dos gerentes selecionados (que agora estão no formData.gerentes)
     const payload2 = {
-      usuarios_hash: formData.gerentes || [], // Agora são IDs, não emails
+      usuario_hash: formData.gerentes || [],
       promotora_hash: formData.id
     };
 
     try {
-      // Primeiro atualiza os dados da promotora
       await axios.put(`${API_BASE_URL}/promotora/atualizar`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
-      // Depois atualiza os relacionamentos com gerentes
       const response2 = await fetch(`${API_BASE_URL}/gestao-promotora-gerente/criar`, {
         method: "POST",
         headers: {
@@ -303,15 +339,14 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
                   control={methods.control}
                   name="representante"
                   render={({ field }) => {
-                    // Converter usuários para opções do Combobox
+                    // Usar a lista original de usuários para representante
                     const representanteOptions = usuarios
                       .filter((usuario) => usuario.email && usuario.email.trim() !== "")
                       .map((usuario) => ({
-                        id: usuario.email, // Usar email como ID
+                        id: usuario.email,
                         name: usuario.nome || usuario.email || "Usuário sem nome"
                       }));
 
-                    // Encontrar o valor selecionado atual
                     const selectedValue =
                       representanteOptions.find((opt) => opt.id === field.value) || null;
 
@@ -338,11 +373,12 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
                   control={methods.control}
                   name="gerentes"
                   render={({ field }) => {
-                    const promotoraOptions: MultiSelectOption[] = usuarios
+                    // Usar a lista filtrada de usuários Banco para gerentes
+                    const gerenteOptions: MultiSelectOption[] = usuariosBanco
                       .filter((usuario) => usuario.email && usuario.email.trim() !== "")
-                      .map((p) => ({
-                        label: String(p.nome || p.email || "Usuário sem nome"),
-                        value: String(p.id)
+                      .map((usuario) => ({
+                        label: String(usuario.nome || usuario.email || "Usuário sem nome"),
+                        value: String(usuario.id)
                       }));
 
                     return (
@@ -350,12 +386,12 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
                         <FormLabel>Gerentes</FormLabel>
                         <FormControl>
                           <MultiSelect
-                            options={promotoraOptions}
+                            options={gerenteOptions}
                             onValueChange={(values) => {
                               field.onChange(values);
                             }}
                             defaultValue={field.value || []}
-                            placeholder="Selecione os usuários..."
+                            placeholder="Selecione os gerentes..."
                             deduplicateOptions={true}
                           />
                         </FormControl>
@@ -410,7 +446,7 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
                           data={statusOptions}
                           displayField="name"
                           value={statusOptions.find((opt) => opt.id === field.value) ?? null}
-                          onChange={(selected) => field.onChange(selected.id)}
+                          onChange={(selected) => field.onChange(selected?.id)}
                           searchFields={["name"]}
                         />
                       </FormControl>
