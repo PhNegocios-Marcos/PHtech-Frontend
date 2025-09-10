@@ -273,7 +273,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
 
   const handleRowClick = (promotora: Promotora) => {
     try {
-      setSelectedPromotora(null);
+      setSelectedPromotora(promotora);
     } catch (error: any) {
       toast.error("Erro ao selecionar promotora", {
         style: {

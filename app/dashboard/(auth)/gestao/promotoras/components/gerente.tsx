@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -14,6 +14,7 @@ import {
   VisibilityState
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -35,16 +36,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { CarregandoTable } from "./leads_carregando";
 import { Promotora } from "./editPromotora";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type Usuario = {
-  nome: string;
-  email: string;
-  tipo_usuario: string;
-  status: number;
+type Gerente = {
+  gerente_nome: string;
+  gerente_usuario_hash: string;
+  relacionamento_hash: string | null;
 };
 
 type UsuariosTableProps = {
@@ -53,15 +53,8 @@ type UsuariosTableProps = {
   onClose: () => void;
 };
 
-const usuarioColumns: ColumnDef<Usuario>[] = [
-  { accessorKey: "nome", header: "Nome" },
-  { accessorKey: "email", header: "Email" },
-  { accessorKey: "tipo_usuario", header: "Tipo de Usuário" },
-  { accessorKey: "status", header: "Status" }
-];
-
-export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+export function GerenteTable({ cnpj, promotora, onClose }: UsuariosTableProps) {
+  const [usuarios, setUsuarios] = useState<Gerente[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -69,35 +62,85 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
   const { token } = useAuth();
   const router = useRouter();
 
+  // Função para remover gerente - USANDO gerente_usuario_hash
+  const removerGerente = useCallback(async (gerente: Gerente) => {
+    if (!token || !gerente.gerente_usuario_hash) {
+      toast.error("Autenticação necessária ou hash inválido");
+      return;
+    }
+
+    const payload = {
+      id_gestao_gerente_promotora: gerente.gerente_usuario_hash, // ← AQUI: usar gerente_usuario_hash
+      status: "0"
+    };
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/gestao-promotora-gerente/atualizar`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Gerente removido com sucesso");
+        // Remove o gerente da lista local usando gerente_usuario_hash
+        setUsuarios(prev => prev.filter(u => u.gerente_usuario_hash !== gerente.gerente_usuario_hash));
+      } else {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error("Erro ao remover gerente:", error);
+      toast.error("Falha ao remover gerente");
+    }
+  }, [token]);
+
+  // Definição das colunas DENTRO do componente
+  const usuarioColumns: ColumnDef<Gerente>[] = [
+    {
+      accessorKey: "gerente_nome",
+      header: "Nome do Gerente"
+    },
+    {
+      id: "remover",
+      header: "Remover",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => removerGerente(row.original)}
+          title="Remover Gerente">
+          <Trash2 className="h-4 w-4 text-primary" />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false
+    }
+  ];
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   useEffect(() => {
     async function fetchUsuariosRelacionados() {
       if (!token || !cnpj) {
-        toast.error("Autenticação necessária", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: "Token ou CNPJ não encontrado"
-        });
+        toast.error("Autenticação necessária");
         return;
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/rel_usuario_promotora/${cnpj}`, {
+        const response = await fetch(`${API_BASE_URL}/promotora/${promotora.id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -106,50 +149,31 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar relacionamentos");
+          throw new Error(`Erro HTTP: ${response.status}`);
         }
 
         const data = await response.json();
-        const usuariosArray: Usuario[] = [];
 
-        Object.values(data.promotoras).forEach((prom: any) => {
-          prom.usuarios.forEach((relUsuario: any) => {
-            if (relUsuario.usuario) {
-              usuariosArray.push({
-                nome: relUsuario.usuario.nome,
-                email: relUsuario.usuario.email,
-                tipo_usuario: relUsuario.usuario.tipo_usuario,
-                status: relUsuario.usuario.status
-              });
-            }
-          });
-        });
+        // A API retorna diretamente o array de gerentes
+        if (data.gerentes && Array.isArray(data.gerentes)) {
+          const usuariosArray: Gerente[] = data.gerentes.map((gerente: any) => ({
+            gerente_nome: gerente.gerente_nome,
+            gerente_usuario_hash: gerente.gerente_usuario_hash,
+            relacionamento_hash: gerente.relacionamento_hash // mesmo sendo null, mantemos para consistência
+          }));
 
-        setUsuarios(usuariosArray);
-        // toast.success("Usuários carregados com sucesso", {
-        //   style: {
-        //     background: 'var(--toast-success)',
-        //     color: 'var(--toast-success-foreground)',
-        //     boxShadow: 'var(--toast-shadow)'
-        //   },
-        //   description: `${usuariosArray.length} usuários encontrados`
-        // });
+          setUsuarios(usuariosArray);
+        } else {
+          setUsuarios([]);
+        }
       } catch (error: any) {
-        console.error("Erro na requisição:", error.message || error);
-        toast.error("Falha ao carregar usuários", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: error.message || "Erro desconhecido"
-        });
+        console.error("Erro na requisição:", error);
+        toast.error("Falha ao carregar usuários");
       }
     }
 
     fetchUsuariosRelacionados();
-  }, [token, cnpj]);
+  }, [token, cnpj, promotora.id]);
 
   const table = useReactTable({
     data: usuarios,
@@ -171,13 +195,7 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
   });
 
   const handleClose = () => {
-    toast.info("Fechando lista de usuários", {
-      style: {
-        background: "var(--toast-info)",
-        color: "var(--toast-info-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    toast.info("Fechando lista de usuários");
     onClose();
   };
 
@@ -199,8 +217,10 @@ export function UsuariosTable({ cnpj, promotora, onClose }: UsuariosTableProps) 
         <div className="mb-4 flex items-center gap-2">
           <Input
             placeholder="Filtrar por nome..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("nome")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("gerente_nome")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("gerente_nome")?.setFilterValue(event.target.value)
+            }
             className="max-w-sm"
           />
           <DropdownMenu>
