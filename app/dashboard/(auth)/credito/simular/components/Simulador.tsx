@@ -85,9 +85,6 @@ export default function SimuladorFgts({
         const data = response.data;
         const arrData = Array.isArray(data) ? data : [data];
 
-        // console.log(response.data);
-        // console.log(response.status);
-
         const parsedSections: Section[] = arrData.map((item: any) => ({
           type: item.simulacao_campos_produtos_type,
           title: item.simulacao_campos_produtos_title,

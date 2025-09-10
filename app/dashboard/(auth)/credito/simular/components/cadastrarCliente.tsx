@@ -685,6 +685,16 @@ interface CadastroClienteModalProps {
   onClose: () => void;
 }
 
+interface CadastroClienteModalProps {
+  cpf: string;
+  simulacao?: Record<string, any>;
+  produtoId?: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onCadastrado?: (cpf: string, simulacao: any) => void;
+  onClienteExiste?: (cpf: string) => void;
+}
+
 export default function CadastroClienteModal({ isOpen, onClose }: CadastroClienteModalProps) {
   const { token } = useAuth();
   const [formSections] = useState<FormSection[]>(fixedFormSections);
