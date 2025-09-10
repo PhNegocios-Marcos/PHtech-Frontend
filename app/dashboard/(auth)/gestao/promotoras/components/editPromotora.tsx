@@ -10,6 +10,8 @@ import { Combobox } from "@/components/Combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { MultiSelect, type MultiSelectOption } from "@/components/multi-select";
+import { Controller } from "react-hook-form";
+
 import {
   Form,
   FormControl,
@@ -207,6 +209,9 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
       return;
     }
 
+    const representanteEmail = formData.representante;
+    const usuarioRepresentante = usuarios.find((usuario) => usuario.email === representanteEmail);
+
     const payload = {
       id: formData.id,
       nome: formData.nome,
@@ -218,6 +223,12 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
     const payload2 = {
       usuario_hash: formData.gerentes || [],
       promotora_hash: formData.id
+    };
+
+    const payload3 = {
+      promotora_hash: formData.id,
+      nome: "Gestor - Global",
+      email: usuarioRepresentante?.email || ""
     };
 
     try {
@@ -234,6 +245,12 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload2)
+      });
+
+      await axios.post(`${API_BASE_URL}/rel_usuario_perfil/criar`, payload3, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (!response2.ok) {

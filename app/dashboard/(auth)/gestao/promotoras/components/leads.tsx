@@ -15,7 +15,7 @@ import {
 } from "@tanstack/react-table";
 import axios from "axios";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Pencil } from "lucide-react";
+import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -160,14 +160,14 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
     },
     {
       id: "editar",
-      header: "Editar",
+      header: "Ver",
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setSelectedPromotora(row.original)}
-          title="Editar usuário">
-          <Pencil className="h-4 w-4" />
+          title="Ver Promotora">
+          <Search className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,

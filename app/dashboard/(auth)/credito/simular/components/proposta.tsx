@@ -266,6 +266,8 @@ export default function PropostaCliente({
           : {}
       };
 
+      console.log("body: ", body);
+
       const response = await axios.post(`${API_BASE_URL}/proposta/criar`, body, {
         headers: {
           "Content-Type": "application/json",
