@@ -50,6 +50,9 @@ export function maskMoneyReal (value: any) {
     return 'R$ ' + valueMasked;
 }
 
-export function maskFinalValueWithZero (value: string | number) {
-  const splitValue = value.toLocaleString();
+export function maskFinalValueWithZero (value: string | number | null) {
+  //@ts-ignore
+  const splitValue = parseFloat(value.toString());
+
+  return splitValue;
 } 
