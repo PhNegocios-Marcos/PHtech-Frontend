@@ -404,7 +404,7 @@ export default function CadastroCamposModal({
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Configurar Campos de Cadastro</h2>
+                <h2 className="text-xl font-semibold">Configurar campos de cadastro</h2>
                 <button
                   type="button"
                   onClick={onClose}

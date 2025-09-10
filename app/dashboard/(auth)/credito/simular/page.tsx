@@ -14,6 +14,8 @@ import { useHasPermission } from "@/hooks/useFilteredPageRoutes";
 import CadastroInputUser from "./components/cadastroInputUser";
 import CadastroInputProduto from "./components/cadastroCampoProduto";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
+import { CircleAlert } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -41,8 +43,10 @@ export default function CreditSimular() {
   const [isCadastroOpen2, setIsCadastroOpen2] = useState(false);
   const handleCloseCadastro2 = () => setIsCadastroOpen2(false);
 
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const podeCriar = useHasPermission("Input_Campos_Cadastro_Cliente_Criar");
+
+  const isBanco = userData?.tipo_usuario === 'Banco';
 
   useEffect(() => {
     const fetchConvenios = async () => {
@@ -59,13 +63,7 @@ export default function CreditSimular() {
         setConvenios(formatado);
       } catch (error) {
         console.error("Erro ao buscar convênios:", error);
-        toast.error("Erro ao carregar convênios", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Erro ao carregar convênios");
       }
     };
 
@@ -97,13 +95,7 @@ export default function CreditSimular() {
         setSelectedCategoria(null);
       } catch (error) {
         console.error("Erro ao buscar produtos:", error);
-        toast.error("Erro ao carregar modalidades", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Erro ao carregar modalidades");
       }
     };
 
@@ -135,13 +127,7 @@ export default function CreditSimular() {
         setSimuladorKey((prev) => prev + 1);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
-        toast.error("Erro ao carregar categorias", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Erro ao carregar categorias");
       }
     };
 
@@ -151,25 +137,19 @@ export default function CreditSimular() {
   const handleAbrirCadastro = (cpf: string, dadosSimulacao: any) => {
     setCpfProposta(cpf);
     setSimulacao(dadosSimulacao);
-    toast.success("Cliente encontrado, montando proposta...", {
-      style: {
-        background: "var(--toast-success)",
-        color: "var(--toast-success-foreground)",
-        boxShadow: "var(--toast-shadow)"
-      }
-    });
+    toastComponent.success("Cliente encontrado! Estamos montando a proposta...");
   };
 
   return (
     <ProtectedRoute requiredPermission="Simular_ver">
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row flex-wrap justify-between">
         <CampoBoasVindas />
         <div className="grid grid-cols-1 gap-1 md:grid-cols-2">
-          {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Campos Usuario</Button>}
-          {podeCriar && <Button onClick={() => setIsCadastroOpen2(true)}>Campos Produto</Button>}
+          {podeCriar && <Button className="w-full md:w-auto" onClick={() => setIsCadastroOpen(true)}>Cadastro de campos do usuário</Button>}
+          {podeCriar && <Button className="w-full md:w-auto" onClick={() => setIsCadastroOpen2(true)}>Cadastro de campos do produto</Button>}
         </div>
       </div>
-      <div className="space-y-6">
+      <div className={`space-y-6 ${isBanco ? 'hidden' : 'block'}`}>
         {!cpfProposta ? (
           <>
             <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -258,6 +238,11 @@ export default function CreditSimular() {
             />
           )
         )}
+      </div>
+      
+      <div className={isBanco ? "flex w-full h-full flex-col justify-center items-center" : "hidden"}>
+        <CircleAlert  size={96} className="text-red-600"/>
+        <h3 className="md:text-3xl sm:text-2xl text-xl text-center">Este usuário não tem permissão para simular.</h3>
       </div>
       <CadastroInputUser isOpen={isCadastroOpen} onClose={handleCloseCadastro} />
       <CadastroInputProduto isOpen={isCadastroOpen2} onClose={handleCloseCadastro2} />

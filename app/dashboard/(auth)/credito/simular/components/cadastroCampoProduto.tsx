@@ -118,7 +118,7 @@ export default function CadastroInputProduto({
     { value: "cpf", label: "CPF", section: "DadosSimulacao" },
     { value: "saldo", label: "Saldo FGTS", section: "DadosSimulacao" },
     { value: "mes_aniversario", label: "Mês Aniversário", section: "DadosSimulacao" },
-    { value: "juros", label: "Taxa de Juros", section: "DadosSimulacao" },
+    // { value: "juros", label: "Taxa de Juros", section: "DadosSimulacao" },
     { value: "parcelas_adiantadas", label: "Parcelas Adiantadas", section: "DadosSimulacao" },
     { value: "data_inicio", label: "Data de Início", section: "DadosSimulacao" },
     { value: "valor_liberado", label: "Valor Liberado", section: "ResultadoSimulacao" },
@@ -129,7 +129,7 @@ export default function CadastroInputProduto({
       section: "ResultadoSimulacao"
     },
     { value: "cet", label: "CET", section: "ResultadoSimulacao" },
-    { value: "taxa_juros", label: "Taxa de Juros", section: "ResultadoSimulacao" }
+    // { value: "taxa_juros", label: "Taxa de Juros", section: "ResultadoSimulacao" }
   ]);
 
   const {
