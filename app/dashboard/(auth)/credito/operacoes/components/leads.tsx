@@ -147,7 +147,7 @@ export function OperacoesTable() {
       cell: ({ row }) => {
         const { status, cor_status } = row.original;
         return (
-          <Badge className={`${cor_status}-100`}>
+          <Badge className={`${cor_status}`}>
             {status}
           </Badge>
         )},

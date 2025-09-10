@@ -13,7 +13,7 @@ export function maskMonth (value: any) {
     return valueMasked + complement;
 }
 
-export function maskDate(value: any): string {
+export function maskDate (value: any): string {
   const raw = value.getValue?.() ?? value;
 
   if (
@@ -35,7 +35,7 @@ export function maskDate(value: any): string {
   }
 }
 
-export function maskCPF(value: any): string {
+export function maskCPF (value: any): string {
   const onlyDigits = String(value).replace(/\D/g, "").slice(0, 11);
 
   return onlyDigits
@@ -44,8 +44,12 @@ export function maskCPF(value: any): string {
     .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }
 
-export function maskMoneyReal(value: any) {
+export function maskMoneyReal (value: any) {
     const valueMasked = value.getValue();
 
     return 'R$ ' + valueMasked;
 }
+
+export function maskFinalValueWithZero (value: string | number) {
+  const splitValue = value.toLocaleString();
+} 

@@ -67,10 +67,16 @@ export type ApiPropostaPayload = {
     carenciaPrincipal: string;
     baseCalculo: string;
     periodicidadePagamento: string;
-    dataInicio: string | null;
+    periodicidade: number;
+    data_inicio: string | null;
     dataPrimeiroPagamento: string | null;
     corban: string;
     ajustarVencimentos: string;
+    usa_seguro: number | null;
+    seguro: string | null;
+    usa_tac: number | null;
+    valor_tac: string | null;
+    iof: string | null;
   }[];
   operacaoResultados?: {
     // Tornado opcional
@@ -370,11 +376,52 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-full">
           {proposta.operacaoParametros.map((item, index) => (
-            <div key={index} className={`rounded-lg border p-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
-              <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
-              <p className="text-lg font-bold">{`${item.taxaJurosAM} %` || "-"}</p>
+            <div key={index} className={`rounded-lg flex gap-6 border p-4 justify-between ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
+                <p className="text-lg font-bold">{`${item.taxaJurosAM} %` || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Prazo de operação</p>
+                <p className="text-lg font-bold">{`${item.quantidadeParcelas} meses`}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Data de início</p>
+                <p className="text-lg font-bold">{maskDate(item.data_inicio)}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Data do primeiro pagamento</p>
+                <p className="text-lg font-bold">{maskDate(item.dataPrimeiroPagamento)}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Prazo de pagamento</p>
+                <p className="text-lg font-bold">{`${item.periodicidade} meses`}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Seguro</p>
+                <p className="text-md font-medium">
+                  {item.usa_seguro === 0 ? "Não utiliza seguro" : item.seguro}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">TAC</p>
+                <p className={`${item.usa_tac === 0 ? 'font-medium text-md' : 'font-bold text-lg'}`}>
+                  {item.usa_tac === 0 ? "Não utiliza TAC" : `${item.valor_tac} %`}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">IOF</p>
+                <p className="text-lg font-bold">{`${item.iof} %`}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -691,6 +738,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
         }
 
         const data = await response.json();
+        console.log(data);
         setProposta(transformApiData(data)); // Usar a função de transformação
       } catch (err) {
         console.error("Erro ao carregar proposta:", err);

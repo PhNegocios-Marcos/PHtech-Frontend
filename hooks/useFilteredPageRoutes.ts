@@ -48,11 +48,12 @@ function filterItems(items: PageRoutesItemType, allowedRoutes: string[]): PageRo
 
 // ✅ Hook principal que filtra rotas com base nas permissões
 export function useFilteredPageRoutes(): PageRoutesType {
-  const { userPermissoes } = useAuth();
+  const { userPermissoes, userData } = useAuth();
+  const isBanco = userData?.tipo_usuario === "Banco";
 
   let allowedRoutes: string[] = [];
 
-  if (userPermissoes === "acesso_total") {
+  if (userPermissoes === "acesso_total" && !isBanco) {
     allowedRoutes = [
       "Equipes_ver",
       "Promotora_ver",
@@ -97,6 +98,48 @@ export function useFilteredPageRoutes(): PageRoutesType {
     ];
   } else if (Array.isArray(userPermissoes)) {
     allowedRoutes = userPermissoes;
+  } else if (isBanco) {
+        allowedRoutes = [
+      "Equipes_ver",
+      "Promotora_ver",
+      "Usuarios_ver",
+      "Perfis_ver",
+      "Gestão_Permissões",
+      "Gestão_Modulos",
+      "Credito_Excluidos",
+      "Credito_Operações",
+      "Credito_Simular",
+      "Cadastro_ver",
+      "TipoOperacao_ver",
+      "Produto_ver",
+      "Convenio_ver",
+      "Convenios_criar",
+      "Averbador_ver",
+      "Orgao_ver",
+      "Taxa_ver",
+      "Orgaos_criar",
+      "RO_ver",
+      "Esteria_ver",
+      "Seguro_ver",
+      "Seguradora_ver",
+      "Input_Campos_Cadastro_Cliente_Criar",
+      "TaxaCadastro_ver",
+      "Operacoes_ver",
+      "Esteira_ver",
+      "Modalidade_ver",
+      "RoteiroOperacional_ver",
+      "Alcadas_ver",
+      "Tipo_de_Acesso_criar",
+      "Clientes_ver",
+      "Modalidade_ver",
+      "Config_Banco_ver",
+      "Operacoes_Banco_ver",
+      "Chat_ai",
+      "Bancalizador_ver",
+      "Credito_ver",
+      "Usuarios_atualizar",
+      "Equipes_atualizar"
+    ];
   }
 
   allowedRoutes.push("Default");
