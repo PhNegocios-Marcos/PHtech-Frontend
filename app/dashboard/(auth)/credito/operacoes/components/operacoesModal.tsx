@@ -20,7 +20,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { maskDate, maskMoneyReal, maskPercentage } from "@/utils/maskTable";
+import { maskDate, maskFinalValueWithZero, maskMoneyReal, maskPercentage } from "@/utils/maskTable";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,6 +36,7 @@ export type ApiPropostaPayload = {
   data: string;
   status: string; // Alterado de number para string
   cor_status: string;
+  numero_operacao: string;
   roteiro: string;
   taxa: string; // Adicionado campo que existe no JSON
   informacoes: {
@@ -70,6 +71,7 @@ export type ApiPropostaPayload = {
     periodicidade: number;
     data_inicio: string | null;
     dataPrimeiroPagamento: string | null;
+    dataUltimoPagamento: string | null;
     corban: string;
     ajustarVencimentos: string;
     usa_seguro: number | null;
@@ -198,7 +200,7 @@ const ProcessStepper = ({ status }: { status?: string }) => {
   ];
 
   return (
-    <div className="mb-6 flex w-full items-center justify-between">
+    <div className="mb-6 hidden sm:flex w-full items-center justify-between">
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div className="flex flex-col items-center">
@@ -240,7 +242,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-6">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
           Dados da proposta
         </CardTitle>
       </CardHeader>
@@ -262,9 +264,9 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Data da última atualização", value: maskDate(proposta.historico.dataUltimaAtualizacao) },
             { label: "Última atualização feita por", value: proposta.historico.ultimaAtualizacaoPor}  
           ].map((item, index) => (
-            <div key={index} className="w-full space-y-2">
-              <p className="text-muted-foreground text-sm font-medium">{item.label}</p>
-              <p className="text-lg font-medium">{item.value}</p>
+            <div key={index} className="w-full">
+              <p className="text-muted-foreground text-sm font-medium mb-0 sm:mb-1">{item.label}</p>
+              <p className="text-md sm:text-lg font-medium">{item.value}</p>
             </div>
           ))}
         </div>
@@ -283,7 +285,7 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
     <>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
             Andamento da operação
           </CardTitle>
         </CardHeader>
@@ -371,17 +373,17 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
           Parâmetros da operação
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid w-full">
+        <div className="w-full">
           {proposta.operacaoParametros.map((item, index) => (
-            <div key={index} className={`rounded-lg flex gap-6 border p-4 justify-between ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
+            <div key={index} className={`rounded-lg grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border p-4 justify-between ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
-                <p className="text-lg font-bold">{`${item.taxaJurosAM} %` || "-"}</p>
+                <p className="text-lg font-bold">{`${maskFinalValueWithZero(item.taxaJurosAM)}%` || "-"}</p>
               </div>
 
               <div>
@@ -397,6 +399,11 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">Data do primeiro pagamento</p>
                 <p className="text-lg font-bold">{maskDate(item.dataPrimeiroPagamento)}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">Data do último pagamento</p>
+                <p className="text-lg font-bold">{maskDate(item.dataUltimoPagamento)}</p>
               </div>
 
               <div>
@@ -420,7 +427,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">IOF</p>
-                <p className="text-lg font-bold">{`${item.iof} %`}</p>
+                <p className="text-lg font-bold">{`${maskFinalValueWithZero(item.iof)}%`}</p>
               </div>
             </div>
           ))}
@@ -456,7 +463,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Detalhes das parcelas</CardTitle>
+        <CardTitle className="text-md sm:text-lg">Detalhes das parcelas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-x-auto">
@@ -500,8 +507,8 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <FileText className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+          {/* <FileText className="h-5 w-5" /> */}
           Documentos da operação
         </CardTitle>
       </CardHeader>
@@ -524,8 +531,8 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <FileText className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+          {/* <FileText className="h-5 w-5" /> */}
           Documentos - {proposta.tomador}
         </CardTitle>
       </CardHeader>
@@ -539,8 +546,8 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <Card className="w-full">
     <CardHeader>
-      <CardTitle className="flex items-center gap-2 text-lg">
-        <PenTool className="h-5 w-5" />
+      <CardTitle className="flex items-center gap-2 text-md sm:text-lg ">
+        {/* <PenTool className="h-5 w-5" /> */}
         Status das assinaturas
       </CardTitle>
     </CardHeader>
@@ -854,12 +861,19 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
         {/* Main Content */}
         <div className="flex">
           {/* Conteúdo principal SEM scroll interno */}
-          <div ref={containerRef} className="flex-1 px-8 pb-16">
+          <div ref={containerRef} className="flex-1 w-full px-4 sm:px-8 pb-16">
             {/* Header */}
-            <div className="mb-4 flex flex-col 2xl:flex-row 2xl:items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Detalhes da operação</h2>
-                <p className="text-muted-foreground mt-1">ID: {proposta.id}</p>
+            <div className="mb-4 flex flex-col 2xl:flex-row 2xl:items-center flex-wrap justify-between">
+              <div className="w-full 2xl:w-auto flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold">Detalhes da operação</h2>
+                  <p className="text-muted-foreground mt-1">Nº {proposta.numero_operacao}</p>
+                </div>
+
+                <Button onClick={onClose} size="sm" className="2xl:hidden rounded-2xl sm:rounded">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="hidden sm:flex">Voltar</span>
+                </Button>
               </div>
 
               <div className="pt-6">
@@ -876,9 +890,9 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   }}
                   id={section.id}
                   className="scroll-mt-28">
-                  <div className="mb-3 flex items-center gap-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <section.icon className="h-6 w-6 text-primary" />
-                    <h3 className="text-xl font-medium">{section.label}</h3>
+                    <h3 className="text-lg sm:text-xl font-medium">{section.label}</h3>
                   </div>
                   <div className="w-full space-y-8">
                     {/* @ts-ignore */}
@@ -889,7 +903,7 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
             </div>
           </div>
           {/* Sticky lateral */}
-          <div className="min-h-[100vh] w-80 hidden xl:flex border-l">
+          <div className="min-h-[100vh] w-80 hidden 2xl:flex border-l">
             <div
               style={{ position: "fixed", marginTop: "131px" }}
               className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8">

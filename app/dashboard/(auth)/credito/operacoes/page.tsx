@@ -23,10 +23,8 @@ export default function Page() {
 
   return (
     <ProtectedRoute requiredPermission="Credito_ver">
-      <div className="mb-4 flex justify-between space-y-4">
-        <CampoBoasVindas />
-
-          {/* <CustomDateRangePicker /> */}
+      <div className="mb-4 flex flex-wrap justify-between space-y-4">
+          <CampoBoasVindas />
 
           {podeCriar && !isBanco && (
             <Button id="Credito_criar" onClick={irParaOutraPagina}>
