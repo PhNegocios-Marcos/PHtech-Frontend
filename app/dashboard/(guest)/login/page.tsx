@@ -134,20 +134,21 @@ export default function Page() {
   }
 
   return (
-      <div className="flex flex-col h-screen py-20 px-[24px] md:px-[64px] xl:px-[256px]" style={imageConstruct}>
-        <div className="flex w-full flex-col lg:flex-row my-auto justify-between items-center">
-          <div className="lg:w-[50%] sm:w-[75%] w-full  hidden md:mb-6 sm:flex flex-col justify-center gap-3">
-            <Image
+      <div className="flex flex-col h-screen">
+        <div className="w-full flex my-auto">
+            <img
+              src={`${backgroundImageFile}`}
+              className="hidden h-screen w-1/2 md:flex"
+              alt="Banner login"
+            />
+            {/* <Image
               src="/logo_white.png" // caminho da imagem (pública ou importada)
               alt="Descrição da imagem"
               width={200}
               height={200}
-            />
-            <h3 className="text-white text-[16px] md:text-[24px] text-center lg:text-left lg:text-[28px] xl:text-[32px]">
-              A melhor experiência <br/> para você e seu cliente.
-            </h3>
-          </div>
-          <div className="flex items-center justify-center lg:w-[35%] sm:w-[75%] w-full">
+            /> */}
+
+          <div className="flex items-center justify-center w-1/2">
             {currentModal === "none" && promotorasModal === "none" && (
               <div className="w-full">
                 <Card className="p-[40px] bg-background">

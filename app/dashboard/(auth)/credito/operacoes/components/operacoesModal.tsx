@@ -414,14 +414,14 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">Seguro</p>
                 <p className="text-md font-medium">
-                  {item.usa_seguro === 0 ? "Não utiliza seguro" : item.seguro}
+                  {item.usa_seguro === 0 ? "Não informado" : item.seguro}
                 </p>
               </div>
 
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">TAC</p>
                 <p className={`${item.usa_tac === 0 ? 'font-medium text-md' : 'font-bold text-lg'}`}>
-                  {item.usa_tac === 0 ? "Não utiliza TAC" : `${item.valor_tac} %`}
+                  {item.usa_tac === 0 ? "Não informado" : `${item.valor_tac} %`}
                 </p>
               </div>
 
