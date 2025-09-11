@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import AjusteOperacaoModal from "./AjusteOperacaoModal";
+import { toast } from "sonner";
 import {
   CheckCircle,
   Clock,
@@ -200,7 +201,7 @@ const ProcessStepper = ({ status }: { status?: string }) => {
   ];
 
   return (
-    <div className="mb-6 hidden sm:flex w-full items-center justify-between">
+    <div className="mb-6 hidden w-full items-center justify-between sm:flex">
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div className="flex flex-col items-center">
@@ -225,7 +226,7 @@ const ProcessStepper = ({ status }: { status?: string }) => {
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`mx-2 xl:mx-4 h-0.5 md:w-8 xl:w-16 transition-all duration-300 ${
+              className={`mx-2 h-0.5 transition-all duration-300 md:w-8 xl:mx-4 xl:w-16 ${
                 steps[index + 1].status === "completed" || step.status === "completed"
                   ? "bg-primary"
                   : "bg-muted"
@@ -242,7 +243,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-6">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+        <CardTitle className="text-md flex items-center gap-2 sm:text-lg">
           Dados da proposta
         </CardTitle>
       </CardHeader>
@@ -261,12 +262,18 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Correspondente", value: proposta.historico.correspondente },
             { label: "Operador", value: proposta.historico.operador },
             { label: "Grupo", value: proposta.historico.grupo },
-            { label: "Data da última atualização", value: maskDate(proposta.historico.dataUltimaAtualizacao) },
-            { label: "Última atualização feita por", value: proposta.historico.ultimaAtualizacaoPor}  
+            {
+              label: "Data da última atualização",
+              value: maskDate(proposta.historico.dataUltimaAtualizacao)
+            },
+            {
+              label: "Última atualização feita por",
+              value: proposta.historico.ultimaAtualizacaoPor
+            }
           ].map((item, index) => (
             <div key={index} className="w-full">
-              <p className="text-muted-foreground text-sm font-medium mb-0 sm:mb-1">{item.label}</p>
-              <p className="text-md sm:text-lg font-medium">{item.value}</p>
+              <p className="text-muted-foreground mb-0 text-sm font-medium sm:mb-1">{item.label}</p>
+              <p className="text-md font-medium sm:text-lg">{item.value}</p>
             </div>
           ))}
         </div>
@@ -314,8 +321,12 @@ const Historico = ({ proposta }: { proposta: ApiPropostaPayload }) => {
                   <div className="ml-10 w-full">
                     <p className="text-lg font-medium">{item.event}</p>
                     <p className="text-muted-foreground text-sm">{item.description}</p>
-                    <p className="text-muted-foreground text-sm">Iniciado em {maskDate(item.iniciado)}</p>
-                    <p className="text-muted-foreground text-sm">Finalizado em {maskDate(item.finalizado)}</p>
+                    <p className="text-muted-foreground text-sm">
+                      Iniciado em {maskDate(item.iniciado)}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Finalizado em {maskDate(item.finalizado)}
+                    </p>
 
                     {/* ALTERAÇÃO AQUI: Mostrar botão para status "failed" também */}
                     {(item.status === "pending" || item.status === "failed") &&
@@ -364,26 +375,34 @@ const formatarData = (dataString: string): string => {
 
 const formatarStringNumerica = (valor: string) => {
   const numero = parseFloat(valor);
-  const verifyNumber =  isNaN(numero) ? valor : numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const verifyNumber = isNaN(numero)
+    ? valor
+    : numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  return verifyNumber === "0,00" ? verifyNumber : "R$ " + verifyNumber
+  return verifyNumber === "0,00" ? verifyNumber : "R$ " + verifyNumber;
 };
 
 const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+        <CardTitle className="text-md flex items-center gap-2 sm:text-lg">
           Parâmetros da operação
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="w-full">
           {proposta.operacaoParametros.map((item, index) => (
-            <div key={index} className={`rounded-lg grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border p-4 justify-between ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
+            <div
+              key={index}
+              className={`grid justify-between gap-6 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${item.valorParcela ? "bg-secondary" : "bg-muted"} w-full`}>
               <div>
-                <p className="text-muted-foreground mb-1 text-sm font-medium">Taxa de juros ao mês</p>
-                <p className="text-lg font-bold">{`${maskFinalValueWithZero(item.taxaJurosAM)}%` || "-"}</p>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">
+                  Taxa de juros ao mês
+                </p>
+                <p className="text-lg font-bold">
+                  {`${maskFinalValueWithZero(item.taxaJurosAM)}%` || "-"}
+                </p>
               </div>
 
               <div>
@@ -397,12 +416,16 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
               </div>
 
               <div>
-                <p className="text-muted-foreground mb-1 text-sm font-medium">Data do primeiro pagamento</p>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">
+                  Data do primeiro pagamento
+                </p>
                 <p className="text-lg font-bold">{maskDate(item.dataPrimeiroPagamento)}</p>
               </div>
 
               <div>
-                <p className="text-muted-foreground mb-1 text-sm font-medium">Data do último pagamento</p>
+                <p className="text-muted-foreground mb-1 text-sm font-medium">
+                  Data do último pagamento
+                </p>
                 <p className="text-lg font-bold">{maskDate(item.dataUltimoPagamento)}</p>
               </div>
 
@@ -420,7 +443,8 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">TAC</p>
-                <p className={`${item.usa_tac === 0 ? 'font-medium text-md' : 'font-bold text-lg'}`}>
+                <p
+                  className={`${item.usa_tac === 0 ? "text-md font-medium" : "text-lg font-bold"}`}>
                   {item.usa_tac === 0 ? "Não informado" : `${item.valor_tac} %`}
                 </p>
               </div>
@@ -485,13 +509,16 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
                   key={index}
                   className={`hover:bg-muted transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted"}`}>
                   <td className="px-4 py-3">{++index}</td>
-                  <td className="px-4 py-3">{(formatarStringNumerica(row.parcela))}</td>
+                  <td className="px-4 py-3">{formatarStringNumerica(row.parcela)}</td>
                   <td className="px-4 py-3">{formatarData(row.vencimento)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.saldo)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.amortizacao)}</td>
                   <td className="px-4 py-3">{formatarStringNumerica(row.juros)}</td>
-                  <td className={`px-4 py-3 ${row.pagamento.length === 0 ? 'font-regular' : 'font-semibold'}`}>
-                    {row.pagamento.length === 0 ? "Pagamento não informado" : formatarStringNumerica(row.pagamento)}
+                  <td
+                    className={`px-4 py-3 ${row.pagamento.length === 0 ? "font-regular" : "font-semibold"}`}>
+                    {row.pagamento.length === 0
+                      ? "Pagamento não informado"
+                      : formatarStringNumerica(row.pagamento)}
                   </td>
                 </tr>
               ))}
@@ -507,7 +534,7 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <div className="w-full space-y-8">
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+        <CardTitle className="text-md flex items-center gap-2 sm:text-lg">
           {/* <FileText className="h-5 w-5" /> */}
           Documentos da operação
         </CardTitle>
@@ -531,7 +558,7 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+        <CardTitle className="text-md flex items-center gap-2 sm:text-lg">
           {/* <FileText className="h-5 w-5" /> */}
           Documentos - {proposta.tomador}
         </CardTitle>
@@ -546,7 +573,7 @@ const Documentos = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 const Assinaturas = ({ proposta }: { proposta: ApiPropostaPayload }) => (
   <Card className="w-full">
     <CardHeader>
-      <CardTitle className="flex items-center gap-2 text-md sm:text-lg ">
+      <CardTitle className="text-md flex items-center gap-2 sm:text-lg">
         {/* <PenTool className="h-5 w-5" /> */}
         Status das assinaturas
       </CardTitle>
@@ -647,7 +674,7 @@ const LoadingSkeleton = () => (
       </div>
       <div className="min-h-[100vh] w-80 border-l">
         <div
-          className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8"
+          className="bg-background sticky top-0 z-30 flex w-80 flex-col justify-between p-8"
           style={{ marginTop: "131px" }}>
           <div>
             <div className="mb-8">
@@ -690,20 +717,27 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const { token } = useAuth();
+  
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
-    sessionStorage.clear();
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   // Busca da proposta na API
@@ -861,23 +895,23 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
         {/* Main Content */}
         <div className="flex">
           {/* Conteúdo principal SEM scroll interno */}
-          <div ref={containerRef} className="flex-1 w-full px-4 sm:px-8 pb-16">
+          <div ref={containerRef} className="w-full flex-1 px-4 pb-16 sm:px-8">
             {/* Header */}
-            <div className="mb-4 flex flex-col 2xl:flex-row 2xl:items-center flex-wrap justify-between">
-              <div className="w-full 2xl:w-auto flex justify-between items-center">
+            <div className="mb-4 flex flex-col flex-wrap justify-between 2xl:flex-row 2xl:items-center">
+              <div className="flex w-full items-center justify-between 2xl:w-auto">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold">Detalhes da operação</h2>
+                  <h2 className="text-xl font-bold sm:text-2xl">Detalhes da operação</h2>
                   <p className="text-muted-foreground mt-1">Nº {proposta.numero_operacao}</p>
                 </div>
 
-                <Button onClick={onClose} size="sm" className="2xl:hidden rounded-2xl sm:rounded">
+                <Button onClick={onClose} size="sm" className="rounded-2xl sm:rounded 2xl:hidden">
                   <ArrowLeft className="h-4 w-4" />
                   <span className="hidden sm:flex">Voltar</span>
                 </Button>
               </div>
 
               <div className="pt-6">
-                  <ProcessStepper status={proposta.status} />
+                <ProcessStepper status={proposta.status} />
               </div>
             </div>
 
@@ -891,8 +925,8 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
                   id={section.id}
                   className="scroll-mt-28">
                   <div className="mb-3 flex items-center gap-2">
-                    <section.icon className="h-6 w-6 text-primary" />
-                    <h3 className="text-lg sm:text-xl font-medium">{section.label}</h3>
+                    <section.icon className="text-primary h-6 w-6" />
+                    <h3 className="text-lg font-medium sm:text-xl">{section.label}</h3>
                   </div>
                   <div className="w-full space-y-8">
                     {/* @ts-ignore */}
@@ -903,10 +937,10 @@ export default function OperacoesDetalhes({ isOpen, onClose, propostaId }: Opera
             </div>
           </div>
           {/* Sticky lateral */}
-          <div className="min-h-[100vh] w-80 hidden 2xl:flex border-l">
+          <div className="hidden min-h-[100vh] w-80 border-l 2xl:flex">
             <div
               style={{ position: "fixed", marginTop: "131px" }}
-              className="sticky top-0 z-30 flex w-80 flex-col justify-between bg-background p-8">
+              className="bg-background sticky top-0 z-30 flex w-80 flex-col justify-between p-8">
               <div>
                 <div className="mb-8">
                   <h4 className="text-muted-foreground mb-3 text-sm font-bold tracking-wide uppercase">

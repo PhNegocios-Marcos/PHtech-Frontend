@@ -67,18 +67,25 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
     return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5, 8)}/${cleaned.slice(8, 12)}-${cleaned.slice(12, 14)}`;
   };
 
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
+   useEffect(() => {
+     const timeout = setTimeout(() => {
+       if (!token) {
+         toast.error("Token de autenticação não encontrado", {
+           style: {
+             background: "var(--toast-error)",
+             color: "var(--toast-error-foreground)",
+             boxShadow: "var(--toast-shadow)"
+           }
+         });
+         sessionStorage.clear();
+         router.push("/dashboard/login");
+       } else {
+         // console.log("tem token");
+       }
+     }, 2000);
+ 
+     return () => clearTimeout(timeout);
+   }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {

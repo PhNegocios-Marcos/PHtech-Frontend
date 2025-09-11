@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import toastComponent from "@/utils/toastComponent";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -68,14 +69,25 @@ export default function CadastroEquipeModal({
   });
 
   // Redireciona se não tiver token
-  useEffect(() => {
-    if (!token) {
-      const timeout = setTimeout(() => {
-        router.push("/dashboard/login");
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [token, router]);
+   useEffect(() => {
+     const timeout = setTimeout(() => {
+       if (!token) {
+         toast.error("Token de autenticação não encontrado", {
+           style: {
+             background: "var(--toast-error)",
+             color: "var(--toast-error-foreground)",
+             boxShadow: "var(--toast-shadow)"
+           }
+         });
+         sessionStorage.clear();
+         router.push("/dashboard/login");
+       } else {
+         // console.log("tem token");
+       }
+     }, 2000);
+ 
+     return () => clearTimeout(timeout);
+   }, [token, router]);
 
   // Carregar promotoras apenas se for banco
   useEffect(() => {

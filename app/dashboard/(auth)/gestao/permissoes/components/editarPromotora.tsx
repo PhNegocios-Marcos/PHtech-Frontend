@@ -68,8 +68,18 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
         router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
       }
     }, 2000);
 

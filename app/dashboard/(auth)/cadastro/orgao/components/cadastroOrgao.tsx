@@ -56,17 +56,24 @@ export default function CadastroOrgao({ isOpen, onClose }: CadastroProdutoModalP
   const router = useRouter();
   const [convenios, setConvenios] = useState<Convenio[]>([]);
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
-    sessionStorage.clear();
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   useEffect(() => {
