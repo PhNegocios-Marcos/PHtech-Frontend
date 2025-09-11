@@ -5,13 +5,13 @@ import { ThemeProvider } from "next-themes";
 import GoogleAnalyticsInit from "@/lib/ga";
 import { fontVariables } from "@/lib/fonts";
 import NextTopLoader from "nextjs-toploader";
-import { AuthProvider } from "@/contexts/AuthContext";
 
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
 import { ActiveThemeProvider } from "@/components/active-theme";
 import { DEFAULT_THEME } from "@/lib/themes";
+import AuthWrapper from "@/components/AuthWrapper";
 
 export default async function RootLayout({
   children
@@ -39,25 +39,25 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={cn("bg-background group/layout font-sans", fontVariables)}
         {...bodyAttributes}>
-        <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange>
-            <ActiveThemeProvider initialTheme={themeSettings} promotoraId="uuid-da-promotora">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange>
+          <ActiveThemeProvider initialTheme={themeSettings} promotoraId="uuid-da-promotora">
+            <AuthWrapper>
               {children}
-              <Toaster />
-              <NextTopLoader
-                color="var(--primary)"
-                showSpinner={false}
-                height={2}
-                shadow-sm="none"
-              />
-              {process.env.NODE_ENV === "production" ? <GoogleAnalyticsInit /> : null}
-            </ActiveThemeProvider>
-          </ThemeProvider>
-        </AuthProvider>
+            </AuthWrapper>
+            <Toaster />
+            <NextTopLoader
+              color="var(--primary)"
+              showSpinner={false}
+              height={2}
+              shadow-sm="none"
+            />
+            {process.env.NODE_ENV === "production" ? <GoogleAnalyticsInit /> : null}
+          </ActiveThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
