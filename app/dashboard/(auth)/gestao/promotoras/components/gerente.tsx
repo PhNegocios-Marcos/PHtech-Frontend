@@ -75,7 +75,7 @@ export function GerenteTable({ cnpj, promotora, onClose }: UsuariosTableProps) {
     };
 
     try {
-      const response = await axios.post(
+      const response = await axios.put(
         `${API_BASE_URL}/gestao-promotora-gerente/atualizar`,
         payload,
         {
