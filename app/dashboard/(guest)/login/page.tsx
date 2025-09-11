@@ -123,7 +123,7 @@ export default function Page() {
   return (
       <div className="flex flex-col h-screen">
         <div className="w-full flex my-auto">
-          <div className="xl:w-[65%] lg:w-[50%]  overflow-hidden h-screen items-center justify-center hidden lg:flex">
+          <div className="xl:w-[60%] lg:w-[50%]  overflow-hidden h-screen items-center justify-center hidden lg:flex">
             <img
               src={`${backgroundImageFile}`}
               className="w-full h-full object-cover object-left"
@@ -131,7 +131,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="flex flex-col max-h-screen items-center justify-center xl:w-[35%] lg:w-[50%] w-full 2xl:px-40 xl:px-10">
+          <div className="flex flex-col max-h-screen items-center justify-center xl:w-[40%] lg:w-[50%] w-full 2xl:px-16 xl:px-10">
               <div className="w-full flex justify-center 2xl:mb-7 xl:mb-6 lg:mb-5">
                 <Image
                   src={'/logo.png'}
