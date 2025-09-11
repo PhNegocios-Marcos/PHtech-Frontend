@@ -71,36 +71,39 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
   const closeModal = () => setCurrentModal("none");
 
   return (
-    <div>
+    <div className="w-full">
       {currentModal === "none" && (
-        <Card className="w-full md:w-[350px] px-5 gap-0">
-          <CardHeader className="px-0 mb-7">
-            <CardTitle className="text-xl">Escolha a promotora</CardTitle>
-          </CardHeader>
-          <CardContent className="px-0 w-full mb-10">
-            <Combobox
-              data={promotoras || []}
-              displayField="nome"
-              value={selectedPromotora}
-              onChange={(val) => {
-                setSelectedPromotora(val);
-              }}
-              label="Promotora"
-              placeholder="Selecione uma promotora"
-              searchFields={["nome"]}
-            />
-          </CardContent>
+        <div className="w-full">
+          <Card className="p-[40px] bg-background gap-0">
+            <CardHeader className="px-0">
+              <CardTitle className="text-black dark:text-white text-[24px] font-semibold mb-0">Escolher a promotora</CardTitle>
+              <p className="text-md text-gray-400 dark:text-gray-200 mb-10">Selecione uma promotora e visualize todos os seus dados.</p>
+            </CardHeader>
+            <CardContent className="px-0">
+              <Combobox
+                data={promotoras || []}
+                displayField="nome"
+                value={selectedPromotora}
+                onChange={(val) => {
+                  setSelectedPromotora(val);
+                }}
+                label="Promotora"
+                placeholder="Selecione uma promotora"
+                searchFields={["nome"]}
+              />
+            </CardContent>
 
-          <Button className="mx-auto w-full py-6 mb-2" onClick={handleConfirm}>
-            Confirmar
-          </Button>
-          {onClose && (
-            <Button onClick={onClose} variant="ghost" className="w-full text-red-500 border border-red-500">
-              <ArrowLeftIcon className="h-4 full" />
-              Voltar
+            <Button className="mx-auto w-full py-6 mb-2 mt-12" onClick={handleConfirm}>
+              Confirmar
             </Button>
-          )}
-        </Card>
+            {onClose && (
+              <Button onClick={onClose} variant="ghost" className="w-full text-red-500 border border-red-500">
+                <ArrowLeftIcon className="h-4 full" />
+                Voltar
+              </Button>
+            )}
+          </Card>
+        </div>
       )}
 
       {currentModal === "2FA" ? (
