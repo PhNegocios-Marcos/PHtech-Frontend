@@ -74,7 +74,7 @@ export default function OTPForm({ onNext, onClose }: OTPFormProps) {
     <div className="w-full">
       {currentModal === "none" && (
         <div className="w-full">
-          <Card className="p-[40px] bg-background gap-0">
+          <Card className="p-[40px] bg-background gap-0 border-0 shadow-none!">
             <CardHeader className="px-0">
               <CardTitle className="text-black dark:text-white text-[24px] font-semibold mb-0">Escolher a promotora</CardTitle>
               <p className="text-md text-gray-400 dark:text-gray-200 mb-10">Selecione uma promotora e visualize todos os seus dados.</p>
