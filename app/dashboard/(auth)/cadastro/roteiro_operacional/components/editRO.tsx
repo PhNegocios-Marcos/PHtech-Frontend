@@ -174,10 +174,10 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
     }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
@@ -238,7 +238,9 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
           <Card className="col-span-2">
             <CardHeader>
               <div className="flex justify-between">
-                <CardTitle>Editar Roteiro:{" "}<span>{roteiro.nome}</span></CardTitle>
+                <CardTitle>
+                  Editar Roteiro: <span>{roteiro.nome}</span>
+                </CardTitle>
                 <Button onClick={onClose} variant="outline">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
@@ -291,7 +293,9 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
                           <FormControl>
                             <Select
                               value={field.value ? "true" : "false"}
-                              onValueChange={(value) => handleSelectChange(fieldConfig.name, value)}>
+                              onValueChange={(value) =>
+                                handleSelectChange(fieldConfig.name, value)
+                              }>
                               <SelectTrigger>
                                 <SelectValue placeholder={fieldConfig.placeholder} />
                               </SelectTrigger>

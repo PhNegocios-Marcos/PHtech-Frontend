@@ -9,14 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage
-} from "@/components/ui/form";
-import { useRouter } from "next/navigation";import {
   Select,
   SelectTrigger,
   SelectValue,
@@ -118,7 +113,7 @@ export default function CadastroRoteiroModal({
       type: "number"
     },
     { name: "taxa_minima", label: "Taxa Mínima (% a.m.)", placeholder: "1.5", type: "number" },
-    { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" },
+    { name: "taxa_maxima", label: "Taxa Máxima (% a.m.)", placeholder: "5.0", type: "number" }
   ];
 
   const formFields2: FormFieldConfig[] = [
@@ -156,10 +151,10 @@ export default function CadastroRoteiroModal({
     }
   ];
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
@@ -170,8 +165,8 @@ export default function CadastroRoteiroModal({
   }, [token, router]);
 
   const onSubmit = async (data: CreateFormData) => {
-    console.log('onSubmit chamado!', data);
-    
+    console.log("onSubmit chamado!", data);
+
     if (!token) {
       toast.error("Token de autenticação não encontrado.");
       return;
@@ -296,17 +291,13 @@ export default function CadastroRoteiroModal({
       <aside
         role="dialog"
         aria-modal="true"
-        className="fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto bg-background p-6 shadow-lg md:w-1/2 rounded-l-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+        className="bg-background fixed top-0 right-0 !left-auto z-50 h-full w-2/2 overflow-auto rounded-l-2xl p-6 shadow-lg md:w-1/2"
+        onClick={(e) => e.stopPropagation()}>
         <FormProvider {...methods}>
-          <form
-            onSubmit={methods.handleSubmit(onSubmit)}
-            className="flex h-full flex-col"
-          >
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">Cadastrar novo roteiro</h2>
-              <X onClick={onClose} className="cursor-pointer"/>
+              <X onClick={onClose} className="cursor-pointer" />
             </div>
             <Card className="flex-grow overflow-auto">
               <CardContent>

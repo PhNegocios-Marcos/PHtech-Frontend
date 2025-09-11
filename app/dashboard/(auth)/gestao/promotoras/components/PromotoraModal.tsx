@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { UsuariosTable } from "./userPromotora";
 import { PromotorEdit } from "./editPromotora";
+import { GerenteTable } from "./gerente";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -63,12 +64,16 @@ export function PromotoraDrawer({ onClose, promotora }: PromotoraDrawerProps) {
       <TabsList className="w-full">
         <TabsTrigger value="overview">Informações</TabsTrigger>
         <TabsTrigger value="reports">Usuários</TabsTrigger>
+        <TabsTrigger value="Gerente">Gerente</TabsTrigger>
       </TabsList>
       <TabsContent value="overview">
         <PromotorEdit id={formData.id} cnpj={formData.cnpj} data={formData} onClose={onClose} />
       </TabsContent>
       <TabsContent value="reports">
         <UsuariosTable cnpj={formData.cnpj} onClose={onClose} promotora={formData} />
+      </TabsContent>
+      <TabsContent value="Gerente">
+        <GerenteTable cnpj={formData.cnpj} onClose={onClose} promotora={formData} />
       </TabsContent>
     </Tabs>
   );

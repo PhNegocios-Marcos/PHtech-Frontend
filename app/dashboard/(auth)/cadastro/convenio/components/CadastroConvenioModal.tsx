@@ -61,6 +61,8 @@ export default function CadastroConvenioModal({ isOpen, onClose }: CadastroConve
           boxShadow: "var(--toast-shadow)"
         }
       });
+          sessionStorage.clear();
+
       router.push("/dashboard/login");
     }
   }, [token, router]);
