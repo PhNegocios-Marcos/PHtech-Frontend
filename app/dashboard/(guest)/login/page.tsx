@@ -147,7 +147,7 @@
 //               width={200}
 //               height={200}
 //             /> */}
-
+// 
 //           <div className="flex items-center justify-center w-1/2">
 //             {currentModal === "none" && promotorasModal === "none" && (
 //               <div className="w-full">
