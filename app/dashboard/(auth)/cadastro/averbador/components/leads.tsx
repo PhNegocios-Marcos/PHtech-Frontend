@@ -69,6 +69,8 @@ export function AverbadorTable() {
           boxShadow: "var(--toast-shadow)"
         }
       });
+          sessionStorage.clear();
+
       router.push("/dashboard/login");
     }
   }, [token, router]);

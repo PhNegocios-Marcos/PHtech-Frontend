@@ -45,10 +45,10 @@ export function AlcadasTable() {
   const [filtro, setFiltro] = React.useState("");
   const [loading, setLoading] = React.useState(true);
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
@@ -204,7 +204,7 @@ export function AlcadasTable() {
         <CardTitle>Lista de alçadas</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <Input
             placeholder="Filtrar alçadas..."
             value={filtro}

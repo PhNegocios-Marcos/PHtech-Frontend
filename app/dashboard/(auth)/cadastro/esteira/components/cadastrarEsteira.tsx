@@ -150,7 +150,7 @@ export default function CadastroEsteira({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
+    sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");

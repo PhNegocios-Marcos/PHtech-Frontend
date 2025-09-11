@@ -33,7 +33,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleInatividade = () => {
-    sessionStorage.clear(); // ou removeItem("token"), etc.
+    sessionStorage.clear();
     router.push("/dashboard/login");
   };
 
@@ -58,7 +58,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (token == null) {
-        // console.log("token null");
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
