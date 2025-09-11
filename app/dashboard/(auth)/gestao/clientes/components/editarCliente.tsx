@@ -111,6 +111,7 @@ const fixedFormSections: FormSection[] = [
     fields: [
       { name: "agencia", label: "Agência", type: "text", required: false },
       { name: "conta", label: "Conta", type: "text", required: false },
+      { name: "digito_conta", label: "Dígito da conta", type: "text", required: false },
       {
         name: "tipo_pix",
         label: "Tipo de Chave Pix",
