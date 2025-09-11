@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();

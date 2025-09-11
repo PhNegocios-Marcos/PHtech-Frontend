@@ -11,6 +11,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ActiveThemeProvider } from "@/components/active-theme";
 import { DEFAULT_THEME } from "@/lib/themes";
+import { AuthProvider } from "@/contexts/AuthContext";
 import AuthWrapper from "@/components/AuthWrapper";
 
 export default async function RootLayout({
@@ -39,25 +40,29 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={cn("bg-background group/layout font-sans", fontVariables)}
         {...bodyAttributes}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange>
-          <ActiveThemeProvider initialTheme={themeSettings} promotoraId="uuid-da-promotora">
-            <AuthWrapper>
-              {children}
-            </AuthWrapper>
-            <Toaster />
-            <NextTopLoader
-              color="var(--primary)"
-              showSpinner={false}
-              height={2}
-              shadow-sm="none"
-            />
-            {process.env.NODE_ENV === "production" ? <GoogleAnalyticsInit /> : null}
-          </ActiveThemeProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange>
+            <ActiveThemeProvider initialTheme={themeSettings} promotoraId="uuid-da-promotora">
+              <AuthProvider>
+                <AuthWrapper>
+                  {children}
+                </AuthWrapper>
+              </AuthProvider>
+              <Toaster />
+              <NextTopLoader
+                color="var(--primary)"
+                showSpinner={false}
+                height={2}
+                shadow-sm="none"
+              />
+              {process.env.NODE_ENV === "production" ? <GoogleAnalyticsInit /> : null}
+            </ActiveThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

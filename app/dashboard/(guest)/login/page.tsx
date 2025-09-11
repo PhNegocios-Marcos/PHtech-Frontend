@@ -84,18 +84,11 @@ export default function Page() {
 
       setLoading(true);
 
-      // Armazenando dados no contexto
       setMail(email);
       setSenha(password);
       setUsa_2fa(data?.usa_2fa);
       setPromotoras(data?.promotoras);
-      setId(data?.id); // ✅ ID do usuário sendo armazenado
-
-      console.log(data);
-      // console.log("data: ", data)
-      // console.log("usa_2fa page: ", data?.usa_2fa);
-
-      // console.log(id)
+      setId(data?.id);
 
       if (data?.tipo_usuario === "Promotora") {
         setPromotorasModal("promotoras");
