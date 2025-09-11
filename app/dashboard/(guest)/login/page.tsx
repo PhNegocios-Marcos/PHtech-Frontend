@@ -123,16 +123,16 @@ export default function Page() {
   return (
       <div className="flex flex-col h-screen">
         <div className="w-full flex my-auto">
-          <div className="w-[65%] overflow-hidden h-screen items-center justify-center hidden md:flex">
+          <div className="xl:w-[65%] lg:w-[50%]  overflow-hidden h-screen items-center justify-center hidden lg:flex">
             <img
               src={`${backgroundImageFile}`}
-              className="hidden w-full md:flex"
+              className="w-full h-full object-cover object-left"
               alt="Banner login"
             />
           </div>
 
-          <div className="flex flex-col h-full items-center justify-between w-[35%] p-4 md:p-8 lg:p-30 lg:py-12 lg:pt-32!">
-              <div className="w-full flex justify-center">
+          <div className="flex flex-col max-h-screen items-center justify-center xl:w-[35%] lg:w-[50%] w-full 2xl:px-40 xl:px-10">
+              <div className="w-full flex justify-center 2xl:mb-7 xl:mb-6 lg:mb-5">
                 <Image
                   src={'/logo.png'}
                   alt="Logotipo da PH Tech"
@@ -143,7 +143,7 @@ export default function Page() {
 
                 {currentModal === "none" && promotorasModal === "none" && (
                 <div className="w-full flex flex-col justify-center">
-                  <Card className="p-[40px] bg-background gap-0">
+                  <Card className="p-[40px] bg-background gap-0 border-0 shadow-none!">
                     <CardTitle className="text-black dark:text-white text-[24px] font-semibold mb-0">Fazer login</CardTitle>
                     <p className="text-md text-gray-400 dark:text-gray-200 mb-10">Seja bem vindo! Entre no sistema e gerencie suas operações.</p>
 
