@@ -68,18 +68,25 @@ export default function CadastrModalidadeModal({ isOpen, onClose }: CadastroModa
     }
   };
 
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
+   useEffect(() => {
+     const timeout = setTimeout(() => {
+       if (!token) {
+         toast.error("Token de autenticação não encontrado", {
+           style: {
+             background: "var(--toast-error)",
+             color: "var(--toast-error-foreground)",
+             boxShadow: "var(--toast-shadow)"
+           }
+         });
+         sessionStorage.clear();
+         router.push("/dashboard/login");
+       } else {
+         // console.log("tem token");
+       }
+     }, 2000);
+ 
+     return () => clearTimeout(timeout);
+   }, [token, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) {

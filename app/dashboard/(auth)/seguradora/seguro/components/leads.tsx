@@ -49,17 +49,24 @@ export function SeguroTable() {
   const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
   useEffect(() => {

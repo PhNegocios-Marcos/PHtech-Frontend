@@ -47,20 +47,26 @@ export function AverbadorEdit({ averbador, onClose, onRefresh }: AverbadorDrawer
   const { token } = useAuth();
 
   useEffect(() => {
-    if (!token) {
-      console.error("Token global não definido!");
-      toast.error("Token de autenticação não encontrado", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
-          sessionStorage.clear();
+    const timeout = setTimeout(() => {
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
+        router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
+      }
+    }, 2000);
 
-      router.push("/dashboard/login");
-    }
+    return () => clearTimeout(timeout);
   }, [token, router]);
+
+
 
   useEffect(() => {
     methods.reset(averbador);

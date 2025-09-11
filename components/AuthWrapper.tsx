@@ -3,6 +3,8 @@
 import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -10,9 +12,18 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
         sessionStorage.clear();
         router.push("/dashboard/login");
+      } else {
+        // console.log("tem token");
       }
     }, 2000);
 

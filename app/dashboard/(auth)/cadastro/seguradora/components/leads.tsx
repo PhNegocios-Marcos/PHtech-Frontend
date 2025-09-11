@@ -48,18 +48,25 @@ export function SeguradorasTable() {
   const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraLinha | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-    sessionStorage.clear();
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
+   useEffect(() => {
+     const timeout = setTimeout(() => {
+       if (!token) {
+         toast.error("Token de autenticação não encontrado", {
+           style: {
+             background: "var(--toast-error)",
+             color: "var(--toast-error-foreground)",
+             boxShadow: "var(--toast-shadow)"
+           }
+         });
+         sessionStorage.clear();
+         router.push("/dashboard/login");
+       } else {
+         // console.log("tem token");
+       }
+     }, 2000);
+ 
+     return () => clearTimeout(timeout);
+   }, [token, router]);
 
   useEffect(() => {
     async function fetchSeguradoras() {

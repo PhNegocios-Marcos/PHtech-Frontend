@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Combobox } from "@/components/Combobox";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import {
   Form,
   FormField,
@@ -18,7 +20,6 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -61,31 +62,26 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
   const [seguradoras, setSeguradoras] = useState<SeguradoraOption[]>([]);
   const [selectedSeguradora, setSelectedSeguradora] = useState<SeguradoraOption | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
+      if (!token) {
+        toast.error("Token de autenticação não encontrado", {
+          style: {
+            background: "var(--toast-error)",
+            color: "var(--toast-error-foreground)",
+            boxShadow: "var(--toast-shadow)"
+          }
+        });
+        sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
         // console.log("tem token");
       }
-    }, 2000); // espera 2 segundos antes de verificar
+    }, 2000);
 
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
+    return () => clearTimeout(timeout);
   }, [token, router]);
 
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-        // console.log("token null");
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
 
   useEffect(() => {
     if (!token || !isOpen) return;

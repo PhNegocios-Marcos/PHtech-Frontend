@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -37,18 +38,25 @@ export function Permissoes({ equipeNome, perfilId }: PermissoesProps) {
   // Estado para as permissões selecionadas (checkboxes marcados)
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
 
-    useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (token == null) {
-    sessionStorage.clear();
-        router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
-      }
-    }, 2000); // espera 2 segundos antes de verificar
-
-    return () => clearTimeout(timeout); // limpa o timer se o componente desmontar antes
-  }, [token, router]);
+   useEffect(() => {
+     const timeout = setTimeout(() => {
+       if (!token) {
+         toast.error("Token de autenticação não encontrado", {
+           style: {
+             background: "var(--toast-error)",
+             color: "var(--toast-error-foreground)",
+             boxShadow: "var(--toast-shadow)"
+           }
+         });
+         sessionStorage.clear();
+         router.push("/dashboard/login");
+       } else {
+         // console.log("tem token");
+       }
+     }, 2000);
+ 
+     return () => clearTimeout(timeout);
+   }, [token, router]);
 
   // Buscar permissões do backend
   useEffect(() => {
