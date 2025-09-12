@@ -172,7 +172,7 @@ export const page_routes: PageRoutesType[] = [
           },
           {
             id: "RO_ver",
-            title: "Roteiro Operacional",
+            title: "Roteiro operacional",
             href: "/dashboard/operacoes/roteiro_operacional"
             // icon: "ChartPie"
           },

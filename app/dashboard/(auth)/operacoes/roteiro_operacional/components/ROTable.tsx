@@ -292,7 +292,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
           />
           <Card className="col-span-2">
             <CardHeader className="flex flex-col justify-between">
-              <CardTitle>Roteiro Operacional</CardTitle>
+              <CardTitle>Roteiro operacional</CardTitle>
             </CardHeader>
             <CardContent>
               <>
@@ -402,7 +402,7 @@ export default function RoteiroOperacionalTable({ ro, isOpen, onClose }: Props) 
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Roteiro Operacional</CardTitle>
+            <CardTitle>Roteiro operacional</CardTitle>
           </CardHeader>
           <CardContent>
             <>

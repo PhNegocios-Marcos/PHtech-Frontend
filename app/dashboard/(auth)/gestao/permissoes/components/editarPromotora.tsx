@@ -187,7 +187,7 @@ export function EquipeEditForm({ permissoes, onClose }: EquipeEditProps) {
                           <FormLabel>Nome da permissão</FormLabel>
                           <FormControl>
                             <Input {...field} />
-                          </FormControl>
+                          </FormControl> 
                           <FormMessage />
                         </FormItem>
                       )}

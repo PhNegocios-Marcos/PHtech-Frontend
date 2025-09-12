@@ -792,7 +792,7 @@ export default function CadastroCompletoModal({ isOpen, onClose }: CadastroCompl
                 <CardHeader>
                   <CardTitle>Regra do produto</CardTitle>
                   <p className="dark:text-200 text-sm text-gray-600">
-                    Selecione o Roteiro Operacional deste produto.
+                    Selecione o Roteiro operacional deste produto.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Trash2, CirclePlus } from "lucide-react";
+import { Trash2, CirclePlus, X } from "lucide-react";
 import {
   Form,
   FormField,
@@ -412,18 +412,12 @@ export default function CadastroCamposModal({
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Configurar campos de cadastro</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <X className="cursor-pointer" onClick={onClose}/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Configuração dos Campos</CardTitle>
+                  <CardTitle>Configuração dos campos</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -458,7 +452,7 @@ export default function CadastroCamposModal({
                           name={`sections.${sectionIndex}.section`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Seção</FormLabel>
+                              <FormLabel>Categoria</FormLabel>
                               <FormControl>
                                 <Combobox
                                   data={getAvailableSectionOptions()}
@@ -477,7 +471,7 @@ export default function CadastroCamposModal({
                         />
 
                         <div className="mt-4">
-                          <h3 className="text-lg font-medium">Campos</h3>
+                          <FormLabel className="mb-2">Campos</FormLabel>
                           <FieldArray
                             sectionIndex={sectionIndex}
                             availableFields={availableFields}
@@ -490,6 +484,7 @@ export default function CadastroCamposModal({
                           onClick={() => removeSection(sectionIndex)}
                           className="mt-4">
                           <Trash2 className="h-4 w-4" />
+                          <p>Deletar categoria </p>
                         </Button>
                       </div>
                     ))}
@@ -506,7 +501,8 @@ export default function CadastroCamposModal({
                             ]
                           })
                         }
-                        className="mt-4">
+                        className="mt-4 flex items-center">
+                        <p>Cadastrar novo campo</p>
                         <CirclePlus className="h-4 w-4" />
                       </Button>
                     )}
@@ -518,7 +514,7 @@ export default function CadastroCamposModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar Configuração</Button>
+                <Button type="submit">Salvar configurações</Button>
               </div>
             </form>
           </Form>
@@ -655,16 +651,17 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
               control={control}
               name={`sections.${sectionIndex}.fields.${fieldIndex}.required`}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Obrigatório</FormLabel>
+                <FormItem className="flex items-center gap-2">
                   <FormControl>
                     <input
                       type="checkbox"
+                      id="required_1"
                       checked={field.value}
                       onChange={(e) => field.onChange(e.target.checked)}
-                      className="h-4 w-4"
+                      className="h-4 w-4 cursor-pointer"
                     />
                   </FormControl>
+                  <FormLabel>Obrigatório</FormLabel>
                   <FormMessage />
                 </FormItem>
               )}
@@ -682,13 +679,17 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
             />
           )}
 
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => remove(fieldIndex)}
-            className="mt-4">
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="w-full flex justify-end">
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => remove(fieldIndex)}
+              className="mt-4">
+              <Trash2 className="h-4 w-4" />
+              Deletar campo
+            </Button>
+          </div>
+          
         </div>
       ))}
 
@@ -696,7 +697,8 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
         type="button"
         variant="outline"
         onClick={() => append({ name: "", label: "", type: "text", required: false, options: [] })}
-        className="mt-4">
+        className="mt-4 flex items-center">
+        <p>Cadastrar novo campo de formulário</p>
         <CirclePlus className="h-4 w-4" />
       </Button>
     </div>
@@ -762,8 +764,9 @@ function OptionArray({ sectionIndex, fieldIndex, isTipoPix }: OptionArrayProps) 
         <Button
           type="button"
           variant="outline"
-          className="mt-4"
+          className="mt-4 flex items-center"
           onClick={() => append({ value: "", label: "" })}>
+          <p>Cadastrar campo do select</p>
           <CirclePlus className="h-4 w-4" />
         </Button>
       )}

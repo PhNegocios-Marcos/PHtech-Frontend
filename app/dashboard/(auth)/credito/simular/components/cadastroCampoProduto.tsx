@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Trash2, CirclePlus } from "lucide-react";
+import { Trash2, CirclePlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Form,
@@ -428,19 +428,13 @@ export default function CadastroInputProduto({
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Configurar Campos da Simulação</h2>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Configurar campos da simulação</h2>
+                <X onClick={methods.handleSubmit(onSubmit)}/>
               </div>
 
               <Card className="flex-grow overflow-auto">
                 <CardHeader>
-                  <CardTitle>Configuração dos Campos</CardTitle>
+                  <CardTitle>Configuração dos campos</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -475,7 +469,7 @@ export default function CadastroInputProduto({
                           name={`sections.${sectionIndex}.section`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Seção</FormLabel>
+                              <FormLabel>Categoria</FormLabel>
                               <FormControl>
                                 <Combobox
                                   data={getAvailableSectionOptions()}
@@ -485,7 +479,7 @@ export default function CadastroInputProduto({
                                   }
                                   onChange={(selected) => field.onChange(selected?.value || "")}
                                   searchFields={["label"]}
-                                  placeholder="Selecione uma seção"
+                                  placeholder="Selecione uma categoria"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -505,8 +499,9 @@ export default function CadastroInputProduto({
                           type="button"
                           variant="destructive"
                           onClick={() => removeSection(sectionIndex)}
-                          className="mt-4">
+                          className="mt-4 flex gap-2">
                           <Trash2 className="h-4 w-4" />
+                          <p>Deletar categoria</p>
                         </Button>
                       </div>
                     ))}
@@ -523,8 +518,9 @@ export default function CadastroInputProduto({
                             ]
                           })
                         }
-                        className="mt-4">
+                        className="mt-4 flex items-center">
                         <CirclePlus className="h-4 w-4" />{" "}
+                        <p>Cadastrar categoria</p>
                       </Button>
                     )}
                   </div>
@@ -566,7 +562,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
       {fields.map((field, fieldIndex) => (
         <div
           key={field.id}
-          className="rounded-md border-1 border-solid p-4 hover:bg-[var(--primary-100)]">
+          className="rounded-md border-1 border-solid p-4">
           <div className="grid grid-cols-3 gap-4">
             <FormField
               control={control}
@@ -644,15 +640,17 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
               name={`sections.${sectionIndex}.fields.${fieldIndex}.required`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Obrigatório</FormLabel>
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      className="h-4 w-4"
-                    />
-                  </FormControl>
+                  <div className="flex gap-2 cursor-pointer">
+                    <FormControl className="cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        className="h-4 w-4"
+                      />
+                    </FormControl>
+                    <FormLabel className="cursor-pointer">Obrigatório</FormLabel>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -663,13 +661,16 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
             <OptionArray sectionIndex={sectionIndex} fieldIndex={fieldIndex} />
           )}
 
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => remove(fieldIndex)}
-            className="mt-4">
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="w-full flex justify-end">
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => remove(fieldIndex)}
+              className="mt-4 flex gap-2 items-center">
+              <Trash2 className="h-4 w-4" />
+              <p>Deletar campo</p>
+            </Button>
+          </div>
         </div>
       ))}
 
@@ -679,6 +680,7 @@ function FieldArray({ sectionIndex, availableFields, className }: FieldArrayProp
         onClick={() => append({ name: "", label: "", type: "text", required: false, options: [] })}
         className="mt-4">
         <CirclePlus className="h-4 w-4" />{" "}
+        <p>Cadastrar novo campo de formulário</p>
       </Button>
     </div>
   );

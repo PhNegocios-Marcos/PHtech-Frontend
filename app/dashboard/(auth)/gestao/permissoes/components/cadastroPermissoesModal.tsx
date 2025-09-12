@@ -200,7 +200,7 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <Card>
                 <CardHeader>
-                  <CardTitle>Dados da equipe</CardTitle>
+                  <CardTitle>Dados da permissão</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -210,9 +210,9 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
                       name="nome"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome da equipe</FormLabel>
+                          <FormLabel>Nome da permissão</FormLabel>
                           <FormControl>
-                            <Input placeholder="Digite o nome" {...field} />
+                            <Input placeholder="Digite o nome da permissão" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -229,8 +229,11 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
                             <Combobox
                               data={modulos}
                               displayField="name"
+                              className="overflow-y-auto"
                               value={modulos.find((opt) => opt.id === field.value) ?? null}
-                              onChange={(selected) => field.onChange(selected?.id)}
+                              onChange={(selected) => {
+                                field.onChange(selected ? selected.id : "")
+                              }}
                               searchFields={["name"]}
                             />
                           </FormControl>
@@ -243,7 +246,7 @@ export default function CadastroPermissoesModal({ isOpen, onClose }: CadastroEqu
               </Card>
 
               <div className="mb-6 flex flex-col mt-auto justify-end gap-4">
-                <Button type="submit" className="py-6">Cadastrar equipe</Button>
+                <Button type="submit" className="py-6">Cadastrar permissão</Button>
                 <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>

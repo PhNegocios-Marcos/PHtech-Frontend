@@ -377,7 +377,7 @@ export function ROEdit({ roteiro, onClose, onRefresh }: RoteiroDrawerProps) {
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Roteiro Operacional: <span className="text-primary">{roteiro.nome}</span>
+                Roteiro operacional: <span className="text-primary">{roteiro.nome}</span>
               </h2>
               <X onClick={onClose} className="cursor-pointer" />
             </div>
