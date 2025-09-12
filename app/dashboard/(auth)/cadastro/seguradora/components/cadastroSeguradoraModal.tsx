@@ -145,7 +145,7 @@ export default function CadastroSeguradoraModal({ isOpen, onClose }: CadastroSeg
                       name="razao_social"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Razão Social</FormLabel>
+                          <FormLabel>Razão social</FormLabel>
                           <FormControl>
                             <Input placeholder="Digite a razão social" {...field} />
                           </FormControl>

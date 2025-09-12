@@ -660,8 +660,8 @@ function SidebarMenuSubButton({
 
 export {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
+  SidebarContent,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,

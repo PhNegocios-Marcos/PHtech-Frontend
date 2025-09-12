@@ -162,7 +162,7 @@ export function OperacoesTable() {
           variant="ghost"
           size="icon"
           onClick={() => setSelectedUser(row.original)}
-          title="Editar usuário">
+          title="Ver operação">
           <Search className="h-4 w-4" />
         </Button>
       ),

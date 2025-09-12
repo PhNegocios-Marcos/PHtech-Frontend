@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -136,7 +137,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
         throw new Error(JSON.stringify(err));
       }
 
-      toast.success("Faixa de seguro cadastrada com sucesso!");
+      toastComponent.success("Faixa de seguro cadastrada com sucesso!");
       methods.reset();
       setSeguradoraSelect(null);
       if (onRefresh) {
@@ -145,7 +146,7 @@ export default function CadastroSeguroModal({ isOpen, onClose, onRefresh }: Cada
       onClose();
     } catch (error: any) {
       console.error("Erro ao cadastrar faixa de seguro:", error);
-      toast.error("Erro ao cadastrar faixa de seguro: " + error.message || error);
+      toastComponent.error("Erro ao cadastrar faixa de seguro: " + error.message || error);
     }
   };
 

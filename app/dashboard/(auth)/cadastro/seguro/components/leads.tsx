@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SeguroModal } from "./SeguroModal";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -51,17 +52,9 @@ export function SeguroTable() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
         sessionStorage.clear();
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
     }, 2000);
 
@@ -85,13 +78,7 @@ export function SeguroTable() {
         setSeguros(data);
       } catch (error: any) {
         console.error("Erro ao carregar faixas de seguro:", error);
-        toast.error(`Erro ao carregar faixas: ${error.message || error}`, {
-          style: {
-            background: 'var(--toast-error)',
-            color: 'var(--toast-error-foreground)',
-            boxShadow: 'var(--toast-shadow)'
-          }
-        });
+        toastComponent.error(`Erro ao carregar faixas: ${error.message || error}`);
       }
     }
 
@@ -176,7 +163,7 @@ export function SeguroTable() {
       {!selectedSeguro ? (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Faixas de Seguro</CardTitle>
+            <CardTitle>Faixas de seguro</CardTitle>
           </CardHeader>
 
           <CardContent>

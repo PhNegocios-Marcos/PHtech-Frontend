@@ -187,7 +187,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
           <Form {...methods}>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Editar Modalidade: <span className="text-primary">{produto?.nome}</span>
+                Editar bancarizador: <span className="text-primary">{produto?.nome}</span>
               </h2>
               <X onClick={onClose} className="cursor-pointer"/>
             </div>
@@ -195,7 +195,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
             <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Informações do Produto</CardTitle>
+                  <CardTitle>Informações do bancarizador</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -235,7 +235,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
                     {produto?.data_inclusao && (
                       <FormItem>
-                        <FormLabel>Data de Inclusão</FormLabel>
+                        <FormLabel>Data de inclusão</FormLabel>
                         <FormControl>
                           <Input 
                             value={produto.data_inclusao} 
@@ -248,7 +248,7 @@ export function ProdutoEdit({ produto, onClose, onRefresh }: ProdutoDrawerProps)
 
                     {produto?.data_atualizacao && (
                       <FormItem>
-                        <FormLabel>Data de Atualização</FormLabel>
+                        <FormLabel>Data de atualização</FormLabel>
                         <FormControl>
                           <Input 
                             value={produto.data_atualizacao} 

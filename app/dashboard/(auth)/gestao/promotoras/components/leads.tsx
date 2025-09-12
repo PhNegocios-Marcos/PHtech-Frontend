@@ -73,17 +73,22 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
 
   const promotoraColumns: ColumnDef<Promotora>[] = [
     { accessorKey: "nome", header: "Nome" },
-    { accessorKey: "razao_social", header: "Razão Social" },
+    { accessorKey: "razao_social", header: "Razão social" },
     {
       accessorKey: "cnpj",
       header: "CNPJ",
       cell: ({ getValue }) => formatCNPJ(getValue())
     },
     { accessorKey: "representante", header: "Representante" },
-    { accessorKey: "master", header: "É Master?" },
+    { accessorKey: "master", header: "É master?", 
+      cell: ({ getValue }) => { 
+        const value = getValue();
+        return `${value === "S" ? 'Sim' : 'Não'}`;  
+      } 
+    },
     {
       accessorKey: "rateio_master",
-      header: "Rateio Master",
+      header: "Rateio master",
       cell: ({ getValue }) => {
         const valor = getValue<number>();
         return `${Math.round(valor)}%`;
@@ -91,7 +96,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
     },
     {
       accessorKey: "rateio_sub",
-      header: "Rateio Sub",
+      header: "Rateio sub",
       cell: ({ getValue }) => {
         const valor = getValue<number>();
         return `${Math.round(valor)}%`;
@@ -296,7 +301,7 @@ export function PromotorasTable({ onSelectPromotora }: PromotorasTableProps) {
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Promotoras</CardTitle>
+            <CardTitle>Lista de promotoras</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex items-center gap-2">

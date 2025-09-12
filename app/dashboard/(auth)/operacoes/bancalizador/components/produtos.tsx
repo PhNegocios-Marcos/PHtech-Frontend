@@ -38,6 +38,7 @@ import { CarregandoTable } from "./leads_carregando";
 import { Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import toastComponent from "@/utils/toastComponent";
 
 export type Produto = {
   id: string;
@@ -137,25 +138,10 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
               )
             );
 
-            toast.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`, {
-              style: {
-                background: "var(--toast-success)",
-                color: "var(--toast-success-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toastComponent.success(`Status atualizado para ${novoStatus === 1 ? "Ativo" : "Inativo"}`);
           } catch (error: any) {
             console.error("Erro ao atualizar status", error);
-            toast.error(
-              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
-              {
-                style: {
-                  background: "var(--toast-error)",
-                  color: "var(--toast-error-foreground)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              }
-            );
+            toastComponent.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
           }
         };
 
@@ -191,13 +177,8 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
+      
         sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
@@ -252,13 +233,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
         setProdutos(transformedData);
       } catch (error: any) {
         console.error("Erro na requisição:", error.message || error);
-        toast.error("Erro ao carregar produtos", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Erro ao carregar produtos");
       } finally {
         setLoading(false);
       }
@@ -289,7 +264,7 @@ export function ProdutosTable({ onSelectProduto }: ProdutosTableProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Modalidade</CardTitle>
+        <CardTitle>Lista de bancarizadores</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center gap-2">

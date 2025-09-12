@@ -21,7 +21,7 @@ export default function Page() {
 
         {podeCriar && (
           <Button onClick={() => setIsCadastroOpen(true)}>
-            Nova Faixa de Seguro
+            Nova faixa de seguro
           </Button>
         )}
       </div>

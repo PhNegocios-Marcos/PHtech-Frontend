@@ -38,6 +38,7 @@ import { CarregandoTable } from "./leads_carregando";
 import { UsuarioPerfil } from "./UsuarioModal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -151,24 +152,9 @@ export function UsuariosTable() {
                 )
               );
 
-              toast.success("Status atualizado com sucesso!", {
-                style: {
-                  background: "var(--toast-success)",
-                  color: "var(--toast-success-foreground)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              });
+              toastComponent.success("Status atualizado com sucesso!");
             } catch (error: any) {
-              toast.error(
-                `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`,
-                {
-                  style: {
-                    background: "var(--toast-error)",
-                    color: "var(--toast-error-foreground)",
-                    boxShadow: "var(--toast-shadow)"
-                  }
-                }
-              );
+              toastComponent.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
             }
           };
 
@@ -212,21 +198,13 @@ export function UsuariosTable() {
   );
 
    useEffect(() => {
-     const timeout = setTimeout(() => {
-       if (!token) {
-         toast.error("Token de autenticação não encontrado", {
-           style: {
-             background: "var(--toast-error)",
-             color: "var(--toast-error-foreground)",
-             boxShadow: "var(--toast-shadow)"
-           }
-         });
-         sessionStorage.clear();
-         router.push("/dashboard/login");
-       } else {
-         // console.log("tem token");
-       }
-     }, 2000);
+      const timeout = setTimeout(() => {
+        if (!token) {
+          toastComponent.error("Token de autenticação não encontrado");
+          sessionStorage.clear();
+          router.push("/dashboard/login");
+        } 
+      }, 2000);
  
      return () => clearTimeout(timeout);
    }, [token, router]);
@@ -267,15 +245,7 @@ export function UsuariosTable() {
           }))
         );
       } catch (error: any) {
-        console.error("Erro ao buscar usuários:", error.message);
-        toast.error(`Erro ao carregar usuários: ${error.message}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            border: "1px solid var(--toast-border)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao carregar usuários: ${error.message}`);
       } finally {
         setIsLoading(false);
       }

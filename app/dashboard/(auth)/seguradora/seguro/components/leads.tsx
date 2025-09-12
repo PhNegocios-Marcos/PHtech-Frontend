@@ -176,7 +176,7 @@ export function SeguroTable() {
     <>
       <Card className="col-span-2">
         <CardHeader className="flex flex-col justify-between">
-          <CardTitle>Faixas de Seguro</CardTitle>
+          <CardTitle>Faixas de seguro</CardTitle>
         </CardHeader>
 
         <CardContent>

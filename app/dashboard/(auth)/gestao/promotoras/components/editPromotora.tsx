@@ -21,6 +21,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -277,13 +278,7 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
       onClose();
       window.location.reload();
     } catch (error: any) {
-      toast.error(`Erro: ${error.response?.data?.detail || error.message}`, {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error(`Erro: ${error.response?.data?.detail || error.message}`);
     }
   };
 
@@ -302,7 +297,7 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  Dados da Promotora: <span className="text-primary">{data.nome}</span>
+                  Dados da promotora: <span className="text-primary">{data.nome}</span>
                 </CardTitle>
                 <div>
                   <Button onClick={onClose} variant="outline">

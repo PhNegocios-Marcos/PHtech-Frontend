@@ -451,7 +451,7 @@ const Operacao = ({ proposta }: { proposta: ApiPropostaPayload }) => (
 
               <div>
                 <p className="text-muted-foreground mb-1 text-sm font-medium">IOF</p>
-                <p className="text-lg font-bold">{`${maskFinalValueWithZero(item.iof)}%`}</p>
+                <p className="text-lg font-bold">{`${formatToBRL(item.iof)}`}</p>
               </div>
             </div>
           ))}
