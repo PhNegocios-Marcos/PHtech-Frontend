@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -105,24 +106,9 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
                 )
               );
 
-              toast.success("Status atualizado com sucesso!", {
-                style: {
-                  background: "var(--toast-success)",
-                  color: "var(--toast-success-foreground)",
-                  border: "1px solid var(--toast-border)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              });
+              toastComponent.success("Status atualizado com sucesso!");
             } catch (error: any) {
-              console.error("Erro ao atualizar status", error);
-              toast.error(`Erro ao atualizar status: ${error.message}`, {
-                style: {
-                  background: "var(--toast-error)",
-                  color: "var(--toast-error-foreground)",
-                  border: "1px solid var(--toast-border)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              });
+              toastComponent.error(`Erro ao atualizar status: ${error.message}`);
             }
           };
 
@@ -153,17 +139,10 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
+        
         sessionStorage.clear();
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
     }, 2000);
 
@@ -191,14 +170,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         setPerfisDisponiveis(data);
       } catch (error: any) {
         console.error("Erro ao carregar perfis disponíveis", error);
-        toast.error(`Erro ao carregar perfis: ${error.message}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            border: "1px solid var(--toast-border)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao carregar perfis: ${error.message}`);
       }
     }
     fetchPerfisDisponiveis();
@@ -231,14 +203,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         setPerfil(data);
       } catch (error: any) {
         console.error("Erro ao carregar perfis do usuário", error);
-        toast.error(`Erro ao carregar perfis do usuário: ${error.message}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            border: "1px solid var(--toast-border)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao carregar perfis do usuário: ${error.message}`);
       } finally {
         setIsLoadingPerfis(false);
       }
@@ -248,14 +213,8 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
 
   async function relacionarPerfil() {
     if (!perfisSelect) {
-      toast.error("Selecione um perfil para vincular", {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          border: "1px solid var(--toast-border)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error("Selecione um perfil para vincular");
+
       return;
     }
 
@@ -280,26 +239,11 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
         }
       );
 
-      toast.success("Perfil vinculado com sucesso!", {
-        style: {
-          background: "var(--toast-success)",
-          color: "var(--toast-success-foreground)",
-          border: "1px solid var(--toast-border)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.success("Perfil vinculado com sucesso!");
       setRefreshKey((prev) => prev + 1);
       setPerfisSelect(null);
     } catch (error: any) {
-      console.error(error);
-      toast.error(`Erro ao vincular perfil: ${error.response?.data?.detail || error.message}`, {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          border: "1px solid var(--toast-border)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error(`Erro ao vincular perfil: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -334,7 +278,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Editar Usuário: <span className="text-primary">{usuario.nome}</span>
+            Editar usuário: <span className="text-primary">{usuario.nome}</span>
           </CardTitle>
           <Button onClick={onClose} variant="outline">
             Voltar
@@ -357,7 +301,7 @@ export default function Perfil({ usuario, perfis, onClose }: Option) {
                 className="w-full"
               />
               <Button onClick={relacionarPerfil} disabled={loading} className="mt-2">
-                {loading ? "Salvando..." : "Relacionar Perfil"}
+                {loading ? "Salvando..." : "Relacionar perfil"}
               </Button>
             </div>
           </div>

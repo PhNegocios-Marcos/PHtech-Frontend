@@ -146,7 +146,7 @@ export default function RelacaoProdutoConvenio({ convenio, onClose }: Props) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Relacionar Produto: <span className="text-primary">{convenio.convenio_nome}</span>
+            Relacionar produto: <span className="text-primary">{convenio.convenio_nome}</span>
           </CardTitle>
           <Button onClick={onClose} variant="outline">
             Voltar

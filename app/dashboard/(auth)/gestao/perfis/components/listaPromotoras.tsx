@@ -76,17 +76,9 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
         sessionStorage.clear();
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
     }, 2000);
 
@@ -112,7 +104,6 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         }
 
         const data = await response.json();
-        console.log(data.length);
 
         setEquipeLabel(data.perfil ?? equipeNome);
 
@@ -141,7 +132,6 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
 
         setPermissoesPorSecao(novoFormato);
       } catch (error: any) {
-        console.error("Erro ao buscar dados:", error.message || error);
         toastComponent.error(`Erro ao buscar permissões: ${error.message || error}`);
       }
     }
@@ -167,7 +157,7 @@ export function UsuariosPorEquipeTable({ equipeNome, onClose }: UsuariosTablePro
         <table className={`min-w-full border text-sm `}>
           <thead className="bg-muted">
             <tr>
-              <th className="border px-2 py-1 text-left">Seção</th>
+              <th className="border px-2 py-1 text-left">Categorias</th>
               {acoes.map((acao) => (
                 <th key={acao} className="border px-2 py-1 text-center capitalize">
                   {acao}

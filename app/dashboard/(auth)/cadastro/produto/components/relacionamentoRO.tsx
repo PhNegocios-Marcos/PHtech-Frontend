@@ -193,7 +193,7 @@ export default function RelRO({ produto, equipes }: Option) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Relacionar Produto</CardTitle>
+        <CardTitle>Relacionar produto</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -209,7 +209,7 @@ export default function RelRO({ produto, equipes }: Option) {
             className="w-full"
           />
           <Button onClick={relacionarProRO} disabled={loading} className="mt-2">
-            {loading ? "Salvando..." : "Relacionar Equipe"}
+            {loading ? "Salvando..." : "Relacionar equipe"}
           </Button>
 
           {message && (

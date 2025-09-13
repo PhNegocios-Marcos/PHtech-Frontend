@@ -13,8 +13,7 @@ import {
   ColumnFiltersState,
   VisibilityState
 } from "@tanstack/react-table";
-import { Pencil, PencilIcon } from "lucide-react";
-import { toast } from "sonner";
+import { PencilIcon } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -40,8 +39,9 @@ import { useAuth } from "@/contexts/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 import { CarregandoTable } from "./leads_carregando";
 import { PerfilDrawer } from "./PerfilModal";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import toastComponent from "@/utils/toastComponent";
 
 type Equipe = {
   id: string;
@@ -63,7 +63,7 @@ export function EquipesTable() {
   const { token } = useAuth();
 
   const equipeColumns: ColumnDef<Equipe>[] = [
-    { accessorKey: "nome", header: "Nome da equipe" },
+    { accessorKey: "nome", header: "Nome do perfil" },
     { accessorKey: "descricao", header: "Descrição" },
         {
       id: "status",
@@ -95,22 +95,9 @@ export function EquipesTable() {
               )
             );
 
-            toast.success("Status atualizado com sucesso!", {
-              style: {
-                background: "var(--toast-success)",
-                color: "var(--toast-success-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toastComponent.success("Status atualizado com sucesso!");
           } catch (error: any) {
-            toast.error(
-              `Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
-              style: {
-                background: "var(--toast-error)",
-                color: "var(--toast-error-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toastComponent.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
           }
         };
 
@@ -143,30 +130,14 @@ export function EquipesTable() {
 
   const handleEditClick = (equipe: Equipe) => {
     setSelectedUser(equipe);
-    // toast.info("Editando equipe", {
-    //   style: {
-    //     background: "var(--toast-info)",
-    //     color: "var(--toast-info-foreground)",
-    //     boxShadow: "var(--toast-shadow)"
-    //   },
-    //   description: equipe.nome
-    // });
   };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
         sessionStorage.clear();
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
     }, 2000);
 
@@ -176,14 +147,7 @@ export function EquipesTable() {
   React.useEffect(() => {
     async function fetchEquipes() {
       if (!token) {
-        toast.error("Autenticação necessária", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: "Faça login para acessar as equipes"
-        });
+        toastComponent.error("Autenticação necessária");
         return;
       }
 
@@ -210,24 +174,9 @@ export function EquipesTable() {
         }));
 
         setEquipes(equipesArray);
-        // toast.success("Equipes carregadas com sucesso", {
-        //   style: {
-        //     background: 'var(--toast-success)',
-        //     color: 'var(--toast-success-foreground)',
-        //     boxShadow: 'var(--toast-shadow)'
-        //   },
-        //   description: `${equipesArray.length} equipes encontradas`
-        // });
       } catch (error: any) {
         console.error("Erro ao buscar equipes:", error.message || error);
-        toast.error("Falha ao carregar equipes", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          },
-          description: error.message || "Erro desconhecido"
-        });
+        toastComponent.error("Falha ao carregar equipes");
       }
     }
 

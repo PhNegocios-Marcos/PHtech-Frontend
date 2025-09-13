@@ -237,7 +237,7 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Relacionar Produto: <span className="text-primary">{usuario.nome}</span>
+            Relacionar produto: <span className="text-primary">{usuario.nome}</span>
           </CardTitle>
           <Button onClick={onClose} variant="outline">
             Voltar
@@ -261,7 +261,7 @@ export default function Equipes({ usuario, equipes, onClose }: Option) {
             />
             {podeCriar && (
               <Button onClick={relacionarEquipe} disabled={loading} className="mt-2">
-                {loading ? "Salvando..." : "Relacionar Equipe"}
+                {loading ? "Salvando..." : "Relacionar equipe"}
               </Button>
             )}
           </div>

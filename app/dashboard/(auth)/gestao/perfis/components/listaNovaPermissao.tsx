@@ -43,17 +43,9 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
         sessionStorage.clear();
         router.push("/dashboard/login");
-      } else {
-        // console.log("tem token");
       }
     }, 2000);
 
@@ -98,14 +90,7 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
 
         setPermissoes(mapeado);
       } catch (error: any) {
-        console.error("Erro ao buscar permissões:", error.message || error);
-        toast.error(`Erro ao buscar permissões: ${error.message || error}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao buscar permissões: ${error.message || error}`);
       }
     }
 
@@ -159,16 +144,8 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
       }
 
       toastComponent.success("Permissões atualizadas com sucesso!");
-
     } catch (error: any) {
-      console.error("Erro ao enviar permissões:", error.message || error);
-      toast.error(`Erro ao enviar permissões: ${error.message || error}`, {
-        style: {
-          background: "var(--toast-error)",
-          color: "var(--toast-error-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.error(`Erro ao enviar permissões: ${error.message || error}`);
     }
   };
 
@@ -185,7 +162,7 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
               Voltar
             </Button>
             <Button className="ml-4" onClick={enviarPermissoesSelecionadas}>
-              Salvar Permissões Selecionadas
+              Salvar permissões selecionadas
             </Button>
           </div>
         </div>
@@ -214,6 +191,7 @@ export function Permissoes({ equipeNome, perfilId, onClose }: PermissoesProps) {
                         <div className="flex items-center justify-center gap-1">
                           <Checkbox
                             key={permissao.nome}
+                            className="cursor-pointer hover:border-primary"
                             checked={selecionadas.has(permissao.nome)}
                             onCheckedChange={(checked) =>
                               togglePermissao(permissao.nome, !!checked)

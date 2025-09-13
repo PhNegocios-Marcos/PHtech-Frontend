@@ -127,12 +127,12 @@ export const page_routes: PageRoutesType[] = [
           }
         ]
       },
-      {
-        id: "Chat_ai",
-        title: "Chat ai",
-        href: "/dashboard/ai-chat",
-        icon: "Brain"
-      }
+      // {
+      //   id: "Chat_ai",
+      //   title: "Chat ai",
+      //   href: "/dashboard/ai-chat",
+      //   icon: "Brain"
+      // }
     ]
   },
   {

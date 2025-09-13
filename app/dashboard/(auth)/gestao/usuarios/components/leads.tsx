@@ -114,14 +114,14 @@ export function UsuariosTable() {
         header: "CPF",
         cell: ({ getValue }) => formatCpf(String(getValue()))
       },
-      { accessorKey: "email", header: "Email" },
+      { accessorKey: "email", header: "E-mail" },
       {
         accessorKey: "telefone",
         header: "Telefone",
         cell: ({ getValue }) => formatTelefone(String(getValue()))
       },
       { accessorKey: "endereco", header: "Endereço" },
-      { accessorKey: "tipo_acesso", header: "Tipo de Usuário" },
+      { accessorKey: "tipo_acesso", header: "Tipo de usuário" },
       {
         id: "status",
         header: "Status",
@@ -293,7 +293,7 @@ export function UsuariosTable() {
       ) : (
         <Card className="col-span-2">
           <CardHeader className="flex flex-col justify-between">
-            <CardTitle>Usuários</CardTitle>
+            <CardTitle>Lista de usuários</CardTitle>
           </CardHeader>
           <CardContent>
             <>

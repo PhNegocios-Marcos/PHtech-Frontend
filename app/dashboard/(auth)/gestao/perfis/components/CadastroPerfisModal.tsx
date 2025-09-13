@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { X } from "lucide-react";
 
 const schema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -161,19 +162,13 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
           <Form {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cadastrar Novo Perfil</h2>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="text-2xl font-bold hover:text-gray-900"
-                  aria-label="Fechar">
-                  ×
-                </button>
+                <h2 className="text-xl font-semibold">Cadastrar novo perfil</h2>
+                <X onClick={handleClose}/>
               </div>
 
-              <Card className="flex-grow overflow-auto">
+              <Card className="overflow-auto">
                 <CardHeader>
-                  <CardTitle>Dados do Perfil</CardTitle>
+                  <CardTitle>Dados do perfil</CardTitle>
                 </CardHeader>
 
                 <CardContent>
@@ -211,7 +206,7 @@ export default function CadastroPerfilModal({ isOpen, onClose }: CadastroPerfilM
                       name="perfil_do_banco"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Perfil do Banco</FormLabel>
+                          <FormLabel>Perfil do banco</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>

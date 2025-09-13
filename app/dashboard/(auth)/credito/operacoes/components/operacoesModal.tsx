@@ -259,7 +259,7 @@ const Informacoes = ({ proposta }: { proposta: ApiPropostaPayload }) => (
             { label: "Código IPOC", value: proposta.informacoes.codigoIpoc },
             { label: "Data de cadastro", value: maskDate(proposta.data) },
             { label: "Observações", value: proposta.informacoes.observacoes },
-            { label: "Correspondente", value: proposta.historico.correspondente },
+            { label: "Promotora", value: proposta.historico.correspondente },
             { label: "Operador", value: proposta.historico.operador },
             { label: "Grupo", value: proposta.historico.grupo },
             {

@@ -79,13 +79,8 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!token) {
-        toast.error("Token de autenticação não encontrado", {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error("Token de autenticação não encontrado");
+
         sessionStorage.clear();
         router.push("/dashboard/login");
       } else {
@@ -268,13 +263,7 @@ export function PromotorEdit({ data, onClose, cnpj, id }: PromotorEditProps) {
         throw new Error("Erro ao atualizar relacionamentos com gerentes");
       }
 
-      toast.success("Promotora atualizada com sucesso!", {
-        style: {
-          background: "var(--toast-success)",
-          color: "var(--toast-success-foreground)",
-          boxShadow: "var(--toast-shadow)"
-        }
-      });
+      toastComponent.success("Promotora atualizada com sucesso!");
       onClose();
       window.location.reload();
     } catch (error: any) {

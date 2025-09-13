@@ -184,10 +184,11 @@ export function OperacoesTable() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData?.detail || "Erro ao buscar equipes");
+          throw new Error(errorData?.detail || "Erro ao buscar lista de propostas");
         }
 
         const data = await response.json();
+        console.log(data);
 
         const operacoesArray = data.map((proposta: any) => ({
           id: proposta.id,
