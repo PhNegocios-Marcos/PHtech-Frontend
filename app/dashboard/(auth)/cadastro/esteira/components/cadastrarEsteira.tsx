@@ -432,13 +432,13 @@ export default function CadastroEsteira({
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)} className="flex h-full flex-col">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Cadastrar Nova Esteira</h2>
+              <h2 className="text-xl font-semibold">Cadastrar nova esteira</h2>
               <X onClick={onClose} className="cursor-pointer"/>
             </div>
 
             <Card className="flex-grow overflow-auto">
               <CardHeader>
-                <CardTitle>Dados da Esteira</CardTitle>
+                <CardTitle>Dados da esteira</CardTitle>
               </CardHeader>
 
               <CardContent>
@@ -447,7 +447,7 @@ export default function CadastroEsteira({
                   name="esteira_nome"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome da Esteira</FormLabel>
+                      <FormLabel>Nome da esteira</FormLabel>
                       <FormControl>
                         <Input placeholder="Nome da esteira" {...field} />
                       </FormControl>

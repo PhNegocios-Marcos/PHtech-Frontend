@@ -1,8 +1,8 @@
 "use client";
 
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, ChevronsUpDown } from "lucide-react";
+import { ChevronRight, ChevronsUpDown, PanelLeftIcon, Undo2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -41,7 +41,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { setOpen, setOpenMobile, isMobile } = useSidebar();
+  const { setOpen, setOpenMobile, isMobile, toggleSidebar, state } = useSidebar();
   const isTablet = useIsTablet();
   const filteredRoutes = useFilteredPageRoutes(); // <-- uso do hook
 
@@ -54,6 +54,13 @@ export default function Sidebar() {
   }, [isTablet]);
 
   const { selectedPromotoraNome } = useAuth();
+  const [delayedCollapsed, setDelayedCollapsed] = useState(false)
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    state === "collapsed" ? timer = setTimeout(() => setDelayedCollapsed(true), 100) : setDelayedCollapsed(false);
+    return () => clearTimeout(timer)
+  }, [state])
 
   return (
     <SidebarContainer collapsible="icon" variant="floating" className="bg-background">
@@ -211,6 +218,15 @@ export default function Sidebar() {
           ))}
         </ScrollArea>
       </SidebarContent>
+      <SidebarFooter className={`${delayedCollapsed ? "items-center justify-center" : ""}`}>
+        <Button
+          onClick={toggleSidebar}
+          size="icon"
+          variant="outline"
+          className="flex md:hidden lg:flex bg-primary hover:bg-primary/80">
+          <Undo2 className="text-white"/>
+        </Button>
+      </SidebarFooter>
     </SidebarContainer>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-
+import { PanelLeftIcon } from "lucide-react";
 import Search from "@/components/layout/header/search";
 import UserMenu from "@/components/layout/header/user-menu";
 import ThemeSwitch from "@/components/layout/header/theme-switch";

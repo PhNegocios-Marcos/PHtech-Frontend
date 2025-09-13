@@ -26,7 +26,7 @@ export default function Page() {
       <div className="mb-4 flex justify-between space-y-4">
         <CampoBoasVindas />
 
-        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Nova Esteira</Button>}
+        {podeCriar && <Button onClick={() => setIsCadastroOpen(true)}>Nova esteira</Button>}
       </div>
 
       {!isEsteiraOpen && (

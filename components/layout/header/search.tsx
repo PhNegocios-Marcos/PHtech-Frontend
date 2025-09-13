@@ -70,8 +70,7 @@ export default function Search() {
           onFocus={() => setOpen(true)}
         />
         <div className="absolute top-1/2 right-2 hidden -translate-y-1/2 items-center gap-0.5 rounded-sm bg-zinc-200 p-1 font-mono text-xs font-medium sm:flex dark:bg-neutral-700">
-          <CommandIcon className="size-3" />
-          <span>k</span>
+          <span>Ctrl + k</span>
         </div>
       </div>
       <div className="block lg:hidden">
@@ -87,7 +86,7 @@ export default function Search() {
         </VisuallyHidden>
         <CommandInput placeholder="Escreva um comando ou pesquise..." />
         <CommandList>
-          <CommandEmpty>Resultado não encontrado</CommandEmpty>
+          <CommandEmpty>Resultado não encontrado.</CommandEmpty>
           {page_routes.map((route) => (
             <React.Fragment key={route.title}>
               <CommandGroup heading={route.title}>

@@ -40,6 +40,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { generateMeta } from "@/lib/utils";
 import VerEsteira from "./verEsteira";
 import { toast } from "sonner";
+import toastComponent from "@/utils/toastComponent";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -66,23 +67,23 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
   const [rowSelection, setRowSelection] = useState({});
   const [esteiraData, setEsteiraData] = useState<Esteira[]>([]);
 
-  const [selectedTaxa, setSelectedTaxa] = useState<Esteira | null>(null);
+  const [selectedEsteira, setSelectedEsteira] = useState<Esteira | null>(null);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [isCadastroOpen, setIsCadastroOpen] = useState(false);
 
   const handleClose = () => {
-    setSelectedTaxa(null);
+    setSelectedEsteira(null);
     setIsCadastroOpen(false);
     onClose();
   };
 
-  const handleSelectTaxa = (taxa: Esteira) => {
-    setSelectedTaxa(taxa);
+  const handleSelectEsteira = (taxa: Esteira) => {
+    setSelectedEsteira(taxa);
     setIsCadastroOpen(true);
   };
 
   const columns: ColumnDef<Esteira>[] = [
-    { accessorKey: "esteira_nome", header: "Nome" },
+    { accessorKey: "esteira_nome", header: "Nome  da esteira" },
     {
       id: "status_relacionamento",
       header: "Status",
@@ -115,25 +116,10 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
               )
             );
 
-            toast.success(
-              `Status do produto "${row.original.esteira_nome}" atualizado com sucesso!`,
-              {
-                style: {
-                  background: "var(--toast-success)",
-                  color: "var(--toast-success-foreground)",
-                  boxShadow: "var(--toast-shadow)"
-                }
-              }
-            );
+            toastComponent.success(`Status do produto "${row.original.esteira_nome}" atualizado com sucesso!`);
           } catch (error: any) {
             console.error("Erro ao atualizar status", error);
-            toast.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`, {
-              style: {
-                background: "var(--toast-error)",
-                color: "var(--toast-error-foreground)",
-                boxShadow: "var(--toast-shadow)"
-              }
-            });
+            toastComponent.error(`Erro ao atualizar status: ${error.response?.data?.detail || error.message}`);
           }
         };
 
@@ -157,8 +143,8 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => handleSelectTaxa(row.original)}
-          title="Editar produto"
+          onClick={() => handleSelectEsteira(row.original)}
+          title="Ver esteira"
         >
           <Search className="h-4 w-4" />
         </Button>
@@ -180,13 +166,7 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
         setEsteiraData(res.data);
       } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
-        toast.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao carregar convênios: ${error.response?.data?.detail || error.message}`);
       }
     }
 
@@ -195,11 +175,11 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
 
   useEffect(() => {
     async function fetchRelacionamentos() {
-      if (!selectedTaxa) return;
+      if (!selectedEsteira) return;
 
       try {
         const res = await axios.get(
-          `${API_BASE_URL}/processo-esteira/ver/${selectedTaxa.esteira_hash}`,
+          `${API_BASE_URL}/processo-esteira/ver/${selectedEsteira.esteira_hash}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -209,18 +189,12 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
         );
       } catch (error: any) {
         console.error("Erro ao carregar convênios", error);
-        toast.error(`Erro ao carregar dados da esteira: ${error.response?.data?.detail || error.message}`, {
-          style: {
-            background: "var(--toast-error)",
-            color: "var(--toast-error-foreground)",
-            boxShadow: "var(--toast-shadow)"
-          }
-        });
+        toastComponent.error(`Erro ao carregar dados da esteira: ${error.response?.data?.detail || error.message}`);
       }
     }
 
     fetchRelacionamentos();
-  }, [token, selectedTaxa]);
+  }, [token, selectedEsteira]);
 
   const table = useReactTable({
     data: esteiraData,
@@ -248,16 +222,18 @@ export default function Produto({ onClose, esteiraHash, esteira }: Props) {
 
   return (
     <div className="space-y-6">
+      <div className={`${!!selectedEsteira ? 'flex w-full' : 'hidden'}`}>
         <VerEsteira
           isOpen={isCadastroOpen}
-          esteiraHash={!!selectedTaxa ? selectedTaxa.esteira_hash : null}
-          esteiraData={!!selectedTaxa ? selectedTaxa.esteira_nome : null}
+          esteiraHash={!!selectedEsteira ? selectedEsteira.esteira_hash : null}
+          esteiraData={!!selectedEsteira ? selectedEsteira.esteira_nome : null}
           onClose={handleClose}
         />
+      </div>
 
         <Card className="">
           <CardHeader>
-            <CardTitle>Esteira</CardTitle>
+            <CardTitle>Lista de esteiras</CardTitle>
           </CardHeader>
           <CardContent>
             <>

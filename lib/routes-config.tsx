@@ -25,7 +25,7 @@ export const page_routes: PageRoutesType[] = [
 
   {
     id: "Dashboards",
-    title: "Dashboards",
+    title: "OPERACIONAL",
     items: [
       {
         id: "Default",
@@ -137,7 +137,7 @@ export const page_routes: PageRoutesType[] = [
   },
   {
     id: "Config_Banco_ver",
-    title: "Config do Banco",
+    title: "SETUP DE OPERAÇÕES",
     items: [
       {
         id: "Esteria_ver",

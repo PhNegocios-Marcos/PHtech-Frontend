@@ -49,6 +49,7 @@ import {
   CheckCircledIcon,
   CircleIcon
 } from "@radix-ui/react-icons";
+import toastComponent from "@/utils/toastComponent";
 
 // Tipos de dados
 interface Etapa {
@@ -248,14 +249,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
       setEtapas(etapasComProcessos);
     } catch (err) {
       setError("Erro ao carregar etapas");
-      console.error(err);
-      toast.error("Erro ao carregar etapas", {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error("Erro ao carregar etapas");
     } finally {
       setLoading(false);
     }
@@ -271,14 +265,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
       });
       setStatusList(res.data);
     } catch (error) {
-      console.error("Erro ao carregar lista de status", error);
-      toast.error("Erro ao carregar lista de status", {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error("Erro ao carregar lista de status");
     }
   };
 
@@ -318,22 +305,11 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
           nova_ordem: e.indice_etapa
         }))
       });
-      toast.success("Ordem salva com sucesso!", {
-        style: {
-          background: 'var(--toast-success)',
-          color: 'var(--toast-success-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+
+      toastComponent.success("Ordem salva com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar ordem:", error);
-      toast.error("Erro ao salvar ordem", {
-        style: {
-          background: 'var(--toast-error)',
-          color: 'var(--toast-error-foreground)',
-          boxShadow: 'var(--toast-shadow)'
-        }
-      });
+      toastComponent.error("Erro ao salvar ordem!");
     }
   };
 
@@ -437,11 +413,10 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
     .filter((e) => e.info_etapa.etapa_nome.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => a.indice_etapa - b.indice_etapa);
 
-  if (loading) return <div>Carregando...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) return toastComponent.error("Ocorreu um erro!");
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader className="flex items-center justify-between">
         <CardTitle>
           Esteira: <span className="text-primary">{esteiraData}</span>
@@ -459,7 +434,7 @@ const ProcessoEsteiraViewer: React.FC<ProcessoEsteiraViewerProps> = ({
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
           />
-          <Button onClick={updateServerOrder}>Salvar Ordem</Button>
+          <Button onClick={updateServerOrder}>Salvar ordem</Button>
         </div>
       </CardContent>
 

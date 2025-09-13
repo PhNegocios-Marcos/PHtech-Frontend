@@ -152,7 +152,7 @@ export function OperacoesTable() {
           </Badge>
         )},
     },
-    { accessorKey: "roteiro", header: "Liquidação do RO" },
+    { accessorKey: "roteiro", header: "RO" },
     // { accessorKey: "Tabela", header: "Tabela" },
     {
       id: "editar",

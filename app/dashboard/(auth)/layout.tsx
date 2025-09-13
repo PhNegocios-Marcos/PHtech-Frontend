@@ -84,6 +84,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="@container/main h-full p-4 pb-0 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto xl:group-data-[theme-content-layout=centered]/layout:mt-8">
           {children}
         </div>
+        <p className="text-xs text-gray-400 dark:text-gray-200 text-center my-4">
+          Powered by
+          <span className="cursor-pointer hover:text-primary transition"> Aurora Core Bank</span>
+        </p>
         <Toaster position="top-center" />
       </SidebarInset>
     </SidebarProvider>
